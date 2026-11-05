@@ -34,23 +34,34 @@ export const CPQCart: React.FC<CPQCartProps> = ({
   const [optimizing, setOptimizing] = useState<boolean>(false);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
+  const initializedRef = React.useRef(false);
+
   // Initial products fetch
   useEffect(() => {
     async function load() {
       const prods = await fetchProducts();
       setProducts(prods);
 
-      // Default selection from recommendations or baseline
-      if (recommendedSkus.length > 0) {
-        setSelectedProductIds(recommendedSkus);
-      } else if (profileSlots?.has_gstin === false) {
-        setSelectedProductIds(["P02", "P17", "P22"]); // Kirana bundle (GST-free)
-      } else {
-        setSelectedProductIds(["P01", "P11", "P16", "P22"]); // Smart Office standard
+      if (!initializedRef.current) {
+        if (recommendedSkus.length > 0) {
+          setSelectedProductIds(recommendedSkus);
+        } else if (profileSlots?.has_gstin === false) {
+          setSelectedProductIds(["P02", "P17", "P22"]); // Kirana bundle (GST-free)
+        } else {
+          setSelectedProductIds(["P01", "P11", "P16", "P22"]); // Smart Office standard
+        }
+        initializedRef.current = true;
       }
     }
     load();
   }, [recommendedSkus, profileSlots]);
+
+  // Update selection if advisor recommendations arrive
+  useEffect(() => {
+    if (recommendedSkus.length > 0) {
+      setSelectedProductIds(recommendedSkus);
+    }
+  }, [recommendedSkus]);
 
   // Recalculate quote whenever cart or contract changes
   useEffect(() => {
@@ -129,12 +140,12 @@ export const CPQCart: React.FC<CPQCartProps> = ({
             <div className="flex items-center justify-between text-xs text-slate-400">
               <span>₹1,000 / mo</span>
               <span className="text-sm font-bold text-red-400">₹{budgetSlider.toLocaleString()}</span>
-              <span>₹25,000 / mo</span>
+              <span>₹50,000 / mo</span>
             </div>
             <input
               type="range"
               min="1000"
-              max="15000"
+              max="50000"
               step="500"
               value={budgetSlider}
               onChange={(e) => setBudgetSlider(Number(e.target.value))}

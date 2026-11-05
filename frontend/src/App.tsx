@@ -59,14 +59,30 @@ export const App: React.FC = () => {
     setCustomerStep("kyc");
   };
 
+  const APPLICANT_NAMES: Record<string, string> = {
+    K01: "Vindhya Tours & Travels",
+    K02: "Royal Mart Supermarket",
+    K03: "Balaji Timber Traders",
+    K04: "Saffron Dental Care LLP",
+    K05: "Balaji Realty LLP",
+    K06: "Meenakshi Cotton Traders",
+    K07: "Neelgiri Physio",
+    K08: "Green Leaf Legal Associates",
+    K09: "Kaveri Insurance Advisors",
+    K10: "Kaveri Stays LLP",
+    K11: "Trinity Bake House Pvt Ltd",
+    K12: "Star Electronics",
+    KIRANA_NON_GST: "Ganesh Kirana & General Store",
+  };
+
   const handleKYCApproved = async (kycRes: KYCVerificationResult) => {
     setKycResult(kycRes);
     // Automatically create a provisioning order
     try {
-      const bName = profileSlots?.segment
-        ? `${profileSlots.segment} Enterprise`
-        : "Apex Diagnostics Center";
-      const bundleName = quote?.items.map((i) => i.product_name).join(" + ") || "Smart Office Bundle";
+      const bName =
+        (kycRes.applicant_id && APPLICANT_NAMES[kycRes.applicant_id]) ||
+        (profileSlots?.segment ? `${profileSlots.segment} Enterprise` : "Apex Diagnostics Center");
+      const bundleName = quote?.items.map((i) => i.product_name).join(" + ") || "Smart Office High-Speed Fiber";
       const monthlyPrice = quote?.net_mrc_inr || 2499;
       const slaDays = quote?.guaranteed_sla_days || 4;
 

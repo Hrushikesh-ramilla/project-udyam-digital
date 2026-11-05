@@ -32,16 +32,20 @@ def valid_consent() -> DPDPConsentPayload:
 
 
 def test_dpdp_zero_persistence_in_memory_redaction():
-    # 12-digit Aadhaar UID format
+    # 12-digit Aadhaar UID format (Strict DPDP Act 2023 zero-numeric-exposure)
     raw_uid = "9876 5432 1098"
     redacted = redact_signatory_id(raw_uid)
-    assert redacted == "XXXX-XXXX-1098"
+    assert "[Aadhaar Redacted-" in redacted
     assert "9876" not in redacted
     assert "5432" not in redacted
+    assert "1098" not in redacted  # Strict zero raw numeric exposure
 
     # Hyphenated 12-digit UID
     raw_hyphen = "1234-5678-9012"
-    assert redact_signatory_id(raw_hyphen) == "XXXX-XXXX-9012"
+    redacted_hyphen = redact_signatory_id(raw_hyphen)
+    assert "[Aadhaar Redacted-" in redacted_hyphen
+    assert "1234" not in redacted_hyphen
+    assert "9012" not in redacted_hyphen
 
     # Synthetic Alphanumeric ID
     raw_syn = "SYN-ID-346190"

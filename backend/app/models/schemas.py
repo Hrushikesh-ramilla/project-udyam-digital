@@ -330,6 +330,7 @@ class KYCVerifyAPIRequest(BaseModel):
     model_config = ConfigDict(extra="forbid")
 
     applicant_preset: Optional[str] = None  # K01, K03, K05, K07, K11, K12
+    applicant_id: Optional[str] = None  # Alias for applicant_preset
     cart_requires_gstin: bool = True
     consent: Optional[DPDPConsentPayload] = None
     custom_doc_hashes: Optional[dict[str, str]] = None

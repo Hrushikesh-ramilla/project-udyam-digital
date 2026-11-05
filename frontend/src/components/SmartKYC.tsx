@@ -392,7 +392,7 @@ export const SmartKYC: React.FC<SmartKYCProps> = ({ quote, onKYCApproved }) => {
                 </span>
               </div>
               <div className="font-mono text-xs bg-slate-950 p-2.5 rounded-lg border border-slate-800 text-slate-300">
-                {kycResult.redacted_signatory_id || "XXXX-XXXX-1234"}
+                {kycResult.redacted_signatory_id || "[Aadhaar Redacted-Token]"}
               </div>
               <p className="text-[10px] text-slate-500">
                 Unmasked 12-digit UID never written to SQLite or disk cache.

@@ -91,8 +91,8 @@ def verify_kyc(req: KYCVerifyAPIRequest):
     data_dir = Path("data/kyc_documents")
     docs: dict[str, bytes] = {}
 
-    if req.applicant_preset:
-        preset = req.applicant_preset.upper().strip()
+    if req.applicant_preset or req.applicant_id:
+        preset = (req.applicant_preset or req.applicant_id or "").upper().strip()
         # Find files matching preset
         doc_types = ["gst_certificate", "udyam_certificate", "signatory_id", "address_proof"]
         for dt in doc_types:
@@ -152,6 +152,7 @@ def get_partner_rescue_leads(limit: int = 30, stage: Optional[str] = None):
     return lead_ml.get_top_rescue_leads(limit=limit, stage_filter=stage)
 
 
+@app.post("/api/orders", response_model=ProvisioningOrder)
 @app.post("/api/order/create", response_model=ProvisioningOrder)
 def create_order(req: CreateOrderRequest):
     return tracker.create_order(
@@ -163,6 +164,7 @@ def create_order(req: CreateOrderRequest):
     )
 
 
+@app.post("/api/orders/{order_id}/advance", response_model=ProvisioningOrder)
 @app.post("/api/order/{order_id}/advance", response_model=ProvisioningOrder)
 def advance_order_stage(order_id: str):
     res = tracker.advance_stage(order_id)
@@ -171,6 +173,7 @@ def advance_order_stage(order_id: str):
     return res
 
 
+@app.get("/api/orders/{order_id}", response_model=ProvisioningOrder)
 @app.get("/api/order/{order_id}", response_model=ProvisioningOrder)
 def get_order_status(order_id: str):
     order = tracker.get_order(order_id)

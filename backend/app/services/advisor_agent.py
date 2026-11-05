@@ -74,9 +74,14 @@ Return STRICTLY valid JSON with no markdown formatting:
 }}"""
         try:
             def _call():
-                return self.client.models.generate_content(
-                    model="gemini-3.5-flash-lite", contents=prompt
-                )
+                for mod in ["gemini-3.8-flash", "gemini-3.5-flash-lite"]:
+                    try:
+                        return self.client.models.generate_content(
+                            model=mod, contents=prompt
+                        )
+                    except Exception:
+                        continue
+                return None
 
             with concurrent.futures.ThreadPoolExecutor(max_workers=1) as executor:
                 future = executor.submit(_call)
