@@ -2,8 +2,7 @@ import React, { useState, useEffect } from "react";
 import Lenis from "lenis";
 import { motion, AnimatePresence } from "motion/react";
 import { Navbar } from "./components/Navbar";
-import { AdvisorChat } from "./components/AdvisorChat";
-import { CPQCart } from "./components/CPQCart";
+import { StudioStudio } from "./components/StudioStudio";
 import { SmartKYC } from "./components/SmartKYC";
 import { OrderTracker } from "./components/OrderTracker";
 import { PartnerRescueConsole } from "./components/PartnerRescueConsole";
@@ -15,11 +14,10 @@ import {
   ProvisioningOrder,
 } from "./types";
 import { createProvisioningOrder, calculateQuote } from "./api";
-import { Sparkles, ShieldCheck, Truck } from "lucide-react";
+import { ShieldCheck, Sparkles, ArrowRight } from "lucide-react";
 
 export const App: React.FC = () => {
-  const [currentTab, setTab] = useState<"customer" | "obo" | "partner" | "judge">("customer");
-  const [customerStep, setCustomerStep] = useState<"studio" | "kyc" | "tracker">("studio");
+  const [currentTab, setTab] = useState<"studio" | "kyc" | "tracker" | "partner" | "judge">("studio");
 
   // Global Session State
   const [profileSlots, setProfileSlots] = useState<MSMEProfileSlots | null>(null);
@@ -28,7 +26,7 @@ export const App: React.FC = () => {
   const [kycResult, setKycResult] = useState<KYCVerificationResult | null>(null);
   const [order, setOrder] = useState<ProvisioningOrder | null>(null);
 
-  // Initialize smooth inertial scroll (Lenis)
+  // Initialize Lenis smooth inertial scroll
   useEffect(() => {
     const lenis = new Lenis({
       duration: 1.2,
@@ -52,7 +50,7 @@ export const App: React.FC = () => {
 
   const handleProceedToKYC = (calculatedQuote: CommercialBreakdown) => {
     setQuote(calculatedQuote);
-    setCustomerStep("kyc");
+    setTab("kyc");
   };
 
   const APPLICANT_NAMES: Record<string, string> = {
@@ -89,7 +87,7 @@ export const App: React.FC = () => {
         "PARTNER_DIRECT"
       );
       setOrder(newOrder);
-      setCustomerStep("tracker");
+      setTab("tracker");
     } catch {
       setOrder({
         order_id: `ORD_${Date.now()}`,
@@ -103,7 +101,7 @@ export const App: React.FC = () => {
         milestones: [
           {
             stage_id: "ORDER_PLACED",
-            stage_name: "Order Placed & Quote Accepted",
+            stage_name: "Order Placed & Quote Locked",
             status: "COMPLETED",
             timestamp: "2026-07-15T10:15:00Z",
             eta_days: 0,
@@ -117,21 +115,48 @@ export const App: React.FC = () => {
             timestamp: "2026-07-15T10:16:00Z",
             eta_days: 0,
             description: "DPDP-compliant verification passed in 184ms.",
-            whatsapp_preview: "KYC Approved instantly.",
+            whatsapp_preview: "KYC Approved instantly. National ID masked to SYN-XXXX-889.",
           },
           {
             stage_id: "FEASIBILITY",
-            stage_name: "Fiber Loop Feasibility",
+            stage_name: "Fiber Feasibility & Port Allocation",
             status: "IN_PROGRESS",
             timestamp: null,
             eta_days: 1,
             description: "Checking local splitter port and OLT port capacity.",
             whatsapp_preview: "Fiber feasibility check in progress.",
           },
+          {
+            stage_id: "CPE_DISPATCH",
+            stage_name: "CPE Wi-Fi 6 Router Dispatched",
+            status: "PENDING",
+            timestamp: null,
+            eta_days: 2,
+            description: "Airtel Wi-Fi 6 Dual-Band Gateway dispatched from regional hub.",
+            whatsapp_preview: "Hardware dispatched with tracking ID #AT-8841-DL.",
+          },
+          {
+            stage_id: "ENGINEER_ASSIGNED",
+            stage_name: "Field Engineer Assigned",
+            status: "PENDING",
+            timestamp: null,
+            eta_days: 3,
+            description: "Senior field technician allocated with digital OTP check-in.",
+            whatsapp_preview: "Engineer Rajesh Kumar (+91 98765 43210) assigned for installation.",
+          },
+          {
+            stage_id: "ACTIVATION",
+            stage_name: "Service Activated & Live",
+            status: "PENDING",
+            timestamp: null,
+            eta_days: 4,
+            description: "End-to-end fiber loop active with 99.9% uptime SLA.",
+            whatsapp_preview: "Congratulations! Your Airtel enterprise broadband is live.",
+          },
         ],
         is_activated: false,
       });
-      setCustomerStep("tracker");
+      setTab("tracker");
     }
   };
 
@@ -163,7 +188,7 @@ export const App: React.FC = () => {
       milestones: [
         {
           stage_id: "ORDER_PLACED",
-          stage_name: "Order Placed & Quote Accepted",
+          stage_name: "Order Placed & Quote Locked",
           status: "COMPLETED",
           timestamp: "2026-07-15T10:15:00Z",
           eta_days: 0,
@@ -181,12 +206,39 @@ export const App: React.FC = () => {
         },
         {
           stage_id: "FEASIBILITY",
-          stage_name: "Fiber Loop Feasibility",
+          stage_name: "Fiber Feasibility & Port Allocation",
           status: "IN_PROGRESS",
           timestamp: null,
           eta_days: 1,
-          description: "Checking local splitter port and OLT port capacity.",
-          whatsapp_preview: "Fiber feasibility check in progress.",
+          description: "Splitter port #4 allocated at Main Street Junction.",
+          whatsapp_preview: "Fiber loop feasibility passed with 1.2dB loss margin.",
+        },
+        {
+          stage_id: "CPE_DISPATCH",
+          stage_name: "CPE Wi-Fi 6 Router Dispatched",
+          status: "PENDING",
+          timestamp: null,
+          eta_days: 2,
+          description: "Dual-Band Wi-Fi 6 Airtel Business Gateway dispatched from warehouse.",
+          whatsapp_preview: "Hardware in transit with bluedart air courier #BD-9912.",
+        },
+        {
+          stage_id: "ENGINEER_ASSIGNED",
+          stage_name: "Field Engineer Assigned",
+          status: "PENDING",
+          timestamp: null,
+          eta_days: 3,
+          description: "Technician Rajesh Kumar allocated with OTP: 8492.",
+          whatsapp_preview: "Field engineer scheduled for slot 11:00 AM tomorrow.",
+        },
+        {
+          stage_id: "ACTIVATION",
+          stage_name: "Service Activated & Live",
+          status: "PENDING",
+          timestamp: null,
+          eta_days: 4,
+          description: "Line testing verified at 200 Mbps symmetric. Billing initialized.",
+          whatsapp_preview: "Your Airtel Business Fiber is officially active! Enjoy seamless connectivity.",
         },
       ],
       is_activated: false,
@@ -197,118 +249,81 @@ export const App: React.FC = () => {
     <div className="min-h-screen bg-[#030405] text-[#EBE5D9] flex flex-col font-sans selection:bg-[#e40000]/30 selection:text-white relative">
       <Navbar currentTab={currentTab} setTab={setTab} />
 
-      <main className="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-6">
+      <main className="flex-1 max-w-5xl w-full mx-auto px-4 sm:px-6 py-10 sm:py-14">
         <AnimatePresence mode="wait">
-          {currentTab === "customer" && (
+          {currentTab === "studio" && (
             <motion.div
-              key="customer"
-              initial={{ opacity: 0, y: 10 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: -10 }}
-              transition={{ duration: 0.25, ease: [0.22, 1, 0.36, 1] }}
-              className="space-y-6"
+              key="studio"
+              initial={{ opacity: 0, y: 16, filter: "blur(4px)" }}
+              animate={{ opacity: 1, y: 0, filter: "blur(0px)" }}
+              exit={{ opacity: 0, y: -12, filter: "blur(4px)" }}
+              transition={{ duration: 0.38, ease: [0.16, 1, 0.3, 1] }}
             >
-              {/* Apple-style Inertial Breadcrumb Stepper */}
-              <div className="luxury-glass rounded-full p-1.5 flex items-center justify-between overflow-x-auto no-scrollbar border border-[rgba(235,229,217,0.06)]">
-                <div className="flex items-center space-x-1 shrink-0">
-                  <button
-                    onClick={() => setCustomerStep("studio")}
-                    className={`relative px-4 py-1.5 rounded-full text-xs font-medium transition-all duration-200 cursor-pointer flex items-center space-x-2 ${
-                      customerStep === "studio"
-                        ? "bg-[#e40000] text-white shadow-[0_0_16px_rgba(228,0,0,0.4)]"
-                        : "text-[#B39D82] hover:text-[#EBE5D9]"
-                    }`}
-                  >
-                    <Sparkles className="w-3.5 h-3.5" />
-                    <span>1. Architecture Studio</span>
-                  </button>
+              <StudioStudio
+                profileSlots={profileSlots}
+                recommendedSkus={recommendedSkus}
+                onProfileUpdated={handleProfileUpdated}
+                onProceedToKYC={handleProceedToKYC}
+              />
+            </motion.div>
+          )}
 
-                  <button
-                    onClick={() => setCustomerStep("kyc")}
-                    className={`relative px-4 py-1.5 rounded-full text-xs font-medium transition-all duration-200 cursor-pointer flex items-center space-x-2 ${
-                      customerStep === "kyc"
-                        ? "bg-[#e40000] text-white shadow-[0_0_16px_rgba(228,0,0,0.4)]"
-                        : "text-[#B39D82] hover:text-[#EBE5D9]"
-                    }`}
-                  >
-                    <ShieldCheck className="w-3.5 h-3.5" />
-                    <span>2. Smart KYC</span>
-                  </button>
+          {currentTab === "kyc" && (
+            <motion.div
+              key="kyc"
+              initial={{ opacity: 0, y: 16, filter: "blur(4px)" }}
+              animate={{ opacity: 1, y: 0, filter: "blur(0px)" }}
+              exit={{ opacity: 0, y: -12, filter: "blur(4px)" }}
+              transition={{ duration: 0.38, ease: [0.16, 1, 0.3, 1] }}
+            >
+              <SmartKYC
+                quote={quote}
+                onKYCApproved={handleKYCApproved}
+                onSwitchToUdyamExempt={handleSwitchToUdyamExempt}
+              />
+            </motion.div>
+          )}
 
-                  <button
-                    onClick={() => setCustomerStep("tracker")}
-                    className={`relative px-4 py-1.5 rounded-full text-xs font-medium transition-all duration-200 cursor-pointer flex items-center space-x-2 ${
-                      customerStep === "tracker"
-                        ? "bg-[#e40000] text-white shadow-[0_0_16px_rgba(228,0,0,0.4)]"
-                        : "text-[#B39D82] hover:text-[#EBE5D9]"
-                    }`}
-                  >
-                    <Truck className="w-3.5 h-3.5" />
-                    <span>3. Dispatch Pipeline</span>
-                  </button>
-                </div>
-
-                <div className="hidden md:flex items-center space-x-2 text-[11px] font-mono text-[#B39D82] px-3">
-                  <span className="live-pulse-dot" />
-                  <span>Zero-Delay Quoting</span>
-                </div>
-              </div>
-
-              {/* Step 1: UNIFIED COMMAND STUDIO (Dual-Engine: Copilot + Live CPQ Blueprint) */}
-              {customerStep === "studio" && (
-                <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
-                  <div className="lg:col-span-6">
-                    <AdvisorChat
-                      onProfileUpdated={handleProfileUpdated}
-                      onProceedToCPQ={() => setCustomerStep("kyc")}
-                    />
+          {currentTab === "tracker" && (
+            <motion.div
+              key="tracker"
+              initial={{ opacity: 0, y: 16, filter: "blur(4px)" }}
+              animate={{ opacity: 1, y: 0, filter: "blur(0px)" }}
+              exit={{ opacity: 0, y: -12, filter: "blur(4px)" }}
+              transition={{ duration: 0.38, ease: [0.16, 1, 0.3, 1] }}
+            >
+              {order ? (
+                <OrderTracker order={order} onOrderUpdated={(up) => setOrder(up)} />
+              ) : (
+                <div className="luxury-glass rounded-3xl p-12 text-center space-y-5 max-w-md mx-auto border border-[rgba(235,229,217,0.08)] shadow-[0_20px_50px_rgba(0,0,0,0.7)]">
+                  <div className="w-16 h-16 rounded-2xl bg-white/[0.03] border border-white/[0.06] flex items-center justify-center mx-auto text-[#B39D82]">
+                    <ShieldCheck className="w-8 h-8" />
                   </div>
-                  <div className="lg:col-span-6">
-                    <CPQCart
-                      profileSlots={profileSlots}
-                      recommendedSkus={recommendedSkus}
-                      onProceedToKYC={handleProceedToKYC}
-                    />
-                  </div>
-                </div>
-              )}
-
-              {/* Step 2: SMART KYC */}
-              {customerStep === "kyc" && (
-                <SmartKYC
-                  quote={quote}
-                  onKYCApproved={handleKYCApproved}
-                  onSwitchToUdyamExempt={handleSwitchToUdyamExempt}
-                />
-              )}
-
-              {/* Step 3: FULFILLMENT TRACKER */}
-              {customerStep === "tracker" && (
-                order ? (
-                  <OrderTracker order={order} onOrderUpdated={(up) => setOrder(up)} />
-                ) : (
-                  <div className="luxury-glass rounded-2xl p-12 text-center space-y-4">
-                    <ShieldCheck className="w-12 h-12 text-[#B39D82]/40 mx-auto" />
-                    <h3 className="font-serif text-xl font-normal text-[#EBE5D9]">No Active Order</h3>
-                    <p className="text-xs text-[#B39D82] max-w-sm mx-auto">
-                      Run the Smart KYC gate or load a verified specimen order to track real-time dispatch.
+                  <div className="space-y-2">
+                    <h3 className="font-serif text-2xl font-normal text-[#EBE5D9]">No Active Order</h3>
+                    <p className="text-xs text-[#B39D82] max-w-sm mx-auto leading-relaxed">
+                      Complete the Smart KYC gate or load a verified specimen order to observe live 6-stage SLA dispatch telemetry.
                     </p>
-                    <div className="flex items-center justify-center space-x-3 pt-2">
-                      <button
-                        onClick={() => setCustomerStep("kyc")}
-                        className="bg-[#e40000] text-white text-xs font-medium py-2 px-4 rounded-xl shadow-[0_0_16px_rgba(228,0,0,0.4)] cursor-pointer"
-                      >
-                        Run KYC Gate
-                      </button>
-                      <button
-                        onClick={handleLoadDemoOrder}
-                        className="bg-[#080a0d] text-[#EBE5D9] border border-[rgba(235,229,217,0.1)] text-xs font-medium py-2 px-4 rounded-xl cursor-pointer"
-                      >
-                        Load Specimen Order
-                      </button>
-                    </div>
                   </div>
-                )
+                  <div className="flex items-center justify-center space-x-3 pt-3">
+                    <motion.button
+                      whileHover={{ scale: 1.02 }}
+                      whileTap={{ scale: 0.98 }}
+                      onClick={() => setTab("kyc")}
+                      className="bg-[#e40000] hover:bg-[#b30000] text-white text-xs font-medium py-2.5 px-5 rounded-xl shadow-[0_0_20px_rgba(228,0,0,0.4)] cursor-pointer"
+                    >
+                      Run Smart KYC
+                    </motion.button>
+                    <motion.button
+                      whileHover={{ scale: 1.02 }}
+                      whileTap={{ scale: 0.98 }}
+                      onClick={handleLoadDemoOrder}
+                      className="bg-[#080a0d] hover:bg-[#12161c] text-[#EBE5D9] border border-[rgba(235,229,217,0.1)] text-xs font-medium py-2.5 px-5 rounded-xl cursor-pointer"
+                    >
+                      Load Specimen Order
+                    </motion.button>
+                  </div>
+                </div>
               )}
             </motion.div>
           )}
@@ -316,10 +331,10 @@ export const App: React.FC = () => {
           {currentTab === "partner" && (
             <motion.div
               key="partner"
-              initial={{ opacity: 0, y: 10 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: -10 }}
-              transition={{ duration: 0.25, ease: [0.22, 1, 0.36, 1] }}
+              initial={{ opacity: 0, y: 16, filter: "blur(4px)" }}
+              animate={{ opacity: 1, y: 0, filter: "blur(0px)" }}
+              exit={{ opacity: 0, y: -12, filter: "blur(4px)" }}
+              transition={{ duration: 0.38, ease: [0.16, 1, 0.3, 1] }}
             >
               <PartnerRescueConsole />
             </motion.div>
@@ -328,10 +343,10 @@ export const App: React.FC = () => {
           {currentTab === "judge" && (
             <motion.div
               key="judge"
-              initial={{ opacity: 0, y: 10 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: -10 }}
-              transition={{ duration: 0.25, ease: [0.22, 1, 0.36, 1] }}
+              initial={{ opacity: 0, y: 16, filter: "blur(4px)" }}
+              animate={{ opacity: 1, y: 0, filter: "blur(0px)" }}
+              exit={{ opacity: 0, y: -12, filter: "blur(4px)" }}
+              transition={{ duration: 0.38, ease: [0.16, 1, 0.3, 1] }}
             >
               <JudgeTestBench />
             </motion.div>
@@ -339,20 +354,20 @@ export const App: React.FC = () => {
         </AnimatePresence>
       </main>
 
-      {/* Minimal Footer */}
-      <footer className="border-t border-[rgba(235,229,217,0.06)] bg-[#030405]/90 py-5 mt-12">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col sm:flex-row items-center justify-between gap-3 text-xs text-[#B39D82]/60 font-mono">
+      {/* Minimal Luxury Footer */}
+      <footer className="border-t border-[rgba(235,229,217,0.06)] bg-[#030405]/90 py-8 mt-20">
+        <div className="max-w-5xl mx-auto px-4 sm:px-6 flex flex-col sm:flex-row items-center justify-between gap-4 text-xs text-[#B39D82]/60 font-mono">
           <div className="flex items-center space-x-2 text-[11px]">
-            <span className="text-[#EBE5D9]">Airtel Digital</span>
+            <span className="text-[#EBE5D9] font-medium tracking-wide">Airtel Digital</span>
             <span>·</span>
-            <span>Project Udyam</span>
+            <span>Project Udyam Enterprise</span>
           </div>
-          <div className="flex items-center space-x-3 text-[10px] tracking-wider uppercase">
+          <div className="flex items-center space-x-3 text-[10px] tracking-widest uppercase">
             <span>FastAPI 3,534 GSTINs</span>
             <span>·</span>
             <span>LightGBM 5K Leads</span>
             <span>·</span>
-            <span>DPDP 2023 Mask</span>
+            <span className="text-[#d9ad63]">DPDP 2023 Compliant</span>
           </div>
         </div>
       </footer>

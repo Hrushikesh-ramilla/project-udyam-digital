@@ -14,6 +14,10 @@ import {
   FileUp,
   Sparkles,
   Zap,
+  Check,
+  Building,
+  CreditCard,
+  FileCheck,
 } from "lucide-react";
 import { KYCVerificationResult, CommercialBreakdown } from "../types";
 import { verifyKYC, uploadKYCDocument, KYCUploadResponse } from "../api";
@@ -74,7 +78,7 @@ export const SmartKYC: React.FC<SmartKYCProps> = ({ quote, onKYCApproved, onSwit
       onSwitchToUdyamExempt();
     }
     setSelectedPreset("KIRANA_NON_GST");
-    setRemediationNotice("Switched to Udyam Micro Bundle (GST-Free).");
+    setRemediationNotice("Switched to Udyam Micro Bundle (GST-Free). All GST-only SKUs removed.");
     try {
       const res = await verifyKYC("KIRANA_NON_GST", false);
       setKycResult(res);
@@ -127,7 +131,6 @@ export const SmartKYC: React.FC<SmartKYCProps> = ({ quote, onKYCApproved, onSwit
       alert("DPDP Act 2023 requires consent.");
       return;
     }
-
     setIsVerifying(true);
     try {
       const cartRequiresGstin = quote ? !quote.gst_exempt_eligible : true;
@@ -141,38 +144,41 @@ export const SmartKYC: React.FC<SmartKYCProps> = ({ quote, onKYCApproved, onSwit
   };
 
   return (
-    <div className="max-w-4xl mx-auto space-y-6">
-      {/* Clean Header */}
-      <div className="luxury-glass rounded-2xl p-5 flex flex-col sm:flex-row sm:items-center justify-between gap-4 border border-[rgba(235,229,217,0.06)] shadow-apple-card">
-        <div className="flex items-center space-x-3">
-          <div className="w-8 h-8 rounded-xl bg-emerald-500/15 border border-emerald-500/30 flex items-center justify-center text-emerald-400">
-            <ShieldCheck className="w-4 h-4" />
+    <div className="max-w-4xl mx-auto space-y-7">
+      {/* Editorial Header */}
+      <div className="luxury-glass rounded-3xl p-6 flex flex-col sm:flex-row sm:items-center justify-between gap-5 border border-[rgba(235,229,217,0.08)] shadow-[0_20px_50px_rgba(0,0,0,0.7)]">
+        <div className="flex items-center space-x-3.5">
+          <div className="w-10 h-10 rounded-2xl bg-emerald-500/15 border border-emerald-500/30 flex items-center justify-center text-emerald-400 shrink-0">
+            <ShieldCheck className="w-5 h-5" />
           </div>
           <div>
-            <h2 className="font-sans text-base font-medium text-[#EBE5D9]">
+            <h2 className="font-serif text-xl sm:text-2xl font-normal text-[#EBE5D9]">
               Smart KYC &amp; DPDP Anomaly Gate
             </h2>
-            <p className="text-xs text-[#B39D82]">
+            <p className="text-xs text-[#B39D82] mt-0.5">
               In-memory 12-digit UID masking · RapidFuzz cross-checks under 200ms
             </p>
           </div>
         </div>
 
-        {/* DPDP Consent */}
-        <div className="flex items-center space-x-2.5 bg-[#030405] px-3.5 py-2 rounded-xl border border-[rgba(235,229,217,0.06)] text-xs text-[#B39D82]">
-          <input
-            type="checkbox"
-            id="dpdp-consent"
-            checked={consentGranted}
-            onChange={(e) => setConsentGranted(e.target.checked)}
-            className="w-3.5 h-3.5 accent-[#e40000] cursor-pointer"
-          />
-          <label htmlFor="dpdp-consent" className="cursor-pointer">
+        {/* DPDP Consent Switch */}
+        <div className="flex items-center space-x-3 bg-[#030405] px-4 py-2.5 rounded-2xl border border-[rgba(235,229,217,0.08)] text-xs text-[#B39D82] shrink-0">
+          <label className="relative inline-flex items-center cursor-pointer">
+            <input
+              type="checkbox"
+              id="dpdp-consent"
+              checked={consentGranted}
+              onChange={(e) => setConsentGranted(e.target.checked)}
+              className="sr-only peer"
+            />
+            <div className="w-8 h-4 bg-gray-800 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-[#EBE5D9] after:border-gray-300 after:border after:rounded-full after:h-3 after:w-3 after:transition-all peer-checked:bg-[#e40000]"></div>
+          </label>
+          <label htmlFor="dpdp-consent" className="cursor-pointer font-medium text-[#EBE5D9]">
             DPDP 2023 Consent
           </label>
           <button
             onClick={() => setShowConsentModal(true)}
-            className="text-[10px] text-[#d9ad63] hover:underline font-mono ml-1"
+            className="text-[10px] text-[#d9ad63] hover:underline font-mono"
           >
             [Audit]
           </button>
@@ -180,23 +186,27 @@ export const SmartKYC: React.FC<SmartKYCProps> = ({ quote, onKYCApproved, onSwit
       </div>
 
       {remediationNotice && (
-        <div className="p-3 rounded-xl bg-emerald-950/30 border border-emerald-500/30 text-emerald-300 text-xs flex items-center space-x-2">
+        <motion.div
+          initial={{ opacity: 0, y: -6 }}
+          animate={{ opacity: 1, y: 0 }}
+          className="p-4 rounded-2xl bg-emerald-950/30 border border-emerald-500/30 text-emerald-300 text-xs flex items-center space-x-2.5"
+        >
           <Sparkles className="w-4 h-4 text-emerald-400 shrink-0" />
-          <span>{remediationNotice}</span>
-        </div>
+          <span className="font-sans">{remediationNotice}</span>
+        </motion.div>
       )}
 
       {/* Mode Switcher */}
-      <div className="flex space-x-2 border-b border-[rgba(235,229,217,0.04)] pb-2">
+      <div className="flex space-x-2 border-b border-[rgba(235,229,217,0.06)] pb-3">
         <button
           onClick={() => {
             setActiveTab("preset");
             setUploadResponse(null);
           }}
-          className={`px-3.5 py-1.5 rounded-full text-xs font-medium transition-colors cursor-pointer ${
+          className={`px-4 py-2 rounded-full text-xs font-medium transition-all cursor-pointer ${
             activeTab === "preset"
-              ? "bg-[#e40000] text-white shadow-[0_0_12px_rgba(228,0,0,0.4)]"
-              : "text-[#B39D82] hover:text-[#EBE5D9]"
+              ? "bg-[#e40000] text-white shadow-[0_0_16px_rgba(228,0,0,0.4)]"
+              : "text-[#B39D82] hover:text-[#EBE5D9] hover:bg-white/[0.03]"
           }`}
         >
           Preset Specimens (K01–K12)
@@ -206,10 +216,10 @@ export const SmartKYC: React.FC<SmartKYCProps> = ({ quote, onKYCApproved, onSwit
             setActiveTab("upload");
             setKycResult(null);
           }}
-          className={`px-3.5 py-1.5 rounded-full text-xs font-medium transition-colors cursor-pointer ${
+          className={`px-4 py-2 rounded-full text-xs font-medium transition-all cursor-pointer ${
             activeTab === "upload"
-              ? "bg-[#e40000] text-white shadow-[0_0_12px_rgba(228,0,0,0.4)]"
-              : "text-[#B39D82] hover:text-[#EBE5D9]"
+              ? "bg-[#e40000] text-white shadow-[0_0_16px_rgba(228,0,0,0.4)]"
+              : "text-[#B39D82] hover:text-[#EBE5D9] hover:bg-white/[0.03]"
           }`}
         >
           Live Document Staging (4 Slots)
@@ -218,8 +228,8 @@ export const SmartKYC: React.FC<SmartKYCProps> = ({ quote, onKYCApproved, onSwit
 
       {activeTab === "preset" ? (
         /* Presets Grid */
-        <div className="luxury-glass rounded-2xl p-5 space-y-4 border border-[rgba(235,229,217,0.06)] shadow-apple-card">
-          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3">
+        <div className="luxury-glass rounded-3xl p-6 sm:p-7 space-y-5 border border-[rgba(235,229,217,0.08)] shadow-[0_20px_50px_rgba(0,0,0,0.7)]">
+          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3.5">
             {presets.map((preset) => {
               const isSelected = selectedPreset === preset.id;
               return (
@@ -231,21 +241,21 @@ export const SmartKYC: React.FC<SmartKYCProps> = ({ quote, onKYCApproved, onSwit
                     setSelectedPreset(preset.id);
                     setKycResult(null);
                   }}
-                  className={`p-3.5 rounded-xl border transition-all cursor-pointer ${
+                  className={`p-4 rounded-2xl border transition-all cursor-pointer ${
                     isSelected
-                      ? "border-[#e40000] bg-[#e40000]/10 shadow-[0_0_16px_rgba(228,0,0,0.2)]"
-                      : "border-[rgba(235,229,217,0.04)] bg-[#030405] hover:border-[rgba(235,229,217,0.12)]"
+                      ? "border-[#e40000] bg-gradient-to-b from-[#e40000]/15 to-transparent shadow-[0_0_20px_rgba(228,0,0,0.25)]"
+                      : "border-[rgba(235,229,217,0.06)] bg-[#030405] hover:border-[rgba(235,229,217,0.16)]"
                   }`}
                 >
-                  <div className="flex items-center justify-between mb-1.5">
-                    <span className="text-xs font-medium text-[#EBE5D9]">{preset.label}</span>
+                  <div className="flex items-center justify-between mb-2">
+                    <span className="text-xs font-semibold text-[#EBE5D9]">{preset.label}</span>
                     <span
-                      className={`text-[9px] px-1.5 py-0.2 rounded font-mono ${
+                      className={`text-[9px] px-2 py-0.5 rounded-full font-mono uppercase border ${
                         preset.type === "CLEAN"
-                          ? "bg-emerald-500/15 text-emerald-400"
+                          ? "bg-emerald-500/15 text-emerald-400 border-emerald-500/30"
                           : preset.type === "EXEMPT"
-                          ? "bg-blue-500/15 text-blue-400"
-                          : "bg-amber-500/15 text-amber-400"
+                          ? "bg-[#d9ad63]/15 text-[#d9ad63] border-[#d9ad63]/30"
+                          : "bg-red-500/15 text-red-400 border-red-500/30"
                       }`}
                     >
                       {preset.type}
@@ -263,39 +273,51 @@ export const SmartKYC: React.FC<SmartKYCProps> = ({ quote, onKYCApproved, onSwit
               whileTap={{ scale: 0.98 }}
               onClick={handleVerify}
               disabled={isVerifying || !consentGranted}
-              className="flex items-center space-x-2 bg-[#e40000] hover:bg-[#b30000] text-white font-medium py-2 px-5 rounded-xl text-xs sm:text-sm shadow-[0_0_16px_rgba(228,0,0,0.4)] disabled:opacity-40 cursor-pointer"
+              className="flex items-center space-x-2 bg-[#e40000] hover:bg-[#b30000] text-white font-medium py-3 px-6 rounded-2xl text-xs sm:text-sm shadow-[0_0_20px_rgba(228,0,0,0.4)] disabled:opacity-40 cursor-pointer animate-shimmer"
             >
-              <RefreshCw className={`w-3.5 h-3.5 ${isVerifying ? "animate-spin" : ""}`} />
-              <span>{isVerifying ? "Verifying..." : "Run KYC Gate"}</span>
+              <RefreshCw className={`w-4 h-4 ${isVerifying ? "animate-spin" : ""}`} />
+              <span>{isVerifying ? "Verifying Registry..." : "Run KYC Gate"}</span>
             </motion.button>
           </div>
         </div>
       ) : (
         /* 4 Upload Slots */
-        <div className="luxury-glass rounded-2xl p-5 space-y-4 border border-[rgba(235,229,217,0.06)] shadow-apple-card">
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+        <div className="luxury-glass rounded-3xl p-6 sm:p-7 space-y-6 border border-[rgba(235,229,217,0.08)] shadow-[0_20px_50px_rgba(0,0,0,0.7)]">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             {[
-              { id: "gst_certificate", label: "GST Certificate (REG-06)" },
-              { id: "udyam_certificate", label: "Udyam Certificate" },
-              { id: "signatory_id", label: "Signatory ID (Masked)" },
-              { id: "address_proof", label: "Utility Bill (<90 Days)" },
+              { id: "gst_certificate", label: "GST Certificate (REG-06)", icon: Building, desc: "Form GST REG-06 Certificate" },
+              { id: "udyam_certificate", label: "Udyam Certificate", icon: FileCheck, desc: "MSME Registration Certificate" },
+              { id: "signatory_id", label: "Signatory ID (Masked)", icon: CreditCard, desc: "DPDP Zero-Numeric In-Memory ID" },
+              { id: "address_proof", label: "Utility Bill (<90 Days)", icon: FileText, desc: "Electricity or Municipal Bill" },
             ].map((slot) => {
               const staged = uploadedSlots[slot.id];
+              const SlotIcon = slot.icon;
               return (
                 <div
                   key={slot.id}
-                  className={`p-3.5 rounded-xl border ${
+                  className={`p-5 rounded-2xl border transition-all ${
                     staged
                       ? "border-emerald-500/40 bg-emerald-950/20"
-                      : "border-[rgba(235,229,217,0.04)] bg-[#030405]"
+                      : "border-dashed border-[rgba(235,229,217,0.12)] bg-[#030405] hover:border-[rgba(235,229,217,0.25)]"
                   }`}
                 >
-                  <div className="flex items-center justify-between mb-2">
-                    <span className="text-xs font-medium text-[#EBE5D9]">{slot.label}</span>
-                    <span className="text-[9px] font-mono text-[#B39D82]">
+                  <div className="flex items-center justify-between mb-3">
+                    <div className="flex items-center space-x-2.5">
+                      <div className="w-7 h-7 rounded-lg bg-white/[0.04] flex items-center justify-center text-[#B39D82]">
+                        <SlotIcon className="w-3.5 h-3.5" />
+                      </div>
+                      <span className="text-xs font-semibold text-[#EBE5D9]">{slot.label}</span>
+                    </div>
+                    <span className={`text-[9px] font-mono px-2 py-0.5 rounded-full uppercase border ${
+                      staged 
+                        ? "bg-emerald-500/20 text-emerald-400 border-emerald-500/30" 
+                        : "bg-white/[0.04] text-[#B39D82]/60 border-white/[0.06]"
+                    }`}>
                       {staged ? "STAGED" : "EMPTY"}
                     </span>
                   </div>
+
+                  <p className="text-[11px] text-[#B39D82] mb-3">{slot.desc}</p>
 
                   <input
                     type="file"
@@ -307,31 +329,35 @@ export const SmartKYC: React.FC<SmartKYCProps> = ({ quote, onKYCApproved, onSwit
                     }}
                     className="hidden"
                   />
-                  <label
-                    htmlFor={`file-${slot.id}`}
-                    className="cursor-pointer inline-flex items-center space-x-1.5 px-3 py-1 rounded-lg bg-white/[0.04] hover:bg-white/[0.08] text-xs text-[#EBE5D9] border border-white/[0.08] transition-colors"
-                  >
-                    <Upload className="w-3 h-3 text-[#B39D82]" />
-                    <span>{staged ? "Replace File" : "Upload File"}</span>
-                  </label>
-                  {staged && (
-                    <span className="text-[11px] font-mono text-[#B39D82] ml-2 truncate">
-                      {staged.file.name}
-                    </span>
-                  )}
+                  <div className="flex items-center space-x-2">
+                    <label
+                      htmlFor={`file-${slot.id}`}
+                      className="cursor-pointer inline-flex items-center space-x-1.5 px-3.5 py-1.5 rounded-xl bg-white/[0.05] hover:bg-white/[0.1] text-xs font-medium text-[#EBE5D9] border border-white/[0.08] transition-colors"
+                    >
+                      <Upload className="w-3 h-3 text-[#B39D82]" />
+                      <span>{staged ? "Replace File" : "Upload Document"}</span>
+                    </label>
+                    {staged && (
+                      <span className="text-[11px] font-mono text-emerald-400 truncate">
+                        ✓ {staged.file.name}
+                      </span>
+                    )}
+                  </div>
                 </div>
               );
             })}
           </div>
 
-          <div className="flex justify-end pt-1">
-            <button
+          <div className="flex justify-end pt-2">
+            <motion.button
+              whileHover={{ scale: 1.02 }}
+              whileTap={{ scale: 0.98 }}
               onClick={handleVerifyCompletePackage}
               disabled={Object.keys(uploadedSlots).length === 0}
-              className="bg-emerald-600 hover:bg-emerald-500 text-white font-medium py-1.5 px-4 rounded-xl text-xs disabled:opacity-40 cursor-pointer"
+              className="bg-emerald-600 hover:bg-emerald-500 text-white font-medium py-2.5 px-6 rounded-2xl text-xs sm:text-sm disabled:opacity-40 cursor-pointer shadow-lg transition-all"
             >
               Verify Staged Package
-            </button>
+            </motion.button>
           </div>
         </div>
       )}
@@ -339,40 +365,44 @@ export const SmartKYC: React.FC<SmartKYCProps> = ({ quote, onKYCApproved, onSwit
       {/* Verification Result Card */}
       {kycResult && (
         <motion.div
-          initial={{ opacity: 0, y: 10 }}
+          initial={{ opacity: 0, y: 12 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.2, ease: [0.22, 1, 0.36, 1] }}
+          transition={{ duration: 0.35, ease: [0.16, 1, 0.3, 1] }}
           className="space-y-4"
         >
-          {/* Main Status */}
+          {/* Main Status Banner */}
           <div
-            className={`p-4 rounded-2xl border flex items-center justify-between luxury-glass ${
+            className={`p-5 rounded-3xl border flex flex-col sm:flex-row sm:items-center justify-between gap-4 luxury-glass ${
               kycResult.status === "APPROVED"
-                ? "border-emerald-500/30 bg-emerald-950/20"
+                ? "border-emerald-500/40 bg-gradient-to-r from-emerald-950/20 via-[#080a0d] to-transparent shadow-[0_0_24px_rgba(16,185,129,0.15)]"
                 : kycResult.status === "MANUAL_REVIEW"
-                ? "border-amber-500/30 bg-amber-950/20"
-                : "border-red-500/30 bg-red-950/20"
+                ? "border-amber-500/40 bg-amber-950/20"
+                : "border-red-500/40 bg-gradient-to-r from-red-950/20 via-[#080a0d] to-transparent"
             }`}
           >
-            <div className="flex items-center space-x-3">
+            <div className="flex items-center space-x-3.5">
               {kycResult.status === "APPROVED" ? (
-                <ShieldCheck className="w-6 h-6 text-emerald-400" />
+                <div className="w-10 h-10 rounded-2xl bg-emerald-500/20 border border-emerald-500/40 flex items-center justify-center text-emerald-400 shrink-0">
+                  <ShieldCheck className="w-6 h-6" />
+                </div>
               ) : (
-                <AlertCircle className="w-6 h-6 text-[#e40000]" />
+                <div className="w-10 h-10 rounded-2xl bg-red-500/20 border border-red-500/40 flex items-center justify-center text-red-400 shrink-0">
+                  <AlertCircle className="w-6 h-6" />
+                </div>
               )}
               <div>
-                <div className="flex items-center space-x-2">
-                  <h3 className="font-sans text-sm font-semibold text-[#EBE5D9]">
+                <div className="flex items-center space-x-2.5">
+                  <h3 className="font-serif text-xl sm:text-2xl font-normal text-[#EBE5D9]">
                     Status: {kycResult.status}
                   </h3>
-                  <span className="text-[10px] font-mono text-[#B39D82] bg-white/[0.04] px-1.5 py-0.2 rounded">
+                  <span className="text-[10px] font-mono text-[#d9ad63] bg-white/[0.04] border border-white/[0.06] px-2 py-0.5 rounded-full">
                     {kycResult.execution_latency_ms}ms
                   </span>
                 </div>
                 <p className="text-xs text-[#B39D82] mt-0.5">
                   {kycResult.status === "APPROVED"
                     ? "All cryptographic and RapidFuzz registry checks passed."
-                    : "Remediation required for compliance pass."}
+                    : "Remediation required for statutory compliance pass."}
                 </p>
               </div>
             </div>
@@ -382,31 +412,31 @@ export const SmartKYC: React.FC<SmartKYCProps> = ({ quote, onKYCApproved, onSwit
                 whileHover={{ scale: 1.03 }}
                 whileTap={{ scale: 0.97 }}
                 onClick={() => onKYCApproved(kycResult)}
-                className="bg-emerald-600 hover:bg-emerald-500 text-white font-medium py-2 px-4 rounded-xl text-xs flex items-center space-x-1.5 cursor-pointer shadow-md"
+                className="bg-emerald-600 hover:bg-emerald-500 text-white font-medium py-3 px-6 rounded-2xl text-xs sm:text-sm flex items-center space-x-2 cursor-pointer shadow-[0_0_20px_rgba(16,185,129,0.35)] shrink-0"
               >
                 <span>Proceed to Dispatch</span>
-                <ArrowRight className="w-3.5 h-3.5" />
+                <ArrowRight className="w-4 h-4" />
               </motion.button>
             )}
           </div>
 
           {/* Details & Fuzzy Scores */}
-          <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
-            <div className="luxury-glass p-3 rounded-xl border border-[rgba(235,229,217,0.06)] space-y-1">
-              <span className="text-[10px] text-[#B39D82] block">DPDP Mask</span>
-              <span className="font-mono text-xs text-[#EBE5D9] block truncate">
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-3.5">
+            <div className="luxury-glass p-4 rounded-2xl border border-[rgba(235,229,217,0.06)] space-y-1">
+              <span className="text-[10px] font-mono uppercase tracking-wider text-[#B39D82] block">DPDP Mask</span>
+              <span className="font-mono text-xs text-[#EBE5D9] block truncate font-medium">
                 {kycResult.redacted_signatory_id || "[Aadhaar Masked]"}
               </span>
             </div>
-            <div className="luxury-glass p-3 rounded-xl border border-[rgba(235,229,217,0.06)] space-y-1">
-              <span className="text-[10px] text-[#B39D82] block">GST Status</span>
-              <span className="font-mono text-xs text-[#EBE5D9] block">
+            <div className="luxury-glass p-4 rounded-2xl border border-[rgba(235,229,217,0.06)] space-y-1">
+              <span className="text-[10px] font-mono uppercase tracking-wider text-[#B39D82] block">GST Status</span>
+              <span className="font-mono text-xs text-[#EBE5D9] block font-medium">
                 {kycResult.gst_status || "N/A (Exempt)"}
               </span>
             </div>
-            <div className="luxury-glass p-3 rounded-xl border border-[rgba(235,229,217,0.06)] space-y-1">
-              <span className="text-[10px] text-[#B39D82] block">Utility Bill Age</span>
-              <span className="font-mono text-xs text-[#EBE5D9] block">
+            <div className="luxury-glass p-4 rounded-2xl border border-[rgba(235,229,217,0.06)] space-y-1">
+              <span className="text-[10px] font-mono uppercase tracking-wider text-[#B39D82] block">Utility Bill Age</span>
+              <span className="font-mono text-xs text-[#EBE5D9] block font-medium">
                 {kycResult.address_bill_age_days ?? "N/A"} days
               </span>
             </div>
@@ -414,31 +444,36 @@ export const SmartKYC: React.FC<SmartKYCProps> = ({ quote, onKYCApproved, onSwit
 
           {/* Anomalies List */}
           {kycResult.anomalies.length > 0 && (
-            <div className="luxury-glass rounded-2xl p-4 space-y-2.5 border border-red-500/20">
-              <h4 className="text-xs font-semibold text-amber-300 uppercase tracking-wider">
-                Exceptions Caught ({kycResult.anomalies.length})
+            <div className="luxury-glass rounded-3xl p-5 sm:p-6 space-y-3 border border-red-500/25">
+              <h4 className="text-xs font-semibold text-amber-300 uppercase tracking-wider flex items-center space-x-2">
+                <AlertCircle className="w-3.5 h-3.5 text-amber-400" />
+                <span>Statutory Exceptions Caught ({kycResult.anomalies.length})</span>
               </h4>
-              <div className="space-y-2">
+              <div className="space-y-3">
                 {kycResult.anomalies.map((anom, idx) => (
-                  <div key={idx} className="p-3 rounded-xl bg-[#030405] border border-white/[0.04] space-y-1">
-                    <div className="flex items-center space-x-2">
-                      <span className="text-[9px] px-1.5 py-0.2 rounded font-mono bg-red-500/20 text-red-400">
+                  <div key={idx} className="p-4 rounded-2xl bg-[#030405] border border-white/[0.06] space-y-2">
+                    <div className="flex items-center space-x-2.5">
+                      <span className="text-[9px] px-2 py-0.5 rounded-full font-mono bg-red-500/20 text-red-400 border border-red-500/30">
                         {anom.code}
                       </span>
-                      <span className="text-xs text-[#EBE5D9]">{anom.message}</span>
+                      <span className="text-xs font-medium text-[#EBE5D9]">{anom.message}</span>
                     </div>
                     {anom.remediation && (
-                      <p className="text-[11px] text-emerald-400">
-                        ↳ Action: {anom.remediation}
+                      <p className="text-[11px] text-[#B39D82]">
+                        ↳ <span className="text-emerald-400">Action:</span> {anom.remediation}
                       </p>
                     )}
                     {anom.code === "GSTIN_INACTIVE" && (
-                      <button
-                        onClick={handleSwitchToUdyam}
-                        className="mt-1 text-xs bg-emerald-600 hover:bg-emerald-500 text-white px-2.5 py-1 rounded-lg font-medium cursor-pointer"
-                      >
-                        1-Click Switch to Udyam Micro Bundle
-                      </button>
+                      <div className="pt-1">
+                        <motion.button
+                          whileHover={{ scale: 1.02 }}
+                          whileTap={{ scale: 0.98 }}
+                          onClick={handleSwitchToUdyam}
+                          className="text-xs bg-[#d9ad63] hover:bg-[#b8914d] text-[#030405] font-semibold px-3.5 py-1.5 rounded-xl cursor-pointer shadow-[0_0_12px_rgba(217,173,99,0.3)] transition-all"
+                        >
+                          1-Click Switch to Udyam Micro Bundle
+                        </motion.button>
+                      </div>
                     )}
                   </div>
                 ))}
@@ -450,23 +485,31 @@ export const SmartKYC: React.FC<SmartKYCProps> = ({ quote, onKYCApproved, onSwit
 
       {/* Consent Modal */}
       {showConsentModal && (
-        <div className="fixed inset-0 z-50 bg-black/80 backdrop-blur-md flex items-center justify-center p-4">
-          <div className="luxury-glass rounded-2xl max-w-md w-full p-5 space-y-3 border border-white/[0.1]">
-            <div className="flex items-center justify-between pb-2 border-b border-white/[0.06]">
-              <h3 className="font-sans text-sm font-semibold text-[#EBE5D9]">DPDP Act 2023 Consent</h3>
+        <div className="fixed inset-0 z-50 bg-black/85 backdrop-blur-xl flex items-center justify-center p-4">
+          <motion.div
+            initial={{ opacity: 0, scale: 0.95 }}
+            animate={{ opacity: 1, scale: 1 }}
+            className="luxury-glass-elevated rounded-3xl max-w-md w-full p-6 space-y-4 border border-white/[0.12] shadow-2xl"
+          >
+            <div className="flex items-center justify-between pb-3 border-b border-white/[0.06]">
+              <div className="flex items-center space-x-2">
+                <ShieldCheck className="w-4 h-4 text-[#d9ad63]" />
+                <h3 className="font-serif text-lg font-normal text-[#EBE5D9]">DPDP Act 2023 Consent Audit</h3>
+              </div>
               <button
                 onClick={() => setShowConsentModal(false)}
-                className="text-xs text-[#B39D82] hover:text-white"
+                className="text-xs text-[#B39D82] hover:text-[#EBE5D9] px-2 py-1 rounded-lg bg-white/[0.04]"
               >
                 Close
               </button>
             </div>
-            <div className="space-y-1.5 text-xs text-[#B39D82] font-mono bg-[#030405] p-3 rounded-xl border border-white/[0.04]">
-              <p>Consent ID: CONSENT_20260715_884920</p>
-              <p>Purpose: Telecom KYC Verification</p>
-              <p>Storage: Zero-numeric plaintext persistence</p>
+            <div className="space-y-2 text-xs text-[#B39D82] font-mono bg-[#030405] p-4 rounded-2xl border border-white/[0.06]">
+              <p className="text-white">Consent ID: CONSENT_20260715_884920</p>
+              <p>Section 6 Notice: Telecom KYC Verification</p>
+              <p>In-Memory Hashing: SHA-256 + Immediate ID Masking</p>
+              <p className="text-emerald-400">Zero Numeric ID Plaintext Stored on Disk</p>
             </div>
-          </div>
+          </motion.div>
         </div>
       )}
     </div>

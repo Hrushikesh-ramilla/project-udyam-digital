@@ -56,3 +56,7 @@ problem.zip
 # Secrets / Env
 .env
 .env.local
+
+# Visual Audit captures
+*.png
+visual_audit/
