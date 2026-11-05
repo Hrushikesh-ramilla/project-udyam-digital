@@ -16,6 +16,52 @@ interface AdvisorChatProps {
   onProfileUpdated: (slots: MSMEProfileSlots, skus?: string[]) => void;
 }
 
+const renderInlineFormatting = (line: string) => {
+  const parts = line.split(/(\*\*[^*]+\*\*)/g);
+  return parts.map((part, i) => {
+    if (part.startsWith("**") && part.endsWith("**")) {
+      return (
+        <strong key={i} className="font-bold text-white">
+          {part.slice(2, -2)}
+        </strong>
+      );
+    }
+    return part;
+  });
+};
+
+const renderFormattedMessage = (text: string) => {
+  const lines = text.split("\n");
+  return (
+    <div className="space-y-1.5 text-xs sm:text-sm">
+      {lines.map((line, idx) => {
+        const trimmed = line.trim();
+        if (!trimmed) return <div key={idx} className="h-1" />;
+
+        if (trimmed.startsWith("### ")) {
+          return (
+            <h4 key={idx} className="font-bold text-white text-sm sm:text-base tracking-tight mb-1">
+              {trimmed.replace("### ", "")}
+            </h4>
+          );
+        }
+
+        if (trimmed.startsWith("* ") || trimmed.startsWith("- ")) {
+          const content = trimmed.substring(2);
+          return (
+            <div key={idx} className="flex items-start space-x-1.5 ml-1">
+              <span className="text-red-400 font-bold">•</span>
+              <span>{renderInlineFormatting(content)}</span>
+            </div>
+          );
+        }
+
+        return <p key={idx}>{renderInlineFormatting(line)}</p>;
+      })}
+    </div>
+  );
+};
+
 export const AdvisorChat: React.FC<AdvisorChatProps> = ({ onProfileUpdated }) => {
   const [messages, setMessages] = useState<Message[]>([
     {
@@ -189,10 +235,10 @@ export const AdvisorChat: React.FC<AdvisorChatProps> = ({ onProfileUpdated }) =>
               className={`max-w-[85%] rounded-2xl px-4 py-3 text-sm leading-relaxed shadow-sm ${
                 m.sender === "user"
                   ? "bg-red-600 text-white rounded-tr-none"
-                  : "bg-slate-800/90 text-slate-100 border border-slate-700/60 rounded-tl-none whitespace-pre-line"
+                  : "bg-slate-800/90 text-slate-100 border border-slate-700/60 rounded-tl-none"
               }`}
             >
-              {m.text}
+              {renderFormattedMessage(m.text)}
 
               {/* TTS Listen Button for Advisor messages */}
               {m.spokenTts && (

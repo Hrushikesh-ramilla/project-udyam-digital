@@ -294,20 +294,24 @@ export const CPQCart: React.FC<CPQCartProps> = ({
           )}
 
           {/* Dependency Locks Warning Box */}
-          {quote && quote.dependency_locks.length > 0 && (
-            <div className="mt-4 p-3 rounded-xl bg-amber-500/10 border border-amber-500/30 text-amber-300 space-y-1.5">
-              <div className="flex items-center space-x-1.5 font-bold text-xs">
-                <AlertTriangle className="w-4 h-4 text-amber-400" />
-                <span>Prerequisite SKU Missing (CPQ DAG Lock)</span>
+          {(() => {
+            const missingLocks = quote ? quote.dependency_locks.filter((l) => l.missing) : [];
+            if (missingLocks.length === 0) return null;
+            return (
+              <div className="mt-4 p-3 rounded-xl bg-amber-500/10 border border-amber-500/30 text-amber-300 space-y-1.5">
+                <div className="flex items-center space-x-1.5 font-bold text-xs">
+                  <AlertTriangle className="w-4 h-4 text-amber-400" />
+                  <span>Prerequisite SKU Missing (CPQ DAG Lock)</span>
+                </div>
+                {missingLocks.map((lock) => (
+                  <p key={lock.dependent_sku} className="text-[11px] leading-relaxed">
+                    • <strong>{lock.dependent_name}</strong> requires an active connectivity base (
+                    {lock.required_one_of.join(" or ")}).
+                  </p>
+                ))}
               </div>
-              {quote.dependency_locks.map((lock) => (
-                <p key={lock.dependent_sku} className="text-[11px] leading-relaxed">
-                  • <strong>{lock.dependent_name}</strong> requires an active connectivity base (
-                  {lock.required_one_of.join(" or ")}).
-                </p>
-              ))}
-            </div>
-          )}
+            );
+          })()}
 
           {/* Itemized Cart List */}
           <div className="mt-4 divide-y divide-slate-800 max-h-56 overflow-y-auto pr-1">
@@ -401,7 +405,11 @@ export const CPQCart: React.FC<CPQCartProps> = ({
           <div className="mt-5">
             <button
               onClick={() => quote && onProceedToKYC(quote)}
-              disabled={!quote || quote.dependency_locks.length > 0 || loading}
+              disabled={
+                !quote ||
+                quote.dependency_locks.filter((l) => l.missing).length > 0 ||
+                loading
+              }
               className="w-full flex items-center justify-center space-x-2 bg-red-600 hover:bg-red-500 text-white font-bold py-3 px-4 rounded-xl shadow-lg shadow-red-600/30 transition-all disabled:opacity-40 disabled:cursor-not-allowed text-sm"
             >
               <span>Accept Quote &amp; Start Smart KYC</span>

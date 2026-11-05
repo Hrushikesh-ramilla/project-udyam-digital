@@ -219,7 +219,7 @@ class CPQEngine:
             min_contract_months=effective_contract,
             guaranteed_sla_days=max_sla_days if items_breakdown else 0,
             gst_exempt_eligible=all_non_gst,
-            dependency_locks=locks,
+            dependency_locks=[lock for lock in locks if lock.missing],
         )
 
     def optimize_budget(self, user: UserProfile, max_monthly_budget: int) -> ReverseBudgetResult:
