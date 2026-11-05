@@ -1,7 +1,17 @@
 from __future__ import annotations
 
+import concurrent.futures
+import json
+import logging
+import os
 import re
 from typing import Optional
+
+try:
+    from google import genai
+    GENAI_AVAILABLE = True
+except ImportError:
+    GENAI_AVAILABLE = False
 
 from backend.app.db.registry import RegistryDatabase, get_registry
 from backend.app.models.schemas import (
@@ -29,6 +39,94 @@ class AdvisorAgent:
     def __init__(self, db: Optional[RegistryDatabase] = None) -> None:
         self.db = db or get_registry()
         self.cpq = CPQEngine(self.db)
+        self.api_key = os.environ.get("GEMINI_API_KEY")
+        self.client = None
+        if GENAI_AVAILABLE and self.api_key:
+            try:
+                self.client = genai.Client()
+            except Exception as e:
+                logging.warning("Could not initialize google.genai Client: %s", e)
+
+    def _extract_slots_with_gemini(
+        self, text: str, existing_slots: Optional[MSMEProfileSlots] = None
+    ) -> Optional[tuple[MSMEProfileSlots, Optional[str], Optional[str]]]:
+        """Tier 1: Live Multimodal LLM slot-extraction and natural conversational response via Gemini API."""
+        if not self.client:
+            return None
+
+        prompt = f"""You are the principal AI Enterprise Telecom Advisor for Project Udyam Digital (Accel Telecom / Airtel Business).
+Analyze this user query in Hindi, Hinglish, or English:
+\"{text}\"
+
+Extract MSME business slots and generate natural, culturally attuned responses (Hindi/Hinglish/English).
+Return STRICTLY valid JSON with no markdown formatting:
+{{
+  \"segment\": \"micro\" | \"prof\" | \"multi\" | \"mfg\" | null,
+  \"city_tier\": 1 | 2 | 3 | null,
+  \"employee_count\": integer or null,
+  \"num_sites\": integer or null,
+  \"has_gstin\": true | false | null,
+  \"detected_needs\": [\"broadband\", \"wifi\", \"calling\", \"cloud\", \"security\", \"cctv\", \"iot\"],
+  \"monthly_budget_cap\": integer or null,
+  \"display_markdown\": \"Conversational markdown response matching user language\",
+  \"spoken_tts\": \"Natural plain text response for Web Speech TTS without markdown or bullet symbols\"
+}}"""
+        try:
+            def _call():
+                return self.client.models.generate_content(
+                    model="gemini-3.5-flash-lite", contents=prompt
+                )
+
+            with concurrent.futures.ThreadPoolExecutor(max_workers=1) as executor:
+                future = executor.submit(_call)
+                res = future.result(timeout=2.0)
+
+            if not res or not res.text:
+                return None
+
+            raw_text = res.text.strip()
+            if raw_text.startswith("```"):
+                parts = raw_text.split("```")
+                if len(parts) >= 2:
+                    raw_text = parts[1]
+                    if raw_text.startswith("json"):
+                        raw_text = raw_text[4:]
+            data = json.loads(raw_text.strip())
+
+            slots = existing_slots.model_copy() if existing_slots else MSMEProfileSlots()
+            if not slots.segment and data.get("segment"):
+                slots.segment = str(data["segment"]).lower()
+            if not slots.city_tier and data.get("city_tier"):
+                slots.city_tier = int(data["city_tier"])
+            if not slots.employee_count and data.get("employee_count"):
+                slots.employee_count = int(data["employee_count"])
+            if not slots.num_sites and data.get("num_sites"):
+                slots.num_sites = int(data["num_sites"])
+            if slots.has_gstin is None and data.get("has_gstin") is not None:
+                slots.has_gstin = bool(data["has_gstin"])
+            if data.get("detected_needs"):
+                existing_needs = set(slots.detected_needs)
+                for n in data["detected_needs"]:
+                    existing_needs.add(str(n).lower())
+                slots.detected_needs = list(existing_needs)
+            if not slots.monthly_budget_cap and data.get("monthly_budget_cap"):
+                slots.monthly_budget_cap = int(data["monthly_budget_cap"])
+
+            # Validate missing slots
+            missing = []
+            if not slots.segment:
+                missing.append("business_type")
+            if not slots.city_tier:
+                missing.append("city_or_tier")
+            if slots.has_gstin is None:
+                missing.append("gstin_status")
+            slots.is_complete = len(missing) == 0
+            slots.missing_slots = missing
+
+            return slots, data.get("display_markdown"), data.get("spoken_tts")
+        except Exception as e:
+            logging.info("Gemini slot extraction unavailable (%s); using deterministic symbolic regex fallback.", e)
+            return None
 
     def extract_slots(self, text: str, existing_slots: Optional[MSMEProfileSlots] = None) -> MSMEProfileSlots:
         """Extracts MSME profile parameters from conversational Hindi, Hinglish, or English."""
@@ -139,8 +237,20 @@ class AdvisorAgent:
         return slots
 
     def process_turn(self, user_message: str, previous_slots: Optional[MSMEProfileSlots] = None) -> AdvisorResponse:
-        """Executes full neuro-symbolic turn: Slot Extraction -> CPQ Engine -> Dual Narration."""
+        """Executes full neuro-symbolic turn: Slot Extraction -> CPQ Engine -> Dual Narration.
+
+        Tier 1: Gemini Live LLM (when GEMINI_API_KEY is configured).
+        Tier 2: Instant Symbolic Regex/Keyword Fallback (<10ms).
+        """
+        # Always run deterministic extraction as bedrock baseline
         slots = self.extract_slots(user_message, previous_slots)
+
+        # Attempt Gemini LLM enhancement for conversational nuances
+        gemini_result = self._extract_slots_with_gemini(user_message, slots)
+        if gemini_result:
+            slots, gemini_md, gemini_tts = gemini_result
+        else:
+            gemini_md, gemini_tts = None, None
 
         # If missing critical slots, formulate conversational clarifying question
         if not slots.is_complete:
@@ -152,8 +262,8 @@ class AdvisorAgent:
             if "gstin_status" in slots.missing_slots:
                 missing_text.append("whether you have a registered GST number or only Udyam")
 
-            prompt_en = f"Namaste! To recommend the best digital plan, could you please clarify: {', '.join(missing_text)}?"
-            prompt_hi_tts = "Namaste! Aapke business ke liye best plan chunne ke liye, kripya batayein ki aap kis sheher mein hain aur aapka business kis type ka hai."
+            prompt_en = gemini_md or f"Namaste! To recommend the best digital plan, could you please clarify: {', '.join(missing_text)}?"
+            prompt_hi_tts = gemini_tts or "Namaste! Aapke business ke liye best plan chunne ke liye, kripya batayein ki aap kis sheher mein hain aur aapka business kis type ka hai."
 
             return AdvisorResponse(
                 slots=slots,

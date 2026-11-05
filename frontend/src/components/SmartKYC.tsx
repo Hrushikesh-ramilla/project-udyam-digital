@@ -13,9 +13,12 @@ import {
   EyeOff,
   Zap,
   Info,
+  Upload,
+  FileUp,
+  Sparkles,
 } from "lucide-react";
 import { KYCVerificationResult, CommercialBreakdown } from "../types";
-import { verifyKYC } from "../api";
+import { verifyKYC, uploadKYCDocument, KYCUploadResponse } from "../api";
 
 interface SmartKYCProps {
   quote: CommercialBreakdown | null;
@@ -28,6 +31,29 @@ export const SmartKYC: React.FC<SmartKYCProps> = ({ quote, onKYCApproved }) => {
   const [isVerifying, setIsVerifying] = useState<boolean>(false);
   const [kycResult, setKycResult] = useState<KYCVerificationResult | null>(null);
   const [showConsentModal, setShowConsentModal] = useState<boolean>(false);
+  const [activeTab, setActiveTab] = useState<"preset" | "upload">("preset");
+  const [uploadedFile, setUploadedFile] = useState<File | null>(null);
+  const [uploadDocType, setUploadDocType] = useState<string>("gst_certificate");
+  const [uploadResponse, setUploadResponse] = useState<KYCUploadResponse | null>(null);
+
+  const handleFileUpload = async (file: File) => {
+    if (!consentGranted) {
+      alert("DPDP Act 2023 requires explicit digital consent before document processing.");
+      return;
+    }
+    setUploadedFile(file);
+    setIsVerifying(true);
+    try {
+      const cartRequiresGstin = quote ? !quote.gst_exempt_eligible : true;
+      const res = await uploadKYCDocument(file, uploadDocType, cartRequiresGstin);
+      setUploadResponse(res);
+      setKycResult(res.verification_result);
+    } catch (err: unknown) {
+      alert(err instanceof Error ? err.message : "File OCR and verification failed.");
+    } finally {
+      setIsVerifying(false);
+    }
+  };
 
   // Preset options representing clean cases and planted hackathon anomalies
   const presets = [
@@ -130,65 +156,178 @@ export const SmartKYC: React.FC<SmartKYCProps> = ({ quote, onKYCApproved }) => {
         </div>
       </div>
 
-      {/* Preset Applicant Selector for Demo / Testing */}
-      <div className="bg-slate-900 border border-slate-800 rounded-2xl p-5 shadow-xl">
-        <div className="flex items-center justify-between mb-4">
-          <h3 className="text-sm font-semibold text-slate-200 uppercase tracking-wider flex items-center space-x-2">
-            <FileText className="w-4 h-4 text-red-500" />
-            <span>Select Applicant Document Specimen</span>
-          </h3>
-          <span className="text-xs text-slate-400">
-            Powered by SHA-256 Content-Addressable OCR (Zero Filename Branching)
-          </span>
-        </div>
-
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
-          {presets.map((preset) => {
-            const isSelected = selectedPreset === preset.id;
-            return (
-              <div
-                key={preset.id}
-                onClick={() => {
-                  setSelectedPreset(preset.id);
-                  setKycResult(null); // reset result on change
-                }}
-                className={`p-3.5 rounded-xl border transition-all cursor-pointer ${
-                  isSelected
-                    ? "border-red-500 bg-red-950/20 shadow-md shadow-red-950/30"
-                    : "border-slate-800 bg-slate-950/40 hover:border-slate-700"
-                }`}
-              >
-                <div className="flex items-center justify-between">
-                  <span className="text-xs font-bold text-white">{preset.label}</span>
-                  <span
-                    className={`text-[9px] px-1.5 py-0.5 rounded font-bold uppercase ${
-                      preset.type === "CLEAN"
-                        ? "bg-emerald-500/20 text-emerald-400"
-                        : preset.type === "EXEMPT"
-                        ? "bg-blue-500/20 text-blue-400"
-                        : "bg-amber-500/20 text-amber-400"
-                    }`}
-                  >
-                    {preset.type}
-                  </span>
-                </div>
-                <p className="text-[11px] text-slate-400 mt-1.5 leading-relaxed">{preset.desc}</p>
-              </div>
-            );
-          })}
-        </div>
-
-        <div className="mt-5 flex justify-end">
-          <button
-            onClick={handleVerify}
-            disabled={isVerifying || !consentGranted}
-            className="flex items-center space-x-2 bg-red-600 hover:bg-red-500 text-white font-bold py-2.5 px-6 rounded-xl shadow-lg shadow-red-600/30 transition-all text-xs sm:text-sm disabled:opacity-50"
-          >
-            <RefreshCw className={`w-4 h-4 ${isVerifying ? "animate-spin" : ""}`} />
-            <span>{isVerifying ? "Executing Verification Funnel..." : "Run Deterministic KYC Gate"}</span>
-          </button>
-        </div>
+      {/* Mode Switcher: Preset Specimens vs Real File Upload */}
+      <div className="flex space-x-2 border-b border-slate-800 pb-2">
+        <button
+          onClick={() => {
+            setActiveTab("preset");
+            setUploadResponse(null);
+          }}
+          className={`flex items-center space-x-2 px-4 py-2 rounded-xl text-xs font-bold transition-all ${
+            activeTab === "preset"
+              ? "bg-red-600 text-white shadow-md shadow-red-600/30"
+              : "bg-slate-800/60 text-slate-400 hover:text-white"
+          }`}
+        >
+          <FileText className="w-4 h-4" />
+          <span>Synthetic Hackathon Specimens (K01–K12)</span>
+        </button>
+        <button
+          onClick={() => {
+            setActiveTab("upload");
+            setKycResult(null);
+          }}
+          className={`flex items-center space-x-2 px-4 py-2 rounded-xl text-xs font-bold transition-all ${
+            activeTab === "upload"
+              ? "bg-red-600 text-white shadow-md shadow-red-600/30"
+              : "bg-slate-800/60 text-slate-400 hover:text-white"
+          }`}
+        >
+          <Upload className="w-4 h-4" />
+          <span>Upload Real PDF / Image (Judge Laptop Test)</span>
+        </button>
       </div>
+
+      {activeTab === "preset" ? (
+        /* Preset Applicant Selector for Demo / Testing */
+        <div className="bg-slate-900 border border-slate-800 rounded-2xl p-5 shadow-xl">
+          <div className="flex items-center justify-between mb-4">
+            <h3 className="text-sm font-semibold text-slate-200 uppercase tracking-wider flex items-center space-x-2">
+              <FileText className="w-4 h-4 text-red-500" />
+              <span>Select Applicant Document Specimen</span>
+            </h3>
+            <span className="text-xs text-slate-400">
+              Powered by SHA-256 Content-Addressable OCR (Zero Filename Branching)
+            </span>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
+            {presets.map((preset) => {
+              const isSelected = selectedPreset === preset.id;
+              return (
+                <div
+                  key={preset.id}
+                  onClick={() => {
+                    setSelectedPreset(preset.id);
+                    setKycResult(null);
+                  }}
+                  className={`p-3.5 rounded-xl border transition-all cursor-pointer ${
+                    isSelected
+                      ? "border-red-500 bg-red-950/20 shadow-md shadow-red-950/30"
+                      : "border-slate-800 bg-slate-950/40 hover:border-slate-700"
+                  }`}
+                >
+                  <div className="flex items-center justify-between">
+                    <span className="text-xs font-bold text-white">{preset.label}</span>
+                    <span
+                      className={`text-[9px] px-1.5 py-0.5 rounded font-bold uppercase ${
+                        preset.type === "CLEAN"
+                          ? "bg-emerald-500/20 text-emerald-400"
+                          : preset.type === "EXEMPT"
+                          ? "bg-blue-500/20 text-blue-400"
+                          : "bg-amber-500/20 text-amber-400"
+                      }`}
+                    >
+                      {preset.type}
+                    </span>
+                  </div>
+                  <p className="text-[11px] text-slate-400 mt-1.5 leading-relaxed">{preset.desc}</p>
+                </div>
+              );
+            })}
+          </div>
+
+          <div className="mt-5 flex justify-end">
+            <button
+              onClick={handleVerify}
+              disabled={isVerifying || !consentGranted}
+              className="flex items-center space-x-2 bg-red-600 hover:bg-red-500 text-white font-bold py-2.5 px-6 rounded-xl shadow-lg shadow-red-600/30 transition-all text-xs sm:text-sm disabled:opacity-50"
+            >
+              <RefreshCw className={`w-4 h-4 ${isVerifying ? "animate-spin" : ""}`} />
+              <span>{isVerifying ? "Executing Verification Funnel..." : "Run Deterministic KYC Gate"}</span>
+            </button>
+          </div>
+        </div>
+      ) : (
+        /* Real Drag & Drop / File Upload Zone for Judges */
+        <div className="bg-slate-900 border border-slate-800 rounded-2xl p-6 shadow-xl space-y-4">
+          <div className="flex items-center justify-between">
+            <div>
+              <h3 className="text-sm font-semibold text-slate-200 uppercase tracking-wider flex items-center space-x-2">
+                <FileUp className="w-4 h-4 text-emerald-400" />
+                <span>Drag &amp; Drop Any Real KYC File (Judge Live Test)</span>
+              </h3>
+              <p className="text-xs text-slate-400 mt-1">
+                Upload real PDF or PNG/JPG documents. Parsed live via native PyMuPDF and Gemini Vision OCR.
+              </p>
+            </div>
+            <span className="text-xs bg-emerald-500/10 text-emerald-400 border border-emerald-500/30 px-2.5 py-1 rounded-full font-semibold">
+              Live OCR &amp; Vision Active
+            </span>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-3 pt-2">
+            <div>
+              <label className="block text-xs font-medium text-slate-300 mb-1">Expected Document Type:</label>
+              <select
+                value={uploadDocType}
+                onChange={(e) => setUploadDocType(e.target.value)}
+                className="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-xs text-white focus:outline-none focus:border-red-500"
+              >
+                <option value="gst_certificate">GST Certificate (Form GST REG-06)</option>
+                <option value="udyam_certificate">Udyam Registration Certificate</option>
+                <option value="signatory_id">Signatory National ID (Aadhaar / Passport)</option>
+                <option value="address_proof">Electricity / Utility Bill (&lt;90 days)</option>
+              </select>
+            </div>
+
+            <div className="md:col-span-2">
+              <label className="block text-xs font-medium text-slate-300 mb-1">Select File (.pdf, .png, .jpg):</label>
+              <input
+                type="file"
+                accept=".pdf,.png,.jpg,.jpeg"
+                onChange={(e) => {
+                  const f = e.target.files?.[0];
+                  if (f) handleFileUpload(f);
+                }}
+                className="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-1.5 text-xs text-slate-400 file:mr-3 file:py-1.5 file:px-3 file:rounded-lg file:border-0 file:text-xs file:font-semibold file:bg-red-600 file:text-white hover:file:bg-red-500 cursor-pointer"
+              />
+            </div>
+          </div>
+
+          {uploadedFile && (
+            <div className="p-3 bg-slate-950 rounded-xl border border-slate-800 flex items-center justify-between text-xs">
+              <div className="flex items-center space-x-2">
+                <FileText className="w-4 h-4 text-red-400" />
+                <span className="text-white font-medium">{uploadedFile.name}</span>
+                <span className="text-slate-500 font-mono">({Math.round(uploadedFile.size / 1024)} KB)</span>
+              </div>
+              {uploadResponse && (
+                <span className="text-[10px] text-slate-400 font-mono bg-slate-900 px-2 py-0.5 rounded">
+                  SHA-256: {uploadResponse.file_sha256.slice(0, 16)}...
+                </span>
+              )}
+            </div>
+          )}
+
+          {uploadResponse?.extracted_fields && Object.keys(uploadResponse.extracted_fields).length > 0 && (
+            <div className="p-4 bg-slate-950 rounded-xl border border-slate-800 space-y-2">
+              <span className="text-xs font-bold text-slate-300 uppercase tracking-wider flex items-center space-x-1.5">
+                <Sparkles className="w-3.5 h-3.5 text-amber-400" />
+                <span>Live Extracted Fields (OCR &amp; Regex Engine)</span>
+              </span>
+              <div className="grid grid-cols-2 md:grid-cols-4 gap-2 text-xs">
+                {Object.entries(uploadResponse.extracted_fields).map(([k, v]) => (
+                  <div key={k} className="p-2 bg-slate-900/80 rounded-lg border border-slate-800/80">
+                    <span className="text-[10px] text-slate-500 uppercase block">{k}</span>
+                    <span className="text-white font-mono font-semibold truncate block">{v || "N/A"}</span>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+        </div>
+      )}
 
       {/* Verification Result Display */}
       {kycResult && (

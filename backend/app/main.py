@@ -2,7 +2,7 @@ from __future__ import annotations
 
 from pathlib import Path
 from typing import Optional
-from fastapi import FastAPI, HTTPException
+from fastapi import FastAPI, File, Form, HTTPException, UploadFile
 from fastapi.middleware.cors import CORSMiddleware
 
 from backend.app.db.registry import get_registry
@@ -111,6 +111,40 @@ def verify_kyc(req: KYCVerifyAPIRequest):
     )
 
     return kyc.verify_application(docs, cart_requires_gstin=req.cart_requires_gstin, consent=consent)
+
+
+@app.post("/api/kyc/upload")
+async def upload_and_verify_document(
+    file: UploadFile = File(...),
+    doc_type: str = Form("document"),
+    cart_requires_gstin: bool = Form(True),
+    consent_granted: bool = Form(True),
+):
+    """Uploads any arbitrary PDF, PNG, JPG document from judge's laptop, parses it
+    live via PyMuPDF/Gemini Vision/Regex, and verifies it against registries."""
+    file_bytes = await file.read()
+    parsed_doc = kyc.parse_document_bytes(file_bytes, fallback_type=doc_type)
+
+    consent = DPDPConsentPayload(
+        consent_id="CONSENT_UPLOAD_SESSION",
+        user_id="UPLOAD_USER",
+        purpose="Airtel Business telecom KYC verification, live document extraction, and DPDP Act 2023 compliance.",
+        timestamp="2026-07-15T10:00:00Z",
+        ip_hash="d59b20e0e0149023ab9450c2656e1cb1ef92ca157bb6be29e843b0281b67104b",
+        granted=consent_granted,
+    )
+
+    docs = {parsed_doc.doc_type: parsed_doc}
+    kyc_res = kyc.verify_application(docs, cart_requires_gstin=cart_requires_gstin, consent=consent)
+
+    return {
+        "filename": file.filename,
+        "size_bytes": len(file_bytes),
+        "file_sha256": parsed_doc.file_sha256,
+        "doc_type": parsed_doc.doc_type,
+        "extracted_fields": parsed_doc.extracted_fields,
+        "verification_result": kyc_res.model_dump(),
+    }
 
 
 @app.get("/api/partner/leads", response_model=list[LeadRescueItem])

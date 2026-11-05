@@ -102,6 +102,34 @@ export async function verifyKYC(
   return await res.json();
 }
 
+export interface KYCUploadResponse {
+  filename: string;
+  size_bytes: number;
+  file_sha256: string;
+  doc_type: string;
+  extracted_fields: Record<string, string>;
+  verification_result: KYCVerificationResult;
+}
+
+export async function uploadKYCDocument(
+  file: File,
+  docType: string = "document",
+  cartRequiresGstin: boolean = true
+): Promise<KYCUploadResponse> {
+  const formData = new FormData();
+  formData.append("file", file);
+  formData.append("doc_type", docType);
+  formData.append("cart_requires_gstin", String(cartRequiresGstin));
+  formData.append("consent_granted", "true");
+
+  const res = await fetch(`${API_BASE}/kyc/upload`, {
+    method: "POST",
+    body: formData,
+  });
+  if (!res.ok) throw new Error("Document upload and verification failed");
+  return await res.json();
+}
+
 export async function fetchRescueLeads(): Promise<LeadRescueItem[]> {
   try {
     const res = await fetch(`${API_BASE}/partner/leads?limit=30`);

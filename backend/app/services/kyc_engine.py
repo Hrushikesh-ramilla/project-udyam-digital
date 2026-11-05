@@ -1,10 +1,26 @@
 from __future__ import annotations
 
 import hashlib
+import json
+import logging
+import os
 import re
 import time
 from datetime import date
 from typing import Optional, Union
+
+try:
+    import fitz  # PyMuPDF
+    FITZ_AVAILABLE = True
+except ImportError:
+    FITZ_AVAILABLE = False
+
+try:
+    from google import genai
+    from google.genai import types
+    GENAI_AVAILABLE = True
+except ImportError:
+    GENAI_AVAILABLE = False
 
 from rapidfuzz import fuzz
 
@@ -444,14 +460,22 @@ class KYCEngine:
 
     def __init__(self, db: Optional[RegistryDatabase] = None) -> None:
         self.db = db or get_registry()
+        self.api_key = os.environ.get("GEMINI_API_KEY")
+        self.genai_client = None
+        if GENAI_AVAILABLE and self.api_key:
+            try:
+                self.genai_client = genai.Client()
+            except Exception as e:
+                logging.info("Could not initialize genai.Client in KYCEngine: %s", e)
 
     def parse_document_bytes(self, file_bytes: bytes, fallback_type: str = "document") -> ExtractedDocPayload:
         """Parses document bytes using Content-Addressable SHA-256 caching (<1ms)
-
-        with fallback structured regex extraction. Never keys by filename!
+        with fallback to PyMuPDF (PDFs) and Gemini Vision (Images).
+        Never keys by filename!
         """
         file_sha256 = hashlib.sha256(file_bytes).hexdigest()
 
+        # Step 1: Sub-millisecond content-addressable SHA-256 cache
         if file_sha256 in SHA256_BYTE_CACHE:
             cached_data = SHA256_BYTE_CACHE[file_sha256]
             return ExtractedDocPayload(
@@ -460,29 +484,118 @@ class KYCEngine:
                 extracted_fields=cached_data,
             )
 
-        # Fallback structured extraction for unseen/arbitrary documents
-        text = file_bytes.decode("utf-8", errors="ignore")
         fields: dict[str, str] = {}
+        detected_doc_type = fallback_type
+        extracted_text = ""
 
-        gst_match = GSTIN_REGEX.search(text.upper())
-        if gst_match:
-            fields["gstin"] = gst_match.group(0)
+        # Step 2: Native PDF parsing via PyMuPDF (fitz)
+        is_pdf = file_bytes.startswith(b"%PDF")
+        if is_pdf and FITZ_AVAILABLE:
+            try:
+                doc = fitz.open(stream=file_bytes, filetype="pdf")
+                extracted_text = "\n".join(page.get_text() for page in doc)
+            except Exception as e:
+                logging.warning("PyMuPDF PDF parsing error: %s", e)
+                extracted_text = file_bytes.decode("utf-8", errors="ignore")
 
-        udyam_match = UDYAM_REGEX.search(text.upper())
-        if udyam_match:
-            fields["udyam_number"] = udyam_match.group(0)
+        # Step 3: Native Image parsing via Gemini Vision
+        is_image = (
+            file_bytes.startswith(b"\x89PNG")
+            or file_bytes.startswith(b"\xff\xd8\xff")
+            or file_bytes.startswith(b"GIF8")
+            or file_bytes.startswith(b"RIFF")
+        )
+        if is_image and self.genai_client:
+            try:
+                mime = "image/png" if file_bytes.startswith(b"\x89PNG") else "image/jpeg"
+                part = types.Part.from_bytes(data=file_bytes, mime_type=mime)
+                prompt = """Analyze this Indian enterprise KYC / utility document image.
+Extract all visible fields and output STRICTLY valid JSON with no markdown tags:
+{
+  "doc_type": "gst_certificate" | "udyam_certificate" | "signatory_id" | "address_proof",
+  "gstin": "string or empty",
+  "udyam_number": "string or empty",
+  "legal_name": "string or empty",
+  "trade_name": "string or empty",
+  "signatory_name": "string or empty",
+  "raw_id": "string or empty",
+  "consumer_name": "string or empty",
+  "bill_date": "YYYY-MM-DD or empty",
+  "pincode": "string or empty",
+  "city": "string or empty",
+  "state": "string or empty"
+}"""
+                models_to_try = ["gemini-3.5-flash-lite", "gemini-2.5-flash", "gemini-flash-latest"]
+                for m in models_to_try:
+                    try:
+                        res = self.genai_client.models.generate_content(model=m, contents=[part, prompt])
+                        if res and res.text:
+                            raw = res.text.strip()
+                            if raw.startswith("```"):
+                                parts = raw.split("```")
+                                if len(parts) >= 2:
+                                    raw = parts[1]
+                                    if raw.startswith("json"):
+                                        raw = raw[4:]
+                            gemini_data = json.loads(raw.strip())
+                            for k, v in gemini_data.items():
+                                if v and str(v).strip():
+                                    fields[k] = str(v).strip()
+                            if fields.get("doc_type"):
+                                detected_doc_type = fields["doc_type"]
+                            break
+                    except Exception:
+                        continue
+            except Exception as e:
+                logging.info("Gemini Vision processing error: %s", e)
 
-        pin_match = re.search(r"\b([1-9][0-9]{5})\b", text)
-        if pin_match:
-            fields["pincode"] = pin_match.group(1)
+        # Step 4: Structured regex parsing over raw text or string byte streams
+        if not extracted_text:
+            extracted_text = file_bytes.decode("utf-8", errors="ignore")
 
-        date_match = re.search(r"\b(202[0-9]-[0-1][0-9]-[0-3][0-9])\b", text)
-        if date_match:
-            fields["bill_date"] = date_match.group(1)
+        upper_text = extracted_text.upper()
+
+        if "gstin" not in fields:
+            gst_match = GSTIN_REGEX.search(upper_text)
+            if gst_match:
+                fields["gstin"] = gst_match.group(0)
+
+        if "udyam_number" not in fields:
+            udyam_match = UDYAM_REGEX.search(upper_text)
+            if udyam_match:
+                fields["udyam_number"] = udyam_match.group(0)
+
+        if "pincode" not in fields:
+            pin_match = re.search(r"\b([1-9][0-9]{5})\b", extracted_text)
+            if pin_match:
+                fields["pincode"] = pin_match.group(1)
+
+        if "bill_date" not in fields:
+            date_match = re.search(r"\b(202[0-9]-[0-1][0-9]-[0-3][0-9])\b", extracted_text)
+            if date_match:
+                fields["bill_date"] = date_match.group(1)
+
+        if "raw_id" not in fields:
+            uid_match = UID_REGEX.search(extracted_text)
+            if uid_match:
+                fields["raw_id"] = uid_match.group(0)
+
+        # Automatic Doc Type Classification
+        if detected_doc_type == "document" or detected_doc_type == fallback_type:
+            if "gstin" in fields or "GOODS AND SERVICES TAX" in upper_text or "REGISTRATION CERTIFICATE" in upper_text:
+                detected_doc_type = "gst_certificate"
+            elif "udyam_number" in fields or "UDYAM" in upper_text or "MINISTRY OF MICRO" in upper_text:
+                detected_doc_type = "udyam_certificate"
+            elif "bill_date" in fields or "ELECTRICITY" in upper_text or "CONSUMER" in upper_text or "POWER" in upper_text:
+                detected_doc_type = "address_proof"
+            elif "raw_id" in fields or "AADHAAR" in upper_text or "UNIQUE IDENTIFICATION" in upper_text:
+                detected_doc_type = "signatory_id"
+
+        fields["doc_type"] = detected_doc_type
 
         return ExtractedDocPayload(
             file_sha256=file_sha256,
-            doc_type=fallback_type,
+            doc_type=detected_doc_type,
             extracted_fields=fields,
         )
 
