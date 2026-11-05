@@ -104,3 +104,74 @@ class RegistryLookupResponse(BaseModel):
     entity_type: str
     record: Optional[dict] = None
     query_latency_ms: float
+
+
+# CPQ & DAG Schemas
+class UserProfile(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+
+    segment: str = Field(description="Business segment: micro, prof, multi, mfg")
+    city_tier: int = Field(ge=1, le=3, description="City Tier (1 or 2)")
+    employee_count: int = Field(ge=1, description="Total employee count")
+    num_sites: int = Field(ge=1, description="Number of operational branches/sites")
+    has_gstin: bool = Field(description="Whether the business has an active GSTIN")
+    detected_needs: list[str] = Field(default_factory=list, description="Extracted needs tags")
+    monthly_budget_cap: Optional[int] = Field(default=None, description="Optional monthly budget cap in INR")
+
+
+class CartItem(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+
+    product_id: str
+    quantity: int = Field(default=1, ge=1)
+
+
+class CartItemBreakdown(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+
+    product_id: str
+    product_name: str
+    category: str
+    quantity: int
+    unit_mrc_inr: int
+    total_mrc_inr: int
+    unit_otc_inr: int
+    total_otc_inr: int
+    install_days: int
+    requires_gstin: bool
+
+
+class DependencyLock(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+
+    dependent_sku: str
+    dependent_name: str
+    required_one_of: list[str]
+    missing: bool
+    reason: str
+
+
+class CommercialBreakdown(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+
+    items: list[CartItemBreakdown]
+    gross_mrc_inr: int
+    bundle_discount_inr: int
+    net_mrc_inr: int
+    total_otc_inr: int
+    otc_discount_inr: int
+    net_otc_inr: int
+    min_contract_months: int
+    guaranteed_sla_days: int
+    gst_exempt_eligible: bool
+    dependency_locks: list[DependencyLock]
+
+
+class ReverseBudgetResult(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+
+    budget_inr: int
+    selected_skus: list[str]
+    commercials: CommercialBreakdown
+    utility_score: float
+    rationale: str
