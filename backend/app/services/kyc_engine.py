@@ -6,6 +6,9 @@ import logging
 import os
 import re
 import time
+import concurrent.futures
+from dotenv import load_dotenv
+load_dotenv()
 from datetime import date
 from typing import Optional, Union
 
@@ -524,7 +527,7 @@ class KYCEngine:
         self.genai_client = None
         if GENAI_AVAILABLE and self.api_key:
             try:
-                self.genai_client = genai.Client()
+                self.genai_client = genai.Client(api_key=self.api_key)
             except Exception as e:
                 logging.info("Could not initialize genai.Client in KYCEngine: %s", e)
 
@@ -619,10 +622,14 @@ Extract all visible fields and output STRICTLY valid JSON with no markdown tags:
   "city": "string or empty",
   "state": "string or empty"
 }"""
-                models_to_try = ["gemini-3.8-flash", "gemini-3.5-flash-lite", "gemini-flash-latest"]
+                models_to_try = ["gemini-3.1-flash-lite", "gemini-3.5-flash-lite", "gemini-flash-latest"]
                 for m in models_to_try:
                     try:
-                        res = self.genai_client.models.generate_content(model=m, contents=[part, prompt])
+                        def _call_vision():
+                            return self.genai_client.models.generate_content(model=m, contents=[part, prompt])
+                        with concurrent.futures.ThreadPoolExecutor(max_workers=1) as ex:
+                            future = ex.submit(_call_vision)
+                            res = future.result(timeout=8.0)
                         if res and res.text:
                             raw = res.text.strip()
                             if raw.startswith("```"):

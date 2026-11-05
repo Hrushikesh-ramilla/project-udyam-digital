@@ -187,8 +187,14 @@ class LeadRescueMLEngine:
         """Returns sorted rescue leads prioritizing high-propensity dropped SMBs using batch prediction."""
         leads = self.db.get_all_leads()
         filtered_leads = [
-            l for l in leads
-            if l.outcome.lower() != "activated" and (not stage_filter or l.stage_reached.lower() == stage_filter.lower())
+            l
+            for l in leads
+            if l.outcome.lower() != "activated"
+            and (
+                not l.drop_reason
+                or ("invalid number" not in l.drop_reason.lower() and "wrong" not in l.drop_reason.lower())
+            )
+            and (not stage_filter or l.stage_reached.lower() == stage_filter.lower())
         ]
         if not filtered_leads:
             return []
