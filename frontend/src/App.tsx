@@ -128,6 +128,76 @@ export const App: React.FC = () => {
     )}&bundle=smart_office`;
   };
 
+  const handleLoadDemoOrder = () => {
+    setOrder({
+      order_id: "ORD_DEMO_2026_8832",
+      business_name: "Apex Diagnostics Center",
+      partner_id: "PARTNER_BLR_9812",
+      partner_commission_inr: 4498,
+      bundle_name: "Smart Office Fiber 200M (P01 + P11 + P16 + P22)",
+      monthly_charge_inr: 2499,
+      total_sla_days: 4,
+      current_stage_idx: 1,
+      milestones: [
+        {
+          stage_id: "ORDER_PLACED",
+          stage_name: "Order Placed & Quote Accepted",
+          status: "COMPLETED",
+          timestamp: "2026-07-15T10:15:00Z",
+          eta_days: 0,
+          description: "Digital quote locked and commercial contract approved.",
+          whatsapp_preview: "Order #ORD_DEMO_2026_8832 confirmed! Guaranteed 4-day SLA initialized.",
+        },
+        {
+          stage_id: "KYC_VERIFIED",
+          stage_name: "Smart KYC Verified",
+          status: "COMPLETED",
+          timestamp: "2026-07-15T10:16:00Z",
+          eta_days: 0,
+          description: "DPDP-compliant verification passed in 184ms with 100% RapidFuzz score.",
+          whatsapp_preview: "KYC Approved instantly. National ID masked to XXXX-XXXX-1234.",
+        },
+        {
+          stage_id: "FEASIBILITY",
+          stage_name: "Fiber Loop Feasibility",
+          status: "IN_PROGRESS",
+          timestamp: null,
+          eta_days: 1,
+          description: "Checking local splitter port and OLT port capacity.",
+          whatsapp_preview: "Fiber feasibility check in progress. Splitter port reserved at local node.",
+        },
+        {
+          stage_id: "CPE_DISPATCH",
+          stage_name: "CPE Equipment Dispatch",
+          status: "PENDING",
+          timestamp: null,
+          eta_days: 1,
+          description: "Dual-band Wi-Fi 6 Optical Network Terminal assigned and barcoded.",
+          whatsapp_preview: "Your Wi-Fi 6 CPE router has been dispatched from the regional warehouse.",
+        },
+        {
+          stage_id: "FIELD_INSTALL",
+          stage_name: "Field Installation & Splicing",
+          status: "PENDING",
+          timestamp: null,
+          eta_days: 1,
+          description: "Field technician scheduled for optical line splicing and signal testing.",
+          whatsapp_preview: "Technician Ramesh Kumar assigned! Installation OTP: 4892.",
+        },
+        {
+          stage_id: "ACTIVATED",
+          stage_name: "Service Activated & Live",
+          status: "PENDING",
+          timestamp: null,
+          eta_days: 1,
+          description: "Radius authentication live. Static IP bound to customer gateway.",
+          whatsapp_preview: "🎉 Your Airtel Business connection is LIVE! Speed test: 204 Mbps.",
+        },
+      ],
+      is_activated: false,
+    });
+  };
+
   const copyOBOLink = () => {
     navigator.clipboard.writeText(generateOBOLink());
     setOboCopied(true);
@@ -227,12 +297,20 @@ export const App: React.FC = () => {
                   <p className="text-xs text-slate-400 max-w-md mx-auto">
                     Complete the Smart KYC verification step or select a scenario in the Judge Test Bench to populate order telemetry.
                   </p>
-                  <button
-                    onClick={() => setCustomerStep("kyc")}
-                    className="bg-red-600 hover:bg-red-500 text-white text-xs font-bold py-2 px-4 rounded-xl"
-                  >
-                    Go to Smart KYC
-                  </button>
+                  <div className="flex items-center justify-center space-x-3 pt-2">
+                    <button
+                      onClick={() => setCustomerStep("kyc")}
+                      className="bg-red-600 hover:bg-red-500 text-white text-xs font-bold py-2.5 px-4 rounded-xl shadow-md transition-all"
+                    >
+                      Go to Smart KYC
+                    </button>
+                    <button
+                      onClick={handleLoadDemoOrder}
+                      className="bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 text-xs font-semibold py-2.5 px-4 rounded-xl transition-all"
+                    >
+                      Simulate Sample Active Order
+                    </button>
+                  </div>
                 </div>
               )
             )}

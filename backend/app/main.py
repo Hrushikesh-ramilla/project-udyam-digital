@@ -150,50 +150,88 @@ def get_judge_scenario(scenario_id: str):
     """Provides structured data for the Judge Test Bench drawer to demonstrate planted defects live."""
     s_id = scenario_id.upper().strip()
 
-    if s_id == "K01_CANCELLED_GST":
-        return {
-            "scenario": "Applicant K01: Cancelled GSTIN & Blank Udyam Trap",
-            "applicant": "K01",
-            "business_name": "Vindhya Tours & Travels",
-            "expected_outcome": "REJECTED (Planted Blocker)",
-            "key_traps": ["GSTIN 37IHKXV5167L1ZS has status CANCELLED in registry", "Udyam Certificate reg number is blank"],
-            "remediation": "1-click switch to GST-exempt Udyam AirFiber bundle or provide active GSTIN",
-        }
-    elif s_id == "K05_MISSING_UDYAM":
-        return {
-            "scenario": "Applicant K05: Missing Mandatory Udyam Certificate",
-            "applicant": "K05",
-            "business_name": "Balaji Realty LLP",
-            "expected_outcome": "REJECTED (Missing Document)",
-            "key_traps": ["Applicant only uploaded 3 documents; Udyam registration certificate is absent"],
-            "remediation": "Upload official Udyam certificate to proceed",
-        }
-    elif s_id == "K11_STALE_BILL":
-        return {
-            "scenario": "Applicant K11: Stale Utility Bill (>90 Days Old from 2026-07-15)",
-            "applicant": "K11",
-            "business_name": "Trinity Bake House Pvt Ltd",
-            "expected_outcome": "REJECTED (Stale Address Proof)",
-            "key_traps": ["Electricity bill dated 2025-10-31 is 257 days old relative to reference date 2026-07-15"],
-            "remediation": "Upload recent utility bill issued within the last 90 days",
-        }
-    elif s_id == "K07_ENTITY_MISMATCH":
-        return {
-            "scenario": "Applicant K07: Entity Name Discrepancy",
-            "applicant": "K07",
-            "business_name": "Neelgiri Physio Clinic",
-            "expected_outcome": "REJECTED (Trade Name Conflicting)",
-            "key_traps": ["Legal name on certificate declared as '(Prop. Shri Physio Clinic)' while declared trade name is 'Neelgiri Physio Clinic'"],
-            "remediation": "Re-upload authentic unedited certificate matching GST registry",
-        }
-    elif s_id == "NON_GST_KIRANA":
-        return {
-            "scenario": "Non-GST Kirana Merchant (55% Base Segment)",
-            "applicant": "K02",
-            "business_name": "Saffron Kirana Store",
-            "expected_outcome": "APPROVED via GST-Exempt Udyam Pathway",
-            "key_traps": ["No GSTIN: Standard telco CPQ fails; Udyam Digital automatically routes to 5G AirFiber 100 + Failover @ ₹1,398/mo"],
-            "remediation": "100% zero-friction digital onboarding",
-        }
+    # Determine preset and parameters
+    preset = "K03"
+    cart_requires_gstin = True
+    title = ""
+    expected_outcome = ""
+    expected_behavior = ""
+    notes = ""
+    remediation = ""
+
+    if "K01" in s_id:
+        preset = "K01"
+        title = "Applicant K01: Cancelled GSTIN & Blank Udyam Trap"
+        expected_outcome = "REJECTED (Planted Blocker)"
+        expected_behavior = "Engine queries mock_gstin_registry.csv (3,534 rows) and traps 'Cancelled' status on 2026-06-01. Evaluates Udyam regex rejecting blank registration number."
+        notes = "Planted defect trapped: GSTIN status CANCELLED and Udyam regex failure. Actionable remediation provided to switch to non-GST bundle."
+        remediation = "1-click switch to GST-exempt Udyam AirFiber bundle or provide active GSTIN"
+    elif "K05" in s_id:
+        preset = "K05"
+        title = "Applicant K05: Missing Mandatory Udyam Certificate"
+        expected_outcome = "REJECTED (Missing Document)"
+        expected_behavior = "Payload validation intercepts missing Udyam certificate without crashing. Enforces mandatory KYC document checklist."
+        notes = "Planted ingestion defect trapped: Missing Udyam document. Flags UDYAM_DOC_MISSING."
+        remediation = "Upload official Udyam certificate to proceed"
+    elif "K11" in s_id:
+        preset = "K11"
+        title = "Applicant K11: Stale Utility Bill (>90 Days Old from 2026-07-15)"
+        expected_outcome = "REJECTED (Stale Address Proof)"
+        expected_behavior = "Enforces Hackathon Anchor Date 2026-07-15. Calculates bill date (2025-10-31) = 257 days old > 90-day validity window."
+        notes = "Planted temporal defect trapped: Utility bill age 257 days exceeds statutory 90-day threshold."
+        remediation = "Upload recent utility bill issued within the last 90 days"
+    elif "K07" in s_id:
+        preset = "K07"
+        title = "Applicant K07: Entity Name Discrepancy"
+        expected_outcome = "REJECTED (Trade Name Conflicting)"
+        expected_behavior = "RapidFuzz token sorting compares legal proprietor trade name against declared invoice trade name (<70% similarity threshold)."
+        notes = "Planted entity defect trapped: Legal name says '(Prop. Shri Physio Clinic)' vs declared 'Neelgiri Physio Clinic'."
+        remediation = "Re-upload authentic unedited certificate matching GST registry"
+    elif "K03" in s_id:
+        preset = "K03"
+        title = "Applicant K03: Clean 100% Instant Approval"
+        expected_outcome = "APPROVED (Golden Path)"
+        expected_behavior = "Valid GSTIN + valid Udyam + fresh bill. Proprietor title extraction ('Joseph Singh (Prop. Ganesh Woodcraft)') scores 100% RapidFuzz match."
+        notes = "Clean golden path passed: In-memory national ID masked to XXXX-XXXX-1234, registry active, zero anomalies."
+        remediation = "None required. Order immediately ready for provisioning."
+    elif "NON_GST" in s_id or "KIRANA" in s_id:
+        preset = "K03"
+        cart_requires_gstin = False
+        title = "Non-GST Kirana Merchant (Micro-Bundle Pathway)"
+        expected_outcome = "APPROVED via GST-Exempt Udyam Pathway"
+        expected_behavior = "GSTIN Firewall bypass for micro-bundles: Kirana applicant onboarded using Udyam and Electricity Bill without demanding GSTIN."
+        notes = "Attacks the 2.0% non-GST conversion gap: Micro-bundle passes Smart KYC with zero GSTIN blockers."
+        remediation = "100% zero-friction digital onboarding"
     else:
         raise HTTPException(status_code=404, detail="Scenario not found")
+
+    # Execute live KYC verification
+    data_dir = Path("data/kyc_documents")
+    docs: dict[str, bytes] = {}
+    doc_types = ["gst_certificate", "udyam_certificate", "signatory_id", "address_proof"]
+    for dt in doc_types:
+        path = data_dir / f"{preset}_{dt}.png"
+        if path.exists():
+            docs[dt] = path.read_bytes()
+
+    consent = DPDPConsentPayload(
+        consent_id=f"CONSENT_BENCH_{preset}",
+        user_id="JUDGE_BENCH_SESSION",
+        purpose="Hackathon jury evaluation, DPDP Act 2023 compliance, and deterministic verification.",
+        timestamp="2026-07-15T10:00:00Z",
+        ip_hash="2c26b46b68ffc68ff99b453c1d30413413422d706483bfa0f98a5e886266e7ae",
+        granted=True,
+    )
+
+    kyc_res = kyc.verify_application(docs, cart_requires_gstin=cart_requires_gstin, consent=consent)
+
+    return {
+        "scenario_id": s_id,
+        "title": title,
+        "applicant": preset,
+        "expected_outcome": expected_outcome,
+        "expected_behavior": expected_behavior,
+        "notes": notes,
+        "remediation": remediation,
+        "verification_result": kyc_res.model_dump(),
+    }
