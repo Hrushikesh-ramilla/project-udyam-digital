@@ -1,13 +1,6 @@
 import React from "react";
-import {
-  Sparkles,
-  ShieldCheck,
-  BarChart3,
-  Scale,
-  Zap,
-  Activity,
-  Layers,
-} from "lucide-react";
+import { motion } from "motion/react";
+import { Zap, Sparkles, BarChart3, Scale, Layers } from "lucide-react";
 
 interface NavbarProps {
   currentTab: "customer" | "obo" | "partner" | "judge";
@@ -15,83 +8,68 @@ interface NavbarProps {
 }
 
 export const Navbar: React.FC<NavbarProps> = ({ currentTab, setTab }) => {
+  const tabs = [
+    { id: "customer", label: "Command Studio", icon: Sparkles },
+    { id: "partner", label: "Lead Rescue", icon: BarChart3 },
+    { id: "judge", label: "Jury Bench", icon: Scale },
+  ] as const;
+
   return (
-    <header className="sticky top-0 z-50 w-full bg-[#080808]/85 backdrop-blur-2xl border-b border-white/[0.07]">
+    <header className="sticky top-0 z-50 w-full bg-[#030405]/80 backdrop-blur-2xl border-b border-[rgba(235,229,217,0.06)]">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
         {/* Brand Architecture */}
-        <div className="flex items-center space-x-3.5 cursor-pointer" onClick={() => setTab("customer")}>
-          <div className="relative flex items-center justify-center">
-            <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-[#e40000] to-[#8b0000] flex items-center justify-center shadow-[0_0_16px_rgba(228,0,0,0.4)] border border-white/20">
-              <Zap className="w-4 h-4 text-white fill-white" />
-            </div>
-            <span className="absolute -bottom-0.5 -right-0.5 w-2 h-2 rounded-full bg-emerald-400 border border-[#080808]" />
+        <motion.div
+          whileHover={{ scale: 1.01 }}
+          whileTap={{ scale: 0.99 }}
+          onClick={() => setTab("customer")}
+          className="flex items-center space-x-3 cursor-pointer"
+        >
+          <div className="w-8 h-8 rounded-xl bg-gradient-to-br from-[#e40000] to-[#b30000] flex items-center justify-center shadow-[0_0_20px_rgba(228,0,0,0.35)] border border-white/20">
+            <Zap className="w-4 h-4 text-white fill-white" />
           </div>
-          <div>
-            <div className="flex items-center space-x-2">
-              <span className="font-serif text-lg tracking-tight font-medium text-[#f2efea]">
-                Airtel Digital
-              </span>
-              <span className="text-[9px] font-mono uppercase tracking-[0.2em] bg-white/[0.05] border border-white/[0.08] text-[#d9ad63] px-2 py-0.5 rounded-full">
-                Udyam OS v2.6
-              </span>
-            </div>
-            <p className="text-[10px] font-mono tracking-wider text-white/40 uppercase hidden sm:block">
-              63M MSME Instant Zero-Touch Onboarding
-            </p>
+          <div className="flex items-baseline space-x-2">
+            <span className="font-sans text-base font-semibold tracking-tight text-[#EBE5D9]">
+              Airtel Digital
+            </span>
+            <span className="text-[10px] font-mono tracking-widest text-[#B39D82] uppercase">
+              Udyam Studio
+            </span>
           </div>
-        </div>
+        </motion.div>
 
-        {/* Studio Navigation Pills */}
-        <nav className="flex items-center space-x-1 sm:space-x-1.5 bg-[#121210]/90 p-1 rounded-full border border-white/[0.08] shadow-[inset_0_1px_1px_rgba(255,255,255,0.06)]">
-          <button
-            onClick={() => setTab("customer")}
-            className={`flex items-center space-x-1.5 px-3.5 py-1.5 rounded-full text-xs font-medium transition-all duration-200 cursor-pointer ${
-              currentTab === "customer"
-                ? "bg-[#e40000] text-white shadow-[0_0_16px_rgba(228,0,0,0.4)]"
-                : "text-white/60 hover:text-white hover:bg-white/[0.04]"
-            }`}
-          >
-            <Sparkles className="w-3.5 h-3.5" />
-            <span className="hidden sm:inline">Command Studio</span>
-            <span className="sm:hidden">Studio</span>
-          </button>
-
-          <button
-            onClick={() => setTab("partner")}
-            className={`flex items-center space-x-1.5 px-3.5 py-1.5 rounded-full text-xs font-medium transition-all duration-200 cursor-pointer ${
-              currentTab === "partner"
-                ? "bg-[#e40000] text-white shadow-[0_0_16px_rgba(228,0,0,0.4)]"
-                : "text-white/60 hover:text-white hover:bg-white/[0.04]"
-            }`}
-          >
-            <BarChart3 className="w-3.5 h-3.5" />
-            <span className="hidden sm:inline">Lead Rescue (56% Cohort)</span>
-            <span className="sm:hidden">Rescue</span>
-          </button>
-
-          <button
-            onClick={() => setTab("judge")}
-            className={`flex items-center space-x-1.5 px-3.5 py-1.5 rounded-full text-xs font-medium transition-all duration-200 cursor-pointer ${
-              currentTab === "judge"
-                ? "bg-[#e40000] text-white shadow-[0_0_16px_rgba(228,0,0,0.4)]"
-                : "text-white/60 hover:text-white hover:bg-white/[0.04]"
-            }`}
-          >
-            <Scale className="w-3.5 h-3.5" />
-            <span className="hidden sm:inline">Jury Test Bench</span>
-            <span className="sm:hidden">Jury</span>
-          </button>
+        {/* Inertial Floating Nav Tabs */}
+        <nav className="flex items-center space-x-1 bg-[#080a0d]/90 p-1 rounded-full border border-[rgba(235,229,217,0.08)] shadow-[0_4px_20px_rgba(0,0,0,0.5)]">
+          {tabs.map((tab) => {
+            const Icon = tab.icon;
+            const isActive = currentTab === tab.id;
+            return (
+              <button
+                key={tab.id}
+                onClick={() => setTab(tab.id)}
+                className={`relative px-4 py-1.5 rounded-full text-xs font-medium transition-colors duration-200 cursor-pointer flex items-center space-x-1.5 ${
+                  isActive ? "text-[#EBE5D9]" : "text-[#B39D82]/70 hover:text-[#EBE5D9]"
+                }`}
+              >
+                {isActive && (
+                  <motion.div
+                    layoutId="activeNavPill"
+                    transition={{ type: "spring", stiffness: 450, damping: 32 }}
+                    className="absolute inset-0 bg-[#e40000] rounded-full shadow-[0_0_16px_rgba(228,0,0,0.4)]"
+                  />
+                )}
+                <Icon className="w-3.5 h-3.5 relative z-10" />
+                <span className="relative z-10">{tab.label}</span>
+              </button>
+            );
+          })}
         </nav>
 
-        {/* Live POP Telemetry Indicator */}
-        <div className="hidden lg:flex items-center space-x-3 text-xs font-mono">
-          <div className="flex items-center space-x-2 bg-[#121210] border border-white/[0.07] px-3 py-1.5 rounded-full">
+        {/* Telemetry Pill */}
+        <div className="hidden sm:flex items-center space-x-3 font-mono text-[11px]">
+          <div className="flex items-center space-x-2 bg-[#080a0d] border border-[rgba(235,229,217,0.06)] px-3 py-1 rounded-full text-[#B39D82]">
             <span className="live-pulse-dot" />
-            <span className="text-[11px] text-white/70">MUMBAI POP · 11MS</span>
+            <span>MUMBAI HUB · 11MS</span>
           </div>
-          <span className="text-[9px] uppercase tracking-[0.2em] font-mono px-2.5 py-1 rounded-full border border-emerald-500/30 bg-emerald-500/10 text-emerald-400">
-            DPDP In-Memory
-          </span>
         </div>
       </div>
     </header>

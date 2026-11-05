@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useRef } from "react";
+import { motion, AnimatePresence } from "motion/react";
 import {
   Mic,
   MicOff,
@@ -7,13 +8,7 @@ import {
   Sparkles,
   User,
   Bot,
-  CheckCircle2,
-  ArrowRight,
   Languages,
-  Zap,
-  Activity,
-  Layers,
-  HelpCircle,
 } from "lucide-react";
 import { MSMEProfileSlots } from "../types";
 import { sendChatMessage } from "../api";
@@ -37,7 +32,7 @@ const renderInlineFormatting = (line: string) => {
   return parts.map((part, i) => {
     if (part.startsWith("**") && part.endsWith("**")) {
       return (
-        <strong key={i} className="font-semibold text-white">
+        <strong key={i} className="font-semibold text-[#EBE5D9]">
           {part.slice(2, -2)}
         </strong>
       );
@@ -49,14 +44,14 @@ const renderInlineFormatting = (line: string) => {
 const renderFormattedMessage = (text: string) => {
   const lines = text.split("\n");
   return (
-    <div className="space-y-2 text-xs sm:text-[13px] leading-relaxed">
+    <div className="space-y-1.5 text-xs sm:text-[13px] leading-relaxed">
       {lines.map((line, idx) => {
         const trimmed = line.trim();
         if (!trimmed) return <div key={idx} className="h-1" />;
 
         if (trimmed.startsWith("### ")) {
           return (
-            <h4 key={idx} className="font-serif text-base sm:text-lg font-normal text-white tracking-tight pt-1">
+            <h4 key={idx} className="font-serif text-base font-normal text-[#EBE5D9] tracking-tight">
               {trimmed.replace("### ", "")}
             </h4>
           );
@@ -65,14 +60,14 @@ const renderFormattedMessage = (text: string) => {
         if (trimmed.startsWith("* ") || trimmed.startsWith("- ")) {
           const content = trimmed.substring(2);
           return (
-            <div key={idx} className="flex items-start space-x-2 pl-1 text-white/80">
+            <div key={idx} className="flex items-start space-x-2 pl-1 text-[#EBE5D9]/90">
               <span className="text-[#e40000] font-bold mt-0.5">•</span>
               <span>{renderInlineFormatting(content)}</span>
             </div>
           );
         }
 
-        return <p key={idx} className="text-white/80">{renderInlineFormatting(line)}</p>;
+        return <p key={idx} className="text-[#EBE5D9]/90">{renderInlineFormatting(line)}</p>;
       })}
     </div>
   );
@@ -111,7 +106,7 @@ interface LangOption {
 }
 
 const INDIC_LANGUAGES: LangOption[] = [
-  { code: "auto", label: "Auto", native: "Auto-Detect", voiceTag: "en-IN" },
+  { code: "auto", label: "Auto", native: "Auto", voiceTag: "en-IN" },
   { code: "te", label: "Telugu", native: "తెలుగు", voiceTag: "te-IN" },
   { code: "ta", label: "Tamil", native: "தமிழ்", voiceTag: "ta-IN" },
   { code: "bn", label: "Bengali", native: "বাংলা", voiceTag: "bn-IN" },
@@ -124,14 +119,14 @@ const INDIC_LANGUAGES: LangOption[] = [
   { code: "en", label: "English", native: "English", voiceTag: "en-IN" },
 ];
 
-export const AdvisorChat: React.FC<AdvisorChatProps> = ({ onProfileUpdated, onProceedToCPQ }) => {
+export const AdvisorChat: React.FC<AdvisorChatProps> = ({ onProfileUpdated }) => {
   const [selectedLang, setSelectedLang] = useState<string>("auto");
   const [messages, setMessages] = useState<Message[]>([
     {
       id: "m0",
       sender: "advisor",
-      text: "### Enterprise Telecom Copilot\n\nNamaste! I architect custom Airtel connectivity solutions tailored for Bharat's micro-enterprises. Speak or type in your native regional language (Telugu, Tamil, Bengali, Gujarati, Marathi, Kannada, Malayalam, Odia, Hindi, or English) — or select an archetype below to test the deterministic DAG solver.",
-      spokenTts: "Namaste! Welcome to Airtel Business Udyam Digital. Please describe your business and telecom requirements in your preferred language.",
+      text: "### Enterprise Telecom Copilot\n\nConfigure custom enterprise connectivity in your mother tongue. Speak or type across 10 Indian languages, or select a verified archetype below.",
+      spokenTts: "Welcome to Airtel Business Udyam Digital. Please describe your business and telecom requirements in your preferred language.",
     },
   ]);
   const [input, setInput] = useState("");
@@ -166,7 +161,7 @@ export const AdvisorChat: React.FC<AdvisorChatProps> = ({ onProfileUpdated, onPr
       speechWindow.SpeechRecognition || speechWindow.webkitSpeechRecognition;
 
     if (!SpeechRecognitionClass) {
-      alert("Web Speech API is not supported in this browser. Please type your message.");
+      alert("Web Speech API not supported in this browser. Please type.");
       return;
     }
 
@@ -226,14 +221,13 @@ export const AdvisorChat: React.FC<AdvisorChatProps> = ({ onProfileUpdated, onPr
       if (res.spoken_tts_text) {
         speakText(res.spoken_tts_text);
       }
-    } catch (err) {
-      console.error(err);
+    } catch {
       setMessages((prev) => [
         ...prev,
         {
           id: `err_${Date.now()}`,
           sender: "advisor",
-          text: "I encountered a connection error. Please try again or click one of the verified archetypes below.",
+          text: "Connection timeout. Please select a verified archetype below.",
         },
       ]);
     } finally {
@@ -241,220 +235,207 @@ export const AdvisorChat: React.FC<AdvisorChatProps> = ({ onProfileUpdated, onPr
     }
   };
 
-  // Verified Business Archetypes for instant live demos
   const archetypes = [
     {
-      title: "Kirana / Retail (Non-GST)",
+      title: "Kirana (Non-GST)",
       badge: "GST-Free",
-      color: "border-emerald-500/30 text-emerald-400 bg-emerald-500/10",
-      query: "जयपुर में 2 मेडिकल किराना शॉप्स हैं, 4 स्टाफ, यूपीఐ बार बार रुकता है, जीएसटी नहीं है, बजट 1500 महीना",
+      query: "जयपुर में 2 मेडिकल किराना शॉप्स हैं, 4 स्टाफ, यूपीआई रुकता है, जीएसटी नहीं है, बजट 1500 महीना",
     },
     {
-      title: "Clinic & Diagnostics",
+      title: "Clinic & Health",
       badge: "Low-Latency",
-      color: "border-sky-500/30 text-sky-400 bg-sky-500/10",
       query: "హైదరాబాద్‌లో 4 మందితో క్లినిక్ ఉంది, జీఎస్టీ లేదు, 2500 బడ్జెట్, వేగవంతమైన వైఫై కావాలి",
     },
     {
-      title: "Legal & CA Chambers",
-      badge: "GSTIN Mandated",
-      color: "border-champagne-400/30 text-champagne-400 bg-champagne-400/10",
+      title: "CA Chambers",
+      badge: "GSTIN",
       query: "CA firm in Mumbai with 15 staff, active GSTIN, need static IP fiber and secure cloud backup, budget 6000",
     },
     {
-      title: "Surat Textile Unit",
-      badge: "IoT Enterprise",
-      color: "border-red-500/30 text-red-400 bg-red-500/10",
+      title: "Textile Mill",
+      badge: "IoT",
       query: "સુરતમાં કાપડનું કારખાનું છે, ૨૫ કારીગરો, જીએસટી છે, સીસીટીવી અને વાઇફાઇ ૬ જોઈએ, બજેટ ૧૫૦૦૦",
     },
   ];
 
   return (
-    <div className="flex flex-col h-[650px] glass-card rounded-2xl overflow-hidden border border-white/[0.08] shadow-[0_24px_60px_rgba(0,0,0,0.8)]">
-      {/* Copilot Header */}
-      <div className="p-4 bg-[#0a0a09]/90 border-b border-white/[0.07] flex items-center justify-between">
-        <div className="flex items-center space-x-3">
-          <div className="relative flex items-center justify-center">
-            <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-[#e40000]/20 to-[#e40000]/5 border border-[#e40000]/30 flex items-center justify-center text-[#e40000]">
-              <Sparkles className="w-4 h-4" />
-            </div>
-            {loading && (
-              <span className="absolute -top-0.5 -right-0.5 w-2 h-2 rounded-full bg-emerald-400 animate-ping" />
-            )}
+    <div className="flex flex-col h-[620px] luxury-glass rounded-2xl overflow-hidden border border-[rgba(235,229,217,0.06)] shadow-apple-card">
+      {/* Header */}
+      <div className="p-4 bg-[#080a0d]/90 border-b border-[rgba(235,229,217,0.06)] flex items-center justify-between">
+        <div className="flex items-center space-x-2.5">
+          <div className="w-7 h-7 rounded-lg bg-[#e40000]/15 border border-[#e40000]/30 flex items-center justify-center text-[#e40000]">
+            <Sparkles className="w-3.5 h-3.5" />
           </div>
           <div>
-            <div className="flex items-center space-x-2">
-              <h3 className="font-serif text-base font-medium text-white tracking-tight">
-                Multilingual Telecom Copilot
-              </h3>
-              <span className="text-[9px] font-mono uppercase tracking-[0.2em] bg-white/[0.04] text-white/50 border border-white/[0.06] px-2 py-0.5 rounded-full">
-                10 Indic Scripts
-              </span>
-            </div>
-            <p className="text-[10px] font-mono text-white/40">
-              Deterministic Entity Extraction · Zero Hallucination DAG Solver
-            </p>
+            <h3 className="font-sans text-sm font-medium text-[#EBE5D9]">
+              Telecom Copilot
+            </h3>
+            <p className="text-[10px] font-mono text-[#B39D82]">10 Indic Languages · DAG Solver</p>
           </div>
         </div>
 
-        {/* Live Slot Badges */}
-        <div className="flex items-center space-x-2">
-          {currentSlots?.is_complete && (
-            <div className="flex items-center space-x-1.5 text-[10px] font-mono">
-              <span className="bg-white/[0.04] text-white/80 border border-white/[0.08] px-2 py-0.5 rounded-full">
-                Tier {currentSlots.city_tier}
-              </span>
-              <span className="bg-white/[0.04] text-white/80 border border-white/[0.08] px-2 py-0.5 rounded-full capitalize">
-                {currentSlots.segment}
-              </span>
-              <span
-                className={`px-2 py-0.5 rounded-full border ${
-                  currentSlots.has_gstin
-                    ? "bg-purple-500/15 text-purple-300 border-purple-500/30"
-                    : "bg-emerald-500/15 text-emerald-400 border-emerald-500/30"
-                }`}
-              >
-                {currentSlots.has_gstin ? "GSTIN Mandated" : "Non-GST Eligible"}
-              </span>
-            </div>
-          )}
-        </div>
+        {/* Live Slot Tags */}
+        {currentSlots?.is_complete && (
+          <div className="flex items-center space-x-1 text-[10px] font-mono">
+            <span className="bg-white/[0.04] text-[#EBE5D9] px-2 py-0.5 rounded-full border border-white/[0.06]">
+              Tier {currentSlots.city_tier}
+            </span>
+            <span className="bg-white/[0.04] text-[#EBE5D9] px-2 py-0.5 rounded-full border border-white/[0.06] capitalize">
+              {currentSlots.segment}
+            </span>
+            <span
+              className={`px-2 py-0.5 rounded-full border ${
+                currentSlots.has_gstin
+                  ? "bg-purple-500/15 text-purple-300 border-purple-500/30"
+                  : "bg-emerald-500/15 text-emerald-400 border-emerald-500/30"
+              }`}
+            >
+              {currentSlots.has_gstin ? "GSTIN" : "Non-GST"}
+            </span>
+          </div>
+        )}
       </div>
 
-      {/* Indic Language Selector Bar */}
-      <div className="px-3.5 py-2 bg-[#080808]/90 border-b border-white/[0.05] flex items-center space-x-1.5 overflow-x-auto no-scrollbar">
-        <span className="text-[9px] font-mono uppercase tracking-[0.2em] text-white/40 shrink-0 mr-1 flex items-center space-x-1">
+      {/* Indic Language Pills */}
+      <div className="px-3 py-1.5 bg-[#050709] border-b border-[rgba(235,229,217,0.04)] flex items-center space-x-1 overflow-x-auto no-scrollbar">
+        <span className="text-[9px] font-mono tracking-wider text-[#B39D82]/60 uppercase shrink-0 mr-1 flex items-center space-x-1">
           <Languages className="w-3 h-3 text-[#e40000]" />
           <span>Script:</span>
         </span>
         {INDIC_LANGUAGES.map((lang) => (
-          <button
+          <motion.button
             key={lang.code}
+            whileHover={{ scale: 1.04 }}
+            whileTap={{ scale: 0.96 }}
             onClick={() => setSelectedLang(lang.code)}
-            className={`px-2.5 py-1 rounded-full text-[11px] font-medium transition-all shrink-0 cursor-pointer ${
+            className={`px-2.5 py-0.5 rounded-full text-[11px] font-medium transition-colors shrink-0 cursor-pointer ${
               selectedLang === lang.code
                 ? "bg-[#e40000] text-white shadow-[0_0_12px_rgba(228,0,0,0.4)]"
-                : "bg-white/[0.03] text-white/60 hover:text-white hover:bg-white/[0.08] border border-white/[0.05]"
+                : "bg-white/[0.03] text-[#B39D82] hover:text-[#EBE5D9] border border-white/[0.04]"
             }`}
           >
             {lang.native}
-          </button>
+          </motion.button>
         ))}
       </div>
 
       {/* Messages Feed */}
-      <div className="flex-1 p-4 sm:p-5 overflow-y-auto space-y-4">
-        {messages.map((m) => (
-          <div
-            key={m.id}
-            className={`flex items-start space-x-3 ${m.sender === "user" ? "flex-row-reverse space-x-reverse" : ""}`}
-          >
-            <div
-              className={`w-7 h-7 rounded-lg flex items-center justify-center shrink-0 text-xs font-mono font-medium ${
-                m.sender === "user"
-                  ? "bg-[#e40000] text-white shadow-[0_0_12px_rgba(228,0,0,0.3)]"
-                  : "bg-white/[0.06] text-white/70 border border-white/[0.08]"
-              }`}
+      <div className="flex-1 p-4 overflow-y-auto space-y-3">
+        <AnimatePresence initial={false}>
+          {messages.map((m) => (
+            <motion.div
+              key={m.id}
+              initial={{ opacity: 0, y: 8 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.2, ease: [0.22, 1, 0.36, 1] }}
+              className={`flex items-start space-x-2.5 ${m.sender === "user" ? "flex-row-reverse space-x-reverse" : ""}`}
             >
-              {m.sender === "user" ? <User className="w-3.5 h-3.5" /> : <Bot className="w-3.5 h-3.5" />}
-            </div>
+              <div
+                className={`w-6 h-6 rounded-lg flex items-center justify-center shrink-0 text-xs font-mono ${
+                  m.sender === "user"
+                    ? "bg-[#e40000] text-white shadow-[0_0_12px_rgba(228,0,0,0.3)]"
+                    : "bg-[#0f1216] text-[#B39D82] border border-[rgba(235,229,217,0.06)]"
+                }`}
+              >
+                {m.sender === "user" ? <User className="w-3 h-3" /> : <Bot className="w-3 h-3" />}
+              </div>
 
-            <div
-              className={`max-w-[85%] rounded-2xl p-4 shadow-xl ${
-                m.sender === "user"
-                  ? "bg-gradient-to-r from-[#b30000] to-[#e40000] text-white rounded-tr-none border border-red-500/30"
-                  : "bg-[#111110]/95 text-[#f2efea] border border-white/[0.08] rounded-tl-none backdrop-blur-xl"
-              }`}
-            >
-              {renderFormattedMessage(m.text)}
+              <div
+                className={`max-w-[85%] rounded-2xl p-3.5 shadow-md ${
+                  m.sender === "user"
+                    ? "bg-[#e40000] text-white rounded-tr-none"
+                    : "bg-[#0b0e12]/95 text-[#EBE5D9] border border-[rgba(235,229,217,0.06)] rounded-tl-none"
+                }`}
+              >
+                {renderFormattedMessage(m.text)}
 
-              {/* TTS Listen Button for Copilot */}
-              {m.spokenTts && (
-                <div className="mt-3 pt-2.5 border-t border-white/[0.06] flex items-center justify-between text-xs text-white/40">
-                  <span className="text-[10px] font-mono tracking-wider uppercase">Spoken Voice Ready</span>
-                  <button
-                    onClick={() => speakText(m.spokenTts!)}
-                    className="flex items-center space-x-1.5 text-[#d9ad63] hover:text-white transition-colors cursor-pointer text-xs"
-                  >
-                    <Volume2 className="w-3.5 h-3.5" />
-                    <span>Play Narration</span>
-                  </button>
-                </div>
-              )}
-            </div>
-          </div>
-        ))}
+                {m.spokenTts && (
+                  <div className="mt-2.5 pt-2 border-t border-[rgba(235,229,217,0.06)] flex items-center justify-between text-xs text-[#B39D82]">
+                    <span className="text-[9px] font-mono uppercase tracking-wider">Voice Ready</span>
+                    <button
+                      onClick={() => speakText(m.spokenTts!)}
+                      className="flex items-center space-x-1 text-[#d9ad63] hover:text-[#EBE5D9] transition-colors cursor-pointer text-xs"
+                    >
+                      <Volume2 className="w-3 h-3" />
+                      <span>Play</span>
+                    </button>
+                  </div>
+                )}
+              </div>
+            </motion.div>
+          ))}
+        </AnimatePresence>
 
         {loading && (
-          <div className="flex items-center space-x-3 text-white/60 text-xs bg-[#111110]/90 border border-white/[0.08] w-fit px-4 py-2 rounded-full shadow-lg">
-            <div className="flex items-end space-x-1 h-3">
-              <span className="w-1 bg-[#e40000] rounded-full audio-bar-1" />
-              <span className="w-1 bg-[#d9ad63] rounded-full audio-bar-2" />
-              <span className="w-1 bg-[#e40000] rounded-full audio-bar-3" />
-              <span className="w-1 bg-white rounded-full audio-bar-4" />
-            </div>
-            <span className="font-mono text-[11px] text-white/60">Solving CPQ DAG Constraints...</span>
-          </div>
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            className="flex items-center space-x-2 text-[#B39D82] text-xs bg-[#0b0e12] border border-[rgba(235,229,217,0.06)] w-fit px-3 py-1.5 rounded-full"
+          >
+            <span className="w-1.5 h-1.5 rounded-full bg-[#e40000] animate-pulse" />
+            <span className="font-mono text-[10px]">Evaluating DAG constraints...</span>
+          </motion.div>
         )}
         <div ref={messagesEndRef} />
       </div>
 
       {/* Archetype Quick-Triggers */}
-      <div className="px-3 py-2 bg-[#080808]/60 border-t border-white/[0.05] overflow-x-auto no-scrollbar">
-        <div className="flex items-center space-x-2 text-xs">
-          <span className="text-[9px] font-mono uppercase tracking-[0.2em] text-white/40 shrink-0 flex items-center space-x-1">
-            <Zap className="w-3 h-3 text-[#d9ad63]" />
-            <span>Presets:</span>
+      <div className="px-3 py-2 bg-[#050709] border-t border-[rgba(235,229,217,0.04)] overflow-x-auto no-scrollbar">
+        <div className="flex items-center space-x-1.5 text-xs">
+          <span className="text-[9px] font-mono tracking-wider text-[#B39D82]/50 uppercase shrink-0">
+            Presets:
           </span>
           {archetypes.map((arch, idx) => (
-            <button
+            <motion.button
               key={idx}
+              whileHover={{ scale: 1.03 }}
+              whileTap={{ scale: 0.97 }}
               onClick={() => handleSend(arch.query)}
-              className="bg-[#121210] hover:bg-[#181816] border border-white/[0.07] hover:border-white/[0.18] px-3 py-1.5 rounded-xl whitespace-nowrap transition-all text-xs flex items-center space-x-2 shrink-0 cursor-pointer group"
+              className="bg-[#0b0e12] hover:bg-[#12161c] border border-[rgba(235,229,217,0.06)] hover:border-[rgba(235,229,217,0.14)] px-2.5 py-1 rounded-xl whitespace-nowrap transition-all text-xs flex items-center space-x-1.5 shrink-0 cursor-pointer"
             >
-              <span className="font-medium text-white/90 group-hover:text-white">{arch.title}</span>
-              <span className={`text-[9px] font-mono px-1.5 py-0.2 rounded-full border ${arch.color}`}>
+              <span className="text-[#EBE5D9] font-medium text-[11px]">{arch.title}</span>
+              <span className="text-[9px] font-mono text-[#B39D82] bg-white/[0.04] px-1 py-0.2 rounded">
                 {arch.badge}
               </span>
-            </button>
+            </motion.button>
           ))}
         </div>
       </div>
 
       {/* Input Bar */}
-      <div className="p-3 bg-[#0a0a09]/95 border-t border-white/[0.08] flex items-center space-x-2">
-        <button
+      <div className="p-3 bg-[#080a0d] border-t border-[rgba(235,229,217,0.06)] flex items-center space-x-2">
+        <motion.button
+          whileHover={{ scale: 1.05 }}
+          whileTap={{ scale: 0.95 }}
           onClick={handleVoiceInput}
-          className={`p-2.5 rounded-xl border transition-all cursor-pointer ${
+          className={`p-2 rounded-xl border transition-all cursor-pointer ${
             isListening
               ? "bg-[#e40000] text-white border-red-500 animate-pulse shadow-[0_0_16px_rgba(228,0,0,0.6)]"
-              : "bg-white/[0.04] text-white/70 border-white/[0.08] hover:bg-white/[0.08] hover:text-white"
+              : "bg-white/[0.04] text-[#B39D82] border-white/[0.06] hover:bg-white/[0.08] hover:text-[#EBE5D9]"
           }`}
-          title="Click to speak via Web Speech API"
+          title="Voice input"
         >
           {isListening ? <MicOff className="w-4 h-4 text-white" /> : <Mic className="w-4 h-4" />}
-        </button>
+        </motion.button>
 
         <input
           type="text"
           value={input}
           onChange={(e) => setInput(e.target.value)}
           onKeyDown={(e) => e.key === "Enter" && handleSend()}
-          placeholder={
-            isListening
-              ? "Listening in " + (INDIC_LANGUAGES.find((l) => l.code === selectedLang)?.native || "Indic") + "..."
-              : "Type or speak in Telugu, Tamil, Bengali, Gujarati, Kannada, Marathi, Hindi, English..."
-          }
-          className="flex-1 bg-[#121210] border border-white/[0.08] rounded-xl px-4 py-2.5 text-xs sm:text-sm text-white placeholder-white/40 focus:outline-none focus:border-[#e40000] transition-colors"
+          placeholder="Speak or type in Telugu, Tamil, Bengali, Hindi, English..."
+          className="flex-1 bg-[#030405] border border-[rgba(235,229,217,0.08)] rounded-xl px-3.5 py-2 text-xs text-[#EBE5D9] placeholder-[#B39D82]/40 focus:outline-none focus:border-[#e40000] transition-colors"
         />
 
-        <button
+        <motion.button
+          whileHover={{ scale: 1.05 }}
+          whileTap={{ scale: 0.95 }}
           onClick={() => handleSend()}
           disabled={!input.trim()}
-          className="p-2.5 bg-[#e40000] hover:bg-[#b30000] disabled:opacity-30 disabled:cursor-not-allowed text-white rounded-xl transition-all shadow-[0_0_16px_rgba(228,0,0,0.3)] cursor-pointer"
+          className="p-2 bg-[#e40000] hover:bg-[#b30000] disabled:opacity-20 disabled:cursor-not-allowed text-white rounded-xl transition-all shadow-[0_0_12px_rgba(228,0,0,0.3)] cursor-pointer"
         >
           <Send className="w-4 h-4" />
-        </button>
+        </motion.button>
       </div>
     </div>
   );

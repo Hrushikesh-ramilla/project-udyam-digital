@@ -1,4 +1,5 @@
 import React, { useState } from "react";
+import { motion, AnimatePresence } from "motion/react";
 import {
   Shield,
   ShieldCheck,
@@ -9,13 +10,10 @@ import {
   AlertCircle,
   RefreshCw,
   ArrowRight,
-  Eye,
-  EyeOff,
-  Zap,
-  Info,
   Upload,
   FileUp,
   Sparkles,
+  Zap,
 } from "lucide-react";
 import { KYCVerificationResult, CommercialBreakdown } from "../types";
 import { verifyKYC, uploadKYCDocument, KYCUploadResponse } from "../api";
@@ -33,11 +31,9 @@ export const SmartKYC: React.FC<SmartKYCProps> = ({ quote, onKYCApproved, onSwit
   const [kycResult, setKycResult] = useState<KYCVerificationResult | null>(null);
   const [showConsentModal, setShowConsentModal] = useState<boolean>(false);
   const [activeTab, setActiveTab] = useState<"preset" | "upload">("preset");
-  const [uploadedFile, setUploadedFile] = useState<File | null>(null);
   const [uploadDocType, setUploadDocType] = useState<string>("gst_certificate");
   const [uploadResponse, setUploadResponse] = useState<KYCUploadResponse | null>(null);
   const [uploadedSlots, setUploadedSlots] = useState<Record<string, { file: File; res: KYCUploadResponse }>>({});
-  const [inspectionMode, setInspectionMode] = useState<"single" | "package">("single");
   const [remediationNotice, setRemediationNotice] = useState<string | null>(null);
 
   const handleFileUpload = async (file: File, docTypeOverride?: string) => {
@@ -46,7 +42,6 @@ export const SmartKYC: React.FC<SmartKYCProps> = ({ quote, onKYCApproved, onSwit
       return;
     }
     const targetType = docTypeOverride || uploadDocType;
-    setUploadedFile(file);
     setIsVerifying(true);
     try {
       const cartRequiresGstin = quote ? !quote.gst_exempt_eligible : true;
@@ -56,14 +51,9 @@ export const SmartKYC: React.FC<SmartKYCProps> = ({ quote, onKYCApproved, onSwit
         ...prev,
         [targetType]: { file, res },
       }));
-      // In single document mode, show single document inspection result without companion blockers
-      if (inspectionMode === "single" && res.single_doc_result) {
-        setKycResult(res.single_doc_result);
-      } else {
-        setKycResult(res.verification_result);
-      }
+      setKycResult(res.single_doc_result || res.verification_result);
     } catch (err: unknown) {
-      alert(err instanceof Error ? err.message : "File OCR and verification failed.");
+      alert(err instanceof Error ? err.message : "File OCR failed.");
     } finally {
       setIsVerifying(false);
     }
@@ -74,7 +64,6 @@ export const SmartKYC: React.FC<SmartKYCProps> = ({ quote, onKYCApproved, onSwit
       alert("Please upload at least one document first.");
       return;
     }
-    setInspectionMode("package");
     if (uploadResponse?.verification_result) {
       setKycResult(uploadResponse.verification_result);
     }
@@ -85,7 +74,7 @@ export const SmartKYC: React.FC<SmartKYCProps> = ({ quote, onKYCApproved, onSwit
       onSwitchToUdyamExempt();
     }
     setSelectedPreset("KIRANA_NON_GST");
-    setRemediationNotice("Switched to Udyam Micro Bundle! Connection is 100% GST-Exempt (zero GSTIN blocker).");
+    setRemediationNotice("Switched to Udyam Micro Bundle (GST-Free).");
     try {
       const res = await verifyKYC("KIRANA_NON_GST", false);
       setKycResult(res);
@@ -94,49 +83,48 @@ export const SmartKYC: React.FC<SmartKYCProps> = ({ quote, onKYCApproved, onSwit
     }
   };
 
-  // Preset options representing clean cases and regulatory edge cases
   const presets = [
     {
       id: "K03",
-      label: "Applicant K03 (Clean Proprietorship)",
+      label: "Applicant K03 (Clean)",
       type: "CLEAN",
-      desc: "Valid GST + Udyam + Electricity Bill. High fuzzy score (100% proprietor match).",
+      desc: "Valid GST + Udyam + Utility Bill. 100% RapidFuzz score.",
     },
     {
       id: "K01",
       label: "Applicant K01 (Cancelled GSTIN)",
       type: "ANOMALY",
-      desc: "GSTIN cancelled on 2026-06-01 + Blank Udyam certificate registration.",
+      desc: "GSTIN cancelled on 2026-06-01 + Blank Udyam certificate.",
     },
     {
       id: "K05",
       label: "Applicant K05 (Missing Udyam)",
       type: "ANOMALY",
-      desc: "Mandatory physical MSME certificate missing from ingestion package.",
+      desc: "Udyam physical certificate missing from package.",
     },
     {
       id: "K07",
-      label: "Applicant K07 (Entity Name Mismatch)",
+      label: "Applicant K07 (Name Mismatch)",
       type: "ANOMALY",
-      desc: "Entity trade name differs from declared name in invoice (RapidFuzz token similarity < 70%).",
+      desc: "Legal trade name differs from invoice (<70% similarity).",
     },
     {
       id: "K11",
       label: "Applicant K11 (Stale Utility Bill)",
       type: "ANOMALY",
-      desc: "Electricity bill dated 2025-10-31 (257 days old exceeds statutory 90-day window).",
+      desc: "Bill dated 2025-10-31 is 257 days old (>90-day statutory limit).",
     },
     {
       id: "KIRANA_NON_GST",
-      label: "Kirana Store (Non-GST Pathway)",
+      label: "Kirana Store (Non-GST)",
       type: "EXEMPT",
-      desc: "Valid Udyam + Electricity Bill, bypassing GSTIN requirement for retail micro-bundles.",
+      desc: "Valid Udyam + Bill, bypassing GSTIN requirement.",
     },
   ];
 
   const handleVerify = async () => {
     if (!consentGranted) {
-      alert("DPDP Act 2023 requires explicit digital consent before document processing.");
+      alert("DPDP Act 2023 requires consent.");
       return;
     }
 
@@ -146,572 +134,337 @@ export const SmartKYC: React.FC<SmartKYCProps> = ({ quote, onKYCApproved, onSwit
       const res = await verifyKYC(selectedPreset, cartRequiresGstin);
       setKycResult(res);
     } catch (err: unknown) {
-      alert(err instanceof Error ? err.message : "KYC Verification encountered an error.");
+      alert(err instanceof Error ? err.message : "KYC failed.");
     } finally {
       setIsVerifying(false);
     }
   };
 
   return (
-    <div className="max-w-5xl mx-auto space-y-6 animate-fade-in">
-      {/* Header Banner */}
-      <div className="glass-card rounded-2xl p-6 flex flex-col md:flex-row md:items-center justify-between gap-5 relative overflow-hidden">
-        <div className="absolute top-0 right-0 w-80 h-80 bg-emerald-500/5 rounded-full blur-3xl pointer-events-none" />
-        <div>
-          <div className="flex items-center space-x-2.5">
-            <div className="w-8 h-8 rounded-lg bg-emerald-500/15 border border-emerald-500/30 flex items-center justify-center text-emerald-400">
-              <ShieldCheck className="w-4 h-4" />
-            </div>
-            <h2 className="font-serif text-xl font-normal text-white tracking-tight">
+    <div className="max-w-4xl mx-auto space-y-6">
+      {/* Clean Header */}
+      <div className="luxury-glass rounded-2xl p-5 flex flex-col sm:flex-row sm:items-center justify-between gap-4 border border-[rgba(235,229,217,0.06)] shadow-apple-card">
+        <div className="flex items-center space-x-3">
+          <div className="w-8 h-8 rounded-xl bg-emerald-500/15 border border-emerald-500/30 flex items-center justify-center text-emerald-400">
+            <ShieldCheck className="w-4 h-4" />
+          </div>
+          <div>
+            <h2 className="font-sans text-base font-medium text-[#EBE5D9]">
               Smart KYC &amp; DPDP Anomaly Gate
             </h2>
-            <span className="text-[11px] font-mono bg-emerald-500/10 text-emerald-400 border border-emerald-500/30 px-2.5 py-0.5 rounded-full font-medium">
-              Anchor: 2026-07-15
-            </span>
+            <p className="text-xs text-[#B39D82]">
+              In-memory 12-digit UID masking · RapidFuzz cross-checks under 200ms
+            </p>
           </div>
-          <p className="text-xs text-white/60 mt-1.5 leading-relaxed max-w-2xl">
-            Deterministic registry cross-checks (3,534 GSTINs + 2,723 Udyams) with in-memory national ID redaction and RapidFuzz entity matching in &lt;200ms.
-          </p>
         </div>
 
-        {/* DPDP Act 2023 Consent Toggle */}
-        <div className="flex items-center space-x-3 bg-obsidian-surface/80 p-3.5 rounded-xl border border-white/[0.08] shrink-0">
+        {/* DPDP Consent */}
+        <div className="flex items-center space-x-2.5 bg-[#030405] px-3.5 py-2 rounded-xl border border-[rgba(235,229,217,0.06)] text-xs text-[#B39D82]">
           <input
             type="checkbox"
             id="dpdp-consent"
             checked={consentGranted}
             onChange={(e) => setConsentGranted(e.target.checked)}
-            className="w-4 h-4 text-airtel-crimson bg-obsidian-elevated border-white/20 rounded focus:ring-airtel-crimson cursor-pointer accent-airtel-crimson"
+            className="w-3.5 h-3.5 accent-[#e40000] cursor-pointer"
           />
-          <label htmlFor="dpdp-consent" className="text-xs text-white/80 cursor-pointer">
-            <span className="font-medium text-white block">DPDP Act 2023 Consent</span>
-            <span className="block text-[10px] text-white/40">
-              In-memory masking • Zero plain UID persistence
-            </span>
+          <label htmlFor="dpdp-consent" className="cursor-pointer">
+            DPDP 2023 Consent
           </label>
           <button
             onClick={() => setShowConsentModal(true)}
-            className="text-xs font-mono text-champagne-gold hover:underline ml-2 cursor-pointer"
+            className="text-[10px] text-[#d9ad63] hover:underline font-mono ml-1"
           >
-            Audit Log
+            [Audit]
           </button>
         </div>
       </div>
 
       {remediationNotice && (
-        <div className="p-3.5 rounded-xl bg-emerald-950/30 border border-emerald-500/40 text-emerald-300 text-xs flex items-center space-x-2">
+        <div className="p-3 rounded-xl bg-emerald-950/30 border border-emerald-500/30 text-emerald-300 text-xs flex items-center space-x-2">
           <Sparkles className="w-4 h-4 text-emerald-400 shrink-0" />
           <span>{remediationNotice}</span>
         </div>
       )}
 
-      {/* Mode Switcher: Preset Specimens vs Real File Upload */}
-      <div className="flex space-x-2 border-b border-white/[0.06] pb-2">
+      {/* Mode Switcher */}
+      <div className="flex space-x-2 border-b border-[rgba(235,229,217,0.04)] pb-2">
         <button
           onClick={() => {
             setActiveTab("preset");
             setUploadResponse(null);
           }}
-          className={`flex items-center space-x-2 px-4 py-2 rounded-xl text-xs font-medium transition-all cursor-pointer ${
+          className={`px-3.5 py-1.5 rounded-full text-xs font-medium transition-colors cursor-pointer ${
             activeTab === "preset"
-              ? "bg-airtel-crimson text-white shadow-airtel-glow"
-              : "bg-white/[0.04] text-white/60 hover:text-white hover:bg-white/[0.08]"
+              ? "bg-[#e40000] text-white shadow-[0_0_12px_rgba(228,0,0,0.4)]"
+              : "text-[#B39D82] hover:text-[#EBE5D9]"
           }`}
         >
-          <FileText className="w-4 h-4" />
-          <span>Synthetic Hackathon Specimens (K01–K12)</span>
+          Preset Specimens (K01–K12)
         </button>
         <button
           onClick={() => {
             setActiveTab("upload");
             setKycResult(null);
           }}
-          className={`flex items-center space-x-2 px-4 py-2 rounded-xl text-xs font-medium transition-all cursor-pointer ${
+          className={`px-3.5 py-1.5 rounded-full text-xs font-medium transition-colors cursor-pointer ${
             activeTab === "upload"
-              ? "bg-airtel-crimson text-white shadow-airtel-glow"
-              : "bg-white/[0.04] text-white/60 hover:text-white hover:bg-white/[0.08]"
+              ? "bg-[#e40000] text-white shadow-[0_0_12px_rgba(228,0,0,0.4)]"
+              : "text-[#B39D82] hover:text-[#EBE5D9]"
           }`}
         >
-          <Upload className="w-4 h-4" />
-          <span>Upload Real PDF / Image (Judge Laptop Test)</span>
+          Live Document Staging (4 Slots)
         </button>
       </div>
 
       {activeTab === "preset" ? (
-        /* Preset Applicant Selector for Demo / Testing */
-        <div className="glass-card rounded-2xl p-6">
-          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 mb-4 pb-2 border-b border-white/[0.06]">
-            <h3 className="font-serif text-base font-normal text-white flex items-center space-x-2">
-              <FileText className="w-4 h-4 text-airtel-crimson" />
-              <span>Select Applicant Document Specimen</span>
-            </h3>
-            <span className="text-[11px] font-mono text-white/40">
-              Powered by SHA-256 Content-Addressable OCR (Zero Filename Branching)
-            </span>
-          </div>
-
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3.5">
+        /* Presets Grid */
+        <div className="luxury-glass rounded-2xl p-5 space-y-4 border border-[rgba(235,229,217,0.06)] shadow-apple-card">
+          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3">
             {presets.map((preset) => {
               const isSelected = selectedPreset === preset.id;
               return (
-                <div
+                <motion.div
                   key={preset.id}
+                  whileHover={{ scale: 1.02 }}
+                  whileTap={{ scale: 0.98 }}
                   onClick={() => {
                     setSelectedPreset(preset.id);
                     setKycResult(null);
                   }}
-                  className={`p-4 rounded-xl border transition-all cursor-pointer group ${
+                  className={`p-3.5 rounded-xl border transition-all cursor-pointer ${
                     isSelected
-                      ? "border-airtel-crimson/70 bg-airtel-crimson/10 shadow-airtel-glow"
-                      : "border-white/[0.06] bg-obsidian-surface/60 hover:border-white/[0.18] hover:bg-obsidian-elevated/70"
+                      ? "border-[#e40000] bg-[#e40000]/10 shadow-[0_0_16px_rgba(228,0,0,0.2)]"
+                      : "border-[rgba(235,229,217,0.04)] bg-[#030405] hover:border-[rgba(235,229,217,0.12)]"
                   }`}
                 >
-                  <div className="flex items-center justify-between">
-                    <span className="text-xs font-medium text-white">{preset.label}</span>
+                  <div className="flex items-center justify-between mb-1.5">
+                    <span className="text-xs font-medium text-[#EBE5D9]">{preset.label}</span>
                     <span
-                      className={`text-[9px] px-2 py-0.5 rounded-full font-mono uppercase ${
+                      className={`text-[9px] px-1.5 py-0.2 rounded font-mono ${
                         preset.type === "CLEAN"
-                          ? "bg-emerald-500/15 text-emerald-400 border border-emerald-500/30"
+                          ? "bg-emerald-500/15 text-emerald-400"
                           : preset.type === "EXEMPT"
-                          ? "bg-blue-500/15 text-blue-400 border border-blue-500/30"
-                          : "bg-amber-500/15 text-amber-400 border border-amber-500/30"
+                          ? "bg-blue-500/15 text-blue-400"
+                          : "bg-amber-500/15 text-amber-400"
                       }`}
                     >
                       {preset.type}
                     </span>
                   </div>
-                  <p className="text-[11px] text-white/50 mt-2 leading-relaxed">{preset.desc}</p>
-                </div>
+                  <p className="text-[11px] text-[#B39D82] leading-relaxed">{preset.desc}</p>
+                </motion.div>
               );
             })}
           </div>
 
-          <div className="mt-6 flex justify-end">
-            <button
+          <div className="flex justify-end pt-2">
+            <motion.button
+              whileHover={{ scale: 1.02 }}
+              whileTap={{ scale: 0.98 }}
               onClick={handleVerify}
               disabled={isVerifying || !consentGranted}
-              className="flex items-center space-x-2 bg-airtel-crimson hover:bg-airtel-hover text-white font-medium py-2.5 px-6 rounded-xl shadow-airtel-glow transition-all text-xs sm:text-sm disabled:opacity-50 cursor-pointer"
+              className="flex items-center space-x-2 bg-[#e40000] hover:bg-[#b30000] text-white font-medium py-2 px-5 rounded-xl text-xs sm:text-sm shadow-[0_0_16px_rgba(228,0,0,0.4)] disabled:opacity-40 cursor-pointer"
             >
-              <RefreshCw className={`w-4 h-4 ${isVerifying ? "animate-spin" : ""}`} />
-              <span>{isVerifying ? "Executing Verification Funnel..." : "Run Deterministic KYC Gate"}</span>
-            </button>
+              <RefreshCw className={`w-3.5 h-3.5 ${isVerifying ? "animate-spin" : ""}`} />
+              <span>{isVerifying ? "Verifying..." : "Run KYC Gate"}</span>
+            </motion.button>
           </div>
         </div>
       ) : (
-        /* Real Drag & Drop / Multi-Slot Upload Experience */
-        <div className="glass-card rounded-2xl p-6 space-y-5">
-          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-white/[0.06] pb-4">
-            <div>
-              <h3 className="font-serif text-base font-normal text-white flex items-center space-x-2">
-                <FileUp className="w-4 h-4 text-emerald-400" />
-                <span>4-Slot Document Staging &amp; Live Inspection</span>
-              </h3>
-              <p className="text-xs text-white/50 mt-1">
-                Upload individual files to inspect live OCR validity in isolation, or stage all documents to verify the complete package.
-              </p>
-            </div>
-            <div className="flex items-center space-x-2">
-              <span className="text-[11px] font-mono bg-white/[0.04] text-white/70 border border-white/[0.08] px-3 py-1 rounded-full">
-                {Object.keys(uploadedSlots).length} of 4 Staged
-              </span>
-              <button
-                onClick={handleVerifyCompletePackage}
-                disabled={Object.keys(uploadedSlots).length === 0}
-                className="flex items-center space-x-1.5 bg-emerald-600 hover:bg-emerald-500 text-white font-medium py-1.5 px-3.5 rounded-xl text-xs shadow-md shadow-emerald-950/40 disabled:opacity-50 cursor-pointer"
-              >
-                <ShieldCheck className="w-3.5 h-3.5" />
-                <span>Verify Complete Package</span>
-              </button>
-            </div>
-          </div>
-
-          {/* 4 Interactive Upload Slots */}
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        /* 4 Upload Slots */
+        <div className="luxury-glass rounded-2xl p-5 space-y-4 border border-[rgba(235,229,217,0.06)] shadow-apple-card">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
             {[
-              {
-                id: "gst_certificate",
-                label: "GST Certificate (Form GST REG-06)",
-                sub: "15-digit GSTIN tax registration certificate",
-                req: quote ? !quote.gst_exempt_eligible : true,
-              },
-              {
-                id: "udyam_certificate",
-                label: "Udyam Registration Certificate",
-                sub: "Official MSME registration document (UDYAM-XX-00-XXXXXXX)",
-                req: true,
-              },
-              {
-                id: "signatory_id",
-                label: "Signatory National ID",
-                sub: "Aadhaar / Passport (in-memory DPDP masked)",
-                req: true,
-              },
-              {
-                id: "address_proof",
-                label: "Electricity / Utility Bill (<90 Days)",
-                sub: "Commercial premise proof evaluated against 2026-07-15 anchor",
-                req: true,
-              },
+              { id: "gst_certificate", label: "GST Certificate (REG-06)" },
+              { id: "udyam_certificate", label: "Udyam Certificate" },
+              { id: "signatory_id", label: "Signatory ID (Masked)" },
+              { id: "address_proof", label: "Utility Bill (<90 Days)" },
             ].map((slot) => {
               const staged = uploadedSlots[slot.id];
-              const isApproved = staged?.res.single_doc_result?.status === "APPROVED";
               return (
                 <div
                   key={slot.id}
-                  className={`p-4 rounded-xl border transition-all ${
+                  className={`p-3.5 rounded-xl border ${
                     staged
-                      ? isApproved
-                        ? "bg-emerald-950/20 border-emerald-500/40"
-                        : "bg-airtel-crimson/10 border-airtel-crimson/40"
-                      : "bg-obsidian-surface/60 border-white/[0.06]"
+                      ? "border-emerald-500/40 bg-emerald-950/20"
+                      : "border-[rgba(235,229,217,0.04)] bg-[#030405]"
                   }`}
                 >
                   <div className="flex items-center justify-between mb-2">
-                    <span className="text-xs font-medium text-white">{slot.label}</span>
-                    {staged ? (
-                      <span
-                        className={`text-[9px] px-2 py-0.5 rounded-full font-mono uppercase ${
-                          isApproved ? "bg-emerald-500/20 text-emerald-400" : "bg-airtel-crimson/20 text-airtel-crimson"
-                        }`}
-                      >
-                        {isApproved ? "ACTIVE IN REGISTRY" : "REGISTRY DEFECT"}
-                      </span>
-                    ) : (
-                      <span className="text-[9px] text-white/40 font-mono">
-                        {slot.req ? "MANDATORY" : "OPTIONAL (EXEMPT)"}
-                      </span>
-                    )}
-                  </div>
-                  <p className="text-[11px] text-white/50 mb-3">{slot.sub}</p>
-
-                  <div className="flex items-center space-x-2">
-                    <input
-                      type="file"
-                      id={`slot-file-${slot.id}`}
-                      accept=".pdf,.png,.jpg,.jpeg"
-                      onChange={(e) => {
-                        const f = e.target.files?.[0];
-                        if (f) handleFileUpload(f, slot.id);
-                      }}
-                      className="hidden"
-                    />
-                    <label
-                      htmlFor={`slot-file-${slot.id}`}
-                      className="cursor-pointer inline-flex items-center space-x-1.5 px-3 py-1.5 rounded-lg bg-white/[0.06] hover:bg-white/[0.12] text-white/80 text-xs font-medium border border-white/[0.1] transition-all"
-                    >
-                      <Upload className="w-3.5 h-3.5 text-white/60" />
-                      <span>{staged ? "Replace File" : "Upload File"}</span>
-                    </label>
-                    {staged && (
-                      <span className="text-xs font-mono text-white/50 truncate max-w-[160px]">
-                        {staged.file.name}
-                      </span>
-                    )}
+                    <span className="text-xs font-medium text-[#EBE5D9]">{slot.label}</span>
+                    <span className="text-[9px] font-mono text-[#B39D82]">
+                      {staged ? "STAGED" : "EMPTY"}
+                    </span>
                   </div>
 
-                  {staged?.res.extracted_fields && Object.keys(staged.res.extracted_fields).length > 0 && (
-                    <div className="mt-3 pt-3 border-t border-white/[0.06] grid grid-cols-2 gap-1.5 text-[10px] font-mono">
-                      {Object.entries(staged.res.extracted_fields).slice(0, 4).map(([k, v]) => (
-                        <div key={k} className="bg-obsidian-canvas/60 p-1.5 rounded border border-white/[0.04] truncate">
-                          <span className="text-white/40 block uppercase">{k}:</span>
-                          <span className="text-white/80 font-medium">{v || "N/A"}</span>
-                        </div>
-                      ))}
-                    </div>
+                  <input
+                    type="file"
+                    id={`file-${slot.id}`}
+                    accept=".pdf,.png,.jpg,.jpeg"
+                    onChange={(e) => {
+                      const f = e.target.files?.[0];
+                      if (f) handleFileUpload(f, slot.id);
+                    }}
+                    className="hidden"
+                  />
+                  <label
+                    htmlFor={`file-${slot.id}`}
+                    className="cursor-pointer inline-flex items-center space-x-1.5 px-3 py-1 rounded-lg bg-white/[0.04] hover:bg-white/[0.08] text-xs text-[#EBE5D9] border border-white/[0.08] transition-colors"
+                  >
+                    <Upload className="w-3 h-3 text-[#B39D82]" />
+                    <span>{staged ? "Replace File" : "Upload File"}</span>
+                  </label>
+                  {staged && (
+                    <span className="text-[11px] font-mono text-[#B39D82] ml-2 truncate">
+                      {staged.file.name}
+                    </span>
                   )}
                 </div>
               );
             })}
           </div>
+
+          <div className="flex justify-end pt-1">
+            <button
+              onClick={handleVerifyCompletePackage}
+              disabled={Object.keys(uploadedSlots).length === 0}
+              className="bg-emerald-600 hover:bg-emerald-500 text-white font-medium py-1.5 px-4 rounded-xl text-xs disabled:opacity-40 cursor-pointer"
+            >
+              Verify Staged Package
+            </button>
+          </div>
         </div>
       )}
 
-      {/* Verification Result Display */}
+      {/* Verification Result Card */}
       {kycResult && (
-        <div className="space-y-5 animate-fade-in">
-          {/* Main Status & Latency Banner */}
+        <motion.div
+          initial={{ opacity: 0, y: 10 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.2, ease: [0.22, 1, 0.36, 1] }}
+          className="space-y-4"
+        >
+          {/* Main Status */}
           <div
-            className={`p-6 rounded-2xl border flex flex-col sm:flex-row sm:items-center justify-between gap-4 glass-card ${
+            className={`p-4 rounded-2xl border flex items-center justify-between luxury-glass ${
               kycResult.status === "APPROVED"
-                ? "border-emerald-500/40 bg-emerald-950/20"
+                ? "border-emerald-500/30 bg-emerald-950/20"
                 : kycResult.status === "MANUAL_REVIEW"
-                ? "border-amber-500/40 bg-amber-950/20"
-                : "border-airtel-crimson/40 bg-airtel-crimson/10"
+                ? "border-amber-500/30 bg-amber-950/20"
+                : "border-red-500/30 bg-red-950/20"
             }`}
           >
-            <div className="flex items-center space-x-3.5">
+            <div className="flex items-center space-x-3">
               {kycResult.status === "APPROVED" ? (
-                <div className="w-10 h-10 rounded-xl bg-emerald-500/15 border border-emerald-500/30 flex items-center justify-center text-emerald-400 shrink-0">
-                  <ShieldCheck className="w-6 h-6" />
-                </div>
-              ) : kycResult.status === "MANUAL_REVIEW" ? (
-                <div className="w-10 h-10 rounded-xl bg-amber-500/15 border border-amber-500/30 flex items-center justify-center text-amber-400 shrink-0">
-                  <ShieldAlert className="w-6 h-6" />
-                </div>
+                <ShieldCheck className="w-6 h-6 text-emerald-400" />
               ) : (
-                <div className="w-10 h-10 rounded-xl bg-airtel-crimson/15 border border-airtel-crimson/30 flex items-center justify-center text-airtel-crimson shrink-0">
-                  <AlertCircle className="w-6 h-6" />
-                </div>
+                <AlertCircle className="w-6 h-6 text-[#e40000]" />
               )}
               <div>
-                <div className="flex items-center space-x-2.5">
-                  <h3 className="font-serif text-lg font-normal text-white tracking-wide">
-                    KYC Status: {kycResult.status}
+                <div className="flex items-center space-x-2">
+                  <h3 className="font-sans text-sm font-semibold text-[#EBE5D9]">
+                    Status: {kycResult.status}
                   </h3>
-                  <span className="text-[10px] bg-white/[0.06] text-white/70 px-2 py-0.5 rounded font-mono border border-white/[0.08]">
-                    {kycResult.execution_latency_ms} ms latency
+                  <span className="text-[10px] font-mono text-[#B39D82] bg-white/[0.04] px-1.5 py-0.2 rounded">
+                    {kycResult.execution_latency_ms}ms
                   </span>
                 </div>
-                <p className="text-xs text-white/60 mt-1">
+                <p className="text-xs text-[#B39D82] mt-0.5">
                   {kycResult.status === "APPROVED"
-                    ? "All cryptographic, registry, and RapidFuzz entity checks passed 100% deterministically."
-                    : "Compliance exceptions detected by verification engine. Actionable remediation steps generated below."}
+                    ? "All cryptographic and RapidFuzz registry checks passed."
+                    : "Remediation required for compliance pass."}
                 </p>
               </div>
             </div>
 
             {kycResult.status === "APPROVED" && (
-              <button
+              <motion.button
+                whileHover={{ scale: 1.03 }}
+                whileTap={{ scale: 0.97 }}
                 onClick={() => onKYCApproved(kycResult)}
-                className="flex items-center space-x-2 bg-emerald-600 hover:bg-emerald-500 text-white font-medium py-2.5 px-5 rounded-xl text-xs sm:text-sm shadow-md shadow-emerald-950/40 transition-all shrink-0 cursor-pointer"
+                className="bg-emerald-600 hover:bg-emerald-500 text-white font-medium py-2 px-4 rounded-xl text-xs flex items-center space-x-1.5 cursor-pointer shadow-md"
               >
-                <span>Proceed to Provisioning</span>
-                <ArrowRight className="w-4 h-4" />
-              </button>
+                <span>Proceed to Dispatch</span>
+                <ArrowRight className="w-3.5 h-3.5" />
+              </motion.button>
             )}
           </div>
 
-          {/* Verification Details Grid */}
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-            {/* DPDP Act 2023 Redaction Card */}
-            <div className="glass-card rounded-xl p-4 space-y-2.5">
-              <div className="flex items-center justify-between text-xs text-white/50">
-                <span className="flex items-center space-x-1.5">
-                  <Lock className="w-3.5 h-3.5 text-emerald-400" />
-                  <span>DPDP In-Memory Mask</span>
-                </span>
-                <span className="text-[10px] font-mono bg-emerald-500/15 text-emerald-400 px-1.5 py-0.5 rounded">
-                  PASS
-                </span>
-              </div>
-              <div className="font-mono text-xs bg-obsidian-canvas/60 p-2.5 rounded-lg border border-white/[0.06] text-white/80">
-                {kycResult.redacted_signatory_id || "[Aadhaar Redacted-Token]"}
-              </div>
-              <p className="text-[10px] text-white/40">
-                Unmasked 12-digit UID never written to SQLite or disk cache.
-              </p>
+          {/* Details & Fuzzy Scores */}
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+            <div className="luxury-glass p-3 rounded-xl border border-[rgba(235,229,217,0.06)] space-y-1">
+              <span className="text-[10px] text-[#B39D82] block">DPDP Mask</span>
+              <span className="font-mono text-xs text-[#EBE5D9] block truncate">
+                {kycResult.redacted_signatory_id || "[Aadhaar Masked]"}
+              </span>
             </div>
-
-            {/* Registry Status Card */}
-            <div className="glass-card rounded-xl p-4 space-y-2.5">
-              <div className="flex items-center justify-between text-xs text-white/50">
-                <span>Registry Validation</span>
-                <span className="text-[10px] bg-white/[0.04] text-white/50 px-1.5 py-0.5 rounded font-mono">
-                  Anchor: 2026-07-15
-                </span>
-              </div>
-              <div className="text-xs space-y-1.5">
-                <div className="flex justify-between">
-                  <span className="text-white/50">GSTIN Status:</span>
-                  <span
-                    className={`font-mono font-medium ${
-                      kycResult.gst_status === "Active"
-                        ? "text-emerald-400"
-                        : kycResult.gst_status === "Cancelled"
-                        ? "text-airtel-crimson"
-                        : "text-white/50"
-                    }`}
-                  >
-                    {kycResult.gst_status || "N/A (Exempt)"}
-                  </span>
-                </div>
-                <div className="flex justify-between">
-                  <span className="text-white/50">Udyam Registration:</span>
-                  <span
-                    className={`font-mono font-medium ${
-                      kycResult.udyam_status === "Active"
-                        ? "text-emerald-400"
-                        : "text-amber-400"
-                    }`}
-                  >
-                    {kycResult.udyam_status || "Not Found"}
-                  </span>
-                </div>
-              </div>
+            <div className="luxury-glass p-3 rounded-xl border border-[rgba(235,229,217,0.06)] space-y-1">
+              <span className="text-[10px] text-[#B39D82] block">GST Status</span>
+              <span className="font-mono text-xs text-[#EBE5D9] block">
+                {kycResult.gst_status || "N/A (Exempt)"}
+              </span>
             </div>
-
-            {/* Utility Bill Freshness Card */}
-            <div className="glass-card rounded-xl p-4 space-y-2.5">
-              <div className="flex items-center justify-between text-xs text-white/50">
-                <span>Address Proof Freshness</span>
-                <span className="text-[10px] bg-white/[0.04] text-white/50 px-1.5 py-0.5 rounded font-mono">
-                  Max 90 Days
-                </span>
-              </div>
-              <div className="text-xs">
-                <div className="flex justify-between items-baseline">
-                  <span className="text-white/50">Calculated Bill Age:</span>
-                  <span
-                    className={`font-serif text-lg font-medium ${
-                      kycResult.address_bill_age_days !== null &&
-                      kycResult.address_bill_age_days! <= 90
-                        ? "text-emerald-400"
-                        : "text-airtel-crimson"
-                    }`}
-                  >
-                    {kycResult.address_bill_age_days ?? "N/A"} days
-                  </span>
-                </div>
-                <p className="text-[10px] text-white/40 mt-1">
-                  Relative to synthetic hackathon evaluation date 2026-07-15.
-                </p>
-              </div>
+            <div className="luxury-glass p-3 rounded-xl border border-[rgba(235,229,217,0.06)] space-y-1">
+              <span className="text-[10px] text-[#B39D82] block">Utility Bill Age</span>
+              <span className="font-mono text-xs text-[#EBE5D9] block">
+                {kycResult.address_bill_age_days ?? "N/A"} days
+              </span>
             </div>
           </div>
 
-          {/* RapidFuzz Entity Resolution Scores */}
-          <div className="glass-card rounded-xl p-5">
-            <h4 className="font-serif text-sm font-normal text-white tracking-wide mb-3">
-              RapidFuzz Token-Sort Entity Resolution Scores
-            </h4>
-            <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
-              {Object.entries(kycResult.fuzzy_scores).map(([key, score]) => (
-                <div key={key} className="bg-obsidian-surface/60 p-3 rounded-lg border border-white/[0.06]">
-                  <div className="flex justify-between text-xs mb-1.5">
-                    <span className="text-white/50 font-mono text-[11px]">{key}</span>
-                    <span
-                      className={`font-mono font-medium ${
-                        score >= 80 ? "text-emerald-400" : score >= 60 ? "text-amber-400" : "text-airtel-crimson"
-                      }`}
-                    >
-                      {score.toFixed(1)}%
-                    </span>
-                  </div>
-                  <div className="w-full bg-obsidian-elevated h-1.5 rounded-full overflow-hidden">
-                    <div
-                      className={`h-full ${
-                        score >= 80 ? "bg-emerald-500" : score >= 60 ? "bg-amber-500" : "bg-airtel-crimson"
-                      }`}
-                      style={{ width: `${Math.min(100, score)}%` }}
-                    />
-                  </div>
-                </div>
-              ))}
-            </div>
-          </div>
-
-          {/* Anomalies List & 1-Click Remediation */}
+          {/* Anomalies List */}
           {kycResult.anomalies.length > 0 && (
-            <div className="glass-card rounded-2xl p-6 space-y-3.5">
-              <h4 className="font-serif text-base font-normal text-amber-300 flex items-center space-x-2">
-                <AlertCircle className="w-4 h-4 text-amber-400" />
-                <span>Detected Verification Anomalies ({kycResult.anomalies.length})</span>
+            <div className="luxury-glass rounded-2xl p-4 space-y-2.5 border border-red-500/20">
+              <h4 className="text-xs font-semibold text-amber-300 uppercase tracking-wider">
+                Exceptions Caught ({kycResult.anomalies.length})
               </h4>
-
-              <div className="space-y-2.5">
+              <div className="space-y-2">
                 {kycResult.anomalies.map((anom, idx) => (
-                  <div
-                    key={idx}
-                    className="p-4 rounded-xl bg-obsidian-surface/60 border border-white/[0.06] flex flex-col sm:flex-row sm:items-center justify-between gap-3"
-                  >
-                    <div>
-                      <div className="flex items-center space-x-2">
-                        <span
-                          className={`text-[9px] px-2 py-0.5 rounded-full font-mono font-medium ${
-                            anom.severity === "BLOCKER"
-                              ? "bg-airtel-crimson/15 text-airtel-crimson border border-airtel-crimson/30"
-                              : "bg-amber-500/15 text-amber-300 border border-amber-500/30"
-                          }`}
-                        >
-                          {anom.severity}
-                        </span>
-                        <span className="text-xs font-mono font-medium text-white">{anom.code}</span>
-                      </div>
-                      <p className="text-xs text-white/70 mt-1.5">{anom.message}</p>
-                      {anom.remediation && (
-                        <div className="pt-2 space-y-2">
-                          <p className="text-[11px] text-emerald-400">
-                            💡 <strong>Remediation:</strong> {anom.remediation}
-                          </p>
-                          {anom.code === "GSTIN_INACTIVE" && (
-                            <button
-                              onClick={handleSwitchToUdyam}
-                              className="inline-flex items-center space-x-1.5 px-3 py-1.5 rounded-lg bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-medium shadow-md shadow-emerald-950/40 transition-all cursor-pointer"
-                            >
-                              <Zap className="w-3.5 h-3.5 text-champagne-gold" />
-                              <span>1-Click Switch to GST-Exempt Udyam Micro Bundle</span>
-                            </button>
-                          )}
-                          {anom.code === "STALE_ADDRESS_PROOF" && (
-                            <button
-                              onClick={() => {
-                                setActiveTab("upload");
-                                setUploadDocType("address_proof");
-                              }}
-                              className="inline-flex items-center space-x-1.5 px-3 py-1.5 rounded-lg bg-white/[0.08] hover:bg-white/[0.14] text-white text-xs font-medium border border-white/[0.1] transition-all cursor-pointer"
-                            >
-                              <Upload className="w-3.5 h-3.5 text-white/60" />
-                              <span>Upload Fresh Utility Bill (&lt;90 Days)</span>
-                            </button>
-                          )}
-                          {anom.code === "MISSING_UDYAM_CERTIFICATE" && (
-                            <button
-                              onClick={() => {
-                                setActiveTab("upload");
-                                setUploadDocType("udyam_certificate");
-                              }}
-                              className="inline-flex items-center space-x-1.5 px-3 py-1.5 rounded-lg bg-white/[0.08] hover:bg-white/[0.14] text-white text-xs font-medium border border-white/[0.1] transition-all cursor-pointer"
-                            >
-                              <Upload className="w-3.5 h-3.5 text-white/60" />
-                              <span>Upload Udyam Registration Certificate</span>
-                            </button>
-                          )}
-                        </div>
-                      )}
+                  <div key={idx} className="p-3 rounded-xl bg-[#030405] border border-white/[0.04] space-y-1">
+                    <div className="flex items-center space-x-2">
+                      <span className="text-[9px] px-1.5 py-0.2 rounded font-mono bg-red-500/20 text-red-400">
+                        {anom.code}
+                      </span>
+                      <span className="text-xs text-[#EBE5D9]">{anom.message}</span>
                     </div>
+                    {anom.remediation && (
+                      <p className="text-[11px] text-emerald-400">
+                        ↳ Action: {anom.remediation}
+                      </p>
+                    )}
+                    {anom.code === "GSTIN_INACTIVE" && (
+                      <button
+                        onClick={handleSwitchToUdyam}
+                        className="mt-1 text-xs bg-emerald-600 hover:bg-emerald-500 text-white px-2.5 py-1 rounded-lg font-medium cursor-pointer"
+                      >
+                        1-Click Switch to Udyam Micro Bundle
+                      </button>
+                    )}
                   </div>
                 ))}
               </div>
             </div>
           )}
-        </div>
+        </motion.div>
       )}
 
-      {/* DPDP Act 2023 Consent Audit Modal */}
+      {/* Consent Modal */}
       {showConsentModal && (
         <div className="fixed inset-0 z-50 bg-black/80 backdrop-blur-md flex items-center justify-center p-4">
-          <div className="glass-card rounded-2xl max-w-lg w-full p-6 space-y-4 border border-white/[0.12]">
-            <div className="flex items-center justify-between border-b border-white/[0.08] pb-3">
-              <div className="flex items-center space-x-2">
-                <Shield className="w-5 h-5 text-airtel-crimson" />
-                <h3 className="font-serif text-lg font-normal text-white">DPDP Act 2023 Consent Artifact</h3>
-              </div>
+          <div className="luxury-glass rounded-2xl max-w-md w-full p-5 space-y-3 border border-white/[0.1]">
+            <div className="flex items-center justify-between pb-2 border-b border-white/[0.06]">
+              <h3 className="font-sans text-sm font-semibold text-[#EBE5D9]">DPDP Act 2023 Consent</h3>
               <button
                 onClick={() => setShowConsentModal(false)}
-                className="text-white/40 hover:text-white text-xs font-mono cursor-pointer"
+                className="text-xs text-[#B39D82] hover:text-white"
               >
-                [CLOSE]
+                Close
               </button>
             </div>
-            <div className="space-y-2 text-xs text-white/70 font-mono bg-obsidian-canvas/80 p-4 rounded-xl border border-white/[0.06]">
-              <p><strong>Consent ID:</strong> CONSENT_20260715_884920</p>
-              <p><strong>Fiduciary:</strong> Bharti Airtel Limited (Accel Business)</p>
-              <p><strong>Data Principal:</strong> Merchant Signatory</p>
-              <p><strong>Purpose:</strong> Telecom onboarding, GSTN/Udyam registry verification.</p>
-              <p><strong>Audit Timestamp:</strong> 2026-07-15T10:00:00Z</p>
-              <p><strong>Client IP SHA-256:</strong> 2c26b46b68ffc68ff99b453c1d30413413422d706483bfa0f98a5e886266e7ae</p>
-              <p><strong>Masking Protocol:</strong> In-memory regex replacement prior to SQLite commit.</p>
-            </div>
-            <p className="text-[11px] text-white/40">
-              Complies with Section 6 of India Digital Personal Data Protection Act (DPDP) 2023 regarding specific, informed, and unconditional consent.
-            </p>
-            <div className="flex justify-end">
-              <button
-                onClick={() => setShowConsentModal(false)}
-                className="bg-white/[0.08] hover:bg-white/[0.14] text-white text-xs font-medium px-4 py-2 rounded-lg cursor-pointer"
-              >
-                Acknowledge
-              </button>
+            <div className="space-y-1.5 text-xs text-[#B39D82] font-mono bg-[#030405] p-3 rounded-xl border border-white/[0.04]">
+              <p>Consent ID: CONSENT_20260715_884920</p>
+              <p>Purpose: Telecom KYC Verification</p>
+              <p>Storage: Zero-numeric plaintext persistence</p>
             </div>
           </div>
         </div>

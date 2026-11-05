@@ -1,4 +1,5 @@
 import React, { useState } from "react";
+import { motion } from "motion/react";
 import {
   CheckCircle2,
   Clock,
@@ -6,13 +7,10 @@ import {
   Wrench,
   Wifi,
   ShieldCheck,
-  ChevronRight,
-  MessageSquare,
   Award,
-  Phone,
-  User,
   ArrowRight,
-  Sparkles,
+  MessageSquare,
+  User,
 } from "lucide-react";
 import { ProvisioningOrder, ProvisioningMilestone } from "../types";
 import { advanceOrderStage } from "../api";
@@ -36,228 +34,135 @@ export const OrderTracker: React.FC<OrderTrackerProps> = ({ order, onOrderUpdate
       onOrderUpdated(updated);
       setSelectedPreview(updated.milestones[updated.current_stage_idx] || updated.milestones[updated.milestones.length - 1]);
     } catch (err: unknown) {
-      alert(err instanceof Error ? err.message : "Failed to advance order milestone");
+      alert(err instanceof Error ? err.message : "Milestone advance failed");
     } finally {
       setAdvancing(false);
     }
   };
 
-  const getStageIcon = (idx: number, status: string) => {
-    if (status === "COMPLETED") return <CheckCircle2 className="w-5 h-5 text-emerald-400" />;
-    if (status === "IN_PROGRESS") return <Clock className="w-5 h-5 text-amber-400 animate-spin" />;
-    switch (idx) {
-      case 0:
-        return <CheckCircle2 className="w-5 h-5 text-white/30" />;
-      case 1:
-        return <ShieldCheck className="w-5 h-5 text-white/30" />;
-      case 2:
-        return <Wifi className="w-5 h-5 text-white/30" />;
-      case 3:
-        return <Truck className="w-5 h-5 text-white/30" />;
-      case 4:
-        return <Wrench className="w-5 h-5 text-white/30" />;
-      case 5:
-        return <Award className="w-5 h-5 text-white/30" />;
-      default:
-        return <Clock className="w-5 h-5 text-white/30" />;
-    }
-  };
-
   return (
-    <div className="max-w-5xl mx-auto space-y-6 animate-fade-in">
-      {/* Executive Order Header & Partner Commission Banner */}
-      <div className="glass-card rounded-2xl p-6 flex flex-col md:flex-row md:items-center justify-between gap-5 relative overflow-hidden">
-        <div className="absolute top-0 right-0 w-80 h-80 bg-airtel-crimson/5 rounded-full blur-3xl pointer-events-none" />
+    <div className="max-w-4xl mx-auto space-y-5">
+      {/* Order Header */}
+      <div className="luxury-glass rounded-2xl p-5 flex flex-col sm:flex-row sm:items-center justify-between gap-4 border border-[rgba(235,229,217,0.06)] shadow-apple-card">
         <div>
-          <div className="flex items-center space-x-2.5">
-            <span className="text-xs font-mono font-medium bg-airtel-crimson text-white px-2.5 py-0.5 rounded-full shadow-airtel-glow">
+          <div className="flex items-center space-x-2">
+            <span className="text-[10px] font-mono bg-[#e40000] text-white px-2 py-0.5 rounded-full font-medium">
               ORDER #{order.order_id}
             </span>
-            <span className="text-xs font-mono text-white/50">
-              {order.is_activated ? "Status: ACTIVATED" : "Fulfillment In-Progress"}
+            <span className="text-xs font-mono text-[#B39D82]">
+              {order.is_activated ? "ACTIVATED" : "IN-PROGRESS"}
             </span>
           </div>
-          <h2 className="font-serif text-2xl font-normal text-white mt-2">{order.business_name}</h2>
-          <p className="text-xs text-white/60 mt-1">
-            Package: <strong className="text-white/90 font-medium">{order.bundle_name}</strong> (₹
-            {order.monthly_charge_inr.toLocaleString()} / mo) • Guaranteed SLA:{" "}
-            <strong className="text-white/90 font-mono font-medium">{order.total_sla_days} Days</strong>
+          <h2 className="font-serif text-xl font-normal text-[#EBE5D9] mt-1.5">{order.business_name}</h2>
+          <p className="text-xs text-[#B39D82] mt-0.5">
+            {order.bundle_name} · SLA: {order.total_sla_days} Days
           </p>
         </div>
 
-        {/* Partner Commission Banner */}
-        <div className="bg-obsidian-surface/80 border border-champagne-gold/30 rounded-xl p-3.5 flex items-center space-x-3.5 shrink-0">
-          <div className="w-10 h-10 rounded-lg bg-champagne-gold/10 border border-champagne-gold/30 flex items-center justify-center text-champagne-gold">
-            <Award className="w-5 h-5" />
-          </div>
+        {/* Commission */}
+        <div className="bg-[#030405] border border-[rgba(235,229,217,0.06)] rounded-xl p-3 flex items-center space-x-3 shrink-0">
+          <Award className="w-5 h-5 text-[#d9ad63]" />
           <div className="text-xs">
-            <span className="text-white/50 block">Channel Partner Commission</span>
-            <span className="font-serif text-xl font-medium text-champagne-gold">
+            <span className="text-[#B39D82] block">Partner Commission</span>
+            <span className="font-serif text-base text-[#d9ad63]">
               ₹{order.partner_commission_inr.toLocaleString()}
             </span>
-            <span className="text-[10px] text-white/40 block">15% first-year activation share</span>
           </div>
         </div>
       </div>
 
-      {/* 6-Stage Interactive Visual Stepper */}
-      <div className="glass-card rounded-2xl p-6">
-        <div className="flex items-center justify-between mb-6 pb-2 border-b border-white/[0.06]">
-          <h3 className="font-serif text-base font-normal text-white flex items-center space-x-2">
-            <Wifi className="w-4 h-4 text-airtel-crimson" />
-            <span>Deterministic 6-Stage Fulfillment Pipeline</span>
+      {/* 6-Stage Stepper */}
+      <div className="luxury-glass rounded-2xl p-5 space-y-4 border border-[rgba(235,229,217,0.06)] shadow-apple-card">
+        <div className="flex items-center justify-between pb-2 border-b border-[rgba(235,229,217,0.04)]">
+          <h3 className="font-sans text-xs font-semibold text-[#EBE5D9] uppercase tracking-wider">
+            6-Stage Fulfillment Pipeline
           </h3>
-          <span className="text-xs font-mono text-white/50">
-            Current Stage: <strong className="text-white font-medium">{order.current_stage_idx + 1} / 6</strong>
+          <span className="text-xs font-mono text-[#B39D82]">
+            Stage {order.current_stage_idx + 1} of 6
           </span>
         </div>
 
-        {/* Stepper bar */}
-        <div className="grid grid-cols-2 md:grid-cols-6 gap-3">
+        <div className="grid grid-cols-2 md:grid-cols-6 gap-2.5">
           {order.milestones.map((ms, idx) => {
             const isCurrent = idx === order.current_stage_idx;
             const isPassed = ms.status === "COMPLETED";
 
             return (
-              <div
+              <motion.div
                 key={ms.stage_id}
+                whileHover={{ scale: 1.02 }}
                 onClick={() => setSelectedPreview(ms)}
-                className={`p-3.5 rounded-xl border transition-all cursor-pointer relative ${
+                className={`p-3 rounded-xl border transition-all cursor-pointer ${
                   isCurrent
-                    ? "border-airtel-crimson/70 bg-airtel-crimson/10 shadow-airtel-glow"
+                    ? "border-[#e40000] bg-[#e40000]/10 shadow-[0_0_12px_rgba(228,0,0,0.3)]"
                     : isPassed
-                    ? "border-emerald-500/40 bg-emerald-950/20 hover:border-emerald-500/60"
-                    : "border-white/[0.06] bg-obsidian-surface/60 opacity-50"
+                    ? "border-emerald-500/30 bg-emerald-950/15"
+                    : "border-[rgba(235,229,217,0.04)] bg-[#030405] opacity-50"
                 }`}
               >
-                <div className="flex items-center justify-between mb-2">
-                  <span className="text-[10px] font-mono text-white/40">
-                    STAGE {idx + 1}
-                  </span>
-                  {getStageIcon(idx, ms.status)}
-                </div>
-                <h4 className="text-xs font-medium text-white truncate">{ms.stage_name}</h4>
-                <p className="text-[10px] text-white/50 mt-1 line-clamp-2 leading-relaxed">{ms.description}</p>
-                <div className="mt-2 text-[10px] font-mono">
-                  {ms.status === "COMPLETED" ? (
-                    <span className="text-emerald-400 font-medium">Done</span>
-                  ) : ms.status === "IN_PROGRESS" ? (
-                    <span className="text-amber-400 font-medium">In Progress</span>
+                <div className="flex items-center justify-between mb-1.5">
+                  <span className="text-[9px] font-mono text-[#B39D82]">0{idx + 1}</span>
+                  {isPassed ? (
+                    <CheckCircle2 className="w-3.5 h-3.5 text-emerald-400" />
+                  ) : isCurrent ? (
+                    <Clock className="w-3.5 h-3.5 text-amber-400 animate-spin" />
                   ) : (
-                    <span className="text-white/40">Pending</span>
+                    <span className="w-1.5 h-1.5 rounded-full bg-white/20" />
                   )}
                 </div>
-              </div>
+                <h4 className="text-xs font-medium text-[#EBE5D9] truncate">{ms.stage_name}</h4>
+                <div className="mt-1.5 text-[9px] font-mono">
+                  {isPassed ? (
+                    <span className="text-emerald-400">Done</span>
+                  ) : isCurrent ? (
+                    <span className="text-amber-400">In Progress</span>
+                  ) : (
+                    <span className="text-[#B39D82]/50">Pending</span>
+                  )}
+                </div>
+              </motion.div>
             );
           })}
         </div>
 
-        {/* Advance Stage Control */}
-        <div className="mt-6 pt-5 border-t border-white/[0.06] flex flex-col sm:flex-row sm:items-center justify-between gap-3">
-          <div className="text-xs text-white/50">
-            {order.is_activated ? (
-              <span className="text-emerald-400 font-medium flex items-center space-x-1.5">
-                <CheckCircle2 className="w-4 h-4" />
-                <span>Service 100% Provisioned &amp; Online. Zero back-office delays!</span>
-              </span>
-            ) : (
-              <span>
-                Simulate post-sales operational transitions across OSS/BSS, field inventory, and engineer dispatch.
-              </span>
-            )}
-          </div>
-
-          {!order.is_activated && (
-            <button
+        {!order.is_activated && (
+          <div className="pt-2 flex justify-end">
+            <motion.button
+              whileHover={{ scale: 1.02 }}
+              whileTap={{ scale: 0.98 }}
               onClick={handleAdvance}
               disabled={advancing}
-              className="flex items-center justify-center space-x-2 bg-airtel-crimson hover:bg-airtel-hover text-white font-medium py-2.5 px-5 rounded-xl text-xs sm:text-sm shadow-airtel-glow transition-all disabled:opacity-50 cursor-pointer"
+              className="flex items-center space-x-1.5 bg-[#e40000] hover:bg-[#b30000] text-white font-medium py-2 px-4 rounded-xl text-xs shadow-apple-glow disabled:opacity-40 cursor-pointer"
             >
-              <span>{advancing ? "Transitioning..." : "Simulate Next SLA Milestone"}</span>
-              <ArrowRight className="w-4 h-4" />
-            </button>
-          )}
-        </div>
+              <span>{advancing ? "Advancing..." : "Simulate Next SLA Stage"}</span>
+              <ArrowRight className="w-3.5 h-3.5" />
+            </motion.button>
+          </div>
+        )}
       </div>
 
-      {/* WhatsApp Proactive Notification Drawer & Technician Card */}
-      <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
-        {/* Left: WhatsApp Push Notification Preview */}
-        <div className="lg:col-span-7 glass-card rounded-2xl p-6">
-          <div className="flex items-center justify-between mb-4 pb-2 border-b border-white/[0.06]">
-            <div className="flex items-center space-x-2">
-              <MessageSquare className="w-4 h-4 text-emerald-400" />
-              <h3 className="font-serif text-base font-normal text-white">
-                Proactive WhatsApp Customer Updates
-              </h3>
-            </div>
-            <span className="text-[10px] font-mono bg-emerald-500/10 text-emerald-400 border border-emerald-500/30 px-2.5 py-0.5 rounded-full">
-              Live Webhook Feed
-            </span>
+      {/* WhatsApp Preview Drawer */}
+      {selectedPreview && (
+        <div className="luxury-glass rounded-2xl p-4 space-y-3 border border-[rgba(235,229,217,0.06)] shadow-apple-card">
+          <div className="flex items-center space-x-2 text-xs font-medium text-[#EBE5D9]">
+            <MessageSquare className="w-3.5 h-3.5 text-emerald-400" />
+            <span>WhatsApp Customer Webhook Feed</span>
           </div>
 
-          {selectedPreview ? (
-            <div className="bg-[#0b141a] p-4 rounded-xl border border-white/[0.08] space-y-2.5">
-              <div className="flex items-center space-x-2 pb-2.5 border-b border-white/[0.08]">
-                <div className="w-7 h-7 rounded-full bg-airtel-crimson flex items-center justify-center text-xs font-bold text-white shadow-airtel-glow">
-                  A
-                </div>
-                <div>
-                  <span className="text-xs font-medium text-white">Airtel Business Enterprise</span>
-                  <span className="text-[10px] text-emerald-400 ml-2 font-mono">Verified Business</span>
-                </div>
+          <div className="bg-[#0b141a] p-3.5 rounded-xl border border-[rgba(235,229,217,0.04)] space-y-2">
+            <div className="flex items-center space-x-2 pb-1.5 border-b border-white/[0.06]">
+              <div className="w-5 h-5 rounded-full bg-[#e40000] flex items-center justify-center text-[10px] font-bold text-white">
+                A
               </div>
-              <div className="bg-[#202c33] p-4 rounded-xl text-xs text-white/90 leading-relaxed font-sans shadow-sm border border-white/[0.04]">
-                <p className="whitespace-pre-line">{selectedPreview.whatsapp_preview}</p>
-                <div className="text-right text-[10px] text-white/40 mt-2 font-mono">
-                  10:14 AM • Delivered ✓✓
-                </div>
-              </div>
+              <span className="text-xs font-medium text-white">Airtel Enterprise</span>
+              <span className="text-[9px] text-emerald-400 font-mono">Verified</span>
             </div>
-          ) : (
-            <p className="text-xs text-white/40">Select a stage above to preview customer notifications.</p>
-          )}
-        </div>
-
-        {/* Right: Field Engineer / SLA Card */}
-        <div className="lg:col-span-5 glass-card rounded-2xl p-6 space-y-4">
-          <h3 className="font-serif text-base font-normal text-white flex items-center space-x-2">
-            <User className="w-4 h-4 text-blue-400" />
-            <span>Assigned Field Technician</span>
-          </h3>
-
-          <div className="bg-obsidian-surface/60 p-4 rounded-xl border border-white/[0.06] space-y-3">
-            <div className="flex items-center space-x-3">
-              <div className="w-10 h-10 rounded-full bg-blue-500/15 border border-blue-500/30 flex items-center justify-center text-blue-400 font-serif font-medium text-sm">
-                RK
-              </div>
-              <div>
-                <h4 className="text-xs font-medium text-white">Ramesh Kumar</h4>
-                <p className="text-[10px] text-white/50">Certified Optical Fiber &amp; CPE Specialist</p>
-              </div>
+            <div className="bg-[#202c33] p-3 rounded-lg text-xs text-white/90 font-sans">
+              <p className="whitespace-pre-line">{selectedPreview.whatsapp_preview}</p>
             </div>
-
-            <div className="space-y-2 text-xs text-white/70 pt-3 border-t border-white/[0.06]">
-              <div className="flex justify-between">
-                <span className="text-white/50">Technician Phone:</span>
-                <span className="font-mono text-white/90">+91 98110-XXXXX</span>
-              </div>
-              <div className="flex justify-between">
-                <span className="text-white/50">Installation OTP:</span>
-                <span className="font-mono text-emerald-400 font-medium">4892</span>
-              </div>
-              <div className="flex justify-between">
-                <span className="text-white/50">GPS Geo-Fence:</span>
-                <span className="text-emerald-400 font-medium">Matched to Premises</span>
-              </div>
-            </div>
-          </div>
-
-          <div className="bg-obsidian-surface/40 p-3 rounded-xl border border-white/[0.04] text-[11px] text-white/50 leading-relaxed">
-            🚀 <strong>Funnel Impact:</strong> Automated technician allocation and real-time SLA countdown cuts the historical <strong>17.6-day activation cycle</strong> down to <strong>&lt;4 days</strong>, eliminating the 98 dropouts that occur after 21 days of waiting.
           </div>
         </div>
-      </div>
+      )}
     </div>
   );
 };

@@ -7,56 +7,53 @@ export default {
   theme: {
     extend: {
       fontFamily: {
-        sans: ['"Sora"', '"DM Sans"', 'system-ui', '-apple-system', 'sans-serif'],
+        sans: ['"Sora"', '"DM Sans"', '-apple-system', 'sans-serif'],
         serif: ['"Cormorant Garamond"', 'Georgia', 'serif'],
         mono: ['"JetBrains Mono"', 'monospace'],
       },
       colors: {
-        obsidian: {
-          950: "#050505",
-          900: "#0c0c0b",
-          850: "#121210",
-          800: "#181816",
-          750: "#22221f",
-          700: "#2e2e2a",
-          600: "#40403b",
-          500: "#60605a",
+        // Apple / Ivory / Dark Navy Palette from hrushikeshramilla.in & DALE
+        canvas: "#030405",
+        surface: {
+          DEFAULT: "#080a0d",
+          soft: "#0b0e12",
+          elevated: "#0f1216",
+          hover: "#15191f",
         },
-        champagne: {
-          300: "#f0d5a8",
-          400: "#e2be7e",
-          500: "#d9ad63",
-          600: "#b88a3b",
+        ivory: {
+          DEFAULT: "#EBE5D9",
+          soft: "#d8d1c3",
+          muted: "#8c867a",
+        },
+        sand: {
+          DEFAULT: "#B39D82",
+          light: "#c9b69f",
+          dark: "#8f7a62",
+        },
+        gold: {
+          DEFAULT: "#a68a50",
+          warm: "#d9ad63",
+          glow: "rgba(217, 173, 99, 0.25)",
+        },
+        steel: {
+          DEFAULT: "#7EA8C4",
+          soft: "rgba(126, 168, 196, 0.15)",
         },
         airtel: {
-          500: "#ef4444",
-          600: "#e40000",
-          700: "#b30000",
-          darkred: "#8b0000",
-          ink: "#f2efea",
-          surface: "#0c0c0b",
-          border: "rgba(255, 255, 255, 0.07)",
+          DEFAULT: "#e40000",
+          bright: "#EF4444",
+          soft: "rgba(228, 0, 0, 0.15)",
+          glow: "rgba(228, 0, 0, 0.35)",
         }
       },
       boxShadow: {
-        'airtel-glow': '0 0 25px -4px rgba(228, 0, 0, 0.35)',
-        'champagne-glow': '0 0 25px -4px rgba(217, 173, 99, 0.35)',
-        'subtle-depth': '0 20px 40px -15px rgba(0, 0, 0, 0.9), 0 0 0 1px rgba(255, 255, 255, 0.07)',
-        'glass-card': '0 12px 36px 0 rgba(0, 0, 0, 0.5), inset 0 0 0 1px rgba(255, 255, 255, 0.08)',
+        'apple-card': '0 20px 40px -15px rgba(0, 0, 0, 0.7), 0 0 0 1px rgba(235, 229, 217, 0.06)',
+        'apple-elevated': '0 30px 60px -20px rgba(0, 0, 0, 0.85), 0 0 0 1px rgba(235, 229, 217, 0.1)',
+        'apple-glow': '0 0 25px -4px rgba(228, 0, 0, 0.35)',
+        'ivory-glow': '0 0 25px -4px rgba(235, 229, 217, 0.15)',
       },
-      keyframes: {
-        shimmer: {
-          '0%': { backgroundPosition: '-200% 0' },
-          '100%': { backgroundPosition: '200% 0' },
-        },
-        pulseGlow: {
-          '0%, 100%': { opacity: '0.4' },
-          '50%': { opacity: '0.8' },
-        }
-      },
-      animation: {
-        'shimmer': 'shimmer 8s ease-in-out infinite',
-        'pulse-glow': 'pulseGlow 3s ease-in-out infinite',
+      transitionTimingFunction: {
+        'apple-spring': 'cubic-bezier(0.22, 1, 0.36, 1)',
       }
     },
   },
