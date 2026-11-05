@@ -247,3 +247,51 @@ class KYCVerificationResult(BaseModel):
     execution_latency_ms: float
 
 
+# Lead Rescue ML & Provisioning Schemas
+class LeadRescueItem(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+
+    lead_id: str
+    business_name: str
+    segment: str
+    city: str
+    city_tier: int
+    has_gstin: bool
+    monthly_spend_inr: int
+    stage_reached: str
+    drop_reason: Optional[str] = None
+    propensity_score: float
+    priority_tier: str  # HIGH, MEDIUM, LOW
+    top_risk_factors: list[str]
+    next_best_action: str
+    whatsapp_rescue_link: str
+
+
+class ProvisioningMilestone(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+
+    stage_id: str
+    stage_name: str
+    status: str  # COMPLETED, IN_PROGRESS, PENDING
+    timestamp: Optional[str] = None
+    eta_days: int
+    description: str
+    whatsapp_preview: str
+
+
+class ProvisioningOrder(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+
+    order_id: str
+    business_name: str
+    partner_id: Optional[str] = None
+    partner_commission_inr: int = 0
+    bundle_name: str
+    monthly_charge_inr: int
+    total_sla_days: int
+    current_stage_idx: int
+    milestones: list[ProvisioningMilestone]
+    is_activated: bool
+
+
+
