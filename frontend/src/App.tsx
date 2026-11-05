@@ -11,25 +11,22 @@ import {
   CommercialBreakdown,
   KYCVerificationResult,
   ProvisioningOrder,
-  LeadRescueItem,
 } from "./types";
 import { createProvisioningOrder, calculateQuote } from "./api";
 import {
-  Bot,
-  ShoppingCart,
+  Sparkles,
   ShieldCheck,
   Truck,
-  QrCode,
-  Share2,
-  Copy,
-  Check,
-  CheckCircle2,
-  Sparkles,
+  ArrowRight,
+  Layers,
+  Cpu,
+  Activity,
+  Zap,
 } from "lucide-react";
 
 export const App: React.FC = () => {
   const [currentTab, setTab] = useState<"customer" | "obo" | "partner" | "judge">("customer");
-  const [customerStep, setCustomerStep] = useState<"advisor" | "cpq" | "kyc" | "tracker">("advisor");
+  const [customerStep, setCustomerStep] = useState<"studio" | "kyc" | "tracker">("studio");
 
   // Global Session State
   const [profileSlots, setProfileSlots] = useState<MSMEProfileSlots | null>(null);
@@ -37,12 +34,6 @@ export const App: React.FC = () => {
   const [quote, setQuote] = useState<CommercialBreakdown | null>(null);
   const [kycResult, setKycResult] = useState<KYCVerificationResult | null>(null);
   const [order, setOrder] = useState<ProvisioningOrder | null>(null);
-
-  // Field Rep OBO State
-  const [oboPartnerId, setOboPartnerId] = useState<string>("PARTNER_BLR_9812");
-  const [oboBusinessName, setOboBusinessName] = useState<string>("Shri Ganesh Woodcraft");
-  const [oboSelectedBundle, setOboSelectedBundle] = useState<string>("Smart Office Fiber 200M (P01 + P11 + P16 + P22)");
-  const [oboCopied, setOboCopied] = useState<boolean>(false);
 
   const handleProfileUpdated = (slots: MSMEProfileSlots, skus?: string[]) => {
     setProfileSlots(slots);
@@ -72,7 +63,6 @@ export const App: React.FC = () => {
 
   const handleKYCApproved = async (kycRes: KYCVerificationResult) => {
     setKycResult(kycRes);
-    // Automatically create a provisioning order
     try {
       const bName =
         (kycRes.applicant_id && APPLICANT_NAMES[kycRes.applicant_id]) ||
@@ -152,12 +142,6 @@ export const App: React.FC = () => {
     }
   };
 
-  const generateOBOLink = () => {
-    return `${window.location.origin}?partner_id=${oboPartnerId}&biz=${encodeURIComponent(
-      oboBusinessName
-    )}&bundle=smart_office`;
-  };
-
   const handleLoadDemoOrder = () => {
     setOrder({
       order_id: "ORD_DEMO_2026_8832",
@@ -228,98 +212,89 @@ export const App: React.FC = () => {
     });
   };
 
-  const copyOBOLink = () => {
-    navigator.clipboard.writeText(generateOBOLink());
-    setOboCopied(true);
-    setTimeout(() => setOboCopied(false), 2500);
-  };
-
   return (
-    <div className="min-h-screen bg-slate-950 text-slate-100 flex flex-col font-sans">
+    <div className="min-h-screen bg-[#050505] text-[#f2efea] flex flex-col font-sans selection:bg-[#e40000]/30 selection:text-white relative">
       <Navbar currentTab={currentTab} setTab={setTab} />
 
       <main className="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-6">
-        {/* TAB 1: CUSTOMER SELF-SERVE ONBOARDING JOURNEY */}
+        {/* TAB 1: CUSTOMER ONBOARDING STUDIO */}
         {currentTab === "customer" && (
           <div className="space-y-6">
-            {/* Customer Sub-Stepping Bar - DALE Obsidian Glass */}
+            {/* Architectural Breadcrumb Stepper */}
             <div className="glass-card rounded-2xl p-2 sm:p-2.5 flex items-center justify-between overflow-x-auto no-scrollbar shadow-2xl border border-white/[0.08]">
-              <div className="flex items-center space-x-1.5 sm:space-x-3 shrink-0">
+              <div className="flex items-center space-x-2 sm:space-x-3 shrink-0">
                 <button
-                  onClick={() => setCustomerStep("advisor")}
-                  className={`flex items-center space-x-1.5 px-2.5 sm:px-3 py-1.5 rounded-xl text-xs sm:text-sm font-semibold transition-all shrink-0 ${
-                    customerStep === "advisor"
-                      ? "bg-red-600 text-white shadow-md shadow-red-600/30"
-                      : "text-slate-400 hover:text-white"
+                  onClick={() => setCustomerStep("studio")}
+                  className={`flex items-center space-x-2 px-3 sm:px-4 py-1.5 rounded-full text-xs sm:text-sm font-medium transition-all shrink-0 cursor-pointer ${
+                    customerStep === "studio"
+                      ? "bg-[#e40000] text-white shadow-[0_0_16px_rgba(228,0,0,0.4)]"
+                      : "text-white/60 hover:text-white hover:bg-white/[0.04]"
                   }`}
                 >
-                  <Bot className="w-4 h-4" />
-                  <span className="hidden sm:inline">1. Multilingual Advisor</span>
-                  <span className="sm:hidden">1. Advisor</span>
+                  <Sparkles className="w-3.5 h-3.5" />
+                  <span>1. Architecture Studio &amp; CPQ</span>
                 </button>
 
-                <button
-                  onClick={() => setCustomerStep("cpq")}
-                  className={`flex items-center space-x-1.5 px-2.5 sm:px-3 py-1.5 rounded-xl text-xs sm:text-sm font-semibold transition-all shrink-0 ${
-                    customerStep === "cpq"
-                      ? "bg-red-600 text-white shadow-md shadow-red-600/30"
-                      : "text-slate-400 hover:text-white"
-                  }`}
-                >
-                  <ShoppingCart className="w-4 h-4" />
-                  <span className="hidden sm:inline">2. Dynamic CPQ Cart</span>
-                  <span className="sm:hidden">2. CPQ Cart</span>
-                </button>
+                <div className="w-4 h-[1px] bg-white/20 hidden sm:block" />
 
                 <button
                   onClick={() => setCustomerStep("kyc")}
-                  className={`flex items-center space-x-1.5 px-2.5 sm:px-3 py-1.5 rounded-xl text-xs sm:text-sm font-semibold transition-all shrink-0 ${
+                  className={`flex items-center space-x-2 px-3 sm:px-4 py-1.5 rounded-full text-xs sm:text-sm font-medium transition-all shrink-0 cursor-pointer ${
                     customerStep === "kyc"
-                      ? "bg-red-600 text-white shadow-md shadow-red-600/30"
-                      : "text-slate-400 hover:text-white"
+                      ? "bg-[#e40000] text-white shadow-[0_0_16px_rgba(228,0,0,0.4)]"
+                      : "text-white/60 hover:text-white hover:bg-white/[0.04]"
                   }`}
                 >
-                  <ShieldCheck className="w-4 h-4" />
-                  <span className="hidden sm:inline">3. Smart KYC Gate</span>
-                  <span className="sm:hidden">3. Smart KYC</span>
+                  <ShieldCheck className="w-3.5 h-3.5" />
+                  <span>2. Smart KYC &amp; DPDP Gate</span>
                 </button>
+
+                <div className="w-4 h-[1px] bg-white/20 hidden sm:block" />
 
                 <button
                   onClick={() => setCustomerStep("tracker")}
-                  className={`flex items-center space-x-1.5 px-2.5 sm:px-3 py-1.5 rounded-xl text-xs sm:text-sm font-semibold transition-all shrink-0 ${
+                  className={`flex items-center space-x-2 px-3 sm:px-4 py-1.5 rounded-full text-xs sm:text-sm font-medium transition-all shrink-0 cursor-pointer ${
                     customerStep === "tracker"
-                      ? "bg-red-600 text-white shadow-md shadow-red-600/30"
-                      : "text-slate-400 hover:text-white"
+                      ? "bg-[#e40000] text-white shadow-[0_0_16px_rgba(228,0,0,0.4)]"
+                      : "text-white/60 hover:text-white hover:bg-white/[0.04]"
                   }`}
                 >
-                  <Truck className="w-4 h-4" />
-                  <span className="hidden sm:inline">4. Provisioning Tracker</span>
-                  <span className="sm:hidden">4. Tracker</span>
+                  <Truck className="w-3.5 h-3.5" />
+                  <span>3. SLA Fulfillment Pipeline</span>
                 </button>
               </div>
 
-              <div className="hidden lg:flex items-center space-x-2 text-xs font-mono text-slate-400 bg-slate-950 px-3 py-1 rounded-lg border border-slate-800 shrink-0">
-                <Sparkles className="w-3.5 h-3.5 text-amber-400" />
-                <span>One-Sitting MSME Onboarding Journey</span>
+              <div className="hidden lg:flex items-center space-x-2 text-[11px] font-mono text-white/50 bg-[#121210] px-3.5 py-1 rounded-full border border-white/[0.07] shrink-0">
+                <span className="live-pulse-dot" />
+                <span>Zero-Drop Quoting &amp; 4-Day SLA Active</span>
               </div>
             </div>
 
-            {/* Step Rendering */}
-            {customerStep === "advisor" && (
-              <AdvisorChat
-                onProfileUpdated={handleProfileUpdated}
-                onProceedToCPQ={() => setCustomerStep("cpq")}
-              />
+            {/* Step 1: UNIFIED STUDIO (Copilot + Live Real-Time CPQ Solution) */}
+            {customerStep === "studio" && (
+              <div className="space-y-6">
+                <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
+                  {/* Left Column: Multilingual AI Copilot */}
+                  <div className="lg:col-span-6">
+                    <AdvisorChat
+                      onProfileUpdated={handleProfileUpdated}
+                      onProceedToCPQ={() => setCustomerStep("kyc")}
+                    />
+                  </div>
+
+                  {/* Right Column: Live Dynamic CPQ Solution & Budget Optimizer */}
+                  <div className="lg:col-span-6">
+                    <CPQCart
+                      profileSlots={profileSlots}
+                      recommendedSkus={recommendedSkus}
+                      onProceedToKYC={handleProceedToKYC}
+                    />
+                  </div>
+                </div>
+              </div>
             )}
 
-            {customerStep === "cpq" && (
-              <CPQCart
-                profileSlots={profileSlots}
-                recommendedSkus={recommendedSkus}
-                onProceedToKYC={handleProceedToKYC}
-              />
-            )}
-
+            {/* Step 2: SMART KYC */}
             {customerStep === "kyc" && (
               <SmartKYC
                 quote={quote}
@@ -328,28 +303,29 @@ export const App: React.FC = () => {
               />
             )}
 
+            {/* Step 3: FULFILLMENT TRACKER */}
             {customerStep === "tracker" && (
               order ? (
                 <OrderTracker order={order} onOrderUpdated={(up) => setOrder(up)} />
               ) : (
-                <div className="bg-slate-900 border border-slate-800 rounded-2xl p-10 text-center space-y-4">
-                  <ShieldCheck className="w-12 h-12 text-slate-600 mx-auto" />
-                  <h3 className="text-lg font-bold text-white">No Active Provisioning Order Yet</h3>
-                  <p className="text-xs text-slate-400 max-w-md mx-auto">
-                    Complete the Smart KYC verification step or select a scenario in the Judge Test Bench to populate order telemetry.
+                <div className="glass-card rounded-2xl p-12 text-center space-y-4 border border-white/[0.08]">
+                  <ShieldCheck className="w-12 h-12 text-white/40 mx-auto" />
+                  <h3 className="font-serif text-xl font-medium text-white">No Active Order In-Flight</h3>
+                  <p className="text-xs text-white/50 max-w-md mx-auto leading-relaxed">
+                    Complete the Smart KYC verification step or select a pre-staged customer scenario to initialize fulfillment telemetry.
                   </p>
-                  <div className="flex items-center justify-center space-x-3 pt-2">
+                  <div className="flex items-center justify-center space-x-3 pt-3">
                     <button
                       onClick={() => setCustomerStep("kyc")}
-                      className="bg-red-600 hover:bg-red-500 text-white text-xs font-bold py-2.5 px-4 rounded-xl shadow-md transition-all"
+                      className="bg-[#e40000] hover:bg-[#b30000] text-white text-xs font-medium py-2.5 px-5 rounded-xl shadow-[0_0_16px_rgba(228,0,0,0.4)] transition-all cursor-pointer"
                     >
-                      Go to Smart KYC
+                      Run Smart KYC Gate
                     </button>
                     <button
                       onClick={handleLoadDemoOrder}
-                      className="bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 text-xs font-semibold py-2.5 px-4 rounded-xl transition-all"
+                      className="bg-white/[0.05] hover:bg-white/[0.1] text-white/80 border border-white/[0.08] text-xs font-medium py-2.5 px-5 rounded-xl transition-all cursor-pointer"
                     >
-                      Simulate Sample Active Order
+                      Load Verified Specimen Order
                     </button>
                   </div>
                 </div>
@@ -358,121 +334,29 @@ export const App: React.FC = () => {
           </div>
         )}
 
-        {/* TAB 2: FIELD REP ON-BEHALF-OF (OBO) & QR ATTRIBUTION */}
-        {currentTab === "obo" && (
-          <div className="max-w-4xl mx-auto space-y-6">
-            <div className="bg-slate-900 border border-slate-800 rounded-2xl p-6 shadow-xl space-y-4">
-              <div className="flex items-center justify-between pb-4 border-b border-slate-800">
-                <div className="flex items-center space-x-2">
-                  <QrCode className="w-6 h-6 text-red-500" />
-                  <h2 className="text-xl font-bold text-white tracking-tight">
-                    Field Sales Assisted On-Behalf-Of (OBO) Mode
-                  </h2>
-                </div>
-                <span className="text-xs bg-red-500/20 text-red-400 border border-red-500/30 px-3 py-1 rounded-full font-mono font-bold">
-                  Phygital Handoff Active
-                </span>
-              </div>
-              <p className="text-xs text-slate-400 leading-relaxed">
-                Field agents configure the optimal solution during store visits and dispatch a pre-filled, signed session link to the owner's WhatsApp. Solves the <strong>531 leads dropped because owners had no time for lengthy visits</strong>.
-              </p>
-
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 pt-2">
-                <div className="space-y-2">
-                  <label className="text-xs font-semibold text-slate-300">Partner / Rep ID</label>
-                  <input
-                    type="text"
-                    value={oboPartnerId}
-                    onChange={(e) => setOboPartnerId(e.target.value)}
-                    className="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-xs text-white font-mono"
-                  />
-                </div>
-                <div className="space-y-2">
-                  <label className="text-xs font-semibold text-slate-300">Merchant Business Name</label>
-                  <input
-                    type="text"
-                    value={oboBusinessName}
-                    onChange={(e) => setOboBusinessName(e.target.value)}
-                    className="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-xs text-white"
-                  />
-                </div>
-              </div>
-
-              <div className="space-y-2 pt-2">
-                <label className="text-xs font-semibold text-slate-300">Recommended Telecom Package</label>
-                <select
-                  value={oboSelectedBundle}
-                  onChange={(e) => setOboSelectedBundle(e.target.value)}
-                  className="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-xs text-white"
-                >
-                  <option value="Smart Office Fiber 200M (P01 + P11 + P16 + P22)">
-                    Smart Office Fiber 200M (P01 + P11 + P16 + P22) - ₹2,999/mo
-                  </option>
-                  <option value="Kirana Digital Connect (P02 + P17 + P22) [Non-GST Eligible]">
-                    Kirana Digital Connect (P02 + P17 + P22) [Non-GST Eligible] - ₹1,499/mo
-                  </option>
-                  <option value="Enterprise Branch ILL (P03 + P11 + P14 + P23)">
-                    Enterprise Branch ILL (P03 + P11 + P14 + P23) - ₹9,999/mo
-                  </option>
-                </select>
-              </div>
-
-              {/* Generated Deep Link */}
-              <div className="mt-6 p-4 rounded-xl bg-slate-950 border border-slate-800 space-y-3">
-                <div className="flex items-center justify-between text-xs">
-                  <span className="font-semibold text-slate-300">Pre-Hydrated WhatsApp Consent Link</span>
-                  <span className="text-[10px] text-emerald-400 font-mono">Commission Locked: 15%</span>
-                </div>
-                <div className="p-3 bg-slate-900 rounded-lg text-xs font-mono text-slate-300 break-all border border-slate-800">
-                  {generateOBOLink()}
-                </div>
-                <div className="flex items-center justify-between pt-2">
-                  <button
-                    onClick={copyOBOLink}
-                    className="flex items-center space-x-1.5 bg-slate-800 hover:bg-slate-700 text-white font-semibold py-2 px-4 rounded-xl text-xs transition-all"
-                  >
-                    {oboCopied ? <Check className="w-3.5 h-3.5 text-emerald-400" /> : <Copy className="w-3.5 h-3.5" />}
-                    <span>{oboCopied ? "Link Copied!" : "Copy Link"}</span>
-                  </button>
-
-                  <a
-                    href={`https://wa.me/?text=${encodeURIComponent(
-                      `Namaste! Your Airtel Business solution for ${oboBusinessName} is ready for 1-click digital sign-off: ${generateOBOLink()}`
-                    )}`}
-                    target="_blank"
-                    rel="noreferrer"
-                    className="flex items-center space-x-1.5 bg-emerald-600 hover:bg-emerald-500 text-white font-bold py-2 px-4 rounded-xl text-xs transition-all shadow-md shadow-emerald-600/30"
-                  >
-                    <Share2 className="w-3.5 h-3.5" />
-                    <span>Dispatch via WhatsApp</span>
-                  </a>
-                </div>
-              </div>
-            </div>
-          </div>
-        )}
-
-        {/* TAB 3: PARTNER ML RESCUE CONSOLE */}
+        {/* TAB 2: PARTNER ML RESCUE CONSOLE */}
         {currentTab === "partner" && <PartnerRescueConsole />}
 
-        {/* TAB 4: JUDGE TEST BENCH */}
+        {/* TAB 3: JUDGE TEST BENCH */}
         {currentTab === "judge" && <JudgeTestBench />}
       </main>
 
-      {/* Footer - DALE Editorial Footer */}
-      <footer className="border-t border-white/[0.08] bg-[#0c0c0b]/80 backdrop-blur-md py-6 mt-12">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col sm:flex-row items-center justify-between gap-3 text-xs text-[#a3a19b]">
-          <div className="flex items-center space-x-2 font-sans">
-            <span className="font-semibold text-white">Project Udyam Digital</span>
-            <span>•</span>
-            <span>Airtel SYNC Hackathon 2026 Enterprise Track A</span>
+      {/* Footer - Architectural Telemetry Bar */}
+      <footer className="border-t border-white/[0.07] bg-[#070707]/90 backdrop-blur-xl py-6 mt-12">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col sm:flex-row items-center justify-between gap-3 text-xs text-white/50">
+          <div className="flex items-center space-x-2 font-mono text-[11px]">
+            <span className="font-semibold text-white">Bharti Airtel Enterprise</span>
+            <span>·</span>
+            <span>Project Udyam Digital</span>
+            <span>·</span>
+            <span className="text-[#d9ad63]">SYNC 2026 Track A</span>
           </div>
-          <div className="flex items-center space-x-4 font-mono text-[11px] text-[#71716e]">
-            <span className="hover:text-emerald-400 transition-colors">FastAPI + SQLite (3,534 GSTINs)</span>
-            <span>•</span>
-            <span className="hover:text-amber-400 transition-colors">LightGBM (5,000 Telemetry Leads)</span>
-            <span>•</span>
-            <span className="hover:text-red-400 transition-colors">DPDP Act 2023 Zero-Numeric Mask</span>
+          <div className="flex items-center space-x-4 font-mono text-[10px] text-white/40 uppercase tracking-wider">
+            <span className="hover:text-emerald-400 transition-colors">FastAPI + 3,534 GSTINs</span>
+            <span>·</span>
+            <span className="hover:text-amber-400 transition-colors">LightGBM SHAP 5K Leads</span>
+            <span>·</span>
+            <span className="hover:text-[#e40000] transition-colors">DPDP 2023 Compliant</span>
           </div>
         </div>
       </footer>
