@@ -41,7 +41,7 @@ const renderFormattedMessage = (text: string) => {
 
         if (trimmed.startsWith("### ")) {
           return (
-            <h4 key={idx} className="font-bold text-white text-sm sm:text-base tracking-tight mb-1">
+            <h4 key={idx} className="font-serif text-lg sm:text-xl font-normal text-white tracking-tight mb-1">
               {trimmed.replace("### ", "")}
             </h4>
           );
@@ -241,9 +241,9 @@ export const AdvisorChat: React.FC<AdvisorChatProps> = ({ onProfileUpdated, onPr
   ];
 
   return (
-    <div className="flex flex-col h-[580px] bg-slate-900 border border-slate-800 rounded-2xl overflow-hidden shadow-2xl">
+    <div className="flex flex-col h-[600px] glass-card rounded-2xl overflow-hidden shadow-2xl border border-white/[0.08]">
       {/* Advisor Header with Extracted Slots Badges */}
-      <div className="p-4 bg-slate-950/70 border-b border-slate-800 flex items-center justify-between">
+      <div className="p-4 bg-[#0e0e0d]/90 border-b border-white/[0.08] flex items-center justify-between">
         <div className="flex items-center space-x-3">
           <div className="w-8 h-8 rounded-lg bg-red-600/20 border border-red-500/30 flex items-center justify-center text-red-500">
             <Sparkles className="w-4 h-4" />
@@ -323,10 +323,10 @@ export const AdvisorChat: React.FC<AdvisorChatProps> = ({ onProfileUpdated, onPr
             </div>
 
             <div
-              className={`max-w-[85%] rounded-2xl px-4 py-3 text-sm leading-relaxed shadow-sm ${
+              className={`max-w-[85%] rounded-2xl px-4 py-3 text-sm leading-relaxed shadow-lg ${
                 m.sender === "user"
-                  ? "bg-red-600 text-white rounded-tr-none"
-                  : "bg-slate-800/90 text-slate-100 border border-slate-700/60 rounded-tl-none"
+                  ? "bg-gradient-to-r from-red-600 to-rose-700 text-white rounded-tr-none shadow-red-600/25"
+                  : "bg-[#141413]/90 text-[#f4f3ef] border border-white/[0.08] rounded-tl-none backdrop-blur-md"
               }`}
             >
               {renderFormattedMessage(m.text)}
@@ -349,9 +349,13 @@ export const AdvisorChat: React.FC<AdvisorChatProps> = ({ onProfileUpdated, onPr
         ))}
 
         {loading && (
-          <div className="flex items-center space-x-2 text-slate-400 text-xs">
-            <div className="w-2 h-2 rounded-full bg-red-500 animate-ping" />
-            <span>Consulting deterministic CPQ catalogue...</span>
+          <div className="flex items-center space-x-2.5 text-[#a3a19b] text-xs bg-[#141413]/80 border border-white/[0.08] w-fit px-3 py-1.5 rounded-full shadow-md">
+            <div className="flex space-x-1">
+              <span className="w-1.5 h-1.5 rounded-full bg-red-500 animate-bounce" style={{ animationDelay: "0ms" }} />
+              <span className="w-1.5 h-1.5 rounded-full bg-amber-400 animate-bounce" style={{ animationDelay: "150ms" }} />
+              <span className="w-1.5 h-1.5 rounded-full bg-red-500 animate-bounce" style={{ animationDelay: "300ms" }} />
+            </div>
+            <span className="font-mono text-[11px] text-[#a3a19b]">Consulting deterministic CPQ DAG solver...</span>
           </div>
         )}
         <div ref={messagesEndRef} />
@@ -377,8 +381,8 @@ export const AdvisorChat: React.FC<AdvisorChatProps> = ({ onProfileUpdated, onPr
         ))}
       </div>
 
-      {/* Input Bar */}
-      <div className="p-3 bg-slate-950 border-t border-slate-800 flex items-center space-x-2">
+      {/* Input Bar - Obsidian Glass */}
+      <div className="p-3 bg-[#0c0c0b]/90 border-t border-white/[0.08] flex items-center space-x-2">
         <button
           onClick={handleVoiceInput}
           className={`p-2.5 rounded-xl border transition-all ${

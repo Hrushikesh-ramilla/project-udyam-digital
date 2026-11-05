@@ -242,8 +242,8 @@ export const App: React.FC = () => {
         {/* TAB 1: CUSTOMER SELF-SERVE ONBOARDING JOURNEY */}
         {currentTab === "customer" && (
           <div className="space-y-6">
-            {/* Customer Sub-Stepping Bar */}
-            <div className="bg-slate-900 border border-slate-800 rounded-2xl p-2.5 sm:p-3 flex items-center justify-between overflow-x-auto no-scrollbar">
+            {/* Customer Sub-Stepping Bar - DALE Obsidian Glass */}
+            <div className="glass-card rounded-2xl p-2 sm:p-2.5 flex items-center justify-between overflow-x-auto no-scrollbar shadow-2xl border border-white/[0.08]">
               <div className="flex items-center space-x-1.5 sm:space-x-3 shrink-0">
                 <button
                   onClick={() => setCustomerStep("advisor")}
@@ -459,18 +459,20 @@ export const App: React.FC = () => {
         {currentTab === "judge" && <JudgeTestBench />}
       </main>
 
-      {/* Footer */}
-      <footer className="border-t border-slate-800 bg-slate-900/60 py-4 mt-8">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col sm:flex-row items-center justify-between gap-2 text-xs text-slate-500">
-          <div>
-            Project Udyam Digital • Airtel SYNC Hackathon 2026 Enterprise Track
+      {/* Footer - DALE Editorial Footer */}
+      <footer className="border-t border-white/[0.08] bg-[#0c0c0b]/80 backdrop-blur-md py-6 mt-12">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col sm:flex-row items-center justify-between gap-3 text-xs text-[#a3a19b]">
+          <div className="flex items-center space-x-2 font-sans">
+            <span className="font-semibold text-white">Project Udyam Digital</span>
+            <span>•</span>
+            <span>Airtel SYNC Hackathon 2026 Enterprise Track A</span>
           </div>
-          <div className="flex items-center space-x-4">
-            <span>FastAPI + SQLite Registry</span>
+          <div className="flex items-center space-x-4 font-mono text-[11px] text-[#71716e]">
+            <span className="hover:text-emerald-400 transition-colors">FastAPI + SQLite (3,534 GSTINs)</span>
             <span>•</span>
-            <span>LightGBM (5,000 Leads)</span>
+            <span className="hover:text-amber-400 transition-colors">LightGBM (5,000 Telemetry Leads)</span>
             <span>•</span>
-            <span>DPDP Act 2023 Compliant</span>
+            <span className="hover:text-red-400 transition-colors">DPDP Act 2023 Zero-Numeric Mask</span>
           </div>
         </div>
       </footer>

@@ -153,59 +153,69 @@ export const SmartKYC: React.FC<SmartKYCProps> = ({ quote, onKYCApproved, onSwit
   };
 
   return (
-    <div className="max-w-5xl mx-auto space-y-6">
+    <div className="max-w-5xl mx-auto space-y-6 animate-fade-in">
       {/* Header Banner */}
-      <div className="bg-slate-900 border border-slate-800 rounded-2xl p-6 shadow-xl flex flex-col md:flex-row md:items-center justify-between gap-4">
+      <div className="glass-card rounded-2xl p-6 flex flex-col md:flex-row md:items-center justify-between gap-5 relative overflow-hidden">
+        <div className="absolute top-0 right-0 w-80 h-80 bg-emerald-500/5 rounded-full blur-3xl pointer-events-none" />
         <div>
-          <div className="flex items-center space-x-2">
-            <ShieldCheck className="w-6 h-6 text-emerald-400" />
-            <h2 className="text-xl font-bold text-white tracking-tight">
+          <div className="flex items-center space-x-2.5">
+            <div className="w-8 h-8 rounded-lg bg-emerald-500/15 border border-emerald-500/30 flex items-center justify-center text-emerald-400">
+              <ShieldCheck className="w-4 h-4" />
+            </div>
+            <h2 className="font-serif text-xl font-normal text-white tracking-tight">
               Smart KYC &amp; DPDP Anomaly Gate
             </h2>
-            <span className="text-xs bg-emerald-500/10 text-emerald-400 border border-emerald-500/30 px-2.5 py-0.5 rounded-full font-semibold">
-              Evaluation Anchor: 2026-07-15
+            <span className="text-[11px] font-mono bg-emerald-500/10 text-emerald-400 border border-emerald-500/30 px-2.5 py-0.5 rounded-full font-medium">
+              Anchor: 2026-07-15
             </span>
           </div>
-          <p className="text-xs text-slate-400 mt-1">
+          <p className="text-xs text-white/60 mt-1.5 leading-relaxed max-w-2xl">
             Deterministic registry cross-checks (3,534 GSTINs + 2,723 Udyams) with in-memory national ID redaction and RapidFuzz entity matching in &lt;200ms.
           </p>
         </div>
 
         {/* DPDP Act 2023 Consent Toggle */}
-        <div className="flex items-center space-x-3 bg-slate-950/80 p-3 rounded-xl border border-slate-800">
+        <div className="flex items-center space-x-3 bg-obsidian-surface/80 p-3.5 rounded-xl border border-white/[0.08] shrink-0">
           <input
             type="checkbox"
             id="dpdp-consent"
             checked={consentGranted}
             onChange={(e) => setConsentGranted(e.target.checked)}
-            className="w-4 h-4 text-red-600 bg-slate-800 border-slate-700 rounded focus:ring-red-500"
+            className="w-4 h-4 text-airtel-crimson bg-obsidian-elevated border-white/20 rounded focus:ring-airtel-crimson cursor-pointer accent-airtel-crimson"
           />
-          <label htmlFor="dpdp-consent" className="text-xs text-slate-300 cursor-pointer">
-            <span className="font-semibold text-white">DPDP Act 2023 Digital Consent</span>
-            <span className="block text-[10px] text-slate-500">
-              Purpose: Telecom verification. Zero persistence of unmasked UIDs.
+          <label htmlFor="dpdp-consent" className="text-xs text-white/80 cursor-pointer">
+            <span className="font-medium text-white block">DPDP Act 2023 Consent</span>
+            <span className="block text-[10px] text-white/40">
+              In-memory masking • Zero plain UID persistence
             </span>
           </label>
           <button
             onClick={() => setShowConsentModal(true)}
-            className="text-xs text-blue-400 hover:text-blue-300 underline ml-2"
+            className="text-xs font-mono text-champagne-gold hover:underline ml-2 cursor-pointer"
           >
             Audit Log
           </button>
         </div>
       </div>
 
+      {remediationNotice && (
+        <div className="p-3.5 rounded-xl bg-emerald-950/30 border border-emerald-500/40 text-emerald-300 text-xs flex items-center space-x-2">
+          <Sparkles className="w-4 h-4 text-emerald-400 shrink-0" />
+          <span>{remediationNotice}</span>
+        </div>
+      )}
+
       {/* Mode Switcher: Preset Specimens vs Real File Upload */}
-      <div className="flex space-x-2 border-b border-slate-800 pb-2">
+      <div className="flex space-x-2 border-b border-white/[0.06] pb-2">
         <button
           onClick={() => {
             setActiveTab("preset");
             setUploadResponse(null);
           }}
-          className={`flex items-center space-x-2 px-4 py-2 rounded-xl text-xs font-bold transition-all ${
+          className={`flex items-center space-x-2 px-4 py-2 rounded-xl text-xs font-medium transition-all cursor-pointer ${
             activeTab === "preset"
-              ? "bg-red-600 text-white shadow-md shadow-red-600/30"
-              : "bg-slate-800/60 text-slate-400 hover:text-white"
+              ? "bg-airtel-crimson text-white shadow-airtel-glow"
+              : "bg-white/[0.04] text-white/60 hover:text-white hover:bg-white/[0.08]"
           }`}
         >
           <FileText className="w-4 h-4" />
@@ -216,10 +226,10 @@ export const SmartKYC: React.FC<SmartKYCProps> = ({ quote, onKYCApproved, onSwit
             setActiveTab("upload");
             setKycResult(null);
           }}
-          className={`flex items-center space-x-2 px-4 py-2 rounded-xl text-xs font-bold transition-all ${
+          className={`flex items-center space-x-2 px-4 py-2 rounded-xl text-xs font-medium transition-all cursor-pointer ${
             activeTab === "upload"
-              ? "bg-red-600 text-white shadow-md shadow-red-600/30"
-              : "bg-slate-800/60 text-slate-400 hover:text-white"
+              ? "bg-airtel-crimson text-white shadow-airtel-glow"
+              : "bg-white/[0.04] text-white/60 hover:text-white hover:bg-white/[0.08]"
           }`}
         >
           <Upload className="w-4 h-4" />
@@ -229,18 +239,18 @@ export const SmartKYC: React.FC<SmartKYCProps> = ({ quote, onKYCApproved, onSwit
 
       {activeTab === "preset" ? (
         /* Preset Applicant Selector for Demo / Testing */
-        <div className="bg-slate-900 border border-slate-800 rounded-2xl p-5 shadow-xl">
-          <div className="flex items-center justify-between mb-4">
-            <h3 className="text-sm font-semibold text-slate-200 uppercase tracking-wider flex items-center space-x-2">
-              <FileText className="w-4 h-4 text-red-500" />
+        <div className="glass-card rounded-2xl p-6">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 mb-4 pb-2 border-b border-white/[0.06]">
+            <h3 className="font-serif text-base font-normal text-white flex items-center space-x-2">
+              <FileText className="w-4 h-4 text-airtel-crimson" />
               <span>Select Applicant Document Specimen</span>
             </h3>
-            <span className="text-xs text-slate-400">
+            <span className="text-[11px] font-mono text-white/40">
               Powered by SHA-256 Content-Addressable OCR (Zero Filename Branching)
             </span>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3.5">
             {presets.map((preset) => {
               const isSelected = selectedPreset === preset.id;
               return (
@@ -250,37 +260,37 @@ export const SmartKYC: React.FC<SmartKYCProps> = ({ quote, onKYCApproved, onSwit
                     setSelectedPreset(preset.id);
                     setKycResult(null);
                   }}
-                  className={`p-3.5 rounded-xl border transition-all cursor-pointer ${
+                  className={`p-4 rounded-xl border transition-all cursor-pointer group ${
                     isSelected
-                      ? "border-red-500 bg-red-950/20 shadow-md shadow-red-950/30"
-                      : "border-slate-800 bg-slate-950/40 hover:border-slate-700"
+                      ? "border-airtel-crimson/70 bg-airtel-crimson/10 shadow-airtel-glow"
+                      : "border-white/[0.06] bg-obsidian-surface/60 hover:border-white/[0.18] hover:bg-obsidian-elevated/70"
                   }`}
                 >
                   <div className="flex items-center justify-between">
-                    <span className="text-xs font-bold text-white">{preset.label}</span>
+                    <span className="text-xs font-medium text-white">{preset.label}</span>
                     <span
-                      className={`text-[9px] px-1.5 py-0.5 rounded font-bold uppercase ${
+                      className={`text-[9px] px-2 py-0.5 rounded-full font-mono uppercase ${
                         preset.type === "CLEAN"
-                          ? "bg-emerald-500/20 text-emerald-400"
+                          ? "bg-emerald-500/15 text-emerald-400 border border-emerald-500/30"
                           : preset.type === "EXEMPT"
-                          ? "bg-blue-500/20 text-blue-400"
-                          : "bg-amber-500/20 text-amber-400"
+                          ? "bg-blue-500/15 text-blue-400 border border-blue-500/30"
+                          : "bg-amber-500/15 text-amber-400 border border-amber-500/30"
                       }`}
                     >
                       {preset.type}
                     </span>
                   </div>
-                  <p className="text-[11px] text-slate-400 mt-1.5 leading-relaxed">{preset.desc}</p>
+                  <p className="text-[11px] text-white/50 mt-2 leading-relaxed">{preset.desc}</p>
                 </div>
               );
             })}
           </div>
 
-          <div className="mt-5 flex justify-end">
+          <div className="mt-6 flex justify-end">
             <button
               onClick={handleVerify}
               disabled={isVerifying || !consentGranted}
-              className="flex items-center space-x-2 bg-red-600 hover:bg-red-500 text-white font-bold py-2.5 px-6 rounded-xl shadow-lg shadow-red-600/30 transition-all text-xs sm:text-sm disabled:opacity-50"
+              className="flex items-center space-x-2 bg-airtel-crimson hover:bg-airtel-hover text-white font-medium py-2.5 px-6 rounded-xl shadow-airtel-glow transition-all text-xs sm:text-sm disabled:opacity-50 cursor-pointer"
             >
               <RefreshCw className={`w-4 h-4 ${isVerifying ? "animate-spin" : ""}`} />
               <span>{isVerifying ? "Executing Verification Funnel..." : "Run Deterministic KYC Gate"}</span>
@@ -289,25 +299,25 @@ export const SmartKYC: React.FC<SmartKYCProps> = ({ quote, onKYCApproved, onSwit
         </div>
       ) : (
         /* Real Drag & Drop / Multi-Slot Upload Experience */
-        <div className="bg-slate-900 border border-slate-800 rounded-2xl p-6 shadow-xl space-y-5">
-          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-slate-800 pb-4">
+        <div className="glass-card rounded-2xl p-6 space-y-5">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-white/[0.06] pb-4">
             <div>
-              <h3 className="text-sm font-semibold text-slate-200 uppercase tracking-wider flex items-center space-x-2">
+              <h3 className="font-serif text-base font-normal text-white flex items-center space-x-2">
                 <FileUp className="w-4 h-4 text-emerald-400" />
                 <span>4-Slot Document Staging &amp; Live Inspection</span>
               </h3>
-              <p className="text-xs text-slate-400 mt-1">
+              <p className="text-xs text-white/50 mt-1">
                 Upload individual files to inspect live OCR validity in isolation, or stage all documents to verify the complete package.
               </p>
             </div>
             <div className="flex items-center space-x-2">
-              <span className="text-[11px] bg-slate-800 text-slate-300 border border-slate-700 px-3 py-1 rounded-full font-semibold">
+              <span className="text-[11px] font-mono bg-white/[0.04] text-white/70 border border-white/[0.08] px-3 py-1 rounded-full">
                 {Object.keys(uploadedSlots).length} of 4 Staged
               </span>
               <button
                 onClick={handleVerifyCompletePackage}
                 disabled={Object.keys(uploadedSlots).length === 0}
-                className="flex items-center space-x-1.5 bg-emerald-600 hover:bg-emerald-500 text-white font-bold py-1.5 px-3.5 rounded-xl text-xs shadow-md shadow-emerald-600/20 disabled:opacity-50 cursor-pointer"
+                className="flex items-center space-x-1.5 bg-emerald-600 hover:bg-emerald-500 text-white font-medium py-1.5 px-3.5 rounded-xl text-xs shadow-md shadow-emerald-950/40 disabled:opacity-50 cursor-pointer"
               >
                 <ShieldCheck className="w-3.5 h-3.5" />
                 <span>Verify Complete Package</span>
@@ -345,7 +355,6 @@ export const SmartKYC: React.FC<SmartKYCProps> = ({ quote, onKYCApproved, onSwit
             ].map((slot) => {
               const staged = uploadedSlots[slot.id];
               const isApproved = staged?.res.single_doc_result?.status === "APPROVED";
-              const isRejected = staged?.res.single_doc_result?.status === "REJECTED";
               return (
                 <div
                   key={slot.id}
@@ -353,27 +362,27 @@ export const SmartKYC: React.FC<SmartKYCProps> = ({ quote, onKYCApproved, onSwit
                     staged
                       ? isApproved
                         ? "bg-emerald-950/20 border-emerald-500/40"
-                        : "bg-red-950/20 border-red-500/40"
-                      : "bg-slate-950 border-slate-800"
+                        : "bg-airtel-crimson/10 border-airtel-crimson/40"
+                      : "bg-obsidian-surface/60 border-white/[0.06]"
                   }`}
                 >
                   <div className="flex items-center justify-between mb-2">
-                    <span className="text-xs font-bold text-slate-200">{slot.label}</span>
+                    <span className="text-xs font-medium text-white">{slot.label}</span>
                     {staged ? (
                       <span
-                        className={`text-[9px] px-2 py-0.5 rounded font-bold uppercase ${
-                          isApproved ? "bg-emerald-500/20 text-emerald-400" : "bg-red-500/20 text-red-400"
+                        className={`text-[9px] px-2 py-0.5 rounded-full font-mono uppercase ${
+                          isApproved ? "bg-emerald-500/20 text-emerald-400" : "bg-airtel-crimson/20 text-airtel-crimson"
                         }`}
                       >
                         {isApproved ? "ACTIVE IN REGISTRY" : "REGISTRY DEFECT"}
                       </span>
                     ) : (
-                      <span className="text-[9px] text-slate-500 font-mono">
+                      <span className="text-[9px] text-white/40 font-mono">
                         {slot.req ? "MANDATORY" : "OPTIONAL (EXEMPT)"}
                       </span>
                     )}
                   </div>
-                  <p className="text-[11px] text-slate-400 mb-3">{slot.sub}</p>
+                  <p className="text-[11px] text-white/50 mb-3">{slot.sub}</p>
 
                   <div className="flex items-center space-x-2">
                     <input
@@ -388,24 +397,24 @@ export const SmartKYC: React.FC<SmartKYCProps> = ({ quote, onKYCApproved, onSwit
                     />
                     <label
                       htmlFor={`slot-file-${slot.id}`}
-                      className="cursor-pointer inline-flex items-center space-x-1.5 px-3 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs font-medium border border-slate-700 transition-all"
+                      className="cursor-pointer inline-flex items-center space-x-1.5 px-3 py-1.5 rounded-lg bg-white/[0.06] hover:bg-white/[0.12] text-white/80 text-xs font-medium border border-white/[0.1] transition-all"
                     >
-                      <Upload className="w-3.5 h-3.5 text-slate-400" />
+                      <Upload className="w-3.5 h-3.5 text-white/60" />
                       <span>{staged ? "Replace File" : "Upload File"}</span>
                     </label>
                     {staged && (
-                      <span className="text-xs font-mono text-slate-400 truncate max-w-[160px]">
+                      <span className="text-xs font-mono text-white/50 truncate max-w-[160px]">
                         {staged.file.name}
                       </span>
                     )}
                   </div>
 
                   {staged?.res.extracted_fields && Object.keys(staged.res.extracted_fields).length > 0 && (
-                    <div className="mt-3 pt-3 border-t border-slate-800/60 grid grid-cols-2 gap-1.5 text-[10px] font-mono">
+                    <div className="mt-3 pt-3 border-t border-white/[0.06] grid grid-cols-2 gap-1.5 text-[10px] font-mono">
                       {Object.entries(staged.res.extracted_fields).slice(0, 4).map(([k, v]) => (
-                        <div key={k} className="bg-slate-900/80 p-1.5 rounded border border-slate-800/80 truncate">
-                          <span className="text-slate-500 block uppercase">{k}:</span>
-                          <span className="text-slate-300 font-semibold">{v || "N/A"}</span>
+                        <div key={k} className="bg-obsidian-canvas/60 p-1.5 rounded border border-white/[0.04] truncate">
+                          <span className="text-white/40 block uppercase">{k}:</span>
+                          <span className="text-white/80 font-medium">{v || "N/A"}</span>
                         </div>
                       ))}
                     </div>
@@ -419,35 +428,41 @@ export const SmartKYC: React.FC<SmartKYCProps> = ({ quote, onKYCApproved, onSwit
 
       {/* Verification Result Display */}
       {kycResult && (
-        <div className="space-y-5 animate-in fade-in duration-300">
+        <div className="space-y-5 animate-fade-in">
           {/* Main Status & Latency Banner */}
           <div
-            className={`p-5 rounded-2xl border flex flex-col sm:flex-row sm:items-center justify-between gap-4 ${
+            className={`p-6 rounded-2xl border flex flex-col sm:flex-row sm:items-center justify-between gap-4 glass-card ${
               kycResult.status === "APPROVED"
-                ? "bg-emerald-950/30 border-emerald-500/40"
+                ? "border-emerald-500/40 bg-emerald-950/20"
                 : kycResult.status === "MANUAL_REVIEW"
-                ? "bg-amber-950/30 border-amber-500/40"
-                : "bg-red-950/30 border-red-500/40"
+                ? "border-amber-500/40 bg-amber-950/20"
+                : "border-airtel-crimson/40 bg-airtel-crimson/10"
             }`}
           >
-            <div className="flex items-center space-x-3">
+            <div className="flex items-center space-x-3.5">
               {kycResult.status === "APPROVED" ? (
-                <ShieldCheck className="w-8 h-8 text-emerald-400" />
+                <div className="w-10 h-10 rounded-xl bg-emerald-500/15 border border-emerald-500/30 flex items-center justify-center text-emerald-400 shrink-0">
+                  <ShieldCheck className="w-6 h-6" />
+                </div>
               ) : kycResult.status === "MANUAL_REVIEW" ? (
-                <ShieldAlert className="w-8 h-8 text-amber-400" />
+                <div className="w-10 h-10 rounded-xl bg-amber-500/15 border border-amber-500/30 flex items-center justify-center text-amber-400 shrink-0">
+                  <ShieldAlert className="w-6 h-6" />
+                </div>
               ) : (
-                <AlertCircle className="w-8 h-8 text-red-400" />
+                <div className="w-10 h-10 rounded-xl bg-airtel-crimson/15 border border-airtel-crimson/30 flex items-center justify-center text-airtel-crimson shrink-0">
+                  <AlertCircle className="w-6 h-6" />
+                </div>
               )}
               <div>
-                <div className="flex items-center space-x-2">
-                  <h3 className="text-lg font-bold text-white tracking-wide">
+                <div className="flex items-center space-x-2.5">
+                  <h3 className="font-serif text-lg font-normal text-white tracking-wide">
                     KYC Status: {kycResult.status}
                   </h3>
-                  <span className="text-[10px] bg-slate-900/90 text-slate-300 px-2 py-0.5 rounded font-mono border border-slate-700">
+                  <span className="text-[10px] bg-white/[0.06] text-white/70 px-2 py-0.5 rounded font-mono border border-white/[0.08]">
                     {kycResult.execution_latency_ms} ms latency
                   </span>
                 </div>
-                <p className="text-xs text-slate-300 mt-0.5">
+                <p className="text-xs text-white/60 mt-1">
                   {kycResult.status === "APPROVED"
                     ? "All cryptographic, registry, and RapidFuzz entity checks passed 100% deterministically."
                     : "Compliance exceptions detected by verification engine. Actionable remediation steps generated below."}
@@ -458,7 +473,7 @@ export const SmartKYC: React.FC<SmartKYCProps> = ({ quote, onKYCApproved, onSwit
             {kycResult.status === "APPROVED" && (
               <button
                 onClick={() => onKYCApproved(kycResult)}
-                className="flex items-center space-x-2 bg-emerald-600 hover:bg-emerald-500 text-white font-bold py-2.5 px-5 rounded-xl text-xs sm:text-sm shadow-lg shadow-emerald-600/30 transition-all shrink-0"
+                className="flex items-center space-x-2 bg-emerald-600 hover:bg-emerald-500 text-white font-medium py-2.5 px-5 rounded-xl text-xs sm:text-sm shadow-md shadow-emerald-950/40 transition-all shrink-0 cursor-pointer"
               >
                 <span>Proceed to Provisioning</span>
                 <ArrowRight className="w-4 h-4" />
@@ -469,51 +484,51 @@ export const SmartKYC: React.FC<SmartKYCProps> = ({ quote, onKYCApproved, onSwit
           {/* Verification Details Grid */}
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
             {/* DPDP Act 2023 Redaction Card */}
-            <div className="bg-slate-900 border border-slate-800 rounded-xl p-4 space-y-2">
-              <div className="flex items-center justify-between text-xs text-slate-400">
-                <span className="flex items-center space-x-1">
+            <div className="glass-card rounded-xl p-4 space-y-2.5">
+              <div className="flex items-center justify-between text-xs text-white/50">
+                <span className="flex items-center space-x-1.5">
                   <Lock className="w-3.5 h-3.5 text-emerald-400" />
                   <span>DPDP In-Memory Mask</span>
                 </span>
-                <span className="text-[10px] bg-emerald-500/10 text-emerald-400 px-1.5 py-0.5 rounded font-bold">
+                <span className="text-[10px] font-mono bg-emerald-500/15 text-emerald-400 px-1.5 py-0.5 rounded">
                   PASS
                 </span>
               </div>
-              <div className="font-mono text-xs bg-slate-950 p-2.5 rounded-lg border border-slate-800 text-slate-300">
+              <div className="font-mono text-xs bg-obsidian-canvas/60 p-2.5 rounded-lg border border-white/[0.06] text-white/80">
                 {kycResult.redacted_signatory_id || "[Aadhaar Redacted-Token]"}
               </div>
-              <p className="text-[10px] text-slate-500">
+              <p className="text-[10px] text-white/40">
                 Unmasked 12-digit UID never written to SQLite or disk cache.
               </p>
             </div>
 
             {/* Registry Status Card */}
-            <div className="bg-slate-900 border border-slate-800 rounded-xl p-4 space-y-2">
-              <div className="flex items-center justify-between text-xs text-slate-400">
+            <div className="glass-card rounded-xl p-4 space-y-2.5">
+              <div className="flex items-center justify-between text-xs text-white/50">
                 <span>Registry Validation</span>
-                <span className="text-[10px] bg-slate-800 text-slate-300 px-1.5 py-0.5 rounded font-mono">
+                <span className="text-[10px] bg-white/[0.04] text-white/50 px-1.5 py-0.5 rounded font-mono">
                   Anchor: 2026-07-15
                 </span>
               </div>
-              <div className="text-xs space-y-1">
+              <div className="text-xs space-y-1.5">
                 <div className="flex justify-between">
-                  <span className="text-slate-400">GSTIN Status:</span>
+                  <span className="text-white/50">GSTIN Status:</span>
                   <span
-                    className={`font-semibold ${
+                    className={`font-mono font-medium ${
                       kycResult.gst_status === "Active"
                         ? "text-emerald-400"
                         : kycResult.gst_status === "Cancelled"
-                        ? "text-red-400"
-                        : "text-slate-400"
+                        ? "text-airtel-crimson"
+                        : "text-white/50"
                     }`}
                   >
                     {kycResult.gst_status || "N/A (Exempt)"}
                   </span>
                 </div>
                 <div className="flex justify-between">
-                  <span className="text-slate-400">Udyam Registration:</span>
+                  <span className="text-white/50">Udyam Registration:</span>
                   <span
-                    className={`font-semibold ${
+                    className={`font-mono font-medium ${
                       kycResult.udyam_status === "Active"
                         ? "text-emerald-400"
                         : "text-amber-400"
@@ -526,28 +541,28 @@ export const SmartKYC: React.FC<SmartKYCProps> = ({ quote, onKYCApproved, onSwit
             </div>
 
             {/* Utility Bill Freshness Card */}
-            <div className="bg-slate-900 border border-slate-800 rounded-xl p-4 space-y-2">
-              <div className="flex items-center justify-between text-xs text-slate-400">
+            <div className="glass-card rounded-xl p-4 space-y-2.5">
+              <div className="flex items-center justify-between text-xs text-white/50">
                 <span>Address Proof Freshness</span>
-                <span className="text-[10px] bg-slate-800 text-slate-300 px-1.5 py-0.5 rounded font-mono">
+                <span className="text-[10px] bg-white/[0.04] text-white/50 px-1.5 py-0.5 rounded font-mono">
                   Max 90 Days
                 </span>
               </div>
               <div className="text-xs">
                 <div className="flex justify-between items-baseline">
-                  <span className="text-slate-400">Calculated Bill Age:</span>
+                  <span className="text-white/50">Calculated Bill Age:</span>
                   <span
-                    className={`font-bold text-sm ${
+                    className={`font-serif text-lg font-medium ${
                       kycResult.address_bill_age_days !== null &&
                       kycResult.address_bill_age_days! <= 90
                         ? "text-emerald-400"
-                        : "text-red-400"
+                        : "text-airtel-crimson"
                     }`}
                   >
                     {kycResult.address_bill_age_days ?? "N/A"} days
                   </span>
                 </div>
-                <p className="text-[10px] text-slate-500 mt-1">
+                <p className="text-[10px] text-white/40 mt-1">
                   Relative to synthetic hackathon evaluation date 2026-07-15.
                 </p>
               </div>
@@ -555,27 +570,27 @@ export const SmartKYC: React.FC<SmartKYCProps> = ({ quote, onKYCApproved, onSwit
           </div>
 
           {/* RapidFuzz Entity Resolution Scores */}
-          <div className="bg-slate-900 border border-slate-800 rounded-xl p-4">
-            <h4 className="text-xs font-semibold text-slate-300 uppercase tracking-wider mb-3">
+          <div className="glass-card rounded-xl p-5">
+            <h4 className="font-serif text-sm font-normal text-white tracking-wide mb-3">
               RapidFuzz Token-Sort Entity Resolution Scores
             </h4>
             <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
               {Object.entries(kycResult.fuzzy_scores).map(([key, score]) => (
-                <div key={key} className="bg-slate-950/60 p-3 rounded-lg border border-slate-800">
-                  <div className="flex justify-between text-xs mb-1">
-                    <span className="text-slate-400 font-mono text-[11px]">{key}</span>
+                <div key={key} className="bg-obsidian-surface/60 p-3 rounded-lg border border-white/[0.06]">
+                  <div className="flex justify-between text-xs mb-1.5">
+                    <span className="text-white/50 font-mono text-[11px]">{key}</span>
                     <span
-                      className={`font-bold ${
-                        score >= 80 ? "text-emerald-400" : score >= 60 ? "text-amber-400" : "text-red-400"
+                      className={`font-mono font-medium ${
+                        score >= 80 ? "text-emerald-400" : score >= 60 ? "text-amber-400" : "text-airtel-crimson"
                       }`}
                     >
                       {score.toFixed(1)}%
                     </span>
                   </div>
-                  <div className="w-full bg-slate-800 h-1.5 rounded-full overflow-hidden">
+                  <div className="w-full bg-obsidian-elevated h-1.5 rounded-full overflow-hidden">
                     <div
                       className={`h-full ${
-                        score >= 80 ? "bg-emerald-500" : score >= 60 ? "bg-amber-500" : "bg-red-500"
+                        score >= 80 ? "bg-emerald-500" : score >= 60 ? "bg-amber-500" : "bg-airtel-crimson"
                       }`}
                       style={{ width: `${Math.min(100, score)}%` }}
                     />
@@ -587,43 +602,43 @@ export const SmartKYC: React.FC<SmartKYCProps> = ({ quote, onKYCApproved, onSwit
 
           {/* Anomalies List & 1-Click Remediation */}
           {kycResult.anomalies.length > 0 && (
-            <div className="bg-slate-900 border border-slate-800 rounded-2xl p-5 space-y-3">
-              <h4 className="text-xs font-bold text-amber-400 uppercase tracking-wider flex items-center space-x-1.5">
-                <AlertCircle className="w-4 h-4" />
+            <div className="glass-card rounded-2xl p-6 space-y-3.5">
+              <h4 className="font-serif text-base font-normal text-amber-300 flex items-center space-x-2">
+                <AlertCircle className="w-4 h-4 text-amber-400" />
                 <span>Detected Verification Anomalies ({kycResult.anomalies.length})</span>
               </h4>
 
-              <div className="space-y-2">
+              <div className="space-y-2.5">
                 {kycResult.anomalies.map((anom, idx) => (
                   <div
                     key={idx}
-                    className="p-3 rounded-xl bg-slate-950 border border-slate-800 flex flex-col sm:flex-row sm:items-center justify-between gap-2"
+                    className="p-4 rounded-xl bg-obsidian-surface/60 border border-white/[0.06] flex flex-col sm:flex-row sm:items-center justify-between gap-3"
                   >
                     <div>
                       <div className="flex items-center space-x-2">
                         <span
-                          className={`text-[9px] px-1.5 py-0.5 rounded font-bold ${
+                          className={`text-[9px] px-2 py-0.5 rounded-full font-mono font-medium ${
                             anom.severity === "BLOCKER"
-                              ? "bg-red-500/20 text-red-400"
-                              : "bg-amber-500/20 text-amber-400"
+                              ? "bg-airtel-crimson/15 text-airtel-crimson border border-airtel-crimson/30"
+                              : "bg-amber-500/15 text-amber-300 border border-amber-500/30"
                           }`}
                         >
                           {anom.severity}
                         </span>
-                        <span className="text-xs font-bold text-slate-200">{anom.code}</span>
+                        <span className="text-xs font-mono font-medium text-white">{anom.code}</span>
                       </div>
-                      <p className="text-xs text-slate-300 mt-1">{anom.message}</p>
+                      <p className="text-xs text-white/70 mt-1.5">{anom.message}</p>
                       {anom.remediation && (
-                        <div className="pt-1 space-y-2">
-                          <p className="text-[11px] text-emerald-400 mt-0.5">
+                        <div className="pt-2 space-y-2">
+                          <p className="text-[11px] text-emerald-400">
                             💡 <strong>Remediation:</strong> {anom.remediation}
                           </p>
                           {anom.code === "GSTIN_INACTIVE" && (
                             <button
                               onClick={handleSwitchToUdyam}
-                              className="inline-flex items-center space-x-1.5 px-3 py-1.5 rounded-lg bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-semibold shadow-md shadow-emerald-900/30 transition-all cursor-pointer"
+                              className="inline-flex items-center space-x-1.5 px-3 py-1.5 rounded-lg bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-medium shadow-md shadow-emerald-950/40 transition-all cursor-pointer"
                             >
-                              <Zap className="w-3.5 h-3.5 text-amber-300" />
+                              <Zap className="w-3.5 h-3.5 text-champagne-gold" />
                               <span>1-Click Switch to GST-Exempt Udyam Micro Bundle</span>
                             </button>
                           )}
@@ -633,9 +648,9 @@ export const SmartKYC: React.FC<SmartKYCProps> = ({ quote, onKYCApproved, onSwit
                                 setActiveTab("upload");
                                 setUploadDocType("address_proof");
                               }}
-                              className="inline-flex items-center space-x-1.5 px-3 py-1.5 rounded-lg bg-blue-600 hover:bg-blue-500 text-white text-xs font-semibold shadow-md transition-all cursor-pointer"
+                              className="inline-flex items-center space-x-1.5 px-3 py-1.5 rounded-lg bg-white/[0.08] hover:bg-white/[0.14] text-white text-xs font-medium border border-white/[0.1] transition-all cursor-pointer"
                             >
-                              <Upload className="w-3.5 h-3.5" />
+                              <Upload className="w-3.5 h-3.5 text-white/60" />
                               <span>Upload Fresh Utility Bill (&lt;90 Days)</span>
                             </button>
                           )}
@@ -645,9 +660,9 @@ export const SmartKYC: React.FC<SmartKYCProps> = ({ quote, onKYCApproved, onSwit
                                 setActiveTab("upload");
                                 setUploadDocType("udyam_certificate");
                               }}
-                              className="inline-flex items-center space-x-1.5 px-3 py-1.5 rounded-lg bg-blue-600 hover:bg-blue-500 text-white text-xs font-semibold shadow-md transition-all cursor-pointer"
+                              className="inline-flex items-center space-x-1.5 px-3 py-1.5 rounded-lg bg-white/[0.08] hover:bg-white/[0.14] text-white text-xs font-medium border border-white/[0.1] transition-all cursor-pointer"
                             >
-                              <Upload className="w-3.5 h-3.5" />
+                              <Upload className="w-3.5 h-3.5 text-white/60" />
                               <span>Upload Udyam Registration Certificate</span>
                             </button>
                           )}
@@ -664,21 +679,21 @@ export const SmartKYC: React.FC<SmartKYCProps> = ({ quote, onKYCApproved, onSwit
 
       {/* DPDP Act 2023 Consent Audit Modal */}
       {showConsentModal && (
-        <div className="fixed inset-0 z-50 bg-black/80 backdrop-blur-sm flex items-center justify-center p-4">
-          <div className="bg-slate-900 border border-slate-800 rounded-2xl max-w-lg w-full p-6 space-y-4">
-            <div className="flex items-center justify-between border-b border-slate-800 pb-3">
+        <div className="fixed inset-0 z-50 bg-black/80 backdrop-blur-md flex items-center justify-center p-4">
+          <div className="glass-card rounded-2xl max-w-lg w-full p-6 space-y-4 border border-white/[0.12]">
+            <div className="flex items-center justify-between border-b border-white/[0.08] pb-3">
               <div className="flex items-center space-x-2">
-                <Shield className="w-5 h-5 text-red-500" />
-                <h3 className="font-bold text-white text-base">DPDP Act 2023 Consent Artifact</h3>
+                <Shield className="w-5 h-5 text-airtel-crimson" />
+                <h3 className="font-serif text-lg font-normal text-white">DPDP Act 2023 Consent Artifact</h3>
               </div>
               <button
                 onClick={() => setShowConsentModal(false)}
-                className="text-slate-400 hover:text-white text-xs font-mono"
+                className="text-white/40 hover:text-white text-xs font-mono cursor-pointer"
               >
                 [CLOSE]
               </button>
             </div>
-            <div className="space-y-2 text-xs text-slate-300 font-mono bg-slate-950 p-4 rounded-xl border border-slate-800">
+            <div className="space-y-2 text-xs text-white/70 font-mono bg-obsidian-canvas/80 p-4 rounded-xl border border-white/[0.06]">
               <p><strong>Consent ID:</strong> CONSENT_20260715_884920</p>
               <p><strong>Fiduciary:</strong> Bharti Airtel Limited (Accel Business)</p>
               <p><strong>Data Principal:</strong> Merchant Signatory</p>
@@ -687,13 +702,13 @@ export const SmartKYC: React.FC<SmartKYCProps> = ({ quote, onKYCApproved, onSwit
               <p><strong>Client IP SHA-256:</strong> 2c26b46b68ffc68ff99b453c1d30413413422d706483bfa0f98a5e886266e7ae</p>
               <p><strong>Masking Protocol:</strong> In-memory regex replacement prior to SQLite commit.</p>
             </div>
-            <p className="text-[11px] text-slate-400">
+            <p className="text-[11px] text-white/40">
               Complies with Section 6 of India Digital Personal Data Protection Act (DPDP) 2023 regarding specific, informed, and unconditional consent.
             </p>
             <div className="flex justify-end">
               <button
                 onClick={() => setShowConsentModal(false)}
-                className="bg-slate-800 hover:bg-slate-700 text-white text-xs font-semibold px-4 py-2 rounded-lg"
+                className="bg-white/[0.08] hover:bg-white/[0.14] text-white text-xs font-medium px-4 py-2 rounded-lg cursor-pointer"
               >
                 Acknowledge
               </button>
