@@ -175,3 +175,30 @@ class ReverseBudgetResult(BaseModel):
     commercials: CommercialBreakdown
     utility_score: float
     rationale: str
+
+
+# Advisor Schemas
+class MSMEProfileSlots(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+
+    segment: Optional[str] = Field(default=None, description="micro, prof, multi, mfg")
+    city_tier: Optional[int] = Field(default=None, ge=1, le=3, description="1, 2, or 3")
+    employee_count: Optional[int] = Field(default=None, ge=1, description="Number of employees")
+    num_sites: Optional[int] = Field(default=None, ge=1, description="Number of locations/sites")
+    has_gstin: Optional[bool] = Field(default=None, description="Whether business has active GSTIN")
+    monthly_budget_cap: Optional[int] = Field(default=None, description="Monthly budget limit in INR")
+    detected_needs: list[str] = Field(default_factory=list, description="Extracted needs tags")
+    is_complete: bool = Field(default=False, description="Whether core slots are sufficiently populated for CPQ")
+    missing_slots: list[str] = Field(default_factory=list, description="Remaining slots needed")
+
+
+class AdvisorResponse(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+
+    slots: MSMEProfileSlots
+    quote: Optional[CommercialBreakdown] = None
+    recommended_skus: list[str] = Field(default_factory=list)
+    display_markdown: str = Field(description="Formatted markdown response for chat UI")
+    spoken_tts_text: str = Field(description="Clean, symbol-free text for browser TTS voice playback")
+    next_suggested_prompts: list[str] = Field(default_factory=list)
+
