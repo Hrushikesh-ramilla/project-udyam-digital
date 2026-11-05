@@ -112,25 +112,38 @@ class LeadRescueMLEngine:
 
         norm_drop = (lead.drop_reason or "").lower()
 
-        if not lead.has_gstin:
-            risk_factors.append("Non-GST merchant historically exposed to GST-mandatory quoting blocker (2.0% base rate).")
-            nba = "Send 1-Click WhatsApp Udyam Micro Bundle Link (AirFiber 100 @ ₹899/mo, 100% GST-exempt)."
-            rescue_link = f"https://udyam.airtel.in/rescue?lead_id={lead.lead_id}&bundle=UDYAM_MICRO&action=whatsapp"
-        elif "quote" in norm_drop or lead.stage_reached == "Needs assessed":
-            risk_factors.append("Stalled at quoting stage (56% leak cohort) due to complex PDF or unclarified pricing.")
-            nba = "Dispatch Mobile Interactive Checkout Card with transparent single monthly price."
+        # Context-Aware Next-Best-Action (NBA) mapping directly to catalog solutions
+        if "site not feasible" in norm_drop or ("fibre" in norm_drop and "feasible" in norm_drop):
+            risk_factors.append("Physical fiber infrastructure unavailable at customer premises; zero trenching needed.")
+            nba = "1-Click WhatsApp Pitch: Wireless Biz 5G AirFiber 100 (2-Day Plug & Play, Zero Trenching)"
+            rescue_link = f"https://udyam.airtel.in/rescue?lead_id={lead.lead_id}&bundle=P04_AIRFIBER&action=wireless_pitch"
+        elif any(k in norm_drop for k in ["payment failed", "price too high", "cheaper plan"]):
+            risk_factors.append("Price sensitivity / payment barrier: failed first payment or competitor price undercut.")
+            nba = "1-Click WhatsApp Send: Zero-OTC Waiver + 10% Discount Quote AutoPay Link"
+            rescue_link = f"https://udyam.airtel.in/rescue?lead_id={lead.lead_id}&discount=BUNDLE_10_OTC0&action=autopay"
+        elif any(k in norm_drop for k in ["document details did not match", "missing gst", "paperwork", "signatory"]):
+            risk_factors.append("Regulatory document roadblock: mismatch, missing GST/Udyam, or signatory unavailability.")
+            nba = "1-Click WhatsApp Send: Self-Serve Smart KYC Link (Udyam-Only GST-Exempt Eligible)"
+            rescue_link = f"https://udyam.airtel.in/kyc?lead_id={lead.lead_id}&channel=self_serve_udyam"
+        elif any(k in norm_drop for k in ["quote too complex", "quote took too long", "quote"]):
+            risk_factors.append("Stalled at quoting stage (56% leak cohort) due to complex PDF or pricing opacity.")
+            nba = "1-Click Send: Interactive Mobile CPQ Checkout Card (Replaces Legacy PDF)"
             rescue_link = f"https://udyam.airtel.in/checkout?lead_id={lead.lead_id}&view=interactive_card"
-        elif "visit" in norm_drop or "time" in norm_drop or "unreachable" in norm_drop:
+        elif any(k in norm_drop for k in ["no time for a visit", "visit not scheduled", "unreachable", "not interested"]):
             risk_factors.append("Field sales friction: merchant had no time for physical sit-down meeting.")
-            nba = "Trigger Self-Serve Onboarding QR link directly to owner WhatsApp for 5-min night signup."
+            nba = "1-Click WhatsApp Send: 5-Min Mobile Self-Serve Onboarding + Instant QR Attribution"
             rescue_link = f"https://udyam.airtel.in/self-serve?lead_id={lead.lead_id}&channel=whatsapp_qr"
-        elif "delay" in norm_drop or lead.stage_reached == "KYC complete":
-            risk_factors.append("Fulfillment delay risk (>14 days in pipeline, 98 historical cliff dropouts).")
-            nba = "Priority engineer dispatch with guaranteed 48-hour installation SLA."
-            rescue_link = f"https://udyam.airtel.in/tracker?lead_id={lead.lead_id}&action=expedite"
+        elif any(k in norm_drop for k in ["delayed beyond 21 days", "delay", "cancelled before install"]):
+            risk_factors.append("Fulfillment SLA escalation (>14-21 days in pipeline, cliff dropout risk).")
+            nba = "Escalate: Priority Field Engineer Dispatch (48-Hr Guaranteed SLA + 1st Month Credit)"
+            rescue_link = f"https://udyam.airtel.in/tracker?lead_id={lead.lead_id}&action=expedite_credit"
+        elif not lead.has_gstin:
+            risk_factors.append("Non-GST merchant historically exposed to GST-mandatory quoting blocker (2.0% base rate).")
+            nba = "1-Click WhatsApp Send: Self-Serve Smart KYC Link (Udyam-Only GST-Exempt Eligible)"
+            rescue_link = f"https://udyam.airtel.in/rescue?lead_id={lead.lead_id}&bundle=UDYAM_MICRO&action=whatsapp"
         else:
             risk_factors.append(f"Drop reason: {lead.drop_reason or 'Stalled in funnel'}.")
-            nba = "Partner assisted phone consultation with ₹1,500 partner closing bounty."
+            nba = "1-Click WhatsApp Send: Partner Assisted Phone Consultation Quote (₹1,500 Bounty)"
             rescue_link = f"https://udyam.airtel.in/partner/assisted?lead_id={lead.lead_id}"
 
         return LeadRescueItem(

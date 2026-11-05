@@ -135,7 +135,8 @@ async def upload_and_verify_document(
     )
 
     docs = {parsed_doc.doc_type: parsed_doc}
-    kyc_res = kyc.verify_application(docs, cart_requires_gstin=cart_requires_gstin, consent=consent)
+    single_res = kyc.verify_application(docs, cart_requires_gstin=cart_requires_gstin, consent=consent, single_doc_mode=True)
+    package_res = kyc.verify_application(docs, cart_requires_gstin=cart_requires_gstin, consent=consent, single_doc_mode=False)
 
     return {
         "filename": file.filename,
@@ -143,7 +144,8 @@ async def upload_and_verify_document(
         "file_sha256": parsed_doc.file_sha256,
         "doc_type": parsed_doc.doc_type,
         "extracted_fields": parsed_doc.extracted_fields,
-        "verification_result": kyc_res.model_dump(),
+        "single_doc_result": single_res.model_dump(),
+        "verification_result": package_res.model_dump(),
     }
 
 

@@ -108,6 +108,7 @@ export interface KYCUploadResponse {
   file_sha256: string;
   doc_type: string;
   extracted_fields: Record<string, string>;
+  single_doc_result?: KYCVerificationResult;
   verification_result: KYCVerificationResult;
 }
 

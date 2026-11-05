@@ -13,7 +13,7 @@ import {
   ProvisioningOrder,
   LeadRescueItem,
 } from "./types";
-import { createProvisioningOrder } from "./api";
+import { createProvisioningOrder, calculateQuote } from "./api";
 import {
   Bot,
   ShoppingCart,
@@ -47,11 +47,6 @@ export const App: React.FC = () => {
   const handleProfileUpdated = (slots: MSMEProfileSlots, skus?: string[]) => {
     setProfileSlots(slots);
     if (skus && skus.length > 0) setRecommendedSkus(skus);
-    if (slots.is_complete) {
-      setTimeout(() => {
-        setCustomerStep("cpq");
-      }, 2500);
-    }
   };
 
   const handleProceedToKYC = (calculatedQuote: CommercialBreakdown) => {
@@ -139,6 +134,21 @@ export const App: React.FC = () => {
         is_activated: false,
       });
       setCustomerStep("tracker");
+    }
+  };
+
+  const handleSwitchToUdyamExempt = async () => {
+    try {
+      const newQuote = await calculateQuote(
+        [
+          { product_id: "P04", quantity: 1 },
+          { product_id: "P19", quantity: 1 },
+        ],
+        12
+      );
+      setQuote(newQuote);
+    } catch (err) {
+      console.error("Failed to switch to Udyam exempt quote", err);
     }
   };
 
@@ -233,58 +243,62 @@ export const App: React.FC = () => {
         {currentTab === "customer" && (
           <div className="space-y-6">
             {/* Customer Sub-Stepping Bar */}
-            <div className="bg-slate-900 border border-slate-800 rounded-2xl p-3 flex items-center justify-between overflow-x-auto">
-              <div className="flex items-center space-x-2 sm:space-x-4">
+            <div className="bg-slate-900 border border-slate-800 rounded-2xl p-2.5 sm:p-3 flex items-center justify-between overflow-x-auto no-scrollbar">
+              <div className="flex items-center space-x-1.5 sm:space-x-3 shrink-0">
                 <button
                   onClick={() => setCustomerStep("advisor")}
-                  className={`flex items-center space-x-2 px-3 py-1.5 rounded-xl text-xs sm:text-sm font-semibold transition-all ${
+                  className={`flex items-center space-x-1.5 px-2.5 sm:px-3 py-1.5 rounded-xl text-xs sm:text-sm font-semibold transition-all shrink-0 ${
                     customerStep === "advisor"
                       ? "bg-red-600 text-white shadow-md shadow-red-600/30"
                       : "text-slate-400 hover:text-white"
                   }`}
                 >
                   <Bot className="w-4 h-4" />
-                  <span>1. Multilingual Advisor</span>
+                  <span className="hidden sm:inline">1. Multilingual Advisor</span>
+                  <span className="sm:hidden">1. Advisor</span>
                 </button>
 
                 <button
                   onClick={() => setCustomerStep("cpq")}
-                  className={`flex items-center space-x-2 px-3 py-1.5 rounded-xl text-xs sm:text-sm font-semibold transition-all ${
+                  className={`flex items-center space-x-1.5 px-2.5 sm:px-3 py-1.5 rounded-xl text-xs sm:text-sm font-semibold transition-all shrink-0 ${
                     customerStep === "cpq"
                       ? "bg-red-600 text-white shadow-md shadow-red-600/30"
                       : "text-slate-400 hover:text-white"
                   }`}
                 >
                   <ShoppingCart className="w-4 h-4" />
-                  <span>2. Dynamic CPQ Cart</span>
+                  <span className="hidden sm:inline">2. Dynamic CPQ Cart</span>
+                  <span className="sm:hidden">2. CPQ Cart</span>
                 </button>
 
                 <button
                   onClick={() => setCustomerStep("kyc")}
-                  className={`flex items-center space-x-2 px-3 py-1.5 rounded-xl text-xs sm:text-sm font-semibold transition-all ${
+                  className={`flex items-center space-x-1.5 px-2.5 sm:px-3 py-1.5 rounded-xl text-xs sm:text-sm font-semibold transition-all shrink-0 ${
                     customerStep === "kyc"
                       ? "bg-red-600 text-white shadow-md shadow-red-600/30"
                       : "text-slate-400 hover:text-white"
                   }`}
                 >
                   <ShieldCheck className="w-4 h-4" />
-                  <span>3. Smart KYC Gate</span>
+                  <span className="hidden sm:inline">3. Smart KYC Gate</span>
+                  <span className="sm:hidden">3. Smart KYC</span>
                 </button>
 
                 <button
                   onClick={() => setCustomerStep("tracker")}
-                  className={`flex items-center space-x-2 px-3 py-1.5 rounded-xl text-xs sm:text-sm font-semibold transition-all ${
+                  className={`flex items-center space-x-1.5 px-2.5 sm:px-3 py-1.5 rounded-xl text-xs sm:text-sm font-semibold transition-all shrink-0 ${
                     customerStep === "tracker"
                       ? "bg-red-600 text-white shadow-md shadow-red-600/30"
                       : "text-slate-400 hover:text-white"
                   }`}
                 >
                   <Truck className="w-4 h-4" />
-                  <span>4. Provisioning Tracker</span>
+                  <span className="hidden sm:inline">4. Provisioning Tracker</span>
+                  <span className="sm:hidden">4. Tracker</span>
                 </button>
               </div>
 
-              <div className="hidden lg:flex items-center space-x-2 text-xs font-mono text-slate-400 bg-slate-950 px-3 py-1 rounded-lg border border-slate-800">
+              <div className="hidden lg:flex items-center space-x-2 text-xs font-mono text-slate-400 bg-slate-950 px-3 py-1 rounded-lg border border-slate-800 shrink-0">
                 <Sparkles className="w-3.5 h-3.5 text-amber-400" />
                 <span>One-Sitting MSME Onboarding Journey</span>
               </div>
@@ -292,7 +306,10 @@ export const App: React.FC = () => {
 
             {/* Step Rendering */}
             {customerStep === "advisor" && (
-              <AdvisorChat onProfileUpdated={handleProfileUpdated} />
+              <AdvisorChat
+                onProfileUpdated={handleProfileUpdated}
+                onProceedToCPQ={() => setCustomerStep("cpq")}
+              />
             )}
 
             {customerStep === "cpq" && (
@@ -304,7 +321,11 @@ export const App: React.FC = () => {
             )}
 
             {customerStep === "kyc" && (
-              <SmartKYC quote={quote} onKYCApproved={handleKYCApproved} />
+              <SmartKYC
+                quote={quote}
+                onKYCApproved={handleKYCApproved}
+                onSwitchToUdyamExempt={handleSwitchToUdyamExempt}
+              />
             )}
 
             {customerStep === "tracker" && (

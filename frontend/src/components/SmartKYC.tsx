@@ -23,9 +23,10 @@ import { verifyKYC, uploadKYCDocument, KYCUploadResponse } from "../api";
 interface SmartKYCProps {
   quote: CommercialBreakdown | null;
   onKYCApproved: (result: KYCVerificationResult) => void;
+  onSwitchToUdyamExempt?: () => void;
 }
 
-export const SmartKYC: React.FC<SmartKYCProps> = ({ quote, onKYCApproved }) => {
+export const SmartKYC: React.FC<SmartKYCProps> = ({ quote, onKYCApproved, onSwitchToUdyamExempt }) => {
   const [consentGranted, setConsentGranted] = useState<boolean>(true);
   const [selectedPreset, setSelectedPreset] = useState<string>("K03");
   const [isVerifying, setIsVerifying] = useState<boolean>(false);
@@ -35,23 +36,61 @@ export const SmartKYC: React.FC<SmartKYCProps> = ({ quote, onKYCApproved }) => {
   const [uploadedFile, setUploadedFile] = useState<File | null>(null);
   const [uploadDocType, setUploadDocType] = useState<string>("gst_certificate");
   const [uploadResponse, setUploadResponse] = useState<KYCUploadResponse | null>(null);
+  const [uploadedSlots, setUploadedSlots] = useState<Record<string, { file: File; res: KYCUploadResponse }>>({});
+  const [inspectionMode, setInspectionMode] = useState<"single" | "package">("single");
+  const [remediationNotice, setRemediationNotice] = useState<string | null>(null);
 
-  const handleFileUpload = async (file: File) => {
+  const handleFileUpload = async (file: File, docTypeOverride?: string) => {
     if (!consentGranted) {
       alert("DPDP Act 2023 requires explicit digital consent before document processing.");
       return;
     }
+    const targetType = docTypeOverride || uploadDocType;
     setUploadedFile(file);
     setIsVerifying(true);
     try {
       const cartRequiresGstin = quote ? !quote.gst_exempt_eligible : true;
-      const res = await uploadKYCDocument(file, uploadDocType, cartRequiresGstin);
+      const res = await uploadKYCDocument(file, targetType, cartRequiresGstin);
       setUploadResponse(res);
-      setKycResult(res.verification_result);
+      setUploadedSlots((prev) => ({
+        ...prev,
+        [targetType]: { file, res },
+      }));
+      // In single document mode, show single document inspection result without companion blockers
+      if (inspectionMode === "single" && res.single_doc_result) {
+        setKycResult(res.single_doc_result);
+      } else {
+        setKycResult(res.verification_result);
+      }
     } catch (err: unknown) {
       alert(err instanceof Error ? err.message : "File OCR and verification failed.");
     } finally {
       setIsVerifying(false);
+    }
+  };
+
+  const handleVerifyCompletePackage = () => {
+    if (Object.keys(uploadedSlots).length === 0) {
+      alert("Please upload at least one document first.");
+      return;
+    }
+    setInspectionMode("package");
+    if (uploadResponse?.verification_result) {
+      setKycResult(uploadResponse.verification_result);
+    }
+  };
+
+  const handleSwitchToUdyam = async () => {
+    if (onSwitchToUdyamExempt) {
+      onSwitchToUdyamExempt();
+    }
+    setSelectedPreset("KIRANA_NON_GST");
+    setRemediationNotice("Switched to Udyam Micro Bundle! Connection is 100% GST-Exempt (zero GSTIN blocker).");
+    try {
+      const res = await verifyKYC("KIRANA_NON_GST", false);
+      setKycResult(res);
+    } catch {
+      // fallback
     }
   };
 
@@ -249,83 +288,132 @@ export const SmartKYC: React.FC<SmartKYCProps> = ({ quote, onKYCApproved }) => {
           </div>
         </div>
       ) : (
-        /* Real Drag & Drop / File Upload Zone for Judges */
-        <div className="bg-slate-900 border border-slate-800 rounded-2xl p-6 shadow-xl space-y-4">
-          <div className="flex items-center justify-between">
+        /* Real Drag & Drop / Multi-Slot Upload Experience */
+        <div className="bg-slate-900 border border-slate-800 rounded-2xl p-6 shadow-xl space-y-5">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-slate-800 pb-4">
             <div>
               <h3 className="text-sm font-semibold text-slate-200 uppercase tracking-wider flex items-center space-x-2">
                 <FileUp className="w-4 h-4 text-emerald-400" />
-                <span>Drag &amp; Drop Any Real KYC File (Judge Live Test)</span>
+                <span>4-Slot Document Staging &amp; Live Inspection</span>
               </h3>
               <p className="text-xs text-slate-400 mt-1">
-                Upload real PDF or PNG/JPG documents. Parsed live via native PyMuPDF and Gemini Vision OCR.
+                Upload individual files to inspect live OCR validity in isolation, or stage all documents to verify the complete package.
               </p>
             </div>
-            <span className="text-xs bg-emerald-500/10 text-emerald-400 border border-emerald-500/30 px-2.5 py-1 rounded-full font-semibold">
-              Live OCR &amp; Vision Active
-            </span>
-          </div>
-
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-3 pt-2">
-            <div>
-              <label className="block text-xs font-medium text-slate-300 mb-1">Expected Document Type:</label>
-              <select
-                value={uploadDocType}
-                onChange={(e) => setUploadDocType(e.target.value)}
-                className="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-xs text-white focus:outline-none focus:border-red-500"
-              >
-                <option value="gst_certificate">GST Certificate (Form GST REG-06)</option>
-                <option value="udyam_certificate">Udyam Registration Certificate</option>
-                <option value="signatory_id">Signatory National ID (Aadhaar / Passport)</option>
-                <option value="address_proof">Electricity / Utility Bill (&lt;90 days)</option>
-              </select>
-            </div>
-
-            <div className="md:col-span-2">
-              <label className="block text-xs font-medium text-slate-300 mb-1">Select File (.pdf, .png, .jpg):</label>
-              <input
-                type="file"
-                accept=".pdf,.png,.jpg,.jpeg"
-                onChange={(e) => {
-                  const f = e.target.files?.[0];
-                  if (f) handleFileUpload(f);
-                }}
-                className="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-1.5 text-xs text-slate-400 file:mr-3 file:py-1.5 file:px-3 file:rounded-lg file:border-0 file:text-xs file:font-semibold file:bg-red-600 file:text-white hover:file:bg-red-500 cursor-pointer"
-              />
-            </div>
-          </div>
-
-          {uploadedFile && (
-            <div className="p-3 bg-slate-950 rounded-xl border border-slate-800 flex items-center justify-between text-xs">
-              <div className="flex items-center space-x-2">
-                <FileText className="w-4 h-4 text-red-400" />
-                <span className="text-white font-medium">{uploadedFile.name}</span>
-                <span className="text-slate-500 font-mono">({Math.round(uploadedFile.size / 1024)} KB)</span>
-              </div>
-              {uploadResponse && (
-                <span className="text-[10px] text-slate-400 font-mono bg-slate-900 px-2 py-0.5 rounded">
-                  SHA-256: {uploadResponse.file_sha256.slice(0, 16)}...
-                </span>
-              )}
-            </div>
-          )}
-
-          {uploadResponse?.extracted_fields && Object.keys(uploadResponse.extracted_fields).length > 0 && (
-            <div className="p-4 bg-slate-950 rounded-xl border border-slate-800 space-y-2">
-              <span className="text-xs font-bold text-slate-300 uppercase tracking-wider flex items-center space-x-1.5">
-                <Sparkles className="w-3.5 h-3.5 text-amber-400" />
-                <span>Live Extracted Fields (OCR &amp; Regex Engine)</span>
+            <div className="flex items-center space-x-2">
+              <span className="text-[11px] bg-slate-800 text-slate-300 border border-slate-700 px-3 py-1 rounded-full font-semibold">
+                {Object.keys(uploadedSlots).length} of 4 Staged
               </span>
-              <div className="grid grid-cols-2 md:grid-cols-4 gap-2 text-xs">
-                {Object.entries(uploadResponse.extracted_fields).map(([k, v]) => (
-                  <div key={k} className="p-2 bg-slate-900/80 rounded-lg border border-slate-800/80">
-                    <span className="text-[10px] text-slate-500 uppercase block">{k}</span>
-                    <span className="text-white font-mono font-semibold truncate block">{v || "N/A"}</span>
-                  </div>
-                ))}
-              </div>
+              <button
+                onClick={handleVerifyCompletePackage}
+                disabled={Object.keys(uploadedSlots).length === 0}
+                className="flex items-center space-x-1.5 bg-emerald-600 hover:bg-emerald-500 text-white font-bold py-1.5 px-3.5 rounded-xl text-xs shadow-md shadow-emerald-600/20 disabled:opacity-50 cursor-pointer"
+              >
+                <ShieldCheck className="w-3.5 h-3.5" />
+                <span>Verify Complete Package</span>
+              </button>
             </div>
-          )}
+          </div>
+
+          {/* 4 Interactive Upload Slots */}
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            {[
+              {
+                id: "gst_certificate",
+                label: "GST Certificate (Form GST REG-06)",
+                sub: "15-digit GSTIN tax registration certificate",
+                req: quote ? !quote.gst_exempt_eligible : true,
+              },
+              {
+                id: "udyam_certificate",
+                label: "Udyam Registration Certificate",
+                sub: "Official MSME registration document (UDYAM-XX-00-XXXXXXX)",
+                req: true,
+              },
+              {
+                id: "signatory_id",
+                label: "Signatory National ID",
+                sub: "Aadhaar / Passport (in-memory DPDP masked)",
+                req: true,
+              },
+              {
+                id: "address_proof",
+                label: "Electricity / Utility Bill (<90 Days)",
+                sub: "Commercial premise proof evaluated against 2026-07-15 anchor",
+                req: true,
+              },
+            ].map((slot) => {
+              const staged = uploadedSlots[slot.id];
+              const isApproved = staged?.res.single_doc_result?.status === "APPROVED";
+              const isRejected = staged?.res.single_doc_result?.status === "REJECTED";
+              return (
+                <div
+                  key={slot.id}
+                  className={`p-4 rounded-xl border transition-all ${
+                    staged
+                      ? isApproved
+                        ? "bg-emerald-950/20 border-emerald-500/40"
+                        : "bg-red-950/20 border-red-500/40"
+                      : "bg-slate-950 border-slate-800"
+                  }`}
+                >
+                  <div className="flex items-center justify-between mb-2">
+                    <span className="text-xs font-bold text-slate-200">{slot.label}</span>
+                    {staged ? (
+                      <span
+                        className={`text-[9px] px-2 py-0.5 rounded font-bold uppercase ${
+                          isApproved ? "bg-emerald-500/20 text-emerald-400" : "bg-red-500/20 text-red-400"
+                        }`}
+                      >
+                        {isApproved ? "ACTIVE IN REGISTRY" : "REGISTRY DEFECT"}
+                      </span>
+                    ) : (
+                      <span className="text-[9px] text-slate-500 font-mono">
+                        {slot.req ? "MANDATORY" : "OPTIONAL (EXEMPT)"}
+                      </span>
+                    )}
+                  </div>
+                  <p className="text-[11px] text-slate-400 mb-3">{slot.sub}</p>
+
+                  <div className="flex items-center space-x-2">
+                    <input
+                      type="file"
+                      id={`slot-file-${slot.id}`}
+                      accept=".pdf,.png,.jpg,.jpeg"
+                      onChange={(e) => {
+                        const f = e.target.files?.[0];
+                        if (f) handleFileUpload(f, slot.id);
+                      }}
+                      className="hidden"
+                    />
+                    <label
+                      htmlFor={`slot-file-${slot.id}`}
+                      className="cursor-pointer inline-flex items-center space-x-1.5 px-3 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs font-medium border border-slate-700 transition-all"
+                    >
+                      <Upload className="w-3.5 h-3.5 text-slate-400" />
+                      <span>{staged ? "Replace File" : "Upload File"}</span>
+                    </label>
+                    {staged && (
+                      <span className="text-xs font-mono text-slate-400 truncate max-w-[160px]">
+                        {staged.file.name}
+                      </span>
+                    )}
+                  </div>
+
+                  {staged?.res.extracted_fields && Object.keys(staged.res.extracted_fields).length > 0 && (
+                    <div className="mt-3 pt-3 border-t border-slate-800/60 grid grid-cols-2 gap-1.5 text-[10px] font-mono">
+                      {Object.entries(staged.res.extracted_fields).slice(0, 4).map(([k, v]) => (
+                        <div key={k} className="bg-slate-900/80 p-1.5 rounded border border-slate-800/80 truncate">
+                          <span className="text-slate-500 block uppercase">{k}:</span>
+                          <span className="text-slate-300 font-semibold">{v || "N/A"}</span>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </div>
+              );
+            })}
+          </div>
         </div>
       )}
 
@@ -526,9 +614,44 @@ export const SmartKYC: React.FC<SmartKYCProps> = ({ quote, onKYCApproved }) => {
                       </div>
                       <p className="text-xs text-slate-300 mt-1">{anom.message}</p>
                       {anom.remediation && (
-                        <p className="text-[11px] text-emerald-400 mt-0.5">
-                          💡 <strong>Remediation:</strong> {anom.remediation}
-                        </p>
+                        <div className="pt-1 space-y-2">
+                          <p className="text-[11px] text-emerald-400 mt-0.5">
+                            💡 <strong>Remediation:</strong> {anom.remediation}
+                          </p>
+                          {anom.code === "GSTIN_INACTIVE" && (
+                            <button
+                              onClick={handleSwitchToUdyam}
+                              className="inline-flex items-center space-x-1.5 px-3 py-1.5 rounded-lg bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-semibold shadow-md shadow-emerald-900/30 transition-all cursor-pointer"
+                            >
+                              <Zap className="w-3.5 h-3.5 text-amber-300" />
+                              <span>1-Click Switch to GST-Exempt Udyam Micro Bundle</span>
+                            </button>
+                          )}
+                          {anom.code === "STALE_ADDRESS_PROOF" && (
+                            <button
+                              onClick={() => {
+                                setActiveTab("upload");
+                                setUploadDocType("address_proof");
+                              }}
+                              className="inline-flex items-center space-x-1.5 px-3 py-1.5 rounded-lg bg-blue-600 hover:bg-blue-500 text-white text-xs font-semibold shadow-md transition-all cursor-pointer"
+                            >
+                              <Upload className="w-3.5 h-3.5" />
+                              <span>Upload Fresh Utility Bill (&lt;90 Days)</span>
+                            </button>
+                          )}
+                          {anom.code === "MISSING_UDYAM_CERTIFICATE" && (
+                            <button
+                              onClick={() => {
+                                setActiveTab("upload");
+                                setUploadDocType("udyam_certificate");
+                              }}
+                              className="inline-flex items-center space-x-1.5 px-3 py-1.5 rounded-lg bg-blue-600 hover:bg-blue-500 text-white text-xs font-semibold shadow-md transition-all cursor-pointer"
+                            >
+                              <Upload className="w-3.5 h-3.5" />
+                              <span>Upload Udyam Registration Certificate</span>
+                            </button>
+                          )}
+                        </div>
                       )}
                     </div>
                   </div>

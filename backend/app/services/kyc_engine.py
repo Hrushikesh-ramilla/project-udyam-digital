@@ -705,6 +705,7 @@ Extract all visible fields and output STRICTLY valid JSON with no markdown tags:
         docs: dict[str, Union[bytes, ExtractedDocPayload]],
         cart_requires_gstin: bool = True,
         consent: Optional[DPDPConsentPayload] = None,
+        single_doc_mode: bool = False,
     ) -> KYCVerificationResult:
         """Executes full 4-stage KYC verification against DPDP rules, synthetic registries,
 
@@ -744,21 +745,22 @@ Extract all visible fields and output STRICTLY valid JSON with no markdown tags:
             signatory_name = sig_fields.get("signatory_name", "")
 
         # STAGE 2 & 3: Deterministic Registry & Date Gate
-        # Rule A: Missing Mandatory Documents Check
-        required_doc_keys = ["signatory_id", "address_proof", "udyam_certificate"]
-        if cart_requires_gstin:
-            required_doc_keys.append("gst_certificate")
+        # Rule A: Missing Mandatory Documents Check (skipped in single-document inspection mode)
+        if not single_doc_mode:
+            required_doc_keys = ["signatory_id", "address_proof", "udyam_certificate"]
+            if cart_requires_gstin:
+                required_doc_keys.append("gst_certificate")
 
-        for req_k in required_doc_keys:
-            if req_k not in resolved_docs:
-                anomalies.append(
-                    KYCAnomaly(
-                        code=f"MISSING_{req_k.upper()}",
-                        severity="BLOCKER",
-                        message=f"Mandatory document '{req_k}' was not uploaded.",
-                        remediation=f"Please upload a valid {req_k.replace('_', ' ')}.",
+            for req_k in required_doc_keys:
+                if req_k not in resolved_docs:
+                    anomalies.append(
+                        KYCAnomaly(
+                            code=f"MISSING_{req_k.upper()}",
+                            severity="BLOCKER",
+                            message=f"Mandatory document '{req_k}' was not uploaded.",
+                            remediation=f"Please upload a valid {req_k.replace('_', ' ')}.",
+                        )
                     )
-                )
 
         # Rule B: GSTIN Verification
         gst_status: Optional[str] = None

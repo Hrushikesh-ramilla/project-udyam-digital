@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from "react";
-import { Mic, MicOff, Send, Volume2, Sparkles, User, Bot, CheckCircle2 } from "lucide-react";
+import { Mic, MicOff, Send, Volume2, Sparkles, User, Bot, CheckCircle2, ArrowRight } from "lucide-react";
 import { MSMEProfileSlots } from "../types";
 import { sendChatMessage } from "../api";
 
@@ -14,6 +14,7 @@ interface Message {
 
 interface AdvisorChatProps {
   onProfileUpdated: (slots: MSMEProfileSlots, skus?: string[]) => void;
+  onProceedToCPQ?: () => void;
 }
 
 const renderInlineFormatting = (line: string) => {
@@ -87,7 +88,7 @@ interface IWindowSpeech {
   webkitSpeechRecognition?: new () => ISpeechRecognition;
 }
 
-export const AdvisorChat: React.FC<AdvisorChatProps> = ({ onProfileUpdated }) => {
+export const AdvisorChat: React.FC<AdvisorChatProps> = ({ onProfileUpdated, onProceedToCPQ }) => {
   const [messages, setMessages] = useState<Message[]>([
     {
       id: "m0",
@@ -222,24 +223,36 @@ export const AdvisorChat: React.FC<AdvisorChatProps> = ({ onProfileUpdated }) =>
           </div>
         </div>
 
-        {/* Live Slot Tags */}
-        {currentSlots && currentSlots.is_complete && (
-          <div className="hidden sm:flex items-center space-x-1.5 text-xs">
-            <span className="bg-emerald-500/20 text-emerald-300 border border-emerald-500/30 px-2 py-0.5 rounded-md font-medium">
-              Tier {currentSlots.city_tier}
-            </span>
-            <span className="bg-sky-500/20 text-sky-300 border border-sky-500/30 px-2 py-0.5 rounded-md font-medium capitalize">
-              {currentSlots.segment}
-            </span>
-            <span className={`px-2 py-0.5 rounded-md font-medium border ${
-              currentSlots.has_gstin
-                ? "bg-purple-500/20 text-purple-300 border-purple-500/30"
-                : "bg-amber-500/20 text-amber-300 border-amber-500/30"
-            }`}>
-              {currentSlots.has_gstin ? "GST Registered" : "Udyam Only (GST-Free)"}
-            </span>
-          </div>
-        )}
+        {/* Live Slot Tags & Action */}
+        <div className="flex items-center space-x-2">
+          {currentSlots && currentSlots.is_complete && (
+            <div className="hidden md:flex items-center space-x-1.5 text-xs">
+              <span className="bg-emerald-500/20 text-emerald-300 border border-emerald-500/30 px-2 py-0.5 rounded-md font-medium">
+                Tier {currentSlots.city_tier}
+              </span>
+              <span className="bg-sky-500/20 text-sky-300 border border-sky-500/30 px-2 py-0.5 rounded-md font-medium capitalize">
+                {currentSlots.segment}
+              </span>
+              <span className={`px-2 py-0.5 rounded-md font-medium border ${
+                currentSlots.has_gstin
+                  ? "bg-purple-500/20 text-purple-300 border-purple-500/30"
+                  : "bg-amber-500/20 text-amber-300 border-amber-500/30"
+              }`}>
+                {currentSlots.has_gstin ? "GST Registered" : "Udyam Only (GST-Free)"}
+              </span>
+            </div>
+          )}
+
+          {currentSlots && currentSlots.is_complete && onProceedToCPQ && (
+            <button
+              onClick={onProceedToCPQ}
+              className="flex items-center space-x-1 px-3 py-1.5 rounded-xl bg-red-600 hover:bg-red-500 text-white text-xs font-semibold shadow-md shadow-red-600/30 transition-all cursor-pointer"
+            >
+              <span>CPQ Cart</span>
+              <ArrowRight className="w-3.5 h-3.5" />
+            </button>
+          )}
+        </div>
       </div>
 
       {/* Messages Feed */}

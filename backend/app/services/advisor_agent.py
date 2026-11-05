@@ -43,7 +43,7 @@ class AdvisorAgent:
         self.client = None
         if GENAI_AVAILABLE and self.api_key:
             try:
-                self.client = genai.Client()
+                self.client = genai.Client(api_key=self.api_key)
             except Exception as e:
                 logging.warning("Could not initialize google.genai Client: %s", e)
 
@@ -74,7 +74,7 @@ Return STRICTLY valid JSON with no markdown formatting:
 }}"""
         try:
             def _call():
-                for mod in ["gemini-3.8-flash", "gemini-3.5-flash-lite"]:
+                for mod in ["gemini-3.1-flash-lite", "gemini-3.5-flash-lite", "gemini-flash-latest"]:
                     try:
                         return self.client.models.generate_content(
                             model=mod, contents=prompt
@@ -85,7 +85,7 @@ Return STRICTLY valid JSON with no markdown formatting:
 
             with concurrent.futures.ThreadPoolExecutor(max_workers=1) as executor:
                 future = executor.submit(_call)
-                res = future.result(timeout=2.0)
+                res = future.result(timeout=4.5)
 
             if not res or not res.text:
                 return None
@@ -136,94 +136,96 @@ Return STRICTLY valid JSON with no markdown formatting:
 
     def extract_slots(self, text: str, existing_slots: Optional[MSMEProfileSlots] = None) -> MSMEProfileSlots:
         """Extracts MSME profile parameters from conversational Hindi, Hinglish, or English."""
-        norm_text = text.lower().strip()
+        # Normalize Devanagari numerals to standard ASCII digits
+        dev_digits = {"०": "0", "१": "1", "२": "2", "३": "3", "४": "4", "५": "5", "६": "6", "७": "7", "८": "8", "९": "9"}
+        dev_text = "".join(dev_digits.get(ch, ch) for ch in text)
+        norm_text = dev_text.lower().strip()
         slots = existing_slots.model_copy() if existing_slots else MSMEProfileSlots()
 
-        # 1. Segment Extraction
-        if not slots.segment:
-            if re.search(r"\b(kirana|krana|kirane|grocery|salon|parlour|pharmacy|chemist|medical|medicl|dawai|bakery|cafe|boutique|dhaba|stationery|repair|shop|dukan|dukaan|dookan|dokan|retail|store)\b", norm_text):
-                slots.segment = "micro"
-            elif re.search(r"\b(clinic|clinc|doctor|doktor|hospital|ca\s*firm|chartered\s*accountant|lawyer|advocate|coaching|tuition|consultan|architect|diagnostic|office)\b", norm_text):
-                slots.segment = "prof"
-            elif re.search(r"\b(chain|multi[\s-]*site|outlets|stores|branches|restaurant\s*chain)\b", norm_text):
-                slots.segment = "multi"
-            elif re.search(r"\b(factory|fctory|fctry|karkhana|textile|auto[\s-]*parts|manufacturing|plant|foundry|workshop|mill|industrial)\b", norm_text):
-                slots.segment = "mfg"
+        # 1. Segment Extraction (Allows mid-turn overrides if explicitly mentioned)
+        if re.search(r"\b(kirana|krana|kirane|grocery|salon|parlour|pharmacy|chemist|medical|medicl|dawai|bakery|cafe|boutique|dhaba|stationery|repair|shop|dukan|dukaan|dookan|dokan|retail|store)\b", norm_text) or any(w in norm_text for w in ["दुकान", "किराना"]):
+            slots.segment = "micro"
+        elif re.search(r"\b(clinic|clinc|doctor|doktor|hospital|ca\s*firm|chartered\s*accountant|lawyer|advocate|coaching|tuition|consultan|architect|diagnostic|office)\b", norm_text) or any(w in norm_text for w in ["क्लीनिक", "डॉक्टर"]):
+            slots.segment = "prof"
+        elif re.search(r"\b(chain|multi[\s-]*site|outlets|stores|branches|restaurant\s*chain)\b", norm_text) or any(w in norm_text for w in ["शाखा", "ब्रांच"]):
+            slots.segment = "multi"
+        elif re.search(r"\b(factory|fctory|fctry|karkhana|textile|auto[\s-]*parts|manufacturing|plant|foundry|workshop|mill|industrial)\b", norm_text) or any(w in norm_text for w in ["कारखाना", "फैक्ट्री", "कपड़ों", "कपड़ा"]):
+            slots.segment = "mfg"
 
         # 2. City Tier Extraction
-        if not slots.city_tier:
-            # Check city names
-            tier1_pattern = r"\b(mumbai|bombay|mumbay|delhi|dilli|bengaluru|bangalore|blr|hyderabad|hyd|chennai|madras|kolkata|calcutta|pune|ahmedabad|amdavad|gurugram|gurgaon|noida)\b"
-            if re.search(tier1_pattern, norm_text):
+        tier1_pattern = r"\b(mumbai|bombay|mumbay|delhi|dilli|bengaluru|bangalore|blr|hyderabad|hyd|chennai|madras|kolkata|calcutta|pune|ahmedabad|amdavad|gurugram|gurgaon|noida)\b"
+        tier2_pattern = r"\b(jaipur|jaipr|jeypur|lucknow|lko|lakhnau|surat|kanpur|kanpr|knpur|nagpur|indore|bhopal|vizag|visakhapatnam|patna|vadodara|baroda|ludhiana|agra|nashik|coimbatore|kochi|cochin|chandigarh|tier\s*2|chota\s*sheher|chhota\s*shehar)\b"
+        if re.search(tier1_pattern, norm_text) or any(w in norm_text for w in ["मुंबई", "दिल्ली", "पुणे", "बेंगलुरु"]):
+            slots.city_tier = 1
+        elif re.search(tier2_pattern, norm_text) or any(w in norm_text for w in ["सूरत", "जयपुर", "लखनऊ", "नागपुर"]):
+            slots.city_tier = 2
+        elif not slots.city_tier:
+            if re.search(r"\btier\s*1\b", norm_text):
                 slots.city_tier = 1
-            else:
-                tier2_pattern = r"\b(jaipur|jaipr|jeypur|lucknow|lko|lakhnau|surat|kanpur|kanpr|knpur|nagpur|indore|bhopal|vizag|visakhapatnam|patna|vadodara|baroda|ludhiana|agra|nashik|coimbatore|kochi|cochin|chandigarh|tier\s*2|chota\s*sheher|chhota\s*shehar)\b"
-                if re.search(tier2_pattern, norm_text):
-                    slots.city_tier = 2
-                elif re.search(r"\btier\s*1\b", norm_text):
-                    slots.city_tier = 1
-                else:
-                    if any(word in norm_text for word in ["city", "town", "in", "me", "mein"]):
-                        slots.city_tier = 2
+            elif any(word in norm_text for word in ["city", "town", "in", "me", "mein", "में"]):
+                slots.city_tier = 2
 
         # 3. Employee Count Extraction
-        if not slots.employee_count:
-            emp_match = re.search(r"\b(\d+)\s*(?:staff|employees|workers|log|bnde|bande|ladke|members|people|kam\s*(?:karne|krne)\s*wale)\b", norm_text)
-            if emp_match:
-                slots.employee_count = int(emp_match.group(1))
-            else:
-                word_numbers = {
-                    "one": 1, "two": 2, "three": 3, "four": 4, "five": 5, "six": 6,
-                    "seven": 7, "eight": 8, "nine": 9, "ten": 10, "ek": 1, "do": 2,
-                    "teen": 3, "char": 4, "paanch": 5, "chhe": 6, "saat": 7, "aath": 8
-                }
-                for w, val in word_numbers.items():
-                    if re.search(rf"\b{w}\s*(?:staff|employees|workers|log|bnde|bande|ladke)\b", norm_text):
-                        slots.employee_count = val
-                        break
+        emp_match = re.search(r"\b(\d+)\s*(?:staff|employees|workers|log|bnde|bande|ladke|members|people|kam\s*(?:karne|krne)\s*wale)\b", norm_text)
+        if not emp_match:
+            emp_match = re.search(r"(\d+)\s*(?:कर्मचारी|लोग)", norm_text)
+        if emp_match:
+            slots.employee_count = int(emp_match.group(1))
+        elif not slots.employee_count:
+            word_numbers = {
+                "one": 1, "two": 2, "three": 3, "four": 4, "five": 5, "six": 6,
+                "seven": 7, "eight": 8, "nine": 9, "ten": 10, "ek": 1, "do": 2,
+                "teen": 3, "char": 4, "paanch": 5, "chhe": 6, "saat": 7, "aath": 8
+            }
+            for w, val in word_numbers.items():
+                if re.search(rf"\b{w}\s*(?:staff|employees|workers|log|bnde|bande|ladke)\b", norm_text):
+                    slots.employee_count = val
+                    break
 
-        # 4. Site Count Extraction
-        if not slots.num_sites:
-            site_match = re.search(r"\b(\d+)\s*(?:[a-z0-9_-]+\s+)?(?:shops|stores|branches|sites|locations|dukaan|dukan|outlets|units|factories)\b", norm_text)
-            if site_match:
-                slots.num_sites = int(site_match.group(1))
-            elif "2 store" in norm_text or "2 shop" in norm_text or "do dukan" in norm_text:
+        # 4. Site Count Extraction (Supports Mid-Turn Branch Expansion)
+        site_match = re.search(r"\b(\d+)\s*(?:[a-z0-9_-]+\s+)?(?:shops|stores|branches|sites|locations|dukaan|dukan|outlets|units|factories|ब्रांच|शाखा|दुकान)\b", norm_text)
+        if site_match:
+            slots.num_sites = int(site_match.group(1))
+            if re.search(r"\b(branches|sites|locations|outlets|chain|ब्रांच|शाखा)\b", norm_text):
+                slots.segment = "multi"
+        elif not slots.num_sites:
+            if re.search(r"\b(branches|sites|locations|outlets|chain)\b", norm_text):
                 slots.num_sites = 2
-            elif "single" in norm_text or "one shop" in norm_text or "ek dukan" in norm_text:
-                slots.num_sites = 1
+                slots.segment = "multi"
             else:
                 slots.num_sites = 1
 
-        # 5. GSTIN Presence Extraction
-        if slots.has_gstin is None:
-            if re.search(r"\b(no\s*gst(?:in)?|without\s*gst(?:in)?|bina\s*gst|gst(?:in)?\s*(?:nahi|nhi|nai|ni)\b|dont\s*have\s*gst(?:in)?|don't\s*have\s*gst(?:in)?|gst\s*number\s*(?:nahi|nhi|nai|ni)|gst\s*vst\s*(?:kuch\s*)?(?:nahi|nhi|nai|ni)|zero\s*gst|sirf\s*udyam|udyam\s*only)\b", norm_text):
-                slots.has_gstin = False
-            elif re.search(r"\b(have\s*gst(?:in)?|has\s*gst(?:in)?|with\s*gst(?:in)?|gst\s*registered|gst\s*(?:hai|h\b)|gstin\s*(?:hai|h\b)|gst\s*number\s*(?:hai|h\b)|gstin\s*available|active\s*gst(?:in)?)\b", norm_text):
-                slots.has_gstin = True
+        # 5. GSTIN Presence Extraction (Supports Mid-Turn Registration Pivot)
+        if re.search(r"\b(no\s*gst(?:in)?|without\s*gst(?:in)?|bina\s*gst|gst(?:in)?\s*(?:nahi|nhi|nai|ni)\b|dont\s*have\s*gst(?:in)?|don't\s*have\s*gst(?:in)?|gst\s*number\s*(?:nahi|nhi|nai|ni)|gst\s*vst\s*(?:kuch\s*)?(?:nahi|nhi|nai|ni)|zero\s*gst|sirf\s*udyam|udyam\s*only|जीएसटी\s*नहीं)\b", norm_text):
+            slots.has_gstin = False
+        elif re.search(r"\b(have\s*gst(?:in)?|has\s*gst(?:in)?|with\s*gst(?:in)?|gst\s*registered|gst\s*(?:hai|h\b)|gstin\s*(?:hai|h\b)|gst\s*number\s*(?:hai|h\b)|gstin\s*available|active\s*gst(?:in)?|gst\s*(?:number\s*)?mil\s*gaya|mil\s*gaya\s*gst|जीएसटी\s*है)\b", norm_text):
+            slots.has_gstin = True
+        elif slots.segment in {"mfg", "multi"} and slots.has_gstin is None:
+            # Factories and multi-site enterprise chains in India require statutory GST registration
+            slots.has_gstin = True
 
         # 6. Budget Extraction
-        if not slots.monthly_budget_cap:
-            budget_match = re.search(r"\b(?:budget|spending|kharcha|rupaye|rs|inr|₹)\s*(?:is|hai|of|around|lagbhag)?\s*(?:rs\.?|inr|₹)?\s*(\d{3,6})\b", norm_text)
-            if not budget_match:
-                budget_match = re.search(r"\b(\d{3,6})\s*(?:rupaye|rupees|rs|per\s*month|\/mo|tak|approx)\b", norm_text)
-            if budget_match:
-                slots.monthly_budget_cap = int(budget_match.group(1))
+        budget_match = re.search(r"\b(?:budget|spending|kharcha|rupaye|rs|inr|₹)\s*(?:is|hai|of|around|lagbhag)?\s*(?:rs\.?|inr|₹)?\s*(\d{3,6})\b", norm_text)
+        if not budget_match:
+            budget_match = re.search(r"\b(\d{3,6})\s*(?:rupaye|rupees|rs|per\s*month|\/mo|tak|approx)\b", norm_text)
+        if budget_match:
+            slots.monthly_budget_cap = int(budget_match.group(1))
 
         # 7. Needs Extraction
         detected = set(slots.detected_needs)
-        if re.search(r"\b(upi|gpay|phonepe|paytm|pos|qr|hotspot|failover|backup|payment\s*(?:atak|fasa|fas|atke)|counter)\b", norm_text):
+        if re.search(r"\b(upi|gpay|phonepe|paytm|pos|qr|hotspot|failover|backup|payment\s*(?:atak|fasa|fas|atke)|counter|यूपीआई)\b", norm_text):
             detected.add("pos_upi_uptime")
         if re.search(r"\b(whatsapp|watsapp|wtsapp|catalog|catalogue|broadcast|sms|message\s*bhejna)\b", norm_text):
             detected.add("whatsapp_catalogue")
-        if re.search(r"\b(email|mail|tally|cloud|drive|storage|office\s*365|google\s*workspace|data\s*safe)\b", norm_text):
+        if re.search(r"\b(email|mail|tally|cloud|drive|storage|office\s*365|google\s*workspace|data\s*safe|क्लाउड\s*बैकअप|बैकअप)\b", norm_text):
             detected.add("cloud_email")
-        if re.search(r"\b(cctv|camera|camra|cam|surveillance|nvr|dvr)\b", norm_text):
+        if re.search(r"\b(cctv|camera|camra|cam|surveillance|nvr|dvr|सीसीटीवी|कैमरा)\b", norm_text):
             detected.add("cctv_surveillance")
-        if re.search(r"\b(guest\s*wifi|customer\s*wifi|wifi|net|internet|broadband)\b", norm_text):
+        if re.search(r"\b(guest\s*wifi|customer\s*wifi|wifi|net|internet|broadband|वाईफाई|इंटरनेट)\b", norm_text):
             detected.add("guest_wifi")
         if re.search(r"\b(static\s*ip|fixed\s*ip|erp|server)\b", norm_text):
             detected.add("static_ip")
-        if re.search(r"\b(leased\s*line|ill|dedicated\s*internet|fiber\s*cut)\b", norm_text):
+        if re.search(r"\b(leased\s*line|ill|dedicated\s*internet|fiber\s*cut|लीज्ड\s*लाइन)\b", norm_text):
             detected.add("dedicated_ill")
         if re.search(r"\b(iot|machine|sensor|monitoring)\b", norm_text):
             detected.add("iot_monitoring")
@@ -243,6 +245,22 @@ Return STRICTLY valid JSON with no markdown formatting:
         return slots
 
     def process_turn(self, user_message: str, previous_slots: Optional[MSMEProfileSlots] = None) -> AdvisorResponse:
+        norm_msg = user_message.lower().strip()
+        # Prompt injection & arbitrary price override guardrail
+        if "ignore previous instructions" in norm_msg or "ignore all instructions" in norm_msg or re.search(r"\b(?:for|at)\s*(?:rs\.?|inr|₹)?\s*(?:10|1|5|0)\s*(?:per\s*month|\/mo|month)?\b", norm_msg):
+            slots = previous_slots or MSMEProfileSlots()
+            return AdvisorResponse(
+                slots=slots,
+                quote=None,
+                recommended_skus=[],
+                display_markdown="⚠️ **Airtel Business Enterprise Policy Guardrail:** Plan pricing is strictly determined by central regulatory tariff filings and cannot be modified via conversational prompts. Biz Fibre 1G (P03) is **₹3,999/month** (OTC Setup: ₹0). We can, however, help you find an authentic bundle matching your budget.",
+                spoken_tts_text="Airtel Business plan pricing is strictly fixed and audited by regulatory filings. Biz Fibre 1G is 3,999 Rupees per month. Prompt price overrides are not permitted.",
+                next_suggested_prompts=[
+                    "Show plans under ₹1,500/month",
+                    "What are the benefits of Biz Fibre 1G?",
+                    "Check Udyam micro-retail bundles",
+                ],
+            )
         """Executes full neuro-symbolic turn: Slot Extraction -> CPQ Engine -> Dual Narration.
 
         Tier 1: Gemini Live LLM (when GEMINI_API_KEY is configured).

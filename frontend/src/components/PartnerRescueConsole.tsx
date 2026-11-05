@@ -213,17 +213,22 @@ export const PartnerRescueConsole: React.FC<PartnerRescueConsoleProps> = ({ onLo
                     </td>
                     <td className="py-3 px-3">
                       <div className="flex items-center space-x-2">
-                        <span
-                          className={`font-mono font-bold text-sm ${
-                            lead.propensity_score >= 0.7
-                              ? "text-emerald-400"
-                              : lead.propensity_score >= 0.4
-                              ? "text-amber-400"
-                              : "text-slate-400"
-                          }`}
-                        >
-                          {(lead.propensity_score * 100).toFixed(1)}%
-                        </span>
+                        {(() => {
+                          const scoreVal = lead.propensity_score > 1.0 ? lead.propensity_score : lead.propensity_score * 100;
+                          return (
+                            <span
+                              className={`font-mono font-bold text-sm ${
+                                scoreVal >= 70
+                                  ? "text-emerald-400"
+                                  : scoreVal >= 40
+                                  ? "text-amber-400"
+                                  : "text-slate-400"
+                              }`}
+                            >
+                              {scoreVal.toFixed(1)}%
+                            </span>
+                          );
+                        })()}
                         <span
                           className={`text-[9px] px-1.5 py-0.5 rounded font-bold uppercase ${
                             lead.priority_tier === "HIGH"
