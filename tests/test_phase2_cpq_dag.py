@@ -106,6 +106,9 @@ def test_reverse_budget_optimizer_dag_compliance(cpq: CPQEngine):
         detected_needs=["pos_upi_uptime", "cctv_surveillance"],
     )
 
+    # Warm-up pass to eliminate Python cold-import overhead
+    cpq.optimize_budget(user, max_monthly_budget=1500)
+
     test_budgets = [1500, 2500, 6000, 15000]
 
     for budget in test_budgets:
