@@ -202,3 +202,48 @@ class AdvisorResponse(BaseModel):
     spoken_tts_text: str = Field(description="Clean, symbol-free text for browser TTS voice playback")
     next_suggested_prompts: list[str] = Field(default_factory=list)
 
+
+# KYC & DPDP Schemas
+class DPDPConsentPayload(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+
+    consent_id: str
+    user_id: str
+    purpose: str
+    timestamp: str
+    ip_hash: str
+    granted: bool
+
+
+class ExtractedDocPayload(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+
+    file_sha256: str
+    doc_type: str
+    extracted_fields: dict[str, str]
+
+
+class KYCAnomaly(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+
+    code: str
+    severity: str  # BLOCKER, WARNING, INFO
+    message: str
+    remediation: Optional[str] = None
+
+
+class KYCVerificationResult(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+
+    applicant_id: Optional[str] = None
+    status: str  # APPROVED, MANUAL_REVIEW, REJECTED
+    anomalies: list[KYCAnomaly]
+    fuzzy_scores: dict[str, float]
+    dpdp_consent_verified: bool
+    redacted_signatory_id: Optional[str] = None
+    gst_status: Optional[str] = None
+    udyam_status: Optional[str] = None
+    address_bill_age_days: Optional[int] = None
+    execution_latency_ms: float
+
+
