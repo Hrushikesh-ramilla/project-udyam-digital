@@ -37,53 +37,50 @@ class AdvisorAgent:
 
         # 1. Segment Extraction
         if not slots.segment:
-            if re.search(r"\b(kirana|grocery|salon|parlour|pharmacy|chemist|medical|bakery|cafe|boutique|dhaba|stationery|repair|shop|dukan|retail)\b", norm_text):
+            if re.search(r"\b(kirana|krana|kirane|grocery|salon|parlour|pharmacy|chemist|medical|medicl|dawai|bakery|cafe|boutique|dhaba|stationery|repair|shop|dukan|dukaan|dookan|dokan|retail|store)\b", norm_text):
                 slots.segment = "micro"
-            elif re.search(r"\b(clinic|doctor|hospital|ca\s*firm|chartered\s*accountant|lawyer|advocate|coaching|tuition|consultan|architect|diagnostic|office)\b", norm_text):
+            elif re.search(r"\b(clinic|clinc|doctor|doktor|hospital|ca\s*firm|chartered\s*accountant|lawyer|advocate|coaching|tuition|consultan|architect|diagnostic|office)\b", norm_text):
                 slots.segment = "prof"
             elif re.search(r"\b(chain|multi[\s-]*site|outlets|stores|branches|restaurant\s*chain)\b", norm_text):
                 slots.segment = "multi"
-            elif re.search(r"\b(factory|textile|auto[\s-]*parts|manufacturing|plant|foundry|workshop|mill|industrial)\b", norm_text):
+            elif re.search(r"\b(factory|fctory|fctry|karkhana|textile|auto[\s-]*parts|manufacturing|plant|foundry|workshop|mill|industrial)\b", norm_text):
                 slots.segment = "mfg"
 
         # 2. City Tier Extraction
         if not slots.city_tier:
             # Check city names
-            for t1 in TIER_1_CITIES:
-                if re.search(rf"\b{t1}\b", norm_text):
-                    slots.city_tier = 1
-                    break
-            if not slots.city_tier:
-                # Common Tier 2 city keywords or explicit mentions
-                if re.search(r"\b(jaipur|lucknow|surat|kanpur|nagpur|indore|bhopal|vizag|visakhapatnam|patna|vadodara|ludhiana|agra|nashik|coimbatore|kochi|chandigarh|tier\s*2)\b", norm_text):
+            tier1_pattern = r"\b(mumbai|bombay|mumbay|delhi|dilli|bengaluru|bangalore|blr|hyderabad|hyd|chennai|madras|kolkata|calcutta|pune|ahmedabad|amdavad|gurugram|gurgaon|noida)\b"
+            if re.search(tier1_pattern, norm_text):
+                slots.city_tier = 1
+            else:
+                tier2_pattern = r"\b(jaipur|jaipr|jeypur|lucknow|lko|lakhnau|surat|kanpur|kanpr|knpur|nagpur|indore|bhopal|vizag|visakhapatnam|patna|vadodara|baroda|ludhiana|agra|nashik|coimbatore|kochi|cochin|chandigarh|tier\s*2|chota\s*sheher|chhota\s*shehar)\b"
+                if re.search(tier2_pattern, norm_text):
                     slots.city_tier = 2
                 elif re.search(r"\btier\s*1\b", norm_text):
                     slots.city_tier = 1
                 else:
-                    # Default reasonable assumption if location mentioned but not Tier 1
-                    if any(word in norm_text for word in ["city", "town", "in"]):
+                    if any(word in norm_text for word in ["city", "town", "in", "me", "mein"]):
                         slots.city_tier = 2
 
         # 3. Employee Count Extraction
         if not slots.employee_count:
-            emp_match = re.search(r"\b(\d+)\s*(?:staff|employees|workers|log|members|people|kam\s*karne\s*wale)\b", norm_text)
+            emp_match = re.search(r"\b(\d+)\s*(?:staff|employees|workers|log|bnde|bande|ladke|members|people|kam\s*(?:karne|krne)\s*wale)\b", norm_text)
             if emp_match:
                 slots.employee_count = int(emp_match.group(1))
             else:
-                # Check for single word numbers
                 word_numbers = {
                     "one": 1, "two": 2, "three": 3, "four": 4, "five": 5, "six": 6,
                     "seven": 7, "eight": 8, "nine": 9, "ten": 10, "ek": 1, "do": 2,
                     "teen": 3, "char": 4, "paanch": 5, "chhe": 6, "saat": 7, "aath": 8
                 }
                 for w, val in word_numbers.items():
-                    if re.search(rf"\b{w}\s*(?:staff|employees|workers|log)\b", norm_text):
+                    if re.search(rf"\b{w}\s*(?:staff|employees|workers|log|bnde|bande|ladke)\b", norm_text):
                         slots.employee_count = val
                         break
 
         # 4. Site Count Extraction
         if not slots.num_sites:
-            site_match = re.search(r"\b(\d+)\s*(?:[a-z0-9_-]+\s+)?(?:shops|stores|branches|sites|locations|dukaan|outlets|units|factories)\b", norm_text)
+            site_match = re.search(r"\b(\d+)\s*(?:[a-z0-9_-]+\s+)?(?:shops|stores|branches|sites|locations|dukaan|dukan|outlets|units|factories)\b", norm_text)
             if site_match:
                 slots.num_sites = int(site_match.group(1))
             elif "2 store" in norm_text or "2 shop" in norm_text or "do dukan" in norm_text:
@@ -91,34 +88,34 @@ class AdvisorAgent:
             elif "single" in norm_text or "one shop" in norm_text or "ek dukan" in norm_text:
                 slots.num_sites = 1
             else:
-                slots.num_sites = 1  # Default to single site if not specified
+                slots.num_sites = 1
 
         # 5. GSTIN Presence Extraction
         if slots.has_gstin is None:
-            if re.search(r"\b(no\s*gst(?:in)?|without\s*gst(?:in)?|gst(?:in)?\s*nahi|dont\s*have\s*gst(?:in)?|don't\s*have\s*gst(?:in)?|gst\s*number\s*nahi|zero\s*gst)\b", norm_text):
+            if re.search(r"\b(no\s*gst(?:in)?|without\s*gst(?:in)?|bina\s*gst|gst(?:in)?\s*(?:nahi|nhi|nai|ni)\b|dont\s*have\s*gst(?:in)?|don't\s*have\s*gst(?:in)?|gst\s*number\s*(?:nahi|nhi|nai|ni)|gst\s*vst\s*(?:kuch\s*)?(?:nahi|nhi|nai|ni)|zero\s*gst|sirf\s*udyam|udyam\s*only)\b", norm_text):
                 slots.has_gstin = False
-            elif re.search(r"\b(have\s*gst(?:in)?|has\s*gst(?:in)?|with\s*gst(?:in)?|gst\s*registered|gst\s*hai|gstin\s*hai|gst\s*number\s*hai|gstin\s*available|active\s*gst(?:in)?)\b", norm_text):
+            elif re.search(r"\b(have\s*gst(?:in)?|has\s*gst(?:in)?|with\s*gst(?:in)?|gst\s*registered|gst\s*(?:hai|h\b)|gstin\s*(?:hai|h\b)|gst\s*number\s*(?:hai|h\b)|gstin\s*available|active\s*gst(?:in)?)\b", norm_text):
                 slots.has_gstin = True
 
         # 6. Budget Extraction
         if not slots.monthly_budget_cap:
             budget_match = re.search(r"\b(?:budget|spending|kharcha|rupaye|rs|inr|₹)\s*(?:is|hai|of|around|lagbhag)?\s*(?:rs\.?|inr|₹)?\s*(\d{3,6})\b", norm_text)
             if not budget_match:
-                budget_match = re.search(r"\b(\d{3,6})\s*(?:rupaye|rupees|rs|per\s*month|\/mo)\b", norm_text)
+                budget_match = re.search(r"\b(\d{3,6})\s*(?:rupaye|rupees|rs|per\s*month|\/mo|tak|approx)\b", norm_text)
             if budget_match:
                 slots.monthly_budget_cap = int(budget_match.group(1))
 
         # 7. Needs Extraction
         detected = set(slots.detected_needs)
-        if re.search(r"\b(upi|gpay|phonepe|paytm|pos|qr|hotspot|failover|backup|payment\s*atak|counter)\b", norm_text):
+        if re.search(r"\b(upi|gpay|phonepe|paytm|pos|qr|hotspot|failover|backup|payment\s*(?:atak|fasa|fas|atke)|counter)\b", norm_text):
             detected.add("pos_upi_uptime")
-        if re.search(r"\b(whatsapp|catalog|catalogue|broadcast|sms|message\s*bhejna)\b", norm_text):
+        if re.search(r"\b(whatsapp|watsapp|wtsapp|catalog|catalogue|broadcast|sms|message\s*bhejna)\b", norm_text):
             detected.add("whatsapp_catalogue")
-        if re.search(r"\b(email|tally|cloud|drive|storage|office\s*365|google\s*workspace|data\s*safe)\b", norm_text):
+        if re.search(r"\b(email|mail|tally|cloud|drive|storage|office\s*365|google\s*workspace|data\s*safe)\b", norm_text):
             detected.add("cloud_email")
-        if re.search(r"\b(cctv|camera|surveillance|nvr|dvr)\b", norm_text):
+        if re.search(r"\b(cctv|camera|camra|cam|surveillance|nvr|dvr)\b", norm_text):
             detected.add("cctv_surveillance")
-        if re.search(r"\b(guest\s*wifi|customer\s*wifi|wifi)\b", norm_text):
+        if re.search(r"\b(guest\s*wifi|customer\s*wifi|wifi|net|internet|broadband)\b", norm_text):
             detected.add("guest_wifi")
         if re.search(r"\b(static\s*ip|fixed\s*ip|erp|server)\b", norm_text):
             detected.add("static_ip")

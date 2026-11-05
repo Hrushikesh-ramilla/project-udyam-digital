@@ -47,7 +47,11 @@ export const App: React.FC = () => {
   const handleProfileUpdated = (slots: MSMEProfileSlots, skus?: string[]) => {
     setProfileSlots(slots);
     if (skus && skus.length > 0) setRecommendedSkus(skus);
-    setCustomerStep("cpq");
+    if (slots.is_complete) {
+      setTimeout(() => {
+        setCustomerStep("cpq");
+      }, 2500);
+    }
   };
 
   const handleProceedToKYC = (calculatedQuote: CommercialBreakdown) => {
