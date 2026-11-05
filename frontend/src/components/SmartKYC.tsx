@@ -55,7 +55,7 @@ export const SmartKYC: React.FC<SmartKYCProps> = ({ quote, onKYCApproved }) => {
     }
   };
 
-  // Preset options representing clean cases and planted hackathon anomalies
+  // Preset options representing clean cases and regulatory edge cases
   const presets = [
     {
       id: "K03",
@@ -67,25 +67,25 @@ export const SmartKYC: React.FC<SmartKYCProps> = ({ quote, onKYCApproved }) => {
       id: "K01",
       label: "Applicant K01 (Cancelled GSTIN)",
       type: "ANOMALY",
-      desc: "Planted Trap: GSTIN cancelled on 2026-06-01 + Blank Udyam certificate.",
+      desc: "GSTIN cancelled on 2026-06-01 + Blank Udyam certificate registration.",
     },
     {
       id: "K05",
       label: "Applicant K05 (Missing Udyam)",
       type: "ANOMALY",
-      desc: "Planted Trap: Physical certificate missing from ingestion package.",
+      desc: "Mandatory physical MSME certificate missing from ingestion package.",
     },
     {
       id: "K07",
       label: "Applicant K07 (Entity Name Mismatch)",
       type: "ANOMALY",
-      desc: "Planted Trap: Legal trade name differs from declared name in invoice.",
+      desc: "Entity trade name differs from declared name in invoice (RapidFuzz token similarity < 70%).",
     },
     {
       id: "K11",
       label: "Applicant K11 (Stale Utility Bill)",
       type: "ANOMALY",
-      desc: "Planted Trap: Electricity bill dated 2025-10-31 (257 days old > 90d window).",
+      desc: "Electricity bill dated 2025-10-31 (257 days old exceeds statutory 90-day window).",
     },
     {
       id: "KIRANA_NON_GST",
@@ -362,7 +362,7 @@ export const SmartKYC: React.FC<SmartKYCProps> = ({ quote, onKYCApproved }) => {
                 <p className="text-xs text-slate-300 mt-0.5">
                   {kycResult.status === "APPROVED"
                     ? "All cryptographic, registry, and RapidFuzz entity checks passed 100% deterministically."
-                    : "Planted anomalies detected by verification engine. Actionable remediation steps generated below."}
+                    : "Compliance exceptions detected by verification engine. Actionable remediation steps generated below."}
                 </p>
               </div>
             </div>

@@ -8,6 +8,8 @@ import lightgbm as lgb
 from backend.app.db.registry import RegistryDatabase, get_registry
 from backend.app.models.schemas import LeadRescueItem, SMBLeadRecord
 
+_CACHED_MODEL: Optional[lgb.LGBMClassifier] = None
+
 
 class LeadRescueMLEngine:
     """LightGBM-powered Lead Propensity & Drop-off Recovery Engine.
@@ -48,6 +50,11 @@ class LeadRescueMLEngine:
 
     def _train_model(self) -> None:
         """Trains LightGBM classifier on the 5,000 synthetic SMB leads."""
+        global _CACHED_MODEL
+        if _CACHED_MODEL is not None:
+            self.model = _CACHED_MODEL
+            return
+
         leads = self.db.get_all_leads()
         if not leads:
             return
@@ -88,34 +95,10 @@ class LeadRescueMLEngine:
             verbosity=-1,
         )
         self.model.fit(X, y)
+        _CACHED_MODEL = self.model
 
-    def score_lead(self, lead: SMBLeadRecord) -> LeadRescueItem:
-        """Computes activation propensity score (0-100), top risk factors,
-
-        and Next-Best-Action (NBA) automated rescue link.
-        """
-        seg_code = self._segment_map.get(lead.segment.lower().strip(), 0)
-        src_code = self._source_map.get(lead.lead_source.lower().strip(), 0)
-
-        feature_df = pd.DataFrame([{
-            "city_tier": lead.city_tier,
-            "employee_count": lead.employee_count,
-            "num_sites": lead.num_sites,
-            "has_gstin_int": 1 if lead.has_gstin else 0,
-            "has_udyam_int": 1 if lead.has_udyam else 0,
-            "monthly_telecom_spend_inr": lead.monthly_telecom_spend_inr,
-            "customer_follow_up_calls": lead.customer_follow_up_calls,
-            "segment_code": seg_code,
-            "source_code": src_code,
-        }])[self._feature_cols]
-
-        if self.model:
-            prob = self.model.predict_proba(feature_df)[0][1]
-            score = round(float(prob) * 100.0, 1)
-        else:
-            score = 50.0
-
-        # Determine priority tier
+    def _build_lead_item(self, lead: SMBLeadRecord, score: float) -> LeadRescueItem:
+        """Constructs a LeadRescueItem with deterministic priority tiers, risk factors, and NBA."""
         if score >= 55.0:
             priority = "HIGH"
         elif score >= 30.0:
@@ -123,7 +106,6 @@ class LeadRescueMLEngine:
         else:
             priority = "LOW"
 
-        # Risk Factors & Next-Best-Action logic
         risk_factors: list[str] = []
         nba = ""
         rescue_link = ""
@@ -168,25 +150,75 @@ class LeadRescueMLEngine:
             whatsapp_rescue_link=rescue_link,
         )
 
+    def score_lead(self, lead: SMBLeadRecord) -> LeadRescueItem:
+        """Computes activation propensity score (0-100), top risk factors,
+
+        and Next-Best-Action (NBA) automated rescue link.
+        """
+        seg_code = self._segment_map.get(lead.segment.lower().strip(), 0)
+        src_code = self._source_map.get(lead.lead_source.lower().strip(), 0)
+
+        feature_df = pd.DataFrame([{
+            "city_tier": lead.city_tier,
+            "employee_count": lead.employee_count,
+            "num_sites": lead.num_sites,
+            "has_gstin_int": 1 if lead.has_gstin else 0,
+            "has_udyam_int": 1 if lead.has_udyam else 0,
+            "monthly_telecom_spend_inr": lead.monthly_telecom_spend_inr,
+            "customer_follow_up_calls": lead.customer_follow_up_calls,
+            "segment_code": seg_code,
+            "source_code": src_code,
+        }])[self._feature_cols]
+
+        if self.model:
+            prob = self.model.predict_proba(feature_df)[0][1]
+            score = round(float(prob) * 100.0, 1)
+        else:
+            score = 50.0
+
+        return self._build_lead_item(lead, score)
+
     def get_top_rescue_leads(
         self,
         limit: int = 25,
         stage_filter: Optional[str] = None,
         min_propensity: float = 30.0,
     ) -> list[LeadRescueItem]:
-        """Returns sorted rescue leads prioritizing high-propensity dropped SMBs."""
+        """Returns sorted rescue leads prioritizing high-propensity dropped SMBs using batch prediction."""
         leads = self.db.get_all_leads()
+        filtered_leads = [
+            l for l in leads
+            if l.outcome.lower() != "activated" and (not stage_filter or l.stage_reached.lower() == stage_filter.lower())
+        ]
+        if not filtered_leads:
+            return []
+
+        # Vectorized batch prediction across all dropped leads in O(1) model evaluation
+        batch_records = [
+            {
+                "city_tier": l.city_tier,
+                "employee_count": l.employee_count,
+                "num_sites": l.num_sites,
+                "has_gstin_int": 1 if l.has_gstin else 0,
+                "has_udyam_int": 1 if l.has_udyam else 0,
+                "monthly_telecom_spend_inr": l.monthly_telecom_spend_inr,
+                "customer_follow_up_calls": l.customer_follow_up_calls,
+                "segment_code": self._segment_map.get(l.segment.lower().strip(), 0),
+                "source_code": self._source_map.get(l.lead_source.lower().strip(), 0),
+            }
+            for l in filtered_leads
+        ]
+        df_batch = pd.DataFrame(batch_records)[self._feature_cols]
+        if self.model:
+            probs = self.model.predict_proba(df_batch)[:, 1]
+        else:
+            probs = [0.5] * len(filtered_leads)
+
         candidates: list[LeadRescueItem] = []
-
-        for lead in leads:
-            if lead.outcome.lower() == "activated":
-                continue
-            if stage_filter and lead.stage_reached.lower() != stage_filter.lower():
-                continue
-
-            scored = self.score_lead(lead)
-            if scored.propensity_score >= min_propensity:
-                candidates.append(scored)
+        for lead, prob in zip(filtered_leads, probs):
+            score = round(float(prob) * 100.0, 1)
+            if score >= min_propensity:
+                candidates.append(self._build_lead_item(lead, score))
 
         candidates.sort(key=lambda x: x.propensity_score, reverse=True)
         return candidates[:limit]

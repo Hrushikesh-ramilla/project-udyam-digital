@@ -24,29 +24,29 @@ export const JudgeTestBench: React.FC = () => {
   const scenarios = [
     {
       id: "K01",
-      title: "Applicant K01: Cancelled GSTIN Trap",
-      badge: "BLOCKER TRAP",
+      title: "Applicant K01: Cancelled GSTIN Verification",
+      badge: "REGULATORY BLOCKER",
       badgeColor: "bg-red-500/20 text-red-400 border-red-500/30",
-      desc: "GSTIN cancelled on 2026-06-01 + Blank Udyam certificate. Engine must reject immediately with actionable non-GST fallback.",
+      desc: "GSTIN cancelled on 2026-06-01 + Blank Udyam certificate. Engine rejects immediately with actionable non-GST fallback.",
     },
     {
       id: "K05",
-      title: "Applicant K05: Missing Document Trap",
-      badge: "INGESTION TRAP",
+      title: "Applicant K05: Missing Mandatory Document",
+      badge: "MISSING DOCUMENT",
       badgeColor: "bg-amber-500/20 text-amber-400 border-amber-500/30",
-      desc: "Udyam certificate file omitted from ingestion payload. Engine must flag UDYAM_DOC_MISSING without crashing.",
+      desc: "Udyam certificate file omitted from ingestion payload. Engine flags UDYAM_DOC_MISSING without crashing.",
     },
     {
       id: "K07",
-      title: "Applicant K07: Entity Name Mismatch",
-      badge: "FUZZY TRAP",
+      title: "Applicant K07: Entity Name Discrepancy",
+      badge: "FUZZY MISMATCH",
       badgeColor: "bg-amber-500/20 text-amber-400 border-amber-500/30",
       desc: "Legal trade name differs from declared name in invoice (RapidFuzz token similarity < 70%).",
     },
     {
       id: "K11",
       title: "Applicant K11: Stale Utility Bill (>90d)",
-      badge: "ANCHOR DATE TRAP",
+      badge: "STATUTORY EXPIRATION",
       badgeColor: "bg-red-500/20 text-red-400 border-red-500/30",
       desc: "Bill dated 2025-10-31 is 257 days old relative to hackathon anchor 2026-07-15. Violates 90-day validity window.",
     },
@@ -95,7 +95,7 @@ export const JudgeTestBench: React.FC = () => {
               </h2>
             </div>
             <p className="text-xs text-slate-300 mt-1">
-              Test every planted defect, synthetic edge case, and architectural constraint live against the running backend with cryptographic verification.
+              Test real-world regulatory compliance edge cases, document discrepancies, and statutory constraints live against the running backend.
             </p>
           </div>
           <div className="flex items-center space-x-2 bg-slate-950 p-2.5 rounded-xl border border-slate-800 font-mono text-xs text-slate-300">
@@ -187,12 +187,12 @@ export const JudgeTestBench: React.FC = () => {
             </div>
           </div>
 
-          {/* Planted Anomalies Caught */}
+          {/* Compliance Exceptions Caught */}
           {scenarioData.verification_result?.anomalies?.length > 0 && (
             <div className="p-4 rounded-xl bg-red-950/20 border border-red-500/30 space-y-2">
               <h4 className="text-xs font-bold text-red-400 uppercase tracking-wider flex items-center space-x-1.5">
                 <AlertTriangle className="w-4 h-4" />
-                <span>Planted Defects Trapped by Engine ({scenarioData.verification_result.anomalies.length})</span>
+                <span>Compliance Exceptions Detected by Engine ({scenarioData.verification_result.anomalies.length})</span>
               </h4>
               <div className="space-y-1.5">
                 {scenarioData.verification_result.anomalies.map((anom: KYCAnomaly, idx: number) => (

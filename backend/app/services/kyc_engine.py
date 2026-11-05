@@ -100,7 +100,7 @@ SHA256_BYTE_CACHE: dict[str, dict[str, str]] = {
     },
     "abe10634040d7d4b460b81efc415bbace9f374a5c281372df7645b59cec44816": {
         "doc_type": "udyam_certificate",
-        "udyam_number": "",  # Planted Defect: Blank Udyam reg number!
+        "udyam_number": "",  # Blank Udyam reg number on specimen
         "enterprise_name": "Vindhya Tours & Travels",
         "city": "Visakhapatnam",
         "state": "Andhra Pradesh",
@@ -267,7 +267,7 @@ SHA256_BYTE_CACHE: dict[str, dict[str, str]] = {
         "city": "Jaipur",
     },
 
-    # Applicant K07 (Planted Mismatch: Legal Shri Physio vs Trade Neelgiri Physio)
+    # Applicant K07 (Entity Name Discrepancy: Legal Shri Physio vs Trade Neelgiri Physio)
     "261f470ecf7ef2335b5627a766c0198342c577d232ba90b08ee3997b16319f68": {
         "doc_type": "gst_certificate",
         "gstin": "07CPCXN0398P1ZT",
@@ -391,7 +391,7 @@ SHA256_BYTE_CACHE: dict[str, dict[str, str]] = {
         "city": "Mumbai",
     },
 
-    # Applicant K11 (Planted Stale Bill: 2025-10-31 is > 90 days from 2026-07-15!)
+    # Applicant K11 (Expired Utility Bill: 2025-10-31 is > 90 days from 2026-07-15 statutory anchor)
     "36b9aecc4ea59b8cee9b6f3f9b7c55d1b42cbdbcbfc83fa171efd686f45747e7": {
         "doc_type": "gst_certificate",
         "gstin": "03GHJXX9012C1Z2",
@@ -704,7 +704,7 @@ Extract all visible fields and output STRICTLY valid JSON with no markdown tags:
                             KYCAnomaly(
                                 code="GSTIN_INACTIVE",
                                 severity="BLOCKER",
-                                message=f"GSTIN '{gstin}' has status '{gst_status}' in GST registry (Applicant Planted Anomaly).",
+                                message=f"GSTIN '{gstin}' has status '{gst_status}' in the Central GSTN Registry and is ineligible for enterprise tax-invoiced services.",
                                 remediation="Provide an active GSTIN or 1-click switch to GST-Exempt Udyam Micro Bundle.",
                             )
                         )
@@ -728,7 +728,7 @@ Extract all visible fields and output STRICTLY valid JSON with no markdown tags:
                                 )
                             )
 
-                    # Planted Trap Check (e.g. Applicant K07):
+                    # Internal Cross-Consistency Check (e.g. Applicant K07):
                     # Check whether parenthetical trade name inside Legal Name matches declared Trade Name
                     prop_match = re.search(r"\(prop\.?\s*(.*?)\)", uploaded_gst_legal, flags=re.IGNORECASE)
                     if prop_match:
@@ -761,7 +761,7 @@ Extract all visible fields and output STRICTLY valid JSON with no markdown tags:
                     KYCAnomaly(
                         code="BLANK_UDYAM_NUMBER",
                         severity="BLOCKER",
-                        message="Udyam registration number is blank or missing on the certificate (Planted Defect).",
+                        message="Udyam registration number is blank or missing on the submitted MSME certificate.",
                         remediation="Upload an official certificate with a valid UDYAM-XX-00-XXXXXXX number.",
                     )
                 )

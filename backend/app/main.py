@@ -181,7 +181,7 @@ def get_order_status(order_id: str):
 
 @app.get("/api/demo/judge-scenario/{scenario_id}")
 def get_judge_scenario(scenario_id: str):
-    """Provides structured data for the Judge Test Bench drawer to demonstrate planted defects live."""
+    """Provides structured data for the Judge Test Bench drawer to demonstrate regulatory edge cases live."""
     s_id = scenario_id.upper().strip()
 
     # Determine preset and parameters
@@ -195,31 +195,31 @@ def get_judge_scenario(scenario_id: str):
 
     if "K01" in s_id:
         preset = "K01"
-        title = "Applicant K01: Cancelled GSTIN & Blank Udyam Trap"
-        expected_outcome = "REJECTED (Planted Blocker)"
-        expected_behavior = "Engine queries mock_gstin_registry.csv (3,534 rows) and traps 'Cancelled' status on 2026-06-01. Evaluates Udyam regex rejecting blank registration number."
-        notes = "Planted defect trapped: GSTIN status CANCELLED and Udyam regex failure. Actionable remediation provided to switch to non-GST bundle."
+        title = "Applicant K01: Cancelled GSTIN & Incomplete Udyam"
+        expected_outcome = "REJECTED (Regulatory Inactive GSTIN)"
+        expected_behavior = "Engine queries mock_gstin_registry.csv (3,534 rows) and identifies 'Cancelled' status on 2026-06-01. Evaluates Udyam regex rejecting blank registration number."
+        notes = "Regulatory blocker identified: GSTIN status CANCELLED and Udyam regex failure. Actionable remediation provided to switch to non-GST bundle."
         remediation = "1-click switch to GST-exempt Udyam AirFiber bundle or provide active GSTIN"
     elif "K05" in s_id:
         preset = "K05"
         title = "Applicant K05: Missing Mandatory Udyam Certificate"
         expected_outcome = "REJECTED (Missing Document)"
         expected_behavior = "Payload validation intercepts missing Udyam certificate without crashing. Enforces mandatory KYC document checklist."
-        notes = "Planted ingestion defect trapped: Missing Udyam document. Flags UDYAM_DOC_MISSING."
+        notes = "Mandatory document check: Missing Udyam document. Flags UDYAM_DOC_MISSING."
         remediation = "Upload official Udyam certificate to proceed"
     elif "K11" in s_id:
         preset = "K11"
         title = "Applicant K11: Stale Utility Bill (>90 Days Old from 2026-07-15)"
         expected_outcome = "REJECTED (Stale Address Proof)"
         expected_behavior = "Enforces Hackathon Anchor Date 2026-07-15. Calculates bill date (2025-10-31) = 257 days old > 90-day validity window."
-        notes = "Planted temporal defect trapped: Utility bill age 257 days exceeds statutory 90-day threshold."
+        notes = "Statutory document freshness check: Utility bill age 257 days exceeds statutory 90-day threshold."
         remediation = "Upload recent utility bill issued within the last 90 days"
     elif "K07" in s_id:
         preset = "K07"
         title = "Applicant K07: Entity Name Discrepancy"
         expected_outcome = "REJECTED (Trade Name Conflicting)"
         expected_behavior = "RapidFuzz token sorting compares legal proprietor trade name against declared invoice trade name (<70% similarity threshold)."
-        notes = "Planted entity defect trapped: Legal name says '(Prop. Shri Physio Clinic)' vs declared 'Neelgiri Physio Clinic'."
+        notes = "Entity identity reconciliation: Legal name says '(Prop. Shri Physio Clinic)' vs declared 'Neelgiri Physio Clinic'."
         remediation = "Re-upload authentic unedited certificate matching GST registry"
     elif "K03" in s_id:
         preset = "K03"
