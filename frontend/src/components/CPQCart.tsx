@@ -66,8 +66,8 @@ export const CPQCart: React.FC<CPQCartProps> = ({
         const cartItems = selectedProductIds.map((id) => ({ product_id: id, quantity: 1 }));
         const res = await calculateQuote(cartItems, contractMonths);
         setQuote(res);
-      } catch (err: any) {
-        setErrorMessage(err.message || "Failed to calculate quote");
+      } catch (err: unknown) {
+        setErrorMessage(err instanceof Error ? err.message : "Failed to calculate quote");
       } finally {
         setLoading(false);
       }
@@ -96,8 +96,8 @@ export const CPQCart: React.FC<CPQCartProps> = ({
 
       const result = await optimizeBudget(profilePayload, budgetSlider);
       setSelectedProductIds(result.selected_skus);
-    } catch (err: any) {
-      setErrorMessage(err.message || "Budget optimization failed");
+    } catch (err: unknown) {
+      setErrorMessage(err instanceof Error ? err.message : "Budget optimization failed");
     } finally {
       setOptimizing(false);
     }

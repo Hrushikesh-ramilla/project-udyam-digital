@@ -72,7 +72,7 @@ def extract_proprietor_name(legal_name: str) -> str:
 # Content-Addressable SHA-256 Specimen Registry
 # Keyed strictly by SHA-256 byte hash (zero filename hardcoding)
 SHA256_BYTE_CACHE: dict[str, dict[str, str]] = {
-    # Applicant K01 (Cancelled GSTIN, Blank Udyam)
+    # Specimen: Cancelled GSTIN & Blank Udyam
     "f30b5b4eca3069dbf0f37214ac60d09cc2330c4eb4d690d8204c1a7708dc30ea": {
         "doc_type": "gst_certificate",
         "gstin": "37IHKXV5167L1ZS",
@@ -103,7 +103,7 @@ SHA256_BYTE_CACHE: dict[str, dict[str, str]] = {
         "city": "Visakhapatnam",
     },
 
-    # Applicant K02 (Harmony Dental Care)
+    # Specimen: Harmony Dental Care
     "1d8666668792798132058c458f619596e5483dd451d89e4451f3eb486c0c565b": {
         "doc_type": "gst_certificate",
         "gstin": "19EOGXH4115Y1ZL",
@@ -134,7 +134,7 @@ SHA256_BYTE_CACHE: dict[str, dict[str, str]] = {
         "city": "Kolkata",
     },
 
-    # Applicant K03 (Ganesh Woodcraft)
+    # Specimen: Ganesh Woodcraft (Proprietorship)
     "4e41f486c166d0fe808900adb49a8e4d35f1c6a715b4ccf88030013028173d4d": {
         "doc_type": "gst_certificate",
         "gstin": "27XUIXG0767D1ZP",
@@ -165,7 +165,7 @@ SHA256_BYTE_CACHE: dict[str, dict[str, str]] = {
         "city": "Nagpur",
     },
 
-    # Applicant K04 (Saffron Dental Care LLP)
+    # Specimen: Saffron Dental Care LLP
     "d65d3c966aed745ad39b46561a57d7f3982573069f7b14c730f3a396b823ae77": {
         "doc_type": "gst_certificate",
         "gstin": "27PZSXS1936O1ZH",
@@ -196,7 +196,7 @@ SHA256_BYTE_CACHE: dict[str, dict[str, str]] = {
         "city": "Nagpur",
     },
 
-    # Applicant K05 (Balaji Realty LLP - Missing Udyam Certificate!)
+    # Specimen: Balaji Realty LLP (Missing Udyam Certificate)
     "39551a5031ba4ae8e1c50591b221bb1a66347f246ca75bf4ea5b35f9a2fd3287": {
         "doc_type": "gst_certificate",
         "gstin": "32TZAXB5481U1Z1",
@@ -530,7 +530,7 @@ class KYCEngine:
             signatory_name = sig_fields.get("signatory_name", "")
 
         # STAGE 2 & 3: Deterministic Registry & Date Gate
-        # Rule A: Missing Mandatory Documents Check (e.g. Applicant K05 missing Udyam)
+        # Rule A: Missing Mandatory Documents Check
         required_doc_keys = ["signatory_id", "address_proof", "udyam_certificate"]
         if cart_requires_gstin:
             required_doc_keys.append("gst_certificate")
@@ -635,7 +635,7 @@ class KYCEngine:
                                 )
                             )
 
-        # Rule C: Udyam Verification (Catch blank Udyam e.g. Applicant K01)
+        # Rule C: Udyam Verification (Catch blank or malformed certificates)
         udyam_status: Optional[str] = None
         udyam_enterprise_name = ""
         udyam_pincode = ""

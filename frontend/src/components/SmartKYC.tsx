@@ -80,8 +80,8 @@ export const SmartKYC: React.FC<SmartKYCProps> = ({ quote, onKYCApproved }) => {
       const cartRequiresGstin = quote ? !quote.gst_exempt_eligible : true;
       const res = await verifyKYC(selectedPreset, cartRequiresGstin);
       setKycResult(res);
-    } catch (err: any) {
-      alert(err.message || "KYC Verification encountered an error.");
+    } catch (err: unknown) {
+      alert(err instanceof Error ? err.message : "KYC Verification encountered an error.");
     } finally {
       setIsVerifying(false);
     }

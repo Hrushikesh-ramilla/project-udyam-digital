@@ -132,3 +132,15 @@ export interface ProvisioningOrder {
   milestones: ProvisioningMilestone[];
   is_activated: boolean;
 }
+
+export interface JudgeScenarioResult {
+  scenario_id: string;
+  title: string;
+  applicant: string;
+  expected_outcome: string;
+  expected_behavior: string;
+  notes: string;
+  remediation: string;
+  verification_result: KYCVerificationResult;
+}
+

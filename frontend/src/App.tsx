@@ -79,7 +79,7 @@ export const App: React.FC = () => {
       );
       setOrder(newOrder);
       setCustomerStep("tracker");
-    } catch (err: any) {
+    } catch (err: unknown) {
       console.error("Order creation failed", err);
       // Fallback local order structure
       setOrder({

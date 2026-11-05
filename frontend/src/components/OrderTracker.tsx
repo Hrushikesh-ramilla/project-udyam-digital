@@ -35,8 +35,8 @@ export const OrderTracker: React.FC<OrderTrackerProps> = ({ order, onOrderUpdate
       const updated = await advanceOrderStage(order.order_id);
       onOrderUpdated(updated);
       setSelectedPreview(updated.milestones[updated.current_stage_idx] || updated.milestones[updated.milestones.length - 1]);
-    } catch (err: any) {
-      alert(err.message || "Failed to advance order milestone");
+    } catch (err: unknown) {
+      alert(err instanceof Error ? err.message : "Failed to advance order milestone");
     } finally {
       setAdvancing(false);
     }

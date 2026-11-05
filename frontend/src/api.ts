@@ -1,6 +1,7 @@
 import {
   AdvisorResponse,
   CommercialBreakdown,
+  JudgeScenarioResult,
   KYCVerificationResult,
   LeadRescueItem,
   MSMEProfileSlots,
@@ -142,7 +143,7 @@ export async function advanceOrderStage(orderId: string): Promise<ProvisioningOr
   return await res.json();
 }
 
-export async function fetchJudgeScenario(scenarioId: string): Promise<any> {
+export async function fetchJudgeScenario(scenarioId: string): Promise<JudgeScenarioResult> {
   const res = await fetch(`${API_BASE}/demo/judge-scenario/${scenarioId}`);
   if (!res.ok) throw new Error("Scenario not found");
   return await res.json();

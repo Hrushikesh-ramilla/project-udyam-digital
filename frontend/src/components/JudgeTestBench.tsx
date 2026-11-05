@@ -13,11 +13,12 @@ import {
   Database,
 } from "lucide-react";
 import { fetchJudgeScenario } from "../api";
+import { JudgeScenarioResult, KYCAnomaly } from "../types";
 
 export const JudgeTestBench: React.FC = () => {
   const [activeScenarioId, setActiveScenarioId] = useState<string>("K01");
   const [running, setRunning] = useState<boolean>(false);
-  const [scenarioData, setScenarioData] = useState<any | null>(null);
+  const [scenarioData, setScenarioData] = useState<JudgeScenarioResult | null>(null);
   const [executionTimeMs, setExecutionTimeMs] = useState<number | null>(null);
 
   const scenarios = [
@@ -74,8 +75,8 @@ export const JudgeTestBench: React.FC = () => {
       const elapsed = Math.round(performance.now() - start);
       setScenarioData(data);
       setExecutionTimeMs(elapsed);
-    } catch (err: any) {
-      alert(err.message || "Failed to execute scenario");
+    } catch (err: unknown) {
+      alert(err instanceof Error ? err.message : "Failed to execute scenario");
     } finally {
       setRunning(false);
     }
@@ -194,7 +195,7 @@ export const JudgeTestBench: React.FC = () => {
                 <span>Planted Defects Trapped by Engine ({scenarioData.verification_result.anomalies.length})</span>
               </h4>
               <div className="space-y-1.5">
-                {scenarioData.verification_result.anomalies.map((anom: any, idx: number) => (
+                {scenarioData.verification_result.anomalies.map((anom: KYCAnomaly, idx: number) => (
                   <div key={idx} className="text-xs text-slate-300 bg-slate-950 p-2.5 rounded-lg border border-slate-800">
                     <span className="font-mono text-amber-400 font-bold">{anom.code}</span>: {anom.message}
                     {anom.remediation && (

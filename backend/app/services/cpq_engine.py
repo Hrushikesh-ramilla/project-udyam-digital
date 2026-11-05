@@ -18,7 +18,7 @@ BASE_CONNECTIVITY_SKUS = {"P01", "P02", "P03", "P04", "P05", "P06"}
 
 class DependencyLockError(ValueError):
     """Raised when a cart violates directed acyclic graph prerequisite dependencies."""
-    pass
+
 
 
 class CPQEngine:
