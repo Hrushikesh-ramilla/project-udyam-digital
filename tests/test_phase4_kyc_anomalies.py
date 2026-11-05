@@ -186,3 +186,31 @@ def test_valid_applicant_k03_approval(kyc_engine: KYCEngine, valid_consent: DPDP
     assert res.address_bill_age_days is not None
     assert res.address_bill_age_days <= 90  # 2026-06-20 is 25 days old
     assert len([a for a in res.anomalies if a.severity == "BLOCKER"]) == 0
+
+
+def test_valid_applicant_k09_approval(kyc_engine: KYCEngine, valid_consent: DPDPConsentPayload):
+    data_dir = Path("data/kyc_documents")
+    docs = {
+        "gst_certificate": (data_dir / "K09_gst_certificate.png").read_bytes(),
+        "udyam_certificate": (data_dir / "K09_udyam_certificate.png").read_bytes(),
+        "signatory_id": (data_dir / "K09_signatory_id.png").read_bytes(),
+        "address_proof": (data_dir / "K09_address_proof.png").read_bytes(),
+    }
+    res = kyc_engine.verify_application(docs, cart_requires_gstin=True, consent=valid_consent)
+    assert res.status == "APPROVED"
+    assert res.gst_status == "ACTIVE"
+    assert len([a for a in res.anomalies if a.severity == "BLOCKER"]) == 0
+
+
+def test_valid_applicant_k12_approval(kyc_engine: KYCEngine, valid_consent: DPDPConsentPayload):
+    data_dir = Path("data/kyc_documents")
+    docs = {
+        "gst_certificate": (data_dir / "K12_gst_certificate.png").read_bytes(),
+        "udyam_certificate": (data_dir / "K12_udyam_certificate.png").read_bytes(),
+        "signatory_id": (data_dir / "K12_signatory_id.png").read_bytes(),
+        "address_proof": (data_dir / "K12_address_proof.png").read_bytes(),
+    }
+    res = kyc_engine.verify_application(docs, cart_requires_gstin=True, consent=valid_consent)
+    assert res.status == "APPROVED"
+    assert res.gst_status == "ACTIVE"
+    assert len([a for a in res.anomalies if a.severity == "BLOCKER"]) == 0

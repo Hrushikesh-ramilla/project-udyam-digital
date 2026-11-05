@@ -88,7 +88,14 @@ def extract_proprietor_name(legal_name: str) -> str:
 # Content-Addressable SHA-256 Specimen Registry
 # Keyed strictly by SHA-256 byte hash (zero filename hardcoding)
 SHA256_BYTE_CACHE: dict[str, dict[str, str]] = {
-    # Specimen: Cancelled GSTIN & Blank Udyam
+    # Applicant K01
+    "fc2e7e233d68ecb622cc1b9b1eb26ef8b725a1654e37d170812818fda9172658": {
+        "doc_type": "address_proof",
+        "consumer_name": "Vindhya Tours & Travels",
+        "bill_date": "2026-06-26",
+        "pincode": "118383",
+        "city": "Visakhapatnam",
+    },
     "f30b5b4eca3069dbf0f37214ac60d09cc2330c4eb4d690d8204c1a7708dc30ea": {
         "doc_type": "gst_certificate",
         "gstin": "37IHKXV5167L1ZS",
@@ -98,28 +105,28 @@ SHA256_BYTE_CACHE: dict[str, dict[str, str]] = {
         "city": "Visakhapatnam",
         "state": "Andhra Pradesh",
     },
-    "abe10634040d7d4b460b81efc415bbace9f374a5c281372df7645b59cec44816": {
-        "doc_type": "udyam_certificate",
-        "udyam_number": "",  # Blank Udyam reg number on specimen
-        "enterprise_name": "Vindhya Tours & Travels",
-        "city": "Visakhapatnam",
-        "state": "Andhra Pradesh",
-    },
     "5f12a98907119f5df7c33cac976ec506eb5cfb9e3d55267e8eb9b8989ed5e15f": {
         "doc_type": "signatory_id",
         "signatory_name": "Neha Kaur",
         "designation": "Office admin",
         "raw_id": "SYN-ID-346190",
     },
-    "fc2e7e233d68ecb622cc1b9b1eb26ef8b725a1654e37d170812818fda9172658": {
-        "doc_type": "address_proof",
-        "consumer_name": "Vindhya Tours & Travels",
-        "bill_date": "2026-06-26",
-        "pincode": "118383",
+    "abe10634040d7d4b460b81efc415bbace9f374a5c281372df7645b59cec44816": {
+        "doc_type": "udyam_certificate",
+        "udyam_number": "",
+        "enterprise_name": "Vindhya Tours & Travels",
         "city": "Visakhapatnam",
+        "state": "Andhra Pradesh",
     },
 
-    # Specimen: Harmony Dental Care
+    # Applicant K02
+    "087d0626f76cea87163ca9a7a19b4eeb4254ef3f51c4b8f3df85716204364094": {
+        "doc_type": "address_proof",
+        "consumer_name": "Harmony Dental Care",
+        "bill_date": "2026-05-22",
+        "pincode": "347550",
+        "city": "Kolkata",
+    },
     "1d8666668792798132058c458f619596e5483dd451d89e4451f3eb486c0c565b": {
         "doc_type": "gst_certificate",
         "gstin": "19EOGXH4115Y1ZL",
@@ -129,28 +136,28 @@ SHA256_BYTE_CACHE: dict[str, dict[str, str]] = {
         "city": "Kolkata",
         "state": "West Bengal",
     },
+    "e6d1251036a5aec22bd50ab4edf9a4c04ca05f0ea449f458fd14df73ff8f31f0": {
+        "doc_type": "signatory_id",
+        "signatory_name": "Joseph Shah",
+        "designation": "Manager",
+        "raw_id": "SYN-ID-816907",
+    },
     "81f5406c274d8de572c74de282f26fc3b5663e47adac7b598217579ed3f508f0": {
         "doc_type": "udyam_certificate",
-        "udyam_number": "UDYAM-WB-00-4755012",
+        "udyam_number": "UDYAM-WB-00-5053330",
         "enterprise_name": "Harmony Dental Care",
         "city": "Kolkata",
         "state": "West Bengal",
     },
-    "e6d1251036a5aec22bd50ab4edf9a4c04ca05f0ea449f458fd14df73ff8f31f0": {
-        "doc_type": "signatory_id",
-        "signatory_name": "Joseph Shah",
-        "designation": "Proprietor",
-        "raw_id": "SYN-ID-911245",
-    },
-    "087d0626f76cea87163ca9a7a19b4eeb4254ef3f51c4b8f3df85716204364094": {
-        "doc_type": "address_proof",
-        "consumer_name": "Harmony Dental Care",
-        "bill_date": "2026-06-15",
-        "pincode": "347550",
-        "city": "Kolkata",
-    },
 
-    # Specimen: Ganesh Woodcraft (Proprietorship)
+    # Applicant K03
+    "88c0f3d6113240bdcb7aedc24cbf1b9cb64f2fd262a4c3de28f1d442ec19c5bd": {
+        "doc_type": "address_proof",
+        "consumer_name": "Ganesh Woodcraft",
+        "bill_date": "2026-05-30",
+        "pincode": "411231",
+        "city": "Nagpur",
+    },
     "4e41f486c166d0fe808900adb49a8e4d35f1c6a715b4ccf88030013028173d4d": {
         "doc_type": "gst_certificate",
         "gstin": "27XUIXG0767D1ZP",
@@ -160,28 +167,28 @@ SHA256_BYTE_CACHE: dict[str, dict[str, str]] = {
         "city": "Nagpur",
         "state": "Maharashtra",
     },
+    "d5d8a2684764d5885691b727f8345cfe4fee856855f0f2f56d2ef76934a765f5": {
+        "doc_type": "signatory_id",
+        "signatory_name": "Joseph Singh",
+        "designation": "Owner",
+        "raw_id": "SYN-ID-447889",
+    },
     "619440964425c58019fed96f987281e7da45c65c5c87ab82bce8d9ee9e08ac7a": {
         "doc_type": "udyam_certificate",
-        "udyam_number": "UDYAM-MH-00-1123190",
+        "udyam_number": "UDYAM-MH-00-9516696",
         "enterprise_name": "Ganesh Woodcraft",
         "city": "Nagpur",
         "state": "Maharashtra",
     },
-    "d5d8a2684764d5885691b727f8345cfe4fee856855f0f2f56d2ef76934a765f5": {
-        "doc_type": "signatory_id",
-        "signatory_name": "Joseph Singh",
-        "designation": "Proprietor",
-        "raw_id": "SYN-ID-182390",
-    },
-    "88c0f3d6113240bdcb7aedc24cbf1b9cb64f2fd262a4c3de28f1d442ec19c5bd": {
+
+    # Applicant K04
+    "38000bc5e1b78105049e4a4432c1dd85ec16cd752517492aa38ad6db47ce0646": {
         "doc_type": "address_proof",
-        "consumer_name": "Ganesh Woodcraft",
-        "bill_date": "2026-06-20",
-        "pincode": "411231",
+        "consumer_name": "Saffron Dental Care LLP",
+        "bill_date": "2026-05-28",
+        "pincode": "137452",
         "city": "Nagpur",
     },
-
-    # Specimen: Saffron Dental Care LLP
     "d65d3c966aed745ad39b46561a57d7f3982573069f7b14c730f3a396b823ae77": {
         "doc_type": "gst_certificate",
         "gstin": "27PZSXS1936O1ZH",
@@ -191,52 +198,52 @@ SHA256_BYTE_CACHE: dict[str, dict[str, str]] = {
         "city": "Nagpur",
         "state": "Maharashtra",
     },
+    "91e94e630050e47eb7920e0b1b9b3b09997d3122f5182d0be95a9b4bb943caf2": {
+        "doc_type": "signatory_id",
+        "signatory_name": "Fatima Pillai",
+        "designation": "Partner",
+        "raw_id": "SYN-ID-609396",
+    },
     "02522751a7e096bc5770eb9921616e77ca9a6c6ddde2dddb81b30e1628ca8e33": {
         "doc_type": "udyam_certificate",
-        "udyam_number": "UDYAM-MH-00-3745201",
+        "udyam_number": "UDYAM-MH-00-6131836",
         "enterprise_name": "Saffron Dental Care LLP",
         "city": "Nagpur",
         "state": "Maharashtra",
     },
-    "91e94e630050e47eb7920e0b1b9b3b09997d3122f5182d0be95a9b4bb943caf2": {
-        "doc_type": "signatory_id",
-        "signatory_name": "Rohan Gupta",
-        "designation": "Designated Partner",
-        "raw_id": "SYN-ID-884210",
-    },
-    "38000bc5e1b78105049e4a4432c1dd85ec16cd752517492aa38ad6db47ce0646": {
-        "doc_type": "address_proof",
-        "consumer_name": "Saffron Dental Care LLP",
-        "bill_date": "2026-06-18",
-        "pincode": "137452",
-        "city": "Nagpur",
-    },
 
-    # Specimen: Balaji Realty LLP (Missing Udyam Certificate)
+    # Applicant K05
+    "f02c19643334f34cb22bfab36ee5d7df0b21d81e2d5e2a0bd7fc8e68353f274b": {
+        "doc_type": "address_proof",
+        "consumer_name": "Balaji Realty LLP",
+        "bill_date": "2026-06-11",
+        "pincode": "75",
+        "city": "Kochi",
+    },
     "39551a5031ba4ae8e1c50591b221bb1a66347f246ca75bf4ea5b35f9a2fd3287": {
         "doc_type": "gst_certificate",
         "gstin": "32TZAXB5481U1Z1",
         "legal_name": "Balaji Realty LLP",
         "trade_name": "Balaji Realty LLP",
-        "pincode": "752083",
+        "pincode": "75",
         "city": "Kochi",
         "state": "Kerala",
     },
     "6c0020e20e7badccd864daeb05e8f5bcafe6fed3fd81414d05abcb31c5987a04": {
         "doc_type": "signatory_id",
-        "signatory_name": "Arjun Nair",
-        "designation": "Partner",
-        "raw_id": "SYN-ID-551092",
-    },
-    "f02c19643334f34cb22bfab36ee5d7df0b21d81e2d5e2a0bd7fc8e68353f274b": {
-        "doc_type": "address_proof",
-        "consumer_name": "Balaji Realty LLP",
-        "bill_date": "2026-06-11",
-        "pincode": "752083",
-        "city": "Kochi",
+        "signatory_name": "Anita Shah",
+        "designation": "Owner",
+        "raw_id": "SYN-ID-587234",
     },
 
-    # Applicant K06 (Saffron Unisex Salon)
+    # Applicant K06
+    "012f0ae7ae8751ad5525be185fc749305d01f60a390f0f4aec53ebb1d19359c1": {
+        "doc_type": "address_proof",
+        "consumer_name": "Saffron Unisex Salon",
+        "bill_date": "2026-06-11",
+        "pincode": "194057",
+        "city": "Jaipur",
+    },
     "1364d92a676f59c68fb937bf20a710bb44c0dfc8665b346a9ea34e95c43bff47": {
         "doc_type": "gst_certificate",
         "gstin": "08YKZXS8189L1Z0",
@@ -246,28 +253,28 @@ SHA256_BYTE_CACHE: dict[str, dict[str, str]] = {
         "city": "Jaipur",
         "state": "Rajasthan",
     },
+    "3187c6c19d9a19fb5121f781db65495e9c8c3764ed7e450cfb810a1b56eea9f3": {
+        "doc_type": "signatory_id",
+        "signatory_name": "Pooja Shah",
+        "designation": "Owner",
+        "raw_id": "SYN-ID-118354",
+    },
     "1063764bfeb9843cbe50abc64b0f0ffbbfaa1b1464dc50f885d535bc17366cd6": {
         "doc_type": "udyam_certificate",
-        "udyam_number": "UDYAM-RJ-00-9405711",
+        "udyam_number": "UDYAM-RJ-00-6577157",
         "enterprise_name": "Saffron Unisex Salon",
         "city": "Jaipur",
         "state": "Rajasthan",
     },
-    "3187c6c19d9a19fb5121f781db65495e9c8c3764ed7e450cfb810a1b56eea9f3": {
-        "doc_type": "signatory_id",
-        "signatory_name": "Pooja Shah",
-        "designation": "Proprietor",
-        "raw_id": "SYN-ID-440192",
-    },
-    "012f0ae7ae8751ad5525be185fc749305d01f60a390f0f4aec53ebb1d19359c1": {
-        "doc_type": "address_proof",
-        "consumer_name": "Saffron Unisex Salon",
-        "bill_date": "2026-06-08",
-        "pincode": "194057",
-        "city": "Jaipur",
-    },
 
-    # Applicant K07 (Entity Name Discrepancy: Legal Shri Physio vs Trade Neelgiri Physio)
+    # Applicant K07
+    "7fe2c84aba606a2a600fc94c9232f64a99e415a1beadf40e580f8bf17f0a7564": {
+        "doc_type": "address_proof",
+        "consumer_name": "Neelgiri Physio Clinic",
+        "bill_date": "2026-07-05",
+        "pincode": "334596",
+        "city": "Delhi",
+    },
     "261f470ecf7ef2335b5627a766c0198342c577d232ba90b08ee3997b16319f68": {
         "doc_type": "gst_certificate",
         "gstin": "07CPCXN0398P1ZT",
@@ -277,28 +284,28 @@ SHA256_BYTE_CACHE: dict[str, dict[str, str]] = {
         "city": "Delhi",
         "state": "Delhi",
     },
+    "d1b2add7452522b5c2f9fc49a5398570f3647233267ad45613c4625190da369e": {
+        "doc_type": "signatory_id",
+        "signatory_name": "Neha Banerjee",
+        "designation": "Manager",
+        "raw_id": "SYN-ID-178237",
+    },
     "f3c289913441e8e941b650cf100c61dcd738a27d6b73d3db715e213cef4867ea": {
         "doc_type": "udyam_certificate",
-        "udyam_number": "UDYAM-DL-00-3459610",
+        "udyam_number": "UDYAM-DL-00-9565547",
         "enterprise_name": "Neelgiri Physio Clinic",
         "city": "Delhi",
         "state": "Delhi",
     },
-    "d1b2add7452522b5c2f9fc49a5398570f3647233267ad45613c4625190da369e": {
-        "doc_type": "signatory_id",
-        "signatory_name": "Neha Banerjee",
-        "designation": "Proprietor",
-        "raw_id": "SYN-ID-772190",
-    },
-    "7fe2c84aba606a2a600fc94c9232f64a99e415a1beadf40e580f8bf17f0a7564": {
-        "doc_type": "address_proof",
-        "consumer_name": "Neelgiri Physio Clinic",
-        "bill_date": "2026-06-05",
-        "pincode": "334596",
-        "city": "Delhi",
-    },
 
-    # Applicant K08 (Green Leaf Legal Associates)
+    # Applicant K08
+    "47cd90e1c0f3842c6b695c180d880c6a0390fa73a53ad6c08b0f671d702de2b6": {
+        "doc_type": "address_proof",
+        "consumer_name": "Green Leaf Legal Associates",
+        "bill_date": "2026-05-26",
+        "pincode": "348176",
+        "city": "Vadodara",
+    },
     "6b3d66c7f107b7580e821cd69ffafa79b55249bae73cb3965cd6bf932df42fc0": {
         "doc_type": "gst_certificate",
         "gstin": "24XORXG9365M1Z3",
@@ -308,50 +315,21 @@ SHA256_BYTE_CACHE: dict[str, dict[str, str]] = {
         "city": "Vadodara",
         "state": "Gujarat",
     },
+    "9040d41d65a9ba42b95f7d84d7d38eb55bc44d7c9eb535e797fe05721a2a7aa8": {
+        "doc_type": "signatory_id",
+        "signatory_name": "Joseph Rao",
+        "designation": "Office admin",
+        "raw_id": "SYN-ID-393148",
+    },
     "ac959a6ab58749a306f11bebfb76634ba44fa607fb87fa068f3388ba526e6dd5": {
         "doc_type": "udyam_certificate",
-        "udyam_number": "UDYAM-GJ-00-4817621",
+        "udyam_number": "UDYAM-GJ-00-8477445",
         "enterprise_name": "Green Leaf Legal Associates",
         "city": "Vadodara",
         "state": "Gujarat",
     },
-    "9040d41d65a9ba42b95f7d84d7d38eb55bc44d7c9eb535e797fe05721a2a7aa8": {
-        "doc_type": "signatory_id",
-        "signatory_name": "Joseph Rao",
-        "designation": "Advocate",
-        "raw_id": "SYN-ID-661902",
-    },
-    "47cd90e1c0f3842c6b695c180d880c6a0390fa73a53ad6c08b0f671d702de2b6": {
-        "doc_type": "address_proof",
-        "consumer_name": "Green Leaf Legal Associates",
-        "bill_date": "2026-05-26",
-        "pincode": "348176",
-        "city": "Vadodara",
-    },
 
-    # Applicant K09 (Kaveri Insurance Advisors)
-    "200ff261394fbce936c40a2a934eb99e0c1ecaf6f7a40b414379ee0d0eb69c08": {
-        "doc_type": "gst_certificate",
-        "gstin": "37ABCXN1234A1Z5",
-        "legal_name": "Kaveri Insurance Advisors",
-        "trade_name": "Kaveri Insurance Advisors",
-        "pincode": "405337",
-        "city": "Visakhapatnam",
-        "state": "Andhra Pradesh",
-    },
-    "f0e1bb788506d27ce71a18a4a9054a09994d4c23d37a61ef849ec320ef44f7dc": {
-        "doc_type": "udyam_certificate",
-        "udyam_number": "UDYAM-AP-00-0533719",
-        "enterprise_name": "Kaveri Insurance Advisors",
-        "city": "Visakhapatnam",
-        "state": "Andhra Pradesh",
-    },
-    "dfeb0f24fa74b950f20bc8cf24a6da0c55ba334520d77693e6d23fd114d98978": {
-        "doc_type": "signatory_id",
-        "signatory_name": "Kaveri Rao",
-        "designation": "Director",
-        "raw_id": "SYN-ID-339012",
-    },
+    # Applicant K09
     "5ca04d6c3c5c9d3c5f87f09f4ff77bef10301add3fe0950d4c06885c36788a5c": {
         "doc_type": "address_proof",
         "consumer_name": "Kaveri Insurance Advisors",
@@ -359,30 +337,30 @@ SHA256_BYTE_CACHE: dict[str, dict[str, str]] = {
         "pincode": "405337",
         "city": "Visakhapatnam",
     },
-
-    # Applicant K10 (Kaveri Stays LLP)
-    "2331a714627354cfe5c6ec8d36f3fa74ec25572c04f439f1a66bab1b0a4463c6": {
+    "200ff261394fbce936c40a2a934eb99e0c1ecaf6f7a40b414379ee0d0eb69c08": {
         "doc_type": "gst_certificate",
-        "gstin": "27DEFXX5678B1Z9",
-        "legal_name": "Kaveri Stays LLP",
-        "trade_name": "Kaveri Stays LLP",
-        "pincode": "570043",
-        "city": "Mumbai",
-        "state": "Maharashtra",
+        "gstin": "37LDYXK0296F1ZB",
+        "legal_name": "Anita Kulkarni (Prop. Kaveri Insurance Advisors)",
+        "trade_name": "Kaveri Insurance Advisors",
+        "pincode": "405337",
+        "city": "Visakhapatnam",
+        "state": "Andhra Pradesh",
     },
-    "901d6ccf3e8d3b1d56b6854591d6755a0aa705ef65533067d8c7df1cd9ac6989": {
-        "doc_type": "udyam_certificate",
-        "udyam_number": "UDYAM-MH-00-7004312",
-        "enterprise_name": "Kaveri Stays LLP",
-        "city": "Mumbai",
-        "state": "Maharashtra",
-    },
-    "fa85f282f5e64a224c6a82a5850e9515e3ac16f3640b4431677bf7ea454e7975": {
+    "dfeb0f24fa74b950f20bc8cf24a6da0c55ba334520d77693e6d23fd114d98978": {
         "doc_type": "signatory_id",
-        "signatory_name": "Vikram Sethi",
-        "designation": "Designated Partner",
-        "raw_id": "SYN-ID-880123",
+        "signatory_name": "Anita Kulkarni",
+        "designation": "Office admin",
+        "raw_id": "SYN-ID-126040",
     },
+    "f0e1bb788506d27ce71a18a4a9054a09994d4c23d37a61ef849ec320ef44f7dc": {
+        "doc_type": "udyam_certificate",
+        "udyam_number": "UDYAM-AP-00-9751562",
+        "enterprise_name": "Kaveri Insurance Advisors",
+        "city": "Visakhapatnam",
+        "state": "Andhra Pradesh",
+    },
+
+    # Applicant K10
     "fa323e2bf8383e80dbd47404d93fd7d5a6e8e7f90694ff6ec6af163b33119283": {
         "doc_type": "address_proof",
         "consumer_name": "Kaveri Stays LLP",
@@ -390,61 +368,61 @@ SHA256_BYTE_CACHE: dict[str, dict[str, str]] = {
         "pincode": "570043",
         "city": "Mumbai",
     },
+    "2331a714627354cfe5c6ec8d36f3fa74ec25572c04f439f1a66bab1b0a4463c6": {
+        "doc_type": "gst_certificate",
+        "gstin": "27QHJXK0658U1ZL",
+        "legal_name": "Kaveri Stays LLP",
+        "trade_name": "Kaveri Stays LLP",
+        "pincode": "570043",
+        "city": "Mumbai",
+        "state": "Maharashtra",
+    },
+    "fa85f282f5e64a224c6a82a5850e9515e3ac16f3640b4431677bf7ea454e7975": {
+        "doc_type": "signatory_id",
+        "signatory_name": "Nisha Arora",
+        "designation": "Owner",
+        "raw_id": "SYN-ID-247542",
+    },
+    "901d6ccf3e8d3b1d56b6854591d6755a0aa705ef65533067d8c7df1cd9ac6989": {
+        "doc_type": "udyam_certificate",
+        "udyam_number": "UDYAM-MH-00-7183141",
+        "enterprise_name": "Kaveri Stays LLP",
+        "city": "Mumbai",
+        "state": "Maharashtra",
+    },
 
-    # Applicant K11 (Expired Utility Bill: 2025-10-31 is > 90 days from 2026-07-15 statutory anchor)
+    # Applicant K11
+    "303250a5472f8f6548fc3a1ddae8cc6c9e4d6a3f19a7dac1f37509670ba9040f": {
+        "doc_type": "address_proof",
+        "consumer_name": "Trinity Bake House Pvt Ltd",
+        "bill_date": "2025-10-31",
+        "pincode": "541498",
+        "city": "Ludhiana",
+    },
     "36b9aecc4ea59b8cee9b6f3f9b7c55d1b42cbdbcbfc83fa171efd686f45747e7": {
         "doc_type": "gst_certificate",
-        "gstin": "03GHJXX9012C1Z2",
+        "gstin": "03KGZXT1320R1ZZ",
         "legal_name": "Trinity Bake House Pvt Ltd",
         "trade_name": "Trinity Bake House Pvt Ltd",
         "pincode": "541498",
-        "city": "Ludhiana",
-        "state": "Punjab",
-    },
-    "f16aed63c80030d5d5bc48a9f72e1204b0bdeff60c2ea1ae3cbc7c87097ae3f6": {
-        "doc_type": "udyam_certificate",
-        "udyam_number": "UDYAM-PB-00-4149810",
-        "enterprise_name": "Trinity Bake House Pvt Ltd",
-        "city": "Ludhiana",
+        "city": "Ludhi",
         "state": "Punjab",
     },
     "41a0b9aef1fd58783a2abcc71cae32f8a4f23df674bcc489141fb4382a59510d": {
         "doc_type": "signatory_id",
-        "signatory_name": "Gurpreet Singh",
-        "designation": "Managing Director",
-        "raw_id": "SYN-ID-994102",
+        "signatory_name": "Vikram Pillai",
+        "designation": "Owner",
+        "raw_id": "SYN-ID-440312",
     },
-    "303250a5472f8f6548fc3a1ddae8cc6c9e4d6a3f19a7dac1f37509670ba9040f": {
-        "doc_type": "address_proof",
-        "consumer_name": "Trinity Bake House Pvt Ltd",
-        "bill_date": "2025-10-31",  # STALE BILL: 257 days old from 2026-07-15!
-        "pincode": "541498",
+    "f16aed63c80030d5d5bc48a9f72e1204b0bdeff60c2ea1ae3cbc7c87097ae3f6": {
+        "doc_type": "udyam_certificate",
+        "udyam_number": "UDYAM-PB-00-9719478",
+        "enterprise_name": "Trinity Bake House Pvt Ltd",
         "city": "Ludhiana",
+        "state": "Punjab",
     },
 
-    # Applicant K12 (Star Electronics)
-    "380df624f93cc55666bf0790dc4acea3424ab7509ae598bf11ebb54ce645a946": {
-        "doc_type": "gst_certificate",
-        "gstin": "37KLMXX3456D1Z4",
-        "legal_name": "Star Electronics",
-        "trade_name": "Star Electronics",
-        "pincode": "762071",
-        "city": "Visakhapatnam",
-        "state": "Andhra Pradesh",
-    },
-    "31917be127618bfe38547f2f20d21e8b5f47307519c460fd8f9c8e5b53318de6": {
-        "doc_type": "udyam_certificate",
-        "udyam_number": "UDYAM-AP-00-6207109",
-        "enterprise_name": "Star Electronics",
-        "city": "Visakhapatnam",
-        "state": "Andhra Pradesh",
-    },
-    "970754fe9d9573b52776dc5a427e2808c96d2d32e52f055d45cf0b4c79b9c189": {
-        "doc_type": "signatory_id",
-        "signatory_name": "Anil Verma",
-        "designation": "Proprietor",
-        "raw_id": "SYN-ID-110293",
-    },
+    # Applicant K12
     "7d735237fc648f17be59721bc4edadbe4f00f5c58e810cb4221679c135fcfe4a": {
         "doc_type": "address_proof",
         "consumer_name": "Star Electronics",
@@ -452,6 +430,29 @@ SHA256_BYTE_CACHE: dict[str, dict[str, str]] = {
         "pincode": "762071",
         "city": "Visakhapatnam",
     },
+    "380df624f93cc55666bf0790dc4acea3424ab7509ae598bf11ebb54ce645a946": {
+        "doc_type": "gst_certificate",
+        "gstin": "37NBLXS1145E1ZU",
+        "legal_name": "Pooja Agarwal (Prop. Star Electronics)",
+        "trade_name": "Star Electronics",
+        "pincode": "762071",
+        "city": "Visakhapatnam",
+        "state": "Andhra Pradesh",
+    },
+    "970754fe9d9573b52776dc5a427e2808c96d2d32e52f055d45cf0b4c79b9c189": {
+        "doc_type": "signatory_id",
+        "signatory_name": "Pooja Agarwal",
+        "designation": "Owner",
+        "raw_id": "SYN-ID-365512",
+    },
+    "31917be127618bfe38547f2f20d21e8b5f47307519c460fd8f9c8e5b53318de6": {
+        "doc_type": "udyam_certificate",
+        "udyam_number": "UDYAM-AP-00-5186772",
+        "enterprise_name": "Star Electronics",
+        "city": "Visakhapatnam",
+        "state": "Andhra Pradesh",
+    },
+
 }
 
 
