@@ -294,4 +294,46 @@ class ProvisioningOrder(BaseModel):
     is_activated: bool
 
 
+# API Request Schemas
+class ChatRequest(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+
+    user_message: str
+    previous_slots: Optional[MSMEProfileSlots] = None
+
+
+class CalculateQuoteRequest(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+
+    cart: list[CartItem]
+    contract_months: int = 12
+
+
+class OptimizeBudgetRequest(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+
+    profile: UserProfile
+    max_monthly_budget: int
+
+
+class CreateOrderRequest(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+
+    business_name: str
+    bundle_name: str
+    monthly_charge_inr: int
+    total_sla_days: int = 4
+    partner_id: Optional[str] = None
+
+
+class KYCVerifyAPIRequest(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+
+    applicant_preset: Optional[str] = None  # K01, K03, K05, K07, K11, K12
+    cart_requires_gstin: bool = True
+    consent: Optional[DPDPConsentPayload] = None
+    custom_doc_hashes: Optional[dict[str, str]] = None
+
+
+
 
