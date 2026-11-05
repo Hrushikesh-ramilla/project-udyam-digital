@@ -55,11 +55,11 @@ class AdvisorAgent:
         if os.environ.get("PYTEST_CURRENT_TEST") or not self.client:
             return None
 
-        prompt = f"""You are the principal AI Enterprise Telecom Advisor for Project Udyam Digital (Accel Telecom / Airtel Business).
-Analyze this user query in Hindi, Hinglish, or English:
+        prompt = f"""You are the principal Multilingual AI Enterprise Telecom Advisor for Project Udyam Digital (Accel Telecom / Airtel Business).
+Analyze this user query in any Indian language: Telugu, Tamil, Bengali, Gujarati, Marathi, Kannada, Malayalam, Odia, Hindi, Hinglish, or English:
 \"{text}\"
 
-Extract MSME business slots and generate natural, culturally attuned responses (Hindi/Hinglish/English).
+Extract MSME business slots and generate a natural, culturally attuned response IN THE EXACT SAME REGIONAL LANGUAGE AND SCRIPT that the user used (e.g. Telugu script for Telugu, Tamil script for Tamil, Bengali script for Bengali, etc.).
 Return STRICTLY valid JSON with no markdown formatting:
 {{
   \"segment\": \"micro\" | \"prof\" | \"multi\" | \"mfg\" | null,
@@ -138,29 +138,90 @@ Return STRICTLY valid JSON with no markdown formatting:
             return None
 
     def extract_slots(self, text: str, existing_slots: Optional[MSMEProfileSlots] = None) -> MSMEProfileSlots:
-        """Extracts MSME profile parameters from conversational Hindi, Hinglish, or English."""
-        # Normalize Devanagari numerals to standard ASCII digits
-        dev_digits = {"०": "0", "१": "1", "२": "2", "३": "3", "४": "4", "५": "5", "६": "6", "७": "7", "८": "8", "९": "9"}
-        dev_text = "".join(dev_digits.get(ch, ch) for ch in text)
+        """Extracts MSME profile parameters from Telugu, Tamil, Bengali, Gujarati, Marathi, Kannada, Malayalam, Odia, Hindi, Hinglish, or English."""
+        # Normalize numerals across all 8 Indic scripts to standard ASCII digits
+        indic_digits = {
+            # Devanagari (Hindi, Marathi)
+            "०": "0", "१": "1", "२": "2", "३": "3", "४": "4", "५": "5", "६": "6", "७": "7", "८": "8", "९": "9",
+            # Telugu
+            "౦": "0", "౧": "1", "౨": "2", "౩": "3", "౪": "4", "౫": "5", "౬": "6", "౭": "7", "౮": "8", "౯": "9",
+            # Tamil
+            "௧": "1", "௨": "2", "௩": "3", "௪": "4", "௫": "5", "௬": "6", "௭": "7", "௮": "8", "௯": "9",
+            # Bengali
+            "০": "0", "১": "1", "২": "2", "৩": "3", "৪": "4", "৫": "5", "৬": "6", "৭": "7", "৮": "8", "৯": "9",
+            # Gujarati
+            "૦": "0", "૧": "1", "૨": "2", "૩": "3", "૪": "4", "૫": "5", "૬": "6", "૭": "7", "૮": "8", "૯": "9",
+            # Kannada
+            "೦": "0", "೧": "1", "೨": "2", "೩": "3", "೪": "4", "೫": "5", "೬": "6", "೭": "7", "೮": "8", "೯": "9",
+            # Malayalam
+            "൦": "0", "൧": "1", "൨": "2", "൩": "3", "൪": "4", "൫": "5", "൬": "6", "൭": "7", "൮": "8", "൯": "9",
+            # Odia
+            "୦": "0", "୧": "1", "୨": "2", "୩": "3", "୪": "4", "୫": "5", "୬": "6", "୭": "7", "୮": "8", "୯": "9",
+        }
+        dev_text = "".join(indic_digits.get(ch, ch) for ch in text)
         norm_text = dev_text.lower().strip()
         slots = existing_slots.model_copy() if existing_slots else MSMEProfileSlots()
 
-        # 1. Segment Extraction (Allows mid-turn overrides if explicitly mentioned)
-        if re.search(r"\b(kirana|krana|kirane|grocery|salon|parlour|pharmacy|chemist|medical|medicl|dawai|bakery|cafe|boutique|dhaba|stationery|repair|shop|dukan|dukaan|dookan|dokan|retail|store)\b", norm_text) or any(w in norm_text for w in ["दुकान", "किराना"]):
+        # 1. Segment Extraction (Telugu, Tamil, Bengali, Gujarati, Marathi, Kannada, Malayalam, Odia, Hindi, English)
+        micro_words = [
+            "दुकान", "किराना", # Hindi/Marathi
+            "దుకాణం", "కిరాణా", "షాప్", # Telugu
+            "கடை", "மளிகை", "அங்காடி", # Tamil
+            "দোকান", "মুদি", "খুচরা", # Bengali
+            "દુકાન", "કરિયાણું", # Gujarati
+            "ಅಂಗಡಿ", "ಕಿರಾಣಿ", # Kannada
+            "കട", "പലചരക്ക്", # Malayalam
+            "ଦୋକାନ", "ରାସନ" # Odia
+        ]
+        prof_words = [
+            "क्लीनिक", "डॉक्टर", "दवाखाना", # Hindi/Marathi
+            "క్లినిక్", "వైద్యుడు", "డాక్టర్", "ఆఫీస్", # Telugu
+            "கிளினிக்", "மருத்துவமனை", "மருத்துவர்", # Tamil
+            "ক্লিনিক", "ডাক্তার", "অফিস", # Bengali
+            "દવાખાનું", "ક્લિનિક", "ડોક્ટર", # Gujarati
+            "ಚಿಕಿತ್ಸಾಲಯ", "ಕ್ಲಿನಿಕ್", "ವೈದ್ಯರು", # Kannada
+            "ക്ലിനിക്ക്", "ഡോക്ടർ", "ഓഫീസ്", # Malayalam
+            "କ୍ଲିନିକ୍", "ଡାକ୍ତର", "ଅଫିସ୍" # Odia
+        ]
+        multi_words = [
+            "शाखा", "ब्रांच", # Hindi/Marathi
+            "శాఖలు", "బ్రాంచీలు", # Telugu
+            "கிளைகள்", # Tamil
+            "শাখা", # Bengali
+            "શાખાઓ", # Gujarati
+            "ಶಾಖೆಗಳು", # Kannada
+            "ശാഖകൾ", # Malayalam
+            "ଶାଖା" # Odia
+        ]
+        mfg_words = [
+            "कारखाना", "फैक्ट्री", "कपड़ों", "कपड़ा", # Hindi/Marathi
+            "ఫ్యాక్టరీ", "మిల్లు", "పరిశ్రమ", "వస్త్రాల", # Telugu
+            "தொழிற்சாலை", "ஆலை", # Tamil
+            "কারখানা", "শিল্প", # Bengali
+            "કારખાનું", "ટેક્સટાઇલ", # Gujarati
+            "ಕಾರ್ಖಾನೆ", "ಗಿರಣಿ", # Kannada
+            "ഫാക്ടറി", "മില്ല്", # Malayalam
+            "କାରଖାନା" # Odia
+        ]
+
+        if re.search(r"\b(kirana|krana|kirane|grocery|salon|parlour|pharmacy|chemist|medical|medicl|dawai|bakery|cafe|boutique|dhaba|stationery|repair|shop|dukan|dukaan|dookan|dokan|retail|store)\b", norm_text) or any(w in norm_text for w in micro_words):
             slots.segment = "micro"
-        elif re.search(r"\b(clinic|clinc|doctor|doktor|hospital|ca\s*firm|chartered\s*accountant|lawyer|advocate|coaching|tuition|consultan|architect|diagnostic|office)\b", norm_text) or any(w in norm_text for w in ["क्लीनिक", "डॉक्टर"]):
+        elif re.search(r"\b(clinic|clinc|doctor|doktor|hospital|ca\s*firm|chartered\s*accountant|lawyer|advocate|coaching|tuition|consultan|architect|diagnostic|office)\b", norm_text) or any(w in norm_text for w in prof_words):
             slots.segment = "prof"
-        elif re.search(r"\b(chain|multi[\s-]*site|outlets|stores|branches|restaurant\s*chain)\b", norm_text) or any(w in norm_text for w in ["शाखा", "ब्रांच"]):
+        elif re.search(r"\b(chain|multi[\s-]*site|outlets|stores|branches|restaurant\s*chain)\b", norm_text) or any(w in norm_text for w in multi_words):
             slots.segment = "multi"
-        elif re.search(r"\b(factory|fctory|fctry|karkhana|textile|auto[\s-]*parts|manufacturing|plant|foundry|workshop|mill|industrial)\b", norm_text) or any(w in norm_text for w in ["कारखाना", "फैक्ट्री", "कपड़ों", "कपड़ा"]):
+        elif re.search(r"\b(factory|fctory|fctry|karkhana|textile|auto[\s-]*parts|manufacturing|plant|foundry|workshop|mill|industrial)\b", norm_text) or any(w in norm_text for w in mfg_words):
             slots.segment = "mfg"
 
         # 2. City Tier Extraction
         tier1_pattern = r"\b(mumbai|bombay|mumbay|delhi|dilli|bengaluru|bangalore|blr|hyderabad|hyd|chennai|madras|kolkata|calcutta|pune|ahmedabad|amdavad|gurugram|gurgaon|noida)\b"
         tier2_pattern = r"\b(jaipur|jaipr|jeypur|lucknow|lko|lakhnau|surat|kanpur|kanpr|knpur|nagpur|indore|bhopal|vizag|visakhapatnam|patna|vadodara|baroda|ludhiana|agra|nashik|coimbatore|kochi|cochin|chandigarh|tier\s*2|chota\s*sheher|chhota\s*shehar)\b"
-        if re.search(tier1_pattern, norm_text) or any(w in norm_text for w in ["मुंबई", "दिल्ली", "पुणे", "बेंगलुरु"]):
+        tier1_indic = ["मुंबई", "दिल्ली", "पुणे", "पुण्या", "बेंगलुरु", "ಬೆಂಗಳೂ", "హైదరాబాద్", "சென்னை", "কলকাতা", "અમદાવાદ", "കൊച്ചി"]
+        tier2_indic = ["सूरत", "સુરત", "जयपुर", "लखनऊ", "नागपुर", "విజయవాడ", "విశాఖపట్నం", "കോയമ്പത്തൂർ", "மதுரை", "മൈസൂരു", "ଭୁବନେଶ୍ୱର"]
+
+        if re.search(tier1_pattern, norm_text) or any(w in norm_text for w in tier1_indic):
             slots.city_tier = 1
-        elif re.search(tier2_pattern, norm_text) or any(w in norm_text for w in ["सूरत", "जयपुर", "लखनऊ", "नागपुर"]):
+        elif re.search(tier2_pattern, norm_text) or any(w in norm_text for w in tier2_indic):
             slots.city_tier = 2
         elif not slots.city_tier:
             if re.search(r"\btier\s*1\b", norm_text):
@@ -171,7 +232,7 @@ Return STRICTLY valid JSON with no markdown formatting:
         # 3. Employee Count Extraction
         emp_match = re.search(r"\b(\d+)\s*(?:staff|employees|workers|log|bnde|bande|ladke|members|people|kam\s*(?:karne|krne)\s*wale)\b", norm_text)
         if not emp_match:
-            emp_match = re.search(r"(\d+)\s*(?:कर्मचारी|लोग)", norm_text)
+            emp_match = re.search(r"(\d+)\s*(?:জন\s*কর্মী|জন|మంది|ఉద్యోగులు|ஊழியர்கள்|ஆட்கள்|কর্মী|লোক|કારીગરો|कामगार|ಜನರು|ಜನ|ജീവനക്കാർ|କର୍ମଚାରୀ|कर्मचारी|लोग)", norm_text)
         if emp_match:
             slots.employee_count = int(emp_match.group(1))
         elif not slots.employee_count:
@@ -198,19 +259,32 @@ Return STRICTLY valid JSON with no markdown formatting:
             else:
                 slots.num_sites = 1
 
-        # 5. GSTIN Presence Extraction (Supports Mid-Turn Registration Pivot)
-        if re.search(r"\b(no\s*gst(?:in)?|without\s*gst(?:in)?|bina\s*gst|gst(?:in)?\s*(?:nahi|nhi|nai|ni)\b|dont\s*have\s*gst(?:in)?|don't\s*have\s*gst(?:in)?|gst\s*number\s*(?:nahi|nhi|nai|ni)|gst\s*vst\s*(?:kuch\s*)?(?:nahi|nhi|nai|ni)|zero\s*gst|sirf\s*udyam|udyam\s*only|जीएसटी\s*नहीं)\b", norm_text):
+        # 5. GSTIN Presence Extraction (Telugu, Tamil, Bengali, Gujarati, Marathi, Kannada, Malayalam, Odia, Hindi, English)
+        no_gst_regional = [
+            "जीएसटी नहीं", "జీఎస్టీ లేదు", "జిఎస్టి లేదు", "కేవలం ఉద్యమ్",
+            "ஜிஎஸ்டி இல்லை", "உத்யம் மட்டுமே", "জিএসটি নেই", "শুধুমাত্র উদ্যোগ",
+            "જીએસટી નથી", "ફક્ત ઉદ્યમ", "जीएसटी नाही", "ಜಿಎಸ್ಟಿ ಇಲ್ಲ", "ಉದ್ಯಮ್ ಮಾತ್ರ",
+            "ജിഎസ്ടി ഇല്ല", "ഉദ്യം മാത്രം", "ଜିଏସଟି ନାହିଁ"
+        ]
+        has_gst_regional = [
+            "जीएसटी है", "జీఎస్టీ ఉంది", "జిఎస్టి ఉంది", "జీఎస్టీ రిజిస్టర్",
+            "ஜிஎஸ்டி இருக்கு", "ஜிஎஸ்டி பதிவு", "জিএসটি আছে", "জিএসটি নিবন্ধিত",
+            "જીએસટી છે", "જીએસટી રજિસ્ટર્ડ", "जीएसटी आहे", "ಜಿಎಸ್ಟಿ ಇದೆ",
+            "ജിഎസ്ടി ഉണ്ട്", "ଜିଏସଟି ଅଛି"
+        ]
+
+        if re.search(r"\b(no\s*gst(?:in)?|without\s*gst(?:in)?|bina\s*gst|gst(?:in)?\s*(?:nahi|nhi|nai|ni)\b|dont\s*have\s*gst(?:in)?|don't\s*have\s*gst(?:in)?|gst\s*number\s*(?:nahi|nhi|nai|ni)|gst\s*vst\s*(?:kuch\s*)?(?:nahi|nhi|nai|ni)|zero\s*gst|sirf\s*udyam|udyam\s*only)\b", norm_text) or any(w in norm_text for w in no_gst_regional):
             slots.has_gstin = False
-        elif re.search(r"\b(have\s*gst(?:in)?|has\s*gst(?:in)?|with\s*gst(?:in)?|gst\s*registered|gst\s*(?:hai|h\b)|gstin\s*(?:hai|h\b)|gst\s*number\s*(?:hai|h\b)|gstin\s*available|active\s*gst(?:in)?|gst\s*(?:number\s*)?mil\s*gaya|mil\s*gaya\s*gst|जीएसटी\s*है)\b", norm_text):
+        elif re.search(r"\b(have\s*gst(?:in)?|has\s*gst(?:in)?|with\s*gst(?:in)?|gst\s*registered|gst\s*(?:hai|h\b)|gstin\s*(?:hai|h\b)|gst\s*number\s*(?:hai|h\b)|gstin\s*available|active\s*gst(?:in)?|gst\s*(?:number\s*)?mil\s*gaya|mil\s*gaya\s*gst)\b", norm_text) or any(w in norm_text for w in has_gst_regional):
             slots.has_gstin = True
         elif slots.segment in {"mfg", "multi"} and slots.has_gstin is None:
             # Factories and multi-site enterprise chains in India require statutory GST registration
             slots.has_gstin = True
 
         # 6. Budget Extraction
-        budget_match = re.search(r"\b(?:budget|spending|kharcha|rupaye|rs|inr|₹)\s*(?:is|hai|of|around|lagbhag)?\s*(?:rs\.?|inr|₹)?\s*(\d{3,6})\b", norm_text)
+        budget_match = re.search(r"(?:budget|spending|kharcha|rupaye|rs|inr|₹|బడ్జెట్|பட்ஜெட்|বাজেট|બજેટ|बजेट|ಬಜೆಟ್|ബജറ്റ്|ବଜେଟ)\s*(?:is|hai|of|around|lagbhag)?\s*(?:rs\.?|inr|₹)?\s*(\d{3,6})", norm_text)
         if not budget_match:
-            budget_match = re.search(r"\b(\d{3,6})\s*(?:rupaye|rupees|rs|per\s*month|\/mo|tak|approx)\b", norm_text)
+            budget_match = re.search(r"(\d{3,6})\s*(?:rupaye|rupees|rs|per\s*month|\/mo|tak|approx|రూపాయలు|రూ|ரூபாய்|টাকা|રૂપિયા|रुपये|ರೂಪಾಯಿ|രൂപ|ଟଙ୍କା|బడ్జెట్|பட்ஜெட்|বাজেট|બજેટ|बजेट|ಬಜೆಟ್|ബജറ്റ്|ବଜେଟ)", norm_text)
         if budget_match:
             slots.monthly_budget_cap = int(budget_match.group(1))
 
@@ -279,9 +353,19 @@ Return STRICTLY valid JSON with no markdown formatting:
         else:
             gemini_md, gemini_tts = None, None
 
-        # Friendly casual greeting handling for non-business inputs (e.g. "hey whats up", "hi", "hello")
+        # Friendly casual greeting handling across 8 Regional Indic Languages
         clean_msg = user_message.strip().lower()
-        is_greeting = bool(re.search(r"^(hey|hi|hello|whats\s*up|what\'s\s*up|namaste|kem\s*cho|kaise\s*ho|kya\s*haal|good\s*(morning|evening|afternoon)|yo|sup|bhai|bhaiya)\b", clean_msg))
+        regional_greetings = [
+            "నమస్కారం", "నమస్తే", "బాగున్నారా", # Telugu
+            "வணக்கம்", "ஹலோ", "நலமா", # Tamil
+            "নমস্কার", "নমস্তে", "কেমন আছেন", # Bengali
+            "નમસ્તે", "કેમ છો", "નમસ્કાર", # Gujarati
+            "नमस्कार", "कसे आहात", # Marathi
+            "ನಮಸ್ಕಾರ", "ಹೇಗಿದ್ದೀರಿ", # Kannada
+            "നമസ്കാരം", "സുഖമാണോ", # Malayalam
+            "ନମସ୍କାର", "କେମିତି ଅଛନ୍ତି" # Odia
+        ]
+        is_greeting = bool(re.search(r"^(hey|hi|hello|whats\s*up|what\'s\s*up|namaste|kem\s*cho|kaise\s*ho|kya\s*haal|good\s*(morning|evening|afternoon)|yo|sup|bhai|bhaiya)\b", clean_msg)) or any(g in clean_msg for g in regional_greetings)
         has_business_info = bool(slots.segment or slots.city_tier or slots.has_gstin is not None or slots.detected_needs)
 
         if is_greeting and not has_business_info:

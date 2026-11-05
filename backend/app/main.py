@@ -91,10 +91,17 @@ def verify_kyc(req: KYCVerifyAPIRequest):
     data_dir = Path("data/kyc_documents")
     docs: dict[str, bytes] = {}
 
+    cart_requires_gstin = req.cart_requires_gstin
     if req.applicant_preset or req.applicant_id:
         preset = (req.applicant_preset or req.applicant_id or "").upper().strip()
+        if preset in {"KIRANA_NON_GST", "NON_GST_KIRANA", "KIRANA"}:
+            preset = "K03"
+            cart_requires_gstin = False
+
         # Find files matching preset
-        doc_types = ["gst_certificate", "udyam_certificate", "signatory_id", "address_proof"]
+        doc_types = ["udyam_certificate", "signatory_id", "address_proof"]
+        if cart_requires_gstin:
+            doc_types.append("gst_certificate")
         for dt in doc_types:
             path = data_dir / f"{preset}_{dt}.png"
             if path.exists():

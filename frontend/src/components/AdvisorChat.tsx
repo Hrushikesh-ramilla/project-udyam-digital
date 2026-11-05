@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from "react";
-import { Mic, MicOff, Send, Volume2, Sparkles, User, Bot, CheckCircle2, ArrowRight } from "lucide-react";
+import { Mic, MicOff, Send, Volume2, Sparkles, User, Bot, CheckCircle2, ArrowRight, Languages } from "lucide-react";
 import { MSMEProfileSlots } from "../types";
 import { sendChatMessage } from "../api";
 
@@ -88,13 +88,35 @@ interface IWindowSpeech {
   webkitSpeechRecognition?: new () => ISpeechRecognition;
 }
 
+interface LangOption {
+  code: string;
+  label: string;
+  native: string;
+  voiceTag: string;
+}
+
+const INDIC_LANGUAGES: LangOption[] = [
+  { code: "auto", label: "Auto", native: "🇮🇳 Auto-Detect", voiceTag: "en-IN" },
+  { code: "te", label: "Telugu", native: "తెలుగు", voiceTag: "te-IN" },
+  { code: "ta", label: "Tamil", native: "தமிழ்", voiceTag: "ta-IN" },
+  { code: "bn", label: "Bengali", native: "বাংলা", voiceTag: "bn-IN" },
+  { code: "gu", label: "Gujarati", native: "ગુજરાતી", voiceTag: "gu-IN" },
+  { code: "mr", label: "Marathi", native: "मराठी", voiceTag: "mr-IN" },
+  { code: "kn", label: "Kannada", native: "ಕನ್ನಡ", voiceTag: "kn-IN" },
+  { code: "ml", label: "Malayalam", native: "മലയാളം", voiceTag: "ml-IN" },
+  { code: "or", label: "Odia", native: "ଓଡ଼ିଆ", voiceTag: "or-IN" },
+  { code: "hi", label: "Hindi", native: "हिन्दी", voiceTag: "hi-IN" },
+  { code: "en", label: "English", native: "English", voiceTag: "en-IN" },
+];
+
 export const AdvisorChat: React.FC<AdvisorChatProps> = ({ onProfileUpdated, onProceedToCPQ }) => {
+  const [selectedLang, setSelectedLang] = useState<string>("auto");
   const [messages, setMessages] = useState<Message[]>([
     {
       id: "m0",
       sender: "advisor",
-      text: "### Namaste! Welcome to Airtel Business Udyam Digital 🙏\n\nI am your AI Enterprise Advisor. Tell me about your business in **Hindi, Hinglish, or English**:\n* What kind of business do you run?\n* Which city and how many staff?\n* Do you have a GST number or Udyam certificate?",
-      spokenTts: "Namaste! Airtel Business Udyam Digital mein aapka swagat hai. Kripya batayein ki aap kis sheher mein hain aur aapka business kis type ka hai.",
+      text: "### Namaste / నమస్కారం / வணக்கம் / নমস্কার! 🙏\n\nWelcome to Airtel Business Udyam Digital. I am your AI Enterprise Telecom Advisor. Speak or type in any Indian language:\n* **తెలుగు, தமிழ், বাংলা, ગુજરાતી, मराठी, ಕನ್ನಡ, മലയാളം, ଓଡ଼ିଆ, हिन्दी, or English**\n* Tell me what business you run, which city, staff count, and GST/Udyam status!",
+      spokenTts: "Namaste! Welcome to Airtel Business Udyam Digital. Please tell me about your business, your city, and your telecom requirements in your preferred language.",
     },
   ]);
   const [input, setInput] = useState("");
@@ -114,10 +136,11 @@ export const AdvisorChat: React.FC<AdvisorChatProps> = ({ onProfileUpdated, onPr
       const utterance = new SpeechSynthesisUtterance(text);
       utterance.rate = 1.0;
       utterance.pitch = 1.0;
-      // Try to select Hindi or Indian English voice if available
       const voices = window.speechSynthesis.getVoices();
-      const indicVoice = voices.find((v) => v.lang === "hi-IN" || v.lang === "en-IN");
-      if (indicVoice) utterance.voice = indicVoice;
+      const activeLang = INDIC_LANGUAGES.find((l) => l.code === selectedLang);
+      const prefix = activeLang && activeLang.code !== "auto" ? activeLang.voiceTag.split("-")[0] : "en";
+      const matchedVoice = voices.find((v) => v.lang.startsWith(prefix)) || voices.find((v) => v.lang === "hi-IN" || v.lang === "en-IN");
+      if (matchedVoice) utterance.voice = matchedVoice;
       window.speechSynthesis.speak(utterance);
     }
   };
@@ -138,7 +161,8 @@ export const AdvisorChat: React.FC<AdvisorChatProps> = ({ onProfileUpdated, onPr
     }
 
     const recognition = new SpeechRecognitionClass();
-    recognition.lang = "en-IN"; // Captures Indian English and Hinglish smoothly
+    const activeLang = INDIC_LANGUAGES.find((l) => l.code === selectedLang);
+    recognition.lang = activeLang && activeLang.code !== "auto" ? activeLang.voiceTag : "en-IN";
     recognition.interimResults = false;
 
     recognition.onstart = () => setIsListening(true);
@@ -204,9 +228,16 @@ export const AdvisorChat: React.FC<AdvisorChatProps> = ({ onProfileUpdated, onPr
   };
 
   const quickPrompts = [
-    "Bhaiya, meri Jaipur mein 2 medical shops hain, 6 staff, GPay atakta hai, GST nahi hai.",
-    "We are a CA firm in Mumbai with 15 staff, active GSTIN, need fast cloud email.",
-    "Textile unit in Surat with 30 workers, active GST, budget 15000/mo.",
+    { lang: "తెలుగు", text: "హైదరాబాద్‌లో 4 మందితో క్లినిక్ ఉంది, జీఎస్టీ లేదు, 1500 బడ్జెట్" },
+    { lang: "தமிழ்", text: "சென்னையில் மளிகைக் கடை, 3 ஊழியர்கள், ஜிஎஸ்டி இல்லை, பட்ஜெட் 2000" },
+    { lang: "বাংলা", text: "কলকাতায় ওষুধের দোকান, ৫ জন কর্মী, জিএসটি নেই, বাজেট ১০০০" },
+    { lang: "ગુજરાતી", text: "સુરતમાં કાપડનું કારખાનું છે, ૨૫ કારીગરો, જીએસટી છે, બજેટ ૧૫૦૦૦" },
+    { lang: "मराठी", text: "पुण्यात किराणा दुकान आहे, ३ कामगार, जीएसटी नाही, बजेट २५००" },
+    { lang: "ಕನ್ನಡ", text: "ಬೆಂಗಳೂರಿನಲ್ಲಿ ೪ ಜನರ ಕ್ಲಿನಿಕ್ ಇದೆ, ಜಿಎಸ್ಟಿ ಇಲ್ಲ, ಬಜೆಟ್ ೨೦೦೦" },
+    { lang: "മലയാളം", text: "കൊച്ചിയിൽ പലചരക്ക് കട, ೩ ജീവനക്കാർ, ജിഎസ്ടി ഇല്ല, ബജറ്റ് 1500" },
+    { lang: "ଓଡ଼ିଆ", text: "ଭୁବନେଶ୍ୱରରେ ଦୋକାନ ଅଛି, ୩ କର୍ମଚାରୀ, ଜିଏସଟି ନାହିଁ, ବଜେଟ ୧୨୦୦" },
+    { lang: "हिन्दी", text: "जयपुर में 2 मेडिकल शॉप्स, 6 स्टाफ, UPI रुकता है, GST नहीं" },
+    { lang: "English", text: "CA firm in Mumbai with 15 staff, active GSTIN, need fast cloud email" },
   ];
 
   return (
@@ -219,7 +250,7 @@ export const AdvisorChat: React.FC<AdvisorChatProps> = ({ onProfileUpdated, onPr
           </div>
           <div>
             <h3 className="text-sm font-semibold text-white">Multilingual AI Telecom Advisor</h3>
-            <p className="text-xs text-slate-400">Hindi • Hinglish • English (Web Speech Voice-Enabled)</p>
+            <p className="text-xs text-slate-400">10 Indian Languages: Telugu • Tamil • Bengali • Gujarati • Marathi • Kannada • Malayalam • Odia • Hindi • English</p>
           </div>
         </div>
 
@@ -253,6 +284,27 @@ export const AdvisorChat: React.FC<AdvisorChatProps> = ({ onProfileUpdated, onPr
             </button>
           )}
         </div>
+      </div>
+
+      {/* Indic Regional Language Selector Bar */}
+      <div className="px-3 py-1.5 bg-slate-950/80 border-b border-slate-800 flex items-center space-x-1.5 overflow-x-auto no-scrollbar">
+        <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider shrink-0 mr-1 flex items-center space-x-1">
+          <Languages className="w-3.5 h-3.5 text-red-500" />
+          <span className="hidden sm:inline">Language:</span>
+        </span>
+        {INDIC_LANGUAGES.map((lang) => (
+          <button
+            key={lang.code}
+            onClick={() => setSelectedLang(lang.code)}
+            className={`px-2 py-0.5 rounded-lg text-xs transition-all shrink-0 cursor-pointer ${
+              selectedLang === lang.code
+                ? "bg-red-600 text-white font-bold shadow-sm shadow-red-600/30"
+                : "bg-slate-800/80 text-slate-300 hover:text-white hover:bg-slate-700"
+            }`}
+          >
+            <span>{lang.native}</span>
+          </button>
+        ))}
       </div>
 
       {/* Messages Feed */}
@@ -305,16 +357,22 @@ export const AdvisorChat: React.FC<AdvisorChatProps> = ({ onProfileUpdated, onPr
         <div ref={messagesEndRef} />
       </div>
 
-      {/* Quick Prompts Chips */}
+      {/* Quick Prompts Chips across 10 Indian Languages */}
       <div className="px-3 py-1.5 bg-slate-950/40 border-t border-slate-800/50 flex items-center space-x-2 overflow-x-auto text-xs no-scrollbar">
-        <span className="text-slate-400 text-[11px] whitespace-nowrap">Try:</span>
-        {quickPrompts.map((p, idx) => (
+        <span className="text-slate-400 text-[11px] whitespace-nowrap flex items-center space-x-1">
+          <Sparkles className="w-3 h-3 text-amber-400" />
+          <span>Try Regional:</span>
+        </span>
+        {quickPrompts.map((item, idx) => (
           <button
             key={idx}
-            onClick={() => handleSend(p)}
-            className="bg-slate-800 hover:bg-slate-700 border border-slate-700 text-slate-300 px-2.5 py-1 rounded-full whitespace-nowrap transition-colors"
+            onClick={() => handleSend(item.text)}
+            className="bg-slate-800/90 hover:bg-slate-700 border border-slate-700 hover:border-red-500/50 text-slate-200 px-2.5 py-1 rounded-full whitespace-nowrap transition-all text-xs flex items-center space-x-1.5 cursor-pointer"
           >
-            {p.slice(0, 32)}...
+            <span className="bg-red-500/20 text-red-400 px-1 py-0.2 rounded text-[10px] font-bold">
+              {item.lang}
+            </span>
+            <span>{item.text.slice(0, 32)}...</span>
           </button>
         ))}
       </div>
@@ -338,7 +396,7 @@ export const AdvisorChat: React.FC<AdvisorChatProps> = ({ onProfileUpdated, onPr
           value={input}
           onChange={(e) => setInput(e.target.value)}
           onKeyDown={(e) => e.key === "Enter" && handleSend()}
-          placeholder={isListening ? "Listening... bolna shuru karein..." : "Type or speak in Hindi / Hinglish..."}
+          placeholder={isListening ? "Listening in " + (INDIC_LANGUAGES.find(l => l.code === selectedLang)?.native || "Indic") + "..." : "Type or speak in Telugu, Tamil, Bengali, Gujarati, Kannada, Marathi, Hindi, English..."}
           className="flex-1 bg-slate-900 border border-slate-700 rounded-xl px-4 py-2 text-sm text-white focus:outline-none focus:border-red-500 placeholder-slate-500 transition-colors"
         />
 
