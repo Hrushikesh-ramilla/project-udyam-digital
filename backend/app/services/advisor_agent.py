@@ -74,7 +74,7 @@ Return STRICTLY valid JSON with no markdown formatting:
 }}"""
         try:
             def _call():
-                for mod in ["gemini-3.1-flash-lite", "gemini-3.5-flash-lite", "gemini-flash-latest"]:
+                for mod in ["gemini-3.1-flash-lite", "gemini-3.5-flash-lite"]:
                     try:
                         return self.client.models.generate_content(
                             model=mod, contents=prompt
@@ -83,9 +83,12 @@ Return STRICTLY valid JSON with no markdown formatting:
                         continue
                 return None
 
-            with concurrent.futures.ThreadPoolExecutor(max_workers=1) as executor:
+            executor = concurrent.futures.ThreadPoolExecutor(max_workers=1)
+            try:
                 future = executor.submit(_call)
-                res = future.result(timeout=4.5)
+                res = future.result(timeout=2.8)
+            finally:
+                executor.shutdown(wait=False, cancel_futures=True)
 
             if not res or not res.text:
                 return None
@@ -275,6 +278,33 @@ Return STRICTLY valid JSON with no markdown formatting:
             slots, gemini_md, gemini_tts = gemini_result
         else:
             gemini_md, gemini_tts = None, None
+
+        # Friendly casual greeting handling for non-business inputs (e.g. "hey whats up", "hi", "hello")
+        clean_msg = user_message.strip().lower()
+        is_greeting = bool(re.search(r"^(hey|hi|hello|whats\s*up|what\'s\s*up|namaste|kem\s*cho|kaise\s*ho|kya\s*haal|good\s*(morning|evening|afternoon)|yo|sup|bhai|bhaiya)\b", clean_msg))
+        has_business_info = bool(slots.segment or slots.city_tier or slots.has_gstin is not None or slots.detected_needs)
+
+        if is_greeting and not has_business_info:
+            welcome_md = gemini_md or (
+                "### Namaste! Welcome to Airtel Business Udyam Digital 🙏\n\n"
+                "I am doing great! I am your AI Enterprise Telecom Advisor. Tell me a bit about your business:\n"
+                "* What kind of business do you run (e.g. retail shop, clinic, CA office, factory)?\n"
+                "* Which city and approximately how many staff?\n"
+                "* Do you have a registered GSTIN or Udyam certificate?"
+            )
+            welcome_tts = gemini_tts or "Namaste! Airtel Business Udyam Digital mein aapka swagat hai. Kripya batayein ki aap kis sheher mein hain aur aapka business kis type ka hai."
+            return AdvisorResponse(
+                slots=slots,
+                quote=None,
+                recommended_skus=[],
+                display_markdown=welcome_md,
+                spoken_tts_text=welcome_tts,
+                next_suggested_prompts=[
+                    "I run a Kirana store in Tier 2 with no GST",
+                    "We are a CA office in Mumbai with GST",
+                    "We have a factory in Surat with 30 staff",
+                ],
+            )
 
         # If missing critical slots, formulate conversational clarifying question
         if not slots.is_complete:
