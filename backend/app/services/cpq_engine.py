@@ -39,13 +39,13 @@ class CPQEngine:
         eligible: list[ProductItem] = []
 
         norm_segment = user.segment.lower().strip()
-        if "micro" in norm_segment:
+        if any(k in norm_segment for k in ["micro", "retail", "kirana", "dukaan", "shop"]):
             seg_code = "micro"
-        elif "prof" in norm_segment or "office" in norm_segment or "clinic" in norm_segment:
+        elif any(k in norm_segment for k in ["prof", "office", "clinic", "consult"]):
             seg_code = "prof"
-        elif "multi" in norm_segment or "chain" in norm_segment or "store" in norm_segment:
+        elif any(k in norm_segment for k in ["multi", "chain"]):
             seg_code = "multi"
-        elif "mfg" in norm_segment or "manufactur" in norm_segment:
+        elif any(k in norm_segment for k in ["mfg", "manufactur", "factory"]):
             seg_code = "mfg"
         else:
             seg_code = norm_segment
