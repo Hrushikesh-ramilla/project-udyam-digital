@@ -542,33 +542,10 @@ export const StudioStudio: React.FC<StudioStudioProps> = ({
           ))}
         </div>
 
-        {/* Scrollable Preserved Message Thread Container */}
-        <div ref={chatScrollRef} className="max-h-[380px] min-h-[160px] overflow-y-auto space-y-3 pr-2 no-scrollbar">
-          {messages.length === 0 ? (
-            /* First Turn: Just the text messages side-by-side, zero badges/labels/buttons */
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-3 py-1">
-              {/* Left Message: English Words */}
-              <motion.div
-                whileHover={{ scale: 1.01 }}
-                whileTap={{ scale: 0.99 }}
-                onClick={() => handleStartConversation("latin")}
-                className="p-4 rounded-2xl rounded-tl-sm bg-[#030405] hover:bg-white/[0.04] border border-[rgba(235,229,217,0.08)] hover:border-[#e40000]/40 transition-all cursor-pointer text-xs sm:text-sm text-[#EBE5D9] leading-relaxed shadow-sm font-sans"
-              >
-                {activeGreeting.latin}
-              </motion.div>
-
-              {/* Right Message: Traditional Script */}
-              <motion.div
-                whileHover={{ scale: 1.01 }}
-                whileTap={{ scale: 0.99 }}
-                onClick={() => handleStartConversation("native")}
-                className="p-4 rounded-2xl rounded-tl-sm bg-[#030405] hover:bg-white/[0.04] border border-[rgba(235,229,217,0.08)] hover:border-[#e40000]/40 transition-all cursor-pointer text-xs sm:text-sm text-[#EBE5D9] leading-relaxed shadow-sm font-sans"
-              >
-                {activeGreeting.native}
-              </motion.div>
-            </div>
-          ) : (
-            messages.map((m) => {
+        {/* Scrollable Preserved Message Thread Container (Empty on initial load) */}
+        {(messages.length > 0 || loading) && (
+          <div ref={chatScrollRef} className="max-h-[380px] overflow-y-auto space-y-3 pr-2 no-scrollbar">
+            {messages.map((m) => {
               const isUser = m.sender === "user";
               const displayedText = scriptMode === "latin" ? m.textLatin : m.textNative;
               return (
@@ -609,10 +586,9 @@ export const StudioStudio: React.FC<StudioStudioProps> = ({
                   </div>
                 </motion.div>
               );
-            })
-          )}
+            })}
 
-          {/* Typing Indicator */}
+            {/* Typing Indicator */}
           {loading && (
             <motion.div
               initial={{ opacity: 0, y: 6 }}
@@ -627,7 +603,8 @@ export const StudioStudio: React.FC<StudioStudioProps> = ({
               <span className="font-mono text-[11px]">Airtel Advisor is formulating solution...</span>
             </motion.div>
           )}
-        </div>
+          </div>
+        )}
 
         {/* Input Bar */}
         <div className="flex items-center space-x-3 bg-[#030405] rounded-2xl p-2 border border-[rgba(235,229,217,0.08)] focus-within:border-[#e40000]/60 transition-colors">
