@@ -53,67 +53,47 @@ const INDIC_LANGS = [
 
 const GREETINGS: Record<
   string,
-  { latin: string; native: string; actionLatin: string; actionNative: string }
+  { latin: string; native: string }
 > = {
   te: {
     latin: "Namaste! Mee business ki Airtel Enterprise connectivity gurinchi ela sahayam cheyagalanu?",
     native: "నమస్తే! మీ వ్యాపారానికి ఎయిర్‌టెల్ ఎంటర్‌ప్రైజ్ కనెక్టివిటీ గురించి ఎలా సహాయపడగలను?",
-    actionLatin: "Chat in English Words →",
-    actionNative: "సాంప్రదాయ లిపిలో చాట్ చేయండి →",
   },
   hi: {
     latin: "Namaste! Aapke business ke liye Airtel Enterprise connectivity me kaise madad kar sakta hoon?",
     native: "नमस्ते! आपके बिजनेस के लिए एयरटेल एंटरप्राइज कनेक्टिविटी में कैसे मदद कर सकता हूँ?",
-    actionLatin: "Chat in English Words →",
-    actionNative: "पारंपरिक लिपि में चैट करें →",
   },
   ta: {
     latin: "Vanakkam! Ungal business-kku Airtel Enterprise connectivity pathi eppadi udhava mudiyum?",
     native: "வணக்கம்! உங்கள் வணிகத்திற்கு ஏர்டெல் எண்டர்பிரைஸ் இணைப்பு குறித்து எவ்வாறு உதவ முடியும்?",
-    actionLatin: "Chat in English Words →",
-    actionNative: "பாரம்பரிய எழுத்தில் பேசவும் →",
   },
   bn: {
     latin: "Nomoshkar! Aponar business-er jonno Airtel Enterprise connectivity niye kivabe sahajjo korte pari?",
     native: "নমস্কার! আপনার ব্যবসার জন্য এয়ারটেল এন্টারপ্রাইজ কানেক্টিভিটি নিয়ে কীভাবে সাহায্য করতে পারি?",
-    actionLatin: "Chat in English Words →",
-    actionNative: "ঐতিহ্যবাহী লিপিতে চ্যাট করুন →",
   },
   gu: {
     latin: "Namaste! Tamara business mate Airtel Enterprise connectivity ma kem madad kari shaku?",
     native: "નમસ્તે! તમારા બિઝનેસ માટે એરટેલ એન્ટરપ્રાઇઝ કનેક્ટિવિટીમાં કેમ મદદ કરી શકું?",
-    actionLatin: "Chat in English Words →",
-    actionNative: "પરંપરાગત લિપિમાં ચેટ કરો →",
   },
   mr: {
     latin: "Namaskar! Tumchya business sathi Airtel Enterprise connectivity madhye kashi madat karu shakto?",
     native: "नमस्कार! तुमच्या व्यवसायासाठी एअरटेल एंटरप्राइज कनेक्टिव्हिटी मध्ये कशी मदत करू शकतो?",
-    actionLatin: "Chat in English Words →",
-    actionNative: "पारंपारिक लिपीमध्ये चॅट करा →",
   },
   kn: {
     latin: "Namaskara! Nimma business-ge Airtel Enterprise connectivity bagge hege sahayavagali?",
     native: "ನಮಸ್ಕಾರ! ನಿಮ್ಮ ವ್ಯಾಪಾರಕ್ಕೆ ಏರ್‌ಟೆಲ್ ಎಂಟರ್‌ಪ್ರೈಸ್ ಕನೆಕ್ಟಿವಿಟಿ ಬಗ್ಗೆ ಹೇಗೆ ಸಹಾಯ ಮಾಡಲಿ?",
-    actionLatin: "Chat in English Words →",
-    actionNative: "ಸಾಂಪ್ರದಾಯಿಕ ಲಿಪಿಯಲ್ಲಿ ಚಾಟ್ ಮಾಡಿ →",
   },
   ml: {
     latin: "Namaskaram! Ningalude business-nu Airtel Enterprise connectivity kurichu engane sahayikkanam?",
     native: "നമസ്കാരം! നിങ്ങളുടെ ബിസിനസ്സിന് എയർടെൽ എന്റർപ്രൈസ് കണക്റ്റിവിറ്റി കുറിച്ച് എങ്ങനെ സഹായിക്കണം?",
-    actionLatin: "Chat in English Words →",
-    actionNative: "പരമ്പരാഗത ലിപിയിൽ ചാറ്റ് ചെയ്യുക →",
   },
   or: {
     latin: "Namaskar! Aapananka business pain Airtel Enterprise connectivity re kipari sahajya kari paribi?",
     native: "ନମସ୍କାର! ଆପଣଙ୍କ ବ୍ୟବସାୟ ପାଇଁ ଏୟାରଟେଲ ଏଣ୍ଟରପ୍ରାଇଜ୍ କନେକ୍ଟିଭିଟିରେ କିପରି ସାହାଯ୍ୟ କରି ପାରିବି?",
-    actionLatin: "Chat in English Words →",
-    actionNative: "ପାରମ୍ପରିକ ଲିପିରେ ଚାଟ୍ କରନ୍ତୁ →",
   },
   en: {
     latin: "Hello! How can I assist you with Airtel Enterprise connectivity for your business today?",
     native: "Hello! How can I assist you with Airtel Enterprise connectivity for your business today?",
-    actionLatin: "Chat in English →",
-    actionNative: "Chat in English →",
   },
 };
 
@@ -565,54 +545,26 @@ export const StudioStudio: React.FC<StudioStudioProps> = ({
         {/* Scrollable Preserved Message Thread Container */}
         <div ref={chatScrollRef} className="max-h-[380px] min-h-[160px] overflow-y-auto space-y-3 pr-2 no-scrollbar">
           {messages.length === 0 ? (
-            /* First Time Minimal Left/Right Cards */
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-3.5 py-2">
-              {/* Left Card: English Words */}
+            /* First Turn: Just the text messages side-by-side, zero badges/labels/buttons */
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-3 py-1">
+              {/* Left Message: English Words */}
               <motion.div
-                whileHover={{ y: -2, borderColor: "rgba(228,0,0,0.4)" }}
-                whileTap={{ scale: 0.98 }}
+                whileHover={{ scale: 1.01 }}
+                whileTap={{ scale: 0.99 }}
                 onClick={() => handleStartConversation("latin")}
-                className="p-4 sm:p-5 rounded-2xl bg-white/[0.02] hover:bg-white/[0.04] border border-white/[0.08] transition-all cursor-pointer flex flex-col justify-between space-y-3 group shadow-lg"
+                className="p-4 rounded-2xl rounded-tl-sm bg-[#030405] hover:bg-white/[0.04] border border-[rgba(235,229,217,0.08)] hover:border-[#e40000]/40 transition-all cursor-pointer text-xs sm:text-sm text-[#EBE5D9] leading-relaxed shadow-sm font-sans"
               >
-                <div>
-                  <div className="flex items-center justify-between mb-2">
-                    <span className="px-2.5 py-0.5 rounded-full text-[11px] font-mono font-medium bg-[#e40000]/15 text-[#ff6b6b] border border-[#e40000]/30">
-                      🔤 English Words
-                    </span>
-                    <span className="text-[10px] text-[#B39D82]/60 font-mono">Latin Alphabet</span>
-                  </div>
-                  <p className="font-serif text-sm sm:text-base text-[#EBE5D9] leading-relaxed">
-                    {activeGreeting.latin}
-                  </p>
-                </div>
-                <div className="pt-2 flex items-center justify-between text-xs text-[#d9ad63] group-hover:text-[#EBE5D9] transition-colors border-t border-white/[0.04]">
-                  <span>{activeGreeting.actionLatin}</span>
-                  <ArrowRight className="w-3.5 h-3.5 transform group-hover:translate-x-1 transition-transform" />
-                </div>
+                {activeGreeting.latin}
               </motion.div>
 
-              {/* Right Card: Traditional Native Script */}
+              {/* Right Message: Traditional Script */}
               <motion.div
-                whileHover={{ y: -2, borderColor: "rgba(217,173,99,0.4)" }}
-                whileTap={{ scale: 0.98 }}
+                whileHover={{ scale: 1.01 }}
+                whileTap={{ scale: 0.99 }}
                 onClick={() => handleStartConversation("native")}
-                className="p-4 sm:p-5 rounded-2xl bg-white/[0.02] hover:bg-white/[0.04] border border-white/[0.08] transition-all cursor-pointer flex flex-col justify-between space-y-3 group shadow-lg"
+                className="p-4 rounded-2xl rounded-tl-sm bg-[#030405] hover:bg-white/[0.04] border border-[rgba(235,229,217,0.08)] hover:border-[#e40000]/40 transition-all cursor-pointer text-xs sm:text-sm text-[#EBE5D9] leading-relaxed shadow-sm font-sans"
               >
-                <div>
-                  <div className="flex items-center justify-between mb-2">
-                    <span className="px-2.5 py-0.5 rounded-full text-[11px] font-medium bg-[#d9ad63]/15 text-[#d9ad63] border border-[#d9ad63]/30">
-                      🪶 సాంప్రదాయ లిపి
-                    </span>
-                    <span className="text-[10px] text-[#B39D82]/60 font-mono">Native Script</span>
-                  </div>
-                  <p className="font-serif text-sm sm:text-base text-[#EBE5D9] leading-relaxed">
-                    {activeGreeting.native}
-                  </p>
-                </div>
-                <div className="pt-2 flex items-center justify-between text-xs text-[#d9ad63] group-hover:text-[#EBE5D9] transition-colors border-t border-white/[0.04]">
-                  <span>{activeGreeting.actionNative}</span>
-                  <ArrowRight className="w-3.5 h-3.5 transform group-hover:translate-x-1 transition-transform" />
-                </div>
+                {activeGreeting.native}
               </motion.div>
             </div>
           ) : (
@@ -686,8 +638,8 @@ export const StudioStudio: React.FC<StudioStudioProps> = ({
             onKeyDown={(e) => e.key === "Enter" && handleSend()}
             placeholder={
               scriptMode === "latin"
-                ? "Type in English words (e.g. \"bagunnara ela unnaru\", \"10 staff clinic in Hyderabad\")..."
-                : "సాంప్రదాయ లిపిలో టైప్ చేయండి (ఉదా. \"హైదరాబాద్‌లో 4 మందితో క్లినిక్ ఉంది\")..."
+                ? "Type a message..."
+                : (selectedLang === "hi" ? "संदेश टाइप करें..." : "సందేశాన్ని టైప్ చేయండి...")
             }
             className="flex-1 bg-transparent px-4 py-2 text-xs sm:text-sm text-[#EBE5D9] placeholder-[#B39D82]/40 focus:outline-none"
           />
