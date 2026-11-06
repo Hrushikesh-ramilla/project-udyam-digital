@@ -88,9 +88,12 @@ npm run dev
 The entire codebase is verified with **zero mocks or stubs** for core logic:
 
 ```powershell
-# Run the 33-test backend test suite (exits with code 0)
+# Run the 37-test backend test suite (exits with code 0)
 $env:PYTHONPATH="."
 pytest tests/ -v
+
+# Run the 100-case Indic multi-dialect adversarial visual verification suite
+python scripts/run_100_test_cases.py
 
 # Run frontend typecheck and production build
 cd frontend
@@ -162,8 +165,11 @@ Bharti Airtel Limited / Accel Business serves as the **Data Fiduciary** under th
 │   └── package.json
 ├── data/                            # Authority registries, 5,000 leads & KYC specimen images
 ├── docs/
-│   └── ARCHITECTURE_AND_DPDP_NOTE.md # Comprehensive 10-slide deck, Mermaid architecture & DPDP note
-├── tests/                           # 33 comprehensive pytest suites
+│   ├── Project_Udyam_Digital_10_Slide_Pitch_Deck.pptx # Official 10-slide PowerPoint pitch deck
+│   ├── 10_SLIDE_BUSINESS_CASE_DECK.md                 # 10-slide executive pitch deck (Markdown)
+│   └── ARCHITECTURE_AND_DPDP_NOTE.md                  # Comprehensive architecture blueprint, DPDP note & video script
+├── visual_audit/                                      # 100-case visual audit screenshots & interactive dashboard
+├── tests/                                             # 37 comprehensive pytest suites (100% pass)
 ├── run_server.py                    # Cross-directory backend runner
 ├── start_backend.bat                # 1-click Windows backend launcher
 └── start_frontend.bat               # 1-click Windows frontend launcher
