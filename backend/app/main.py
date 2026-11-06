@@ -4,6 +4,7 @@ from pathlib import Path
 from typing import Optional
 from fastapi import FastAPI, File, Form, HTTPException, UploadFile
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.staticfiles import StaticFiles
 
 from backend.app.db.registry import get_registry
 from backend.app.models.schemas import (
@@ -32,6 +33,11 @@ app = FastAPI(
     version="1.0.0",
     description="Deterministic CPQ DAG, DPDP Smart KYC, and LightGBM Lead Rescue API for MSME Onboarding.",
 )
+
+# Serve Visual Audit gallery directly over HTTP
+audit_dir = Path(__file__).resolve().parent.parent.parent / "visual_audit"
+if audit_dir.exists():
+    app.mount("/audit", StaticFiles(directory=str(audit_dir), html=True), name="audit")
 
 # CORS configuration for seamless PWA integration
 app.add_middleware(
