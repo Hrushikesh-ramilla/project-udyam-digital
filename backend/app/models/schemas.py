@@ -201,6 +201,10 @@ class AdvisorResponse(BaseModel):
     display_markdown: str = Field(description="Formatted markdown response for chat UI")
     spoken_tts_text: str = Field(description="Clean, symbol-free text for browser TTS voice playback")
     next_suggested_prompts: list[str] = Field(default_factory=list)
+    display_latin: Optional[str] = Field(default=None, description="Response rendered in English/Latin alphabet")
+    display_native: Optional[str] = Field(default=None, description="Response rendered in traditional native script")
+    user_latin: Optional[str] = Field(default=None, description="User message rendered in English/Latin alphabet")
+    user_native: Optional[str] = Field(default=None, description="User message rendered in traditional native script")
 
 
 # KYC & DPDP Schemas

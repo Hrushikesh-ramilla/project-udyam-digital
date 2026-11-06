@@ -71,6 +71,10 @@ export interface AdvisorResponse {
   display_markdown: string;
   spoken_tts_text: string;
   next_suggested_prompts: string[];
+  display_latin?: string | null;
+  display_native?: string | null;
+  user_latin?: string | null;
+  user_native?: string | null;
 }
 
 export interface KYCAnomaly {

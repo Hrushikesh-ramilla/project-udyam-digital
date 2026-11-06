@@ -89,10 +89,16 @@ def test_romanized_latin_script_indic_flow(advisor: AdvisorAgent):
     assert "Nenu bagunnanu" in res_latin.display_markdown or "dhanyavadalu" in res_latin.display_markdown
     # Verify zero non-Latin Indic characters in Latin mode
     assert not re.search(r"[\u0900-\u0D7F]", res_latin.display_markdown)
+    assert res_latin.display_latin is not None
+    assert res_latin.display_native is not None
+    assert res_latin.user_latin is not None
+    assert res_latin.user_native is not None
 
     # 2. Test Telugu in Native Script ("నమస్కారం బాగున్నారా")
     res_native = advisor.process_turn("నమస్కారం బాగున్నారా", script_mode="native")
     assert "బాగున్నాను" in res_native.display_markdown or "నమస్కారం" in res_native.display_markdown
+    assert res_native.display_latin is not None
+    assert res_native.display_native is not None
 
     # 3. Test slot extraction from Romanized query ("hyderabad lo 4 staff clinic undi, budget 2500")
     res_slots = advisor.process_turn("hyderabad lo 4 staff clinic undi, budget 2500", script_mode="latin")
