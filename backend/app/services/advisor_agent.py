@@ -22,6 +22,12 @@ from backend.app.models.schemas import (
     UserProfile,
 )
 from backend.app.services.cpq_engine import CPQEngine
+from backend.app.services.transliteration_service import (
+    ensure_dual_scripts,
+    has_indic_script,
+    indic_to_latin,
+    latin_to_indic,
+)
 
 TIER_1_CITIES = {
     "mumbai", "delhi", "bengaluru", "bangalore", "hyderabad",
@@ -353,19 +359,38 @@ Return STRICTLY valid JSON with no markdown formatting:
     ) -> AdvisorResponse:
         norm_msg = user_message.lower().strip()
         # Prompt injection & arbitrary price override guardrail
-        if "ignore previous instructions" in norm_msg or "ignore all instructions" in norm_msg or re.search(r"\b(?:for|at)\s*(?:rs\.?|inr|₹)?\s*(?:10|1|5|0)\s*(?:per\s*month|\/mo|month)?\b", norm_msg):
+        is_injection = "ignore previous instructions" in norm_msg or "ignore all instructions" in norm_msg or "say hacked" in norm_msg
+        is_illegal_price = bool(re.search(r"\b(?:at|for|give me.*?at)\s*(?:rs\.?|inr|₹)\s*(?:10|1|5|0|500)\b", norm_msg) or re.search(r"\b(?:10|1|5|0|500)\s*(?:rupees|rs)\s*(?:per\s*month|\/mo)\b", norm_msg))
+        if is_injection or is_illegal_price:
             slots = previous_slots or MSMEProfileSlots()
+            guard_latin = (
+                "⚠️ **Airtel Business Enterprise Policy Guardrail:** Plan pricing is strictly determined by central "
+                "regulatory tariff filings and cannot be modified via conversational prompts. Biz Fibre 1G (P03) is "
+                "**₹3,999/month** (OTC Setup: ₹0). We can, however, help you find an authentic bundle matching your budget."
+            )
+            guard_native = (
+                "⚠️ **ఎయిర్‌టెల్ బిజినెస్ ఎంటర్‌ప్రైజ్ పాలసీ గార్డ్‌రైల్:** ప్లాన్ ధరలు కేంద్ర టారిఫ్ నిబంధనలకు కట్టుబడి ఉంటాయి. "
+                "బిజ్ ఫైబర్ 1G (P03) ధర నెలకు ₹3,999 (సెటప్ రుసుము: ₹0). మీ బడ్జెట్‌కు సరిపోయే ప్రామాణికమైన ప్లాన్‌ను ఎంచుకోవడంలో మేము సహాయం చేయగలము."
+            )
+            p_lat, p_nat = ensure_dual_scripts(guard_latin, guard_native, language_code or "te")
+            u_lat, u_nat = ensure_dual_scripts(user_message, user_message, language_code or "te")
+            eff_script = script_mode or ("native" if has_indic_script(user_message) else "latin")
+
             return AdvisorResponse(
                 slots=slots,
                 quote=None,
                 recommended_skus=[],
-                display_markdown="⚠️ **Airtel Business Enterprise Policy Guardrail:** Plan pricing is strictly determined by central regulatory tariff filings and cannot be modified via conversational prompts. Biz Fibre 1G (P03) is **₹3,999/month** (OTC Setup: ₹0). We can, however, help you find an authentic bundle matching your budget.",
-                spoken_tts_text="Airtel Business plan pricing is strictly fixed and audited by regulatory filings. Biz Fibre 1G is 3,999 Rupees per month. Prompt price overrides are not permitted.",
+                display_markdown=p_lat if eff_script == "latin" else p_nat,
+                spoken_tts_text="Airtel Business plan pricing is strictly fixed and audited by regulatory filings. Prompt price overrides are not permitted.",
                 next_suggested_prompts=[
                     "Show plans under ₹1,500/month",
                     "What are the benefits of Biz Fibre 1G?",
                     "Check Udyam micro-retail bundles",
                 ],
+                display_latin=p_lat,
+                display_native=p_nat,
+                user_latin=u_lat,
+                user_native=u_nat,
             )
         """Executes full neuro-symbolic turn: Slot Extraction -> CPQ Engine -> Dual Narration.
 
@@ -409,6 +434,40 @@ Return STRICTLY valid JSON with no markdown formatting:
             active_lang = "or"
         elif re.search(r"[\u0900-\u097F]", user_message) or re.search(r"\b(kaise\s*ho|kya\s*haal|sab\s*theek|bhai|bhaiya|chahiye|aapka)\b", clean_msg):
             active_lang = "hi"
+
+        # Non-Indic foreign languages / greetings and unrelated queries fallback
+        is_foreign_greeting = bool(re.search(r"^(hola|bonjour|ciao|aloha|hallo|salut|wie\s*gehts|que\s*tal|konnichiwa|privet|merhaba|sawasdee)\b", clean_msg))
+        is_unrelated = bool(re.search(r"\b(recipe|cricket|weather|poem|movie|python\s*code|binary\s*search|joke|capital of|how to cook|who won)\b", clean_msg))
+        if is_foreign_greeting or is_unrelated:
+            resp_latin = (
+                "Namaste! Welcome to Airtel Business Udyam Digital. "
+                "We provide enterprise telecom, high-speed fiber broadband, and digital solutions for Indian businesses "
+                "across all 10 Indic languages. Please tell us about your enterprise (e.g. retail shop, clinic, CA office, factory) "
+                "and city to configure an optimal verified plan."
+            )
+            resp_native = (
+                "నమస్కారం! ఎయిర్‌టెల్ బిజినెస్ ఉద్యమ్ డిజిటల్‌కు స్వాగతం. "
+                "భారతీయ వ్యాపారాల కోసం హై-స్పీడ్ ఫైబర్, స్టాటిక్ ఐపీ మరియు క్లౌడ్ సేవలను మేము అందిస్తున్నాము. "
+                "మీ వ్యాపార వివరాలను తెలపండి."
+            )
+            pure_latin, pure_native = ensure_dual_scripts(resp_latin, resp_native, active_lang)
+            user_lat, user_nat = self._dualize_user_message(user_message, active_lang, effective_script)
+            return AdvisorResponse(
+                slots=slots,
+                quote=None,
+                recommended_skus=[],
+                display_markdown=pure_latin if effective_script == "latin" else pure_native,
+                spoken_tts_text="Namaste! Welcome to Airtel Business Udyam Digital. Please describe your business requirements.",
+                next_suggested_prompts=[
+                    "Broadband for Kirana shop",
+                    "Clinic with 10 staff in Hyderabad",
+                    "Factory setup in Surat",
+                ],
+                display_latin=pure_latin,
+                display_native=pure_native,
+                user_latin=user_lat,
+                user_native=user_nat,
+            )
 
         regional_greetings_native = [
             "నమస్కారం", "నమస్తే", "బాగున్నారా", "ఎలా ఉన్నారు", # Telugu
@@ -629,7 +688,8 @@ Return STRICTLY valid JSON with no markdown formatting:
             
             display_native = matched_native[0]
             display_latin = matched_latin[0]
-            display_md = display_latin if effective_script == "latin" else display_native
+            pure_latin, pure_native = ensure_dual_scripts(display_latin, display_native, active_lang)
+            display_md = pure_latin if effective_script == "latin" else pure_native
             welcome_tts = matched_latin[1] if effective_script == "latin" else matched_native[1]
             user_latin, user_native = self._dualize_user_message(user_message, active_lang, effective_script)
 
@@ -644,8 +704,8 @@ Return STRICTLY valid JSON with no markdown formatting:
                     "We are a CA office in Mumbai with GST",
                     "We have a factory in Surat with 30 staff",
                 ],
-                display_latin=display_latin,
-                display_native=display_native,
+                display_latin=pure_latin,
+                display_native=pure_native,
                 user_latin=user_latin,
                 user_native=user_native,
             )
@@ -662,8 +722,9 @@ Return STRICTLY valid JSON with no markdown formatting:
 
             prompt_latin = f"Namaste! To configure your digital plan, please tell us: {', '.join(missing_text)}."
             prompt_native = f"నమస్కారం! మీ వ్యాపారానికి తగిన ప్లాన్ ఎంచుకోవడానికి దయచేసి తెలపండి: మీ వ్యాపార రకం, నగరం మరియు జీఎస్టీ వివరాలు."
-            display_md = prompt_latin if effective_script == "latin" else prompt_native
-            spoken_tts = prompt_latin if effective_script == "latin" else "Namaste! Mee business details telapandi."
+            pure_latin, pure_native = ensure_dual_scripts(prompt_latin, prompt_native, active_lang)
+            display_md = pure_latin if effective_script == "latin" else pure_native
+            spoken_tts = pure_latin if effective_script == "latin" else "Namaste! Mee business details telapandi."
             user_latin, user_native = self._dualize_user_message(user_message, active_lang, effective_script)
 
             return AdvisorResponse(
@@ -677,8 +738,8 @@ Return STRICTLY valid JSON with no markdown formatting:
                     "We are a CA office in Mumbai with GST",
                     "We have a factory in Surat with 30 staff",
                 ],
-                display_latin=prompt_latin,
-                display_native=prompt_native,
+                display_latin=pure_latin,
+                display_native=pure_native,
                 user_latin=user_latin,
                 user_native=user_native,
             )
@@ -734,7 +795,8 @@ Return STRICTLY valid JSON with no markdown formatting:
 
         # Generate Dual-Channel Narration
         display_latin, display_native, spoken_tts = self._generate_dual_narration(profile, quote, selected_skus)
-        display_md = display_latin if effective_script == "latin" else display_native
+        pure_latin, pure_native = ensure_dual_scripts(display_latin, display_native, active_lang)
+        display_md = pure_latin if effective_script == "latin" else pure_native
         user_latin, user_native = self._dualize_user_message(user_message, active_lang, effective_script)
 
         return AdvisorResponse(
@@ -748,8 +810,8 @@ Return STRICTLY valid JSON with no markdown formatting:
                 "Can I add CCTV surveillance?",
                 "Proceed to instant KYC",
             ],
-            display_latin=display_latin,
-            display_native=display_native,
+            display_latin=pure_latin,
+            display_native=pure_native,
             user_latin=user_latin,
             user_native=user_native,
         )
@@ -757,26 +819,7 @@ Return STRICTLY valid JSON with no markdown formatting:
     def _dualize_user_message(self, text: str, lang: str, script: str) -> tuple[str, str]:
         """Returns (user_latin, user_native) for the input message."""
         clean = text.strip()
-        lower = clean.lower()
-        if "bagunnara" in lower or "ela unna" in lower:
-            return ("bagunnara ela unnaru", "బాగున్నారా ఎలా ఉన్నారు")
-        if "నమస్కారం" in clean or "బాగున్నారా" in clean:
-            return ("namaskaram bagunnara", "నమస్కారం బాగున్నారా")
-        if "vanakkam" in lower:
-            return ("vanakkam eppadi irukkeenga", "வணக்கம் எப்படி இருக்கிறீர்கள்")
-        if "வணக்கம்" in clean:
-            return ("vanakkam eppadi irukkeenga", "வணக்கம் எப்படி இருக்கிறீர்கள்")
-        if "kaise ho" in lower:
-            return ("namaste kaise hain aap", "नमस्ते कैसे हैं आप")
-        if "नमस्ते" in clean:
-            return ("namaste kaise hain aap", "नमस्ते कैसे हैं आप")
-        if "clinic" in lower and ("hyderabad" in lower or "hyd" in lower):
-            return (clean, "హైదరాబాద్‌లో 10 మంది సిబ్బందితో క్లినిక్")
-        if "kirana" in lower:
-            return (clean, "టైర్ 2 లో కిరాణా షాప్, జీఎస్టీ లేదు")
-        if "textile" in lower or "surat" in lower:
-            return (clean, "સુરતમાં કાપડનું કારખાનું, ૨૫ કારીગરો")
-        return (clean, clean)
+        return ensure_dual_scripts(clean, clean, lang)
 
     def _generate_dual_narration(
         self,

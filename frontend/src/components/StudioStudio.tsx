@@ -20,6 +20,7 @@ import {
 } from "lucide-react";
 import { ProductItem, CommercialBreakdown, MSMEProfileSlots } from "../types";
 import { fetchProducts, calculateQuote, optimizeBudget, sendChatMessage } from "../api";
+import { toLatinScript, toNativeScript, hasIndicScript } from "../transliteration";
 
 interface StudioStudioProps {
   profileSlots: MSMEProfileSlots | null;
@@ -354,9 +355,8 @@ export const StudioStudio: React.FC<StudioStudioProps> = ({
       setScriptMode(effectiveMode);
     }
 
-    const qLatin = textOverride || (hasIndic ? q : q);
-    const qNative =
-      nativeOverride || (hasIndic ? q : transliterateToNative(q, activeGreetingKey));
+    const qLatin = hasIndic ? toLatinScript(q) : q;
+    const qNative = hasIndic ? q : toNativeScript(q, activeGreetingKey);
 
     const userMsg: ChatMessage = {
       id: `usr_${Date.now()}`,
@@ -381,13 +381,19 @@ export const StudioStudio: React.FC<StudioStudioProps> = ({
         setSelectedProductIds(res.recommended_skus);
       }
 
+      const rawLatin = res.display_latin || res.display_markdown || "";
+      const rawNative = res.display_native || res.display_markdown || "";
+
+      const advLatin = hasIndicScript(rawLatin) ? toLatinScript(rawLatin) : (rawLatin || toLatinScript(rawNative));
+      const advNative = hasIndicScript(rawNative) ? rawNative : (toNativeScript(rawNative || rawLatin, activeGreetingKey));
+
       const advMsg: ChatMessage = {
         id: `adv_${Date.now()}`,
         sender: "assistant",
-        textLatin: res.display_latin || res.display_markdown,
-        textNative: res.display_native || res.display_markdown,
+        textLatin: advLatin,
+        textNative: advNative,
         timestamp: new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }),
-        spokenTts: res.spoken_tts_text,
+        spokenTts: scriptMode === "latin" ? advLatin : (res.spoken_tts_text || advNative),
       };
       setMessages((prev) => [...prev, advMsg]);
     } catch {
@@ -547,7 +553,12 @@ export const StudioStudio: React.FC<StudioStudioProps> = ({
           <div ref={chatScrollRef} className="max-h-[380px] overflow-y-auto space-y-3 pr-2 no-scrollbar">
             {messages.map((m) => {
               const isUser = m.sender === "user";
-              const displayedText = scriptMode === "latin" ? m.textLatin : m.textNative;
+              let displayedText = scriptMode === "latin" ? (m.textLatin || m.textNative) : (m.textNative || m.textLatin);
+              if (scriptMode === "latin" && hasIndicScript(displayedText)) {
+                displayedText = toLatinScript(displayedText);
+              } else if (scriptMode === "native" && !hasIndicScript(displayedText)) {
+                displayedText = toNativeScript(displayedText, activeGreetingKey);
+              }
               return (
                 <motion.div
                   key={m.id}
