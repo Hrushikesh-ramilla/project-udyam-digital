@@ -4,6 +4,7 @@
 
 Project Udyam Digital is an enterprise-grade solution built for the **Airtel SYNC Hackathon 2026 (Enterprise Track A: Accel Business)**. It replaces the legacy, fragmented, multi-week B2B sales cycle with a unified, four-stage deterministic digital pipeline. The system decouples high-performance client interactivity from sub-millisecond symbolic rule execution, ensuring zero price discrepancies, guaranteed DPDP Act 2023 privacy, resilient Indic transliteration, and autonomous partner lead recovery.
 
+[![Live Demo](https://img.shields.io/badge/live%20demo-65.1.112.251-brightgreen)](http://65.1.112.251)
 [![Tests](https://img.shields.io/badge/pytest-37%20passed-brightgreen)](#testing--verification)
 [![Visual Audit](https://img.shields.io/badge/visual%20audit-100%2F100%20verified-brightgreen)](#hostile-audit--verification-bench)
 [![DPDP Act 2023](https://img.shields.io/badge/DPDP%20Act%202023-Zero--Persistence-blue)](#smart-kyc--dpdp-act-2023-zero-persistence-gate)
