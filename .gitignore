@@ -59,4 +59,8 @@ problem.zip
 
 # Visual Audit captures
 *.png
+!assets/*.png
+!assets/*.svg
+!assets/*.jpg
+!assets/*.webp
 visual_audit/
