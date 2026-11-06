@@ -70,7 +70,12 @@ def get_products():
 
 @app.post("/api/advisor/chat", response_model=AdvisorResponse)
 def advisor_chat(req: ChatRequest):
-    return advisor.process_turn(req.user_message, req.previous_slots)
+    return advisor.process_turn(
+        req.user_message,
+        req.previous_slots,
+        language_code=req.language_code,
+        script_mode=req.script_mode,
+    )
 
 
 @app.post("/api/cpq/calculate", response_model=CommercialBreakdown)

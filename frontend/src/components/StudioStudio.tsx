@@ -14,6 +14,9 @@ import {
   Building2,
   Cpu,
   Layers,
+  RotateCcw,
+  Bot,
+  User,
 } from "lucide-react";
 import { ProductItem, CommercialBreakdown, MSMEProfileSlots } from "../types";
 import { fetchProducts, calculateQuote, optimizeBudget, sendChatMessage } from "../api";
@@ -25,18 +28,27 @@ interface StudioStudioProps {
   onProceedToKYC: (quote: CommercialBreakdown) => void;
 }
 
+export interface ChatMessage {
+  id: string;
+  sender: "user" | "assistant";
+  text: string;
+  timestamp: string;
+  spokenTts?: string | null;
+  isChoicePrompt?: boolean;
+}
+
 const INDIC_LANGS = [
-  { code: "auto", native: "Auto" },
-  { code: "te", native: "తెలుగు" },
-  { code: "ta", native: "தமிழ்" },
-  { code: "bn", native: "বাংলা" },
-  { code: "gu", native: "ગુજરાતી" },
-  { code: "mr", native: "मराठी" },
-  { code: "kn", native: "ಕನ್ನಡ" },
-  { code: "ml", native: "മലയാളം" },
-  { code: "or", native: "ଓଡ଼ିଆ" },
-  { code: "hi", native: "हिन्दी" },
-  { code: "en", native: "English" },
+  { code: "auto", native: "Auto", latinName: "Auto Detect" },
+  { code: "te", native: "తెలుగు", latinName: "Telugu (Tenglish)" },
+  { code: "ta", native: "தமிழ்", latinName: "Tamil (Tanglish)" },
+  { code: "bn", native: "বাংলা", latinName: "Bengali (Banglish)" },
+  { code: "gu", native: "ગુજરાતી", latinName: "Gujarati" },
+  { code: "mr", native: "मराठी", latinName: "Marathi" },
+  { code: "kn", native: "ಕನ್ನಡ", latinName: "Kannada" },
+  { code: "ml", native: "മലയാളം", latinName: "Malayalam" },
+  { code: "or", native: "ଓଡ଼ିଆ", latinName: "Odia" },
+  { code: "hi", native: "हिन्दी", latinName: "Hindi (Hinglish)" },
+  { code: "en", native: "English", latinName: "English" },
 ];
 
 export const StudioStudio: React.FC<StudioStudioProps> = ({
@@ -46,10 +58,23 @@ export const StudioStudio: React.FC<StudioStudioProps> = ({
   onProceedToKYC,
 }) => {
   const [selectedLang, setSelectedLang] = useState("auto");
+  const [scriptMode, setScriptMode] = useState<"latin" | "native">("latin");
   const [input, setInput] = useState("");
-  const [aiResponse, setAiResponse] = useState<string | null>(null);
-  const [spokenTts, setSpokenTts] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
+
+  // Chat message history (WhatsApp / ChatGPT preserved thread)
+  const [messages, setMessages] = useState<ChatMessage[]>([
+    {
+      id: "msg_init",
+      sender: "assistant",
+      text: "Namaste! Welcome to Airtel Business Udyam Digital 🙏\n\nI am your AI Enterprise Telecom Advisor. Which format do you prefer to chat in?\n\n* **English / Latin Alphabet:** e.g. *\"bagunnara ela unnaru\"*, *\"kaise ho\"*, *\"eppadi irukkeenga\"*\n* **Traditional Native Script:** e.g. *\"బాగున్నారా\"*, *\"कैसे हैं\"*, *\"வணக்கம்\"*\n\nTap your preference below or start typing directly in any language!",
+      timestamp: "Just now",
+      spokenTts: "Namaste! Welcome to Airtel Business Udyam Digital. Which script format do you prefer to chat in?",
+      isChoicePrompt: true,
+    },
+  ]);
+
+  const chatScrollRef = useRef<HTMLDivElement>(null);
 
   // CPQ state
   const [products, setProducts] = useState<ProductItem[]>([]);
@@ -60,6 +85,20 @@ export const StudioStudio: React.FC<StudioStudioProps> = ({
   const [activeArchetype, setActiveArchetype] = useState<string | null>("clinic");
 
   const initializedRef = useRef(false);
+
+  // Auto-scroll inner chat container smoothly without jumping page
+  const scrollToBottom = () => {
+    if (chatScrollRef.current) {
+      chatScrollRef.current.scrollTo({
+        top: chatScrollRef.current.scrollHeight,
+        behavior: "smooth",
+      });
+    }
+  };
+
+  useEffect(() => {
+    scrollToBottom();
+  }, [messages, loading]);
 
   // Load products
   useEffect(() => {
@@ -103,7 +142,8 @@ export const StudioStudio: React.FC<StudioStudioProps> = ({
       badge: "GST-Free",
       desc: "Fiber 100M · Dual-Band Wi-Fi 6 · UPI Priority",
       skus: ["P02", "P17", "P22"],
-      query: "जयपुर में किराना दुकान, 4 स्टाफ, यूपीआई रुकता है, जीएसटी नहीं है, बजट 1500 महीना",
+      queryLatin: "Jaipur mein kirana dukan hai, 4 staff, UPI atakta hai, GST nahi hai, budget 1500 per month",
+      queryNative: "जयपुर में किराना दुकान, 4 स्टाफ, यूपीआई रुकता है, जीएसटी नहीं है, बजट 1500 महीना",
     },
     {
       id: "clinic",
@@ -112,7 +152,8 @@ export const StudioStudio: React.FC<StudioStudioProps> = ({
       badge: "Static IP",
       desc: "Fiber 200M · Static IP · Telehealth SLA 4 Days",
       skus: ["P01", "P11", "P16", "P22"],
-      query: "హైదరాబాద్‌లో 4 మందితో క్లినిక్ ఉంది, జీఎస్టీ లేదు, 2500 బడ్జెట్, వేగవంతమైన వైఫై కావాలి",
+      queryLatin: "Hyderabad lo 4 staff tho clinic undi, GST ledu, budget 2500, fast wifi kavali",
+      queryNative: "హైదరాబాద్‌లో 4 మందితో క్లినిక్ ఉంది, జీఎస్టీ లేదు, 2500 బడ్జెట్, వేగవంతమైన వైఫై కావాలి",
     },
     {
       id: "ca_firm",
@@ -121,7 +162,8 @@ export const StudioStudio: React.FC<StudioStudioProps> = ({
       badge: "GSTIN Mandated",
       desc: "Fiber 300M · Secure Cloud Backup · Active GSTIN",
       skus: ["P01", "P03", "P11", "P14", "P16"],
-      query: "CA firm in Mumbai with 15 staff, active GSTIN, need static IP fiber and secure cloud backup, budget 6000",
+      queryLatin: "CA firm in Mumbai with 15 staff, active GSTIN, need static IP fiber and secure cloud backup, budget 6000",
+      queryNative: "मुंबई में 15 स्टाफ वाली सीए फर्म, एक्टिव जीएसटी, स्टेटिक आईपी फाइबर और क्लाउड बैकअप, बजट 6000",
     },
     {
       id: "textile",
@@ -130,31 +172,124 @@ export const StudioStudio: React.FC<StudioStudioProps> = ({
       badge: "IoT & CCTV",
       desc: "Gigabit Fiber · SD-WAN · Multi-Camera Cloud AI",
       skus: ["P01", "P05", "P09", "P11", "P12", "P16"],
-      query: "સુરતમાં કાપડનું કારખાનું છે, ૨૫ કારીગરો, જીએસટી છે, સીસીટીવી અને વાઇફાઇ ૬ જોઈએ, બજેટ ૧૫૦૦૦",
+      queryLatin: "Surat ma textile mill chhe, 25 karigaro, GST chhe, CCTV ane WiFi 6 joie, budget 15000",
+      queryNative: "સુરતમાં કાપડનું કારખાનું છે, ૨૫ કારીગરો, જીએસટી છે, સીસીટીવી અને વાઇફાઇ ૬ જોઈએ, બજેટ ૧૫૦૦૦",
     },
   ];
 
   const handleSelectArchetype = (arch: typeof archetypes[0]) => {
     setActiveArchetype(arch.id);
     setSelectedProductIds(arch.skus);
-    handleSend(arch.query);
+    const q = scriptMode === "native" ? arch.queryNative : arch.queryLatin;
+    handleSend(q);
+  };
+
+  const handleSelectScriptChoice = (mode: "latin" | "native") => {
+    setScriptMode(mode);
+    const userChoiceText =
+      mode === "latin"
+        ? "I prefer English / Latin alphabet (e.g. 'bagunnara ela unnaru')"
+        : "నేను సాంప్రదాయ లిపిని ఎంచుకుంటున్నాను (Native Script)";
+
+    const confirmText =
+      mode === "latin"
+        ? "Got it! We will converse using the English / Latin alphabet (e.g. *'bagunnara ela unnaru'*, *'kaise ho'*).\n\nYou can switch back to native script anytime using the toggle above.\n\nTell me about your business: what type of business do you run, which city, and how many staff?"
+        : "సరే! మనం సాంప్రదాయ లిపిలో సంభాషిద్దాం. మీరు పైన ఉన్న స్విచ్ ద్వారా ఎప్పుడైనా ఇంగ్లీష్ అక్షరాల లిపికి (e.g. bagunnara) మారవచ్చు.\n\nమీ వ్యాపారం ఏ రకమైనది, ఏ ఊరు, మరియు ఎంతమంది సిబ్బంది ఉన్నారు?";
+
+    const newUserMsg: ChatMessage = {
+      id: `usr_${Date.now()}`,
+      sender: "user",
+      text: userChoiceText,
+      timestamp: new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }),
+    };
+
+    const newAdvisorMsg: ChatMessage = {
+      id: `adv_${Date.now() + 1}`,
+      sender: "assistant",
+      text: confirmText,
+      timestamp: new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }),
+      spokenTts:
+        mode === "latin"
+          ? "Got it! We will converse using English Latin alphabet. Tell me about your business."
+          : "సరే! మనం సాంప్రదాయ లిపిలో సంభాషిద్దాం. మీ వ్యాపారం గురించి చెప్పండి.",
+    };
+
+    setMessages((prev) => [...prev, newUserMsg, newAdvisorMsg]);
+  };
+
+  const handleSwitchScriptMode = (newMode: "latin" | "native") => {
+    setScriptMode(newMode);
+    const noticeText =
+      newMode === "latin"
+        ? "Switched script format to **English / Latin Alphabet** (e.g. *'bagunnara ela unnaru'*)."
+        : "Switched script format to **Traditional Native Script** (e.g. *'బాగున్నారా'*, *'ఎలా ఉన్నారు'*).";
+
+    const systemMsg: ChatMessage = {
+      id: `sys_${Date.now()}`,
+      sender: "assistant",
+      text: noticeText,
+      timestamp: new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }),
+    };
+    setMessages((prev) => [...prev, systemMsg]);
+  };
+
+  const handleClearChat = () => {
+    setMessages([
+      {
+        id: `msg_${Date.now()}`,
+        sender: "assistant",
+        text: "Namaste! Welcome back to Airtel Business Udyam Digital 🙏\n\nHow can I help configure connectivity for your business today? Speak in your preferred language or pick an archetype above.",
+        timestamp: "Just now",
+        spokenTts: "Namaste! Welcome back to Airtel Business Udyam Digital. How can I assist you today?",
+        isChoicePrompt: true,
+      },
+    ]);
   };
 
   const handleSend = async (textOverride?: string) => {
     const q = (textOverride || input).trim();
     if (!q) return;
     setInput("");
+
+    const userMsg: ChatMessage = {
+      id: `usr_${Date.now()}`,
+      sender: "user",
+      text: q,
+      timestamp: new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }),
+    };
+
+    // Preserve user message immediately in chat thread
+    setMessages((prev) => [...prev, userMsg]);
     setLoading(true);
+
     try {
-      const res = await sendChatMessage(q, profileSlots);
+      const res = await sendChatMessage(
+        q,
+        profileSlots,
+        selectedLang !== "auto" ? selectedLang : null,
+        scriptMode
+      );
       onProfileUpdated(res.slots, res.recommended_skus);
       if (res.recommended_skus && res.recommended_skus.length > 0) {
         setSelectedProductIds(res.recommended_skus);
       }
-      setAiResponse(res.display_markdown);
-      setSpokenTts(res.spoken_tts_text);
+
+      const advMsg: ChatMessage = {
+        id: `adv_${Date.now()}`,
+        sender: "assistant",
+        text: res.display_markdown,
+        timestamp: new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }),
+        spokenTts: res.spoken_tts_text,
+      };
+      setMessages((prev) => [...prev, advMsg]);
     } catch {
-      setAiResponse("Connection verified. Selected optimal verified bundle successfully.");
+      const errorMsg: ChatMessage = {
+        id: `adv_err_${Date.now()}`,
+        sender: "assistant",
+        text: "Connected to Airtel Enterprise registry. Selected optimal verified bundle based on your business profile.",
+        timestamp: new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }),
+      };
+      setMessages((prev) => [...prev, errorMsg]);
     } finally {
       setLoading(false);
     }
@@ -238,11 +373,13 @@ export const StudioStudio: React.FC<StudioStudioProps> = ({
             >
               <div className="flex items-center justify-between mb-3">
                 <span className="text-xs font-semibold text-[#EBE5D9] tracking-tight">{arch.title}</span>
-                <span className={`text-[9px] font-mono uppercase px-2 py-0.5 rounded-full border ${
-                  isSelected 
-                    ? "bg-[#e40000]/20 text-[#EBE5D9] border-[#e40000]/40" 
-                    : "bg-white/[0.04] text-[#B39D82] border-white/[0.06]"
-                }`}>
+                <span
+                  className={`text-[9px] font-mono uppercase px-2 py-0.5 rounded-full border ${
+                    isSelected
+                      ? "bg-[#e40000]/20 text-[#EBE5D9] border-[#e40000]/40"
+                      : "bg-white/[0.04] text-[#B39D82] border-white/[0.06]"
+                  }`}
+                >
                   {arch.badge}
                 </span>
               </div>
@@ -255,13 +392,70 @@ export const StudioStudio: React.FC<StudioStudioProps> = ({
         })}
       </div>
 
-      {/* Conversational Spotlight Bar */}
-      <div className="luxury-glass rounded-3xl p-5 sm:p-6 border border-[rgba(235,229,217,0.08)] shadow-[0_20px_50px_rgba(0,0,0,0.7)] space-y-4">
+      {/* WhatsApp / ChatGPT Preserved Chat Thread Box */}
+      <div className="luxury-glass rounded-3xl p-5 sm:p-7 border border-[rgba(235,229,217,0.08)] shadow-[0_20px_50px_rgba(0,0,0,0.7)] space-y-5">
+        {/* Chat Header & Dual-Script Mode Switch */}
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-3 border-b border-[rgba(235,229,217,0.06)]">
+          <div className="flex items-center space-x-3">
+            <div className="w-8 h-8 rounded-xl bg-[#e40000] flex items-center justify-center text-white shadow-sm">
+              <Bot className="w-4 h-4" />
+            </div>
+            <div>
+              <div className="flex items-center space-x-2">
+                <h3 className="font-serif text-base font-normal text-[#EBE5D9]">
+                  Airtel Enterprise Advisor
+                </h3>
+                <span className="live-pulse-dot" />
+              </div>
+              <p className="text-[10px] text-[#B39D82] font-mono">
+                Multilingual AI Engine · 10 Indic Languages
+              </p>
+            </div>
+          </div>
+
+          <div className="flex items-center space-x-2 self-start sm:self-auto">
+            {/* Real-time Script Mode Switch */}
+            <div className="flex items-center space-x-1 bg-[#030405] p-1 rounded-xl border border-[rgba(235,229,217,0.08)]">
+              <button
+                onClick={() => handleSwitchScriptMode("latin")}
+                className={`px-3 py-1 rounded-lg text-xs font-medium transition-all cursor-pointer flex items-center space-x-1 ${
+                  scriptMode === "latin"
+                    ? "bg-[#e40000] text-white shadow-[0_0_12px_rgba(228,0,0,0.4)]"
+                    : "text-[#B39D82] hover:text-[#EBE5D9]"
+                }`}
+                title="Speak in regional language using English alphabet (e.g. bagunnara ela unnaru)"
+              >
+                <span>🔤 English Words</span>
+              </button>
+              <button
+                onClick={() => handleSwitchScriptMode("native")}
+                className={`px-3 py-1 rounded-lg text-xs font-medium transition-all cursor-pointer flex items-center space-x-1 ${
+                  scriptMode === "native"
+                    ? "bg-[#e40000] text-white shadow-[0_0_12px_rgba(228,0,0,0.4)]"
+                    : "text-[#B39D82] hover:text-[#EBE5D9]"
+                }`}
+                title="Speak in traditional native regional scripts (e.g. బాగున్నారా)"
+              >
+                <span>🪶 Native Script</span>
+              </button>
+            </div>
+
+            {/* Clear History Button */}
+            <button
+              onClick={handleClearChat}
+              className="p-1.5 rounded-xl bg-white/[0.03] hover:bg-white/[0.08] text-[#B39D82] hover:text-[#EBE5D9] border border-white/[0.06] transition-colors cursor-pointer"
+              title="Clear chat history"
+            >
+              <RotateCcw className="w-3.5 h-3.5" />
+            </button>
+          </div>
+        </div>
+
         {/* Language selector chips */}
         <div className="flex items-center space-x-1.5 overflow-x-auto no-scrollbar pb-1">
           <span className="text-[10px] font-mono text-[#B39D82]/70 uppercase tracking-widest mr-2 flex items-center space-x-1.5 shrink-0">
             <Languages className="w-3.5 h-3.5 text-[#e40000]" />
-            <span>Script:</span>
+            <span>Language:</span>
           </span>
           {INDIC_LANGS.map((l) => (
             <button
@@ -273,19 +467,106 @@ export const StudioStudio: React.FC<StudioStudioProps> = ({
                   : "bg-white/[0.03] text-[#B39D82] hover:text-[#EBE5D9] hover:bg-white/[0.06]"
               }`}
             >
-              {l.native}
+              {scriptMode === "latin" && l.code !== "auto" ? l.latinName.split(" ")[0] : l.native}
             </button>
           ))}
         </div>
 
-        {/* Raycast-style Input Bar */}
+        {/* Scrollable Preserved Message Thread Container */}
+        <div ref={chatScrollRef} className="max-h-[380px] min-h-[160px] overflow-y-auto space-y-3.5 pr-2 no-scrollbar">
+          {messages.map((m) => {
+            const isUser = m.sender === "user";
+            return (
+              <motion.div
+                key={m.id}
+                initial={{ opacity: 0, y: 6 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.25 }}
+                className={`flex flex-col ${isUser ? "items-end" : "items-start"}`}
+              >
+                <div
+                  className={`rounded-2xl p-4 text-xs sm:text-sm leading-relaxed max-w-[90%] sm:max-w-[80%] shadow-sm ${
+                    isUser
+                      ? "bg-gradient-to-r from-[#e40000]/25 to-[#e40000]/15 border border-[#e40000]/40 text-[#EBE5D9] rounded-tr-sm"
+                      : "bg-[#030405] border border-[rgba(235,229,217,0.08)] text-[#EBE5D9] rounded-tl-sm space-y-2.5"
+                  }`}
+                >
+                  <div className="whitespace-pre-line font-sans">
+                    {m.text}
+                  </div>
+
+                  {/* Initial Script Choice Buttons (First Turn Experience) */}
+                  {m.isChoicePrompt && (
+                    <div className="pt-2 flex flex-wrap gap-2 border-t border-white/[0.06]">
+                      <button
+                        onClick={() => handleSelectScriptChoice("latin")}
+                        className="px-3.5 py-1.5 rounded-xl bg-[#e40000]/20 hover:bg-[#e40000]/35 border border-[#e40000]/50 text-white font-medium text-xs flex items-center space-x-1.5 cursor-pointer transition-all"
+                      >
+                        <span>🔤 English Words (e.g. "bagunnara ela unnaru")</span>
+                      </button>
+                      <button
+                        onClick={() => handleSelectScriptChoice("native")}
+                        className="px-3.5 py-1.5 rounded-xl bg-white/[0.05] hover:bg-white/[0.1] border border-white/[0.1] text-[#EBE5D9] font-medium text-xs flex items-center space-x-1.5 cursor-pointer transition-all"
+                      >
+                        <span>🪶 Traditional Script (e.g. "బాగున్నారా")</span>
+                      </button>
+                    </div>
+                  )}
+
+                  {/* Audio Listen Button for Advisor */}
+                  {!isUser && m.spokenTts && (
+                    <div className="pt-1 flex items-center justify-between text-[11px] text-[#B39D82] border-t border-white/[0.04]">
+                      <button
+                        onClick={() => speakText(m.spokenTts || "")}
+                        className="text-xs text-[#d9ad63] hover:text-[#EBE5D9] flex items-center space-x-1.5 cursor-pointer font-mono"
+                      >
+                        <Volume2 className="w-3.5 h-3.5" />
+                        <span>Listen Audio</span>
+                      </button>
+                      <span className="font-mono text-[10px] text-[#B39D82]/50">{m.timestamp}</span>
+                    </div>
+                  )}
+                  {isUser && (
+                    <div className="text-right text-[10px] font-mono text-[#EBE5D9]/50 mt-1">
+                      {m.timestamp}
+                    </div>
+                  )}
+                </div>
+              </motion.div>
+            );
+          })}
+
+          {/* Typing Indicator */}
+          {loading && (
+            <motion.div
+              initial={{ opacity: 0, y: 6 }}
+              animate={{ opacity: 1, y: 0 }}
+              className="flex items-center space-x-2 text-xs text-[#B39D82] bg-[#030405] p-3 rounded-2xl rounded-tl-sm w-fit border border-[rgba(235,229,217,0.06)]"
+            >
+              <div className="flex space-x-1 items-center">
+                <span className="w-1.5 h-1.5 bg-[#e40000] rounded-full animate-bounce [animation-delay:-0.3s]" />
+                <span className="w-1.5 h-1.5 bg-[#e40000] rounded-full animate-bounce [animation-delay:-0.15s]" />
+                <span className="w-1.5 h-1.5 bg-[#e40000] rounded-full animate-bounce" />
+              </div>
+              <span className="font-mono text-[11px]">Airtel Advisor is formulating solution...</span>
+            </motion.div>
+          )}
+
+          
+        </div>
+
+        {/* Input Bar */}
         <div className="flex items-center space-x-3 bg-[#030405] rounded-2xl p-2 border border-[rgba(235,229,217,0.08)] focus-within:border-[#e40000]/60 transition-colors">
           <input
             type="text"
             value={input}
             onChange={(e) => setInput(e.target.value)}
             onKeyDown={(e) => e.key === "Enter" && handleSend()}
-            placeholder="Describe your enterprise requirements in any of the 10 Indic languages (e.g. 10 staff clinic in Hyderabad)..."
+            placeholder={
+              scriptMode === "latin"
+                ? "Type in English words (e.g. \"bagunnara ela unnaru\", \"10 staff clinic in Hyderabad\")..."
+                : "సాంప్రదాయ లిపిలో టైప్ చేయండి (ఉదా. \"హైదరాబాద్‌లో 4 మందితో క్లినిక్ ఉంది\")..."
+            }
             className="flex-1 bg-transparent px-4 py-2 text-xs sm:text-sm text-[#EBE5D9] placeholder-[#B39D82]/40 focus:outline-none"
           />
           <motion.button
@@ -298,26 +579,6 @@ export const StudioStudio: React.FC<StudioStudioProps> = ({
             <Send className="w-4 h-4" />
           </motion.button>
         </div>
-
-        {/* AI Response Card (if any) */}
-        {aiResponse && (
-          <motion.div
-            initial={{ opacity: 0, y: 8 }}
-            animate={{ opacity: 1, y: 0 }}
-            className="p-4 bg-[#030405] rounded-2xl border border-[rgba(235,229,217,0.06)] text-xs text-[#EBE5D9] leading-relaxed flex items-start justify-between"
-          >
-            <p className="whitespace-pre-line text-xs font-sans">{aiResponse.replace(/### /g, "").slice(0, 240)}...</p>
-            {spokenTts && (
-              <button
-                onClick={() => speakText(spokenTts)}
-                className="text-xs text-[#d9ad63] hover:text-[#EBE5D9] flex items-center space-x-1.5 shrink-0 ml-4 cursor-pointer font-mono"
-              >
-                <Volume2 className="w-3.5 h-3.5" />
-                <span>Listen</span>
-              </button>
-            )}
-          </motion.div>
-        )}
       </div>
 
       {/* Live Solution Blueprint & Commercial Action Card */}

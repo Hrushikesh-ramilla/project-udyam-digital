@@ -80,3 +80,22 @@ def test_incomplete_turn_prompts_clarification(advisor: AdvisorAgent):
     assert len(response.slots.missing_slots) > 0
     assert "Namaste" in response.display_markdown or "clarify" in response.display_markdown
     assert len(response.next_suggested_prompts) > 0
+
+
+def test_romanized_latin_script_indic_flow(advisor: AdvisorAgent):
+    import re
+    # 1. Test Telugu in Latin/English alphabet ("bagunnara ela unnaru")
+    res_latin = advisor.process_turn("bagunnara ela unnaru", script_mode="latin")
+    assert "Nenu bagunnanu" in res_latin.display_markdown or "dhanyavadalu" in res_latin.display_markdown
+    # Verify zero non-Latin Indic characters in Latin mode
+    assert not re.search(r"[\u0900-\u0D7F]", res_latin.display_markdown)
+
+    # 2. Test Telugu in Native Script ("నమస్కారం బాగున్నారా")
+    res_native = advisor.process_turn("నమస్కారం బాగున్నారా", script_mode="native")
+    assert "బాగున్నాను" in res_native.display_markdown or "నమస్కారం" in res_native.display_markdown
+
+    # 3. Test slot extraction from Romanized query ("hyderabad lo 4 staff clinic undi, budget 2500")
+    res_slots = advisor.process_turn("hyderabad lo 4 staff clinic undi, budget 2500", script_mode="latin")
+    assert res_slots.slots.segment == "prof"
+    assert res_slots.slots.city_tier == 1  # Hyderabad is Tier 1
+    assert res_slots.slots.employee_count == 4

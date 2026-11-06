@@ -300,6 +300,8 @@ class ChatRequest(BaseModel):
 
     user_message: str
     previous_slots: Optional[MSMEProfileSlots] = None
+    language_code: Optional[str] = None
+    script_mode: Optional[str] = None
 
 
 class CalculateQuoteRequest(BaseModel):

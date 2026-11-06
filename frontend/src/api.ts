@@ -24,12 +24,19 @@ export async function fetchProducts(): Promise<ProductItem[]> {
 
 export async function sendChatMessage(
   message: string,
-  previousSlots?: MSMEProfileSlots | null
+  previousSlots?: MSMEProfileSlots | null,
+  languageCode?: string | null,
+  scriptMode?: "native" | "latin" | null
 ): Promise<AdvisorResponse> {
   const res = await fetch(`${API_BASE}/advisor/chat`, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ user_message: message, previous_slots: previousSlots }),
+    body: JSON.stringify({
+      user_message: message,
+      previous_slots: previousSlots,
+      language_code: languageCode,
+      script_mode: scriptMode,
+    }),
   });
   if (!res.ok) throw new Error("Chat request failed");
   return await res.json();
