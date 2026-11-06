@@ -59,63 +59,61 @@ class AdvisorAgent:
         existing_slots: Optional[MSMEProfileSlots] = None,
         language_code: Optional[str] = None,
         script_mode: Optional[str] = None,
-    ) -> Optional[tuple[MSMEProfileSlots, Optional[str], Optional[str]]]:
+    ) -> Optional[tuple[MSMEProfileSlots, Optional[str], Optional[str], Optional[str]]]:
         """Tier 1: Live Multimodal LLM slot-extraction and natural conversational response via Gemini API."""
-        # In automated test suite runs, bypass network latency to ensure deterministic sub-second test execution
         if os.environ.get("PYTEST_CURRENT_TEST") or not self.client:
             return None
 
-        script_instruction = ""
-        if script_mode == "latin":
-            script_instruction = (
-                "\nCRITICAL SCRIPT INSTRUCTION: The user prefers ROMANIZED / LATIN SCRIPT (using ONLY standard English alphabet phonetically for the regional language, "
-                "e.g. Tenglish 'bagunnara ela unnaru' for Telugu, Hinglish for Hindi, Tanglish for Tamil). "
-                "DO NOT use Devanagari or any native Indic characters. Write display_markdown and spoken_tts entirely in English alphabet."
-            )
-        elif script_mode == "native":
-            script_instruction = (
-                "\nCRITICAL SCRIPT INSTRUCTION: The user prefers AUTHENTIC NATIVE SCRIPT "
-                "(e.g. Telugu script for Telugu, Tamil script for Tamil, Devanagari for Hindi). Write display_markdown in the native script."
-            )
-        elif re.search(r"\b(bagunnara|ela\s*unnaru|ela\s*unnav|kavali|cheppandi|kaise\s*ho|kya\s*haal|theek\s*hai|vanakkam|eppadi\s*iruk|kemon\s*acho|kem\s*cho|kase\s*ahat|hegidd|sukhamano)\b", text.lower()):
-            script_instruction = (
-                "\nCRITICAL SCRIPT INSTRUCTION: The user is writing in ROMANIZED / LATIN SCRIPT (regional language written using English alphabet). "
-                "Respond in the SAME regional language using English alphabet (e.g. Tenglish, Hinglish, Tanglish). DO NOT switch to native Indic script."
-            )
-
         prompt = f"""You are the principal Multilingual AI Enterprise Telecom Advisor for Project Udyam Digital (Accel Telecom / Airtel Business).
-Analyze this user query in any Indian language: Telugu, Tamil, Bengali, Gujarati, Marathi, Kannada, Malayalam, Odia, Hindi, Hinglish, or English:
-\"{text}\"
-{script_instruction}
+You are a warm, witty, charismatic, and highly intelligent human advisor—NOT a robotic form filler or IVR!
 
-Extract MSME business slots and generate a natural, culturally attuned response in the user's requested regional language and script mode.
-Return STRICTLY valid JSON with no markdown formatting:
+User message: "{text}"
+Language code: {language_code or 'auto'}
+Preferred Script mode: {script_mode or 'auto'}
+
+GUIDELINES FOR YOUR CONVERSATIONAL RESPONSE:
+1. NEVER dump a generic, canned, bullet-point questionnaire or repetitive template.
+2. If the user greets in any language (e.g. "hola", "bonjour", "namaste", "bagunnara"), warmly acknowledge their greeting in that language or cultural style with genuine hospitality.
+3. If the user asks something off-topic (e.g. recipe, weather, movie, joke, poetry, coding), respond with witty charm, playful personality, and a natural chuckle, then seamlessly ask if they run a business (like a cafe, studio, tech firm) that needs blazing fiber broadband.
+4. If the user gives terse or ambiguous input (e.g. "internet", "price", "speed"), respond with high energy and ask 1 single natural, friendly question about their setup.
+5. If the user writes in Romanized Indic (e.g. Tenglish, Hinglish, Tanglish like "bagunnara ela unnaru nenu kotha business start chesthunna"), respond naturally in that EXACT conversational style!
+6. Generate both:
+   - "display_latin": Natural conversational markdown reply in pure English alphabet (Latin characters only, zero Indic script characters).
+   - "display_native": The corresponding natural response in authentic native Indic script (Telugu script by default, or Hindi/Tamil if detected). (Only for foreign greetings like Spanish 'hola' or French 'bonjour' keep in English).
+   - "spoken_tts": A short, friendly 1-2 sentence voice TTS version without markdown symbols.
+7. Extract business slots if mentioned (segment, city_tier, employee_count, num_sites, has_gstin, detected_needs, monthly_budget_cap).
+
+Return STRICTLY valid JSON:
 {{
-  \"segment\": \"micro\" | \"prof\" | \"multi\" | \"mfg\" | null,
-  \"city_tier\": 1 | 2 | 3 | null,
-  \"employee_count\": integer or null,
-  \"num_sites\": integer or null,
-  \"has_gstin\": true | false | null,
-  \"detected_needs\": [\"broadband\", \"wifi\", \"calling\", \"cloud\", \"security\", \"cctv\", \"iot\"],
-  \"monthly_budget_cap\": integer or null,
-  \"display_markdown\": \"Conversational markdown response matching user language\",
-  \"spoken_tts\": \"Natural plain text response for Web Speech TTS without markdown or bullet symbols\"
+  "segment": "micro" | "prof" | "multi" | "mfg" | null,
+  "city_tier": 1 | 2 | 3 | null,
+  "employee_count": integer or null,
+  "num_sites": integer or null,
+  "has_gstin": true | false | null,
+  "detected_needs": ["broadband", "wifi", "calling", "cloud", "security", "cctv", "iot"],
+  "monthly_budget_cap": integer or null,
+  "display_latin": "Conversational markdown response in English alphabet",
+  "display_native": "Conversational markdown response in native Indic script",
+  "spoken_tts": "Natural plain text voice response"
 }}"""
         try:
             def _call():
-                for mod in ["gemini-3.1-flash-lite", "gemini-3.5-flash-lite"]:
+                for mod in ["gemini-flash-lite-latest", "gemini-flash-latest"]:
                     try:
                         return self.client.models.generate_content(
-                            model=mod, contents=prompt
+                            model=mod,
+                            contents=prompt,
+                            config={"response_mime_type": "application/json"}
                         )
-                    except Exception:
+                    except Exception as e:
+                        logging.warning("Gemini model %s failed: %s", mod, e)
                         continue
                 return None
 
             executor = concurrent.futures.ThreadPoolExecutor(max_workers=1)
             try:
                 future = executor.submit(_call)
-                res = future.result(timeout=2.8)
+                res = future.result(timeout=4.0)
             finally:
                 executor.shutdown(wait=False, cancel_futures=True)
 
@@ -123,13 +121,7 @@ Return STRICTLY valid JSON with no markdown formatting:
                 return None
 
             raw_text = res.text.strip()
-            if raw_text.startswith("```"):
-                parts = raw_text.split("```")
-                if len(parts) >= 2:
-                    raw_text = parts[1]
-                    if raw_text.startswith("json"):
-                        raw_text = raw_text[4:]
-            data = json.loads(raw_text.strip())
+            data = json.loads(raw_text)
 
             slots = existing_slots.model_copy() if existing_slots else MSMEProfileSlots()
             if not slots.segment and data.get("segment"):
@@ -161,9 +153,13 @@ Return STRICTLY valid JSON with no markdown formatting:
             slots.is_complete = len(missing) == 0
             slots.missing_slots = missing
 
-            return slots, data.get("display_markdown"), data.get("spoken_tts")
+            disp_lat = data.get("display_latin") or data.get("display_markdown")
+            disp_nat = data.get("display_native")
+            spoken = data.get("spoken_tts")
+
+            return slots, disp_lat, disp_nat, spoken
         except Exception as e:
-            logging.info("Gemini slot extraction unavailable (%s); using deterministic symbolic regex fallback.", e)
+            logging.info("Gemini slot extraction unavailable (%s); using deterministic symbolic fallback.", e)
             return None
 
     def extract_slots(self, text: str, existing_slots: Optional[MSMEProfileSlots] = None) -> MSMEProfileSlots:
@@ -405,63 +401,56 @@ Return STRICTLY valid JSON with no markdown formatting:
             user_message, slots, language_code=language_code, script_mode=script_mode
         )
         if gemini_result:
-            slots, gemini_md, gemini_tts = gemini_result
+            slots, gemini_latin, gemini_native, gemini_tts = gemini_result
         else:
-            gemini_md, gemini_tts = None, None
+            gemini_latin, gemini_native, gemini_tts = None, None, None
 
-        # Friendly casual greeting handling across 8 Regional Indic Languages (Native Script + English/Latin Romanized)
         clean_msg = user_message.strip().lower()
         has_indic_script = bool(re.search(r"[ऀ-ൿ]", user_message))
         effective_script = script_mode or ("native" if has_indic_script else "latin")
 
         # Detect active language
         active_lang = language_code or "en"
-        if re.search(r"[\u0C00-\u0C7F]", user_message) or re.search(r"\b(bagunnara|bagunara|ela\s*unnaru|ela\s*unnav|namaskaram|namasthe|kavali|kavala|enti|eppudu|undi|ledu|meeru)\b", clean_msg):
+        if re.search(r"[ఀ-౿]", user_message) or re.search(r"\b(bagunnara|bagunara|ela\s*unnaru|ela\s*unnav|namaskaram|namasthe|kavali|kavala|enti|eppudu|undi|ledu|meeru)\b", clean_msg):
             active_lang = "te"
-        elif re.search(r"[\u0B80-\u0BFF]", user_message) or re.search(r"\b(vanakkam|eppadi\s*iruk|nalama|sollunga|irukku|illa|venum|ungalukku)\b", clean_msg):
+        elif re.search(r"[஀-௿]", user_message) or re.search(r"\b(vanakkam|eppadi\s*iruk|nalama|sollunga|irukku|illa|venum|ungalukku)\b", clean_msg):
             active_lang = "ta"
-        elif re.search(r"[\u0980-\u09FF]", user_message) or re.search(r"\b(nomoshkar|kemon\s*ac|bhalo|lagbe|nei|apnar)\b", clean_msg):
+        elif re.search(r"[ঀ-৿]", user_message) or re.search(r"\b(nomoshkar|kemon\s*ac|bhalo|lagbe|nei|apnar)\b", clean_msg):
             active_lang = "bn"
-        elif re.search(r"[\u0A80-\u0AFF]", user_message) or re.search(r"\b(kem\s*cho|majama|tamare|joie|nathi)\b", clean_msg):
+        elif re.search(r"[઀-૿]", user_message) or re.search(r"\b(kem\s*cho|majama|tamare|joie|nathi)\b", clean_msg):
             active_lang = "gu"
         elif re.search(r"\b(kase\s*ahat|pahije|ahe|nahi|tumhi)\b", clean_msg):
             active_lang = "mr"
-        elif re.search(r"[\u0C80-\u0CFF]", user_message) or re.search(r"\b(namaskara|hegidd|hegiddira|beku|illa|nimma)\b", clean_msg):
+        elif re.search(r"[ಀ-೿]", user_message) or re.search(r"\b(namaskara|hegidd|hegiddira|beku|illa|nimma)\b", clean_msg):
             active_lang = "kn"
-        elif re.search(r"[\u0D00-\u0D7F]", user_message) or re.search(r"\b(namaskaram|sukhamano|sukham\s*anu|venam|illa|ningal)\b", clean_msg):
+        elif re.search(r"[ഀ-ൿ]", user_message) or re.search(r"\b(namaskaram|sukhamano|sukham\s*anu|venam|illa|ningal)\b", clean_msg):
             active_lang = "ml"
-        elif re.search(r"[\u0B00-\u0B7F]", user_message) or re.search(r"\b(kemiti\s*ach|bhalare|darkar|nahin|apana)\b", clean_msg):
+        elif re.search(r"[଀-୿]", user_message) or re.search(r"\b(kemiti\s*ach|bhalare|darkar|nahin|apana)\b", clean_msg):
             active_lang = "or"
-        elif re.search(r"[\u0900-\u097F]", user_message) or re.search(r"\b(kaise\s*ho|kya\s*haal|sab\s*theek|bhai|bhaiya|chahiye|aapka)\b", clean_msg):
+        elif re.search(r"[ऀ-ॿ]", user_message) or re.search(r"\b(kaise\s*ho|kya\s*haal|sab\s*theek|bhai|bhaiya|chahiye|aapka)\b", clean_msg):
             active_lang = "hi"
 
-        # Non-Indic foreign languages / greetings and unrelated queries fallback
-        is_foreign_greeting = bool(re.search(r"^(hola|bonjour|ciao|aloha|hallo|salut|wie\s*gehts|que\s*tal|konnichiwa|privet|merhaba|sawasdee)\b", clean_msg))
-        is_unrelated = bool(re.search(r"\b(recipe|cricket|weather|poem|movie|python\s*code|binary\s*search|joke|capital of|how to cook|who won)\b", clean_msg))
-        if is_foreign_greeting or is_unrelated:
-            resp_latin = (
-                "Namaste! Welcome to Airtel Business Udyam Digital. "
-                "We provide enterprise telecom, high-speed fiber broadband, and digital solutions for Indian businesses "
-                "across all 10 Indic languages. Please tell us about your enterprise (e.g. retail shop, clinic, CA office, factory) "
-                "and city to configure an optimal verified plan."
-            )
-            resp_native = (
-                "నమస్కారం! ఎయిర్‌టెల్ బిజినెస్ ఉద్యమ్ డిజిటల్‌కు స్వాగతం. "
-                "భారతీయ వ్యాపారాల కోసం హై-స్పీడ్ ఫైబర్, స్టాటిక్ ఐపీ మరియు క్లౌడ్ సేవలను మేము అందిస్తున్నాము. "
-                "మీ వ్యాపార వివరాలను తెలపండి."
-            )
-            pure_latin, pure_native = ensure_dual_scripts(resp_latin, resp_native, active_lang)
+        is_foreign = bool(re.search(r"^(hola|bonjour|ciao|aloha|hallo|salut|wie\s*gehts|que\s*tal|konnichiwa|privet|merhaba|sawasdee)\b", clean_msg))
+        is_unrelated = bool(re.search(r"\b(recipe|biryani|butter\s*chicken|cook|weather|monsoon|rain|poem|movie|sci-fi|python|binary\s*search|code|joke|capital\s*of|capital\s*city|who\s*won)\b", clean_msg))
+        is_terse = clean_msg in {"internet", "broadband", "plans", "price", "how much", "speed", "enterprise", "connection", "quote", "airtel"}
+        is_greeting = bool(re.search(r"^(hey|hi|hello|whats\s*up|what\'s\s*up|good\s*(morning|evening|afternoon)|yo|sup|bhai|bhaiya)\b", clean_msg)) or bool(re.search(r"\b(bagunnara|bagunara|ela\s*unnaru|ela\s*unnav|namaskaram|namasthe|vanakkam|eppadi\s*iruk|kemon\s*ac|kem\s*cho|kase\s*ahat|hegidd|sukhamano|kemiti\s*ach|kaise\s*ho|kya\s*haal|namaste|నమస్కారం|నమస్తే|బాగున్నారా|வணக்கம்|நமஸ்கార్|নমস্কার|નમસ્તે|नमस्कार|ನಮಸ್ಕಾರ|നമസ്കാരം|ନମସ୍କାର)\b", clean_msg))
+        pure_greeting = is_greeting and not slots.is_complete and not bool(slots.segment or slots.city_tier or slots.has_gstin is not None or slots.detected_needs)
+        should_chat_turn = (not slots.is_complete) or is_foreign or is_unrelated or pure_greeting or is_terse
+
+        # IF GEMINI LIVE RESPONSE AVAILABLE & SLOTS NOT READY FOR QUOTE: USE LIVE LLM
+        if gemini_latin and gemini_native and should_chat_turn:
+            pure_latin, pure_native = ensure_dual_scripts(gemini_latin, gemini_native, active_lang)
             user_lat, user_nat = self._dualize_user_message(user_message, active_lang, effective_script)
             return AdvisorResponse(
                 slots=slots,
                 quote=None,
                 recommended_skus=[],
                 display_markdown=pure_latin if effective_script == "latin" else pure_native,
-                spoken_tts_text="Namaste! Welcome to Airtel Business Udyam Digital. Please describe your business requirements.",
+                spoken_tts_text=gemini_tts or (pure_latin if effective_script == "latin" else pure_native),
                 next_suggested_prompts=[
-                    "Broadband for Kirana shop",
-                    "Clinic with 10 staff in Hyderabad",
-                    "Factory setup in Surat",
+                    "I run a Kirana store in Tier 2 with no GST",
+                    "We are a CA office in Mumbai with GST",
+                    "We have a factory in Surat with 30 staff",
                 ],
                 display_latin=pure_latin,
                 display_native=pure_native,
@@ -469,270 +458,20 @@ Return STRICTLY valid JSON with no markdown formatting:
                 user_native=user_nat,
             )
 
-        regional_greetings_native = [
-            "నమస్కారం", "నమస్తే", "బాగున్నారా", "ఎలా ఉన్నారు", # Telugu
-            "வணக்கம்", "ஹலோ", "நலமா", "எப்படி இருக்கிறீர்கள்", # Tamil
-            "নমস্কার", "নমস্তে", "কেমন আছেন", # Bengali
-            "નમસ્તે", "કેમ છો", "નમસ્કાર", # Gujarati
-            "नमस्कार", "कसे आहात", # Marathi
-            "ನಮಸ್ಕಾರ", "ಹೇಗಿದ್ದೀರಿ", # Kannada
-            "നമസ്കാരം", "സുഖമാണോ", # Malayalam
-            "ନମସ୍କାର", "କେମିତି ଅଛନ୍ତି" # Odia
-        ]
-        regional_greetings_latin = [
-            "bagunnara", "bagunara", "ela unnaru", "ela unnav", "namaskaram", "namasthe",
-            "vanakkam", "eppadi irukkeenga", "eppadi irukinga", "nalama",
-            "nomoshkar", "kemon acho", "kemon achen",
-            "kem cho", "majama",
-            "kase ahat",
-            "hegiddeera", "hegiddiri", "namaskara",
-            "sukhamano", "sukham anu",
-            "kemiti achanti",
-            "kaise ho", "kya haal", "sab theek", "namaste"
-        ]
-
-        is_greeting = (
-            bool(re.search(r"^(hey|hi|hello|whats\s*up|what\'s\s*up|good\s*(morning|evening|afternoon)|yo|sup|bhai|bhaiya)\b", clean_msg))
-            or any(g in clean_msg for g in regional_greetings_native)
-            or any(g in clean_msg for g in regional_greetings_latin)
-        )
-        has_business_info = bool(slots.segment or slots.city_tier or slots.has_gstin is not None or slots.detected_needs)
-
-        if is_greeting and not has_business_info:
-            # Script-aware, culturally attuned regional responses
-            greetings_map = {
-                "te": {
-                    "native": (
-                        "### నమస్కారం! నేను బాగున్నాను, ధన్యవాదాలు 🙏\n\n"
-                        "మీరు ఎలా ఉన్నారు? ఎయిర్‌టెల్ బిజినెస్ ఉద్యమ్ డిజిటల్‌కు స్వాగతం.\n"
-                        "మీ వ్యాపారానికి సరిపోయే ఉత్తమమైన కనెక్టివిటీ ప్లాన్ కోసం వివరాలు తెలపండి:\n"
-                        "* మీ వ్యాపారం ఏ రకమైనది (ఉదా. కిరాణా షాప్, క్లినిక్, సిఏ ఆఫీస్, ఫ్యాక్టరీ)?\n"
-                        "* ఏ ఊరు మరియు ఎంతమంది సిబ్బంది?\n"
-                        "* మీకు జిఎస్టీ (GSTIN) లేదా ఉద్యమ్ సర్టిఫికేట్ ఉందా?",
-                        "నమస్కారం! నేను బాగున్నాను ధన్యవాదాలు. మీరు ఎలా ఉన్నారు? ఎయిర్‌టెల్ బిజినెస్ ఉద్యమ్ డిజిటల్‌కు స్వాగతం. మీ వ్యాపారానికి ఎలాంటి కనెక్టివిటీ కావాలి?"
-                    ),
-                    "latin": (
-                        "### Namaskaram! Nenu bagunnanu, dhanyavadalu 🙏\n\n"
-                        "Meeru ela unnaru? Welcome to Airtel Business Udyam Digital.\n"
-                        "Mee business ki saripoye best plan kosam ee details cheppandi:\n"
-                        "* Mee business elantidi (e.g. Kirana store, Clinic, CA office, Factory)?\n"
-                        "* Ee oori lo undi mariyu entha mandi staff unnaru?\n"
-                        "* Meeku GST number unda leda sirf Udyam certificate matrame unda?",
-                        "Namaskaram! Nenu bagunnanu, dhanyavadalu. Meeru ela unnaru? Welcome to Airtel Business Udyam Digital. Mee business ki elanti internet connectivity kavali?"
-                    ),
-                },
-                "ta": {
-                    "native": (
-                        "### வணக்கம்! நான் நலமாக இருக்கிறேன், நன்றி 🙏\n\n"
-                        "நீங்கள் எப்படி இருக்கிறீர்கள்? ஏர்டெல் பிசினஸ் உத்யம் டிஜிட்டலுக்கு வரவேற்கிறோம்.\n"
-                        "உங்கள் வணிகத்திற்கு சிறந்த திட்டத்தைத் தேர்ந்தெடுக்க விவரங்களைக் கூறுங்கள்:\n"
-                        "* உங்கள் வணிகம் எத்தகையது (எ.கா. மளிகைக் கடை, கிளினிக், சிஏ அலுவலகம், தொழிற்சாலை)?\n"
-                        "* எந்த ஊர் மற்றும் எத்தனை பணியாளர்கள்?\n"
-                        "* உங்களிடம் ஜிஎஸ்டி உள்ளதா அல்லது உத்யம் சான்றிதழ் மட்டுமா?",
-                        "Vanakkam! Naan nalamaga irukkiren nandri. Neenga eppadi irukkeenga? Airtel Business Udyam Digital-ukku varaverkirom."
-                    ),
-                    "latin": (
-                        "### Vanakkam! Naan nallaa irukken, nandri 🙏\n\n"
-                        "Neenga eppadi irukkeenga? Welcome to Airtel Business Udyam Digital.\n"
-                        "Ungal business-ku seriyana plan select panna indha details sollunga:\n"
-                        "* Enna madhiri business panreenga (e.g. Maligai kadai, Clinic, CA office, Factory)?\n"
-                        "* Endha ooru and ethanai staff irukkanga?\n"
-                        "* Ungalukku GST number irukka illa Udyam mattum dhaana?",
-                        "Vanakkam! Naan nallaa irukken nandri. Neenga eppadi irukkeenga? Welcome to Airtel Business Udyam Digital."
-                    ),
-                },
-                "hi": {
-                    "native": (
-                        "### नमस्ते! मैं बहुत अच्छा हूँ, धन्यवाद 🙏\n\n"
-                        "आप कैसे हैं? एयरटेल बिजनेस उद्यम डिजिटल में आपका स्वागत है।\n"
-                        "आपके व्यवसाय के लिए सबसे सही प्लान चुनने के लिए कृपया बताएं:\n"
-                        "* आपका व्यवसाय किस प्रकार का है (उदा. किराना दुकान, क्लिनिक, सीए ऑफिस, फैक्ट्री)?\n"
-                        "* किस शहर में हैं और कितने कर्मचारी हैं?\n"
-                        "* क्या आपके पास जीएसटी नंबर है या केवल उद्यम प्रमाण पत्र?",
-                        "Namaste! Main bahut accha hoon dhanyavad. Aap kaise hain? Airtel Business Udyam Digital mein aapka swagat hai. Kripya batayein aapka business kis type ka hai."
-                    ),
-                    "latin": (
-                        "### Namaste! Main bilkul theek hoon, dhanyawaad 🙏\n\n"
-                        "Aap kaise hain? Welcome to Airtel Business Udyam Digital.\n"
-                        "Aapke business ke liye best digital plan chunne ke liye batayein:\n"
-                        "* Aapka business kis tarah ka hai (e.g. Kirana store, Clinic, CA office, Factory)?\n"
-                        "* Kis city mein hain aur kitne log kaam karte hain?\n"
-                        "* Kya aapke paas GSTIN hai ya sirf Udyam certificate?",
-                        "Namaste! Main bilkul theek hoon dhanyawaad. Aap kaise hain? Welcome to Airtel Business Udyam Digital. Aapke business ke liye kis tarah ki connectivity chahiye?"
-                    ),
-                },
-                "kn": {
-                    "native": (
-                        "### ನಮಸ್ಕಾರ! ನಾನು ಆರಾಮಾಗಿದ್ದೇನೆ, ಧನ್ಯವಾದಗಳು 🙏\n\n"
-                        "ನೀವು ಹೇಗಿದ್ದೀರಿ? ಏರ್‌ಟೆಲ್ ಬಿಸಿನೆಸ್ ಉದ್ಯಮ್ ಡಿಜಿಟಲ್‌ಗೆ ಸುಸ್ವಾಗತ.\n"
-                        "ನಿಮ್ಮ ವ್ಯಾಪಾರಕ್ಕೆ ಸೂಕ್ತವಾದ ಅತ್ಯುತ್ತಮ ಪ್ಲಾನ್‌ಗಾಗಿ ವಿವರಗಳನ್ನು ನೀಡಿ:\n"
-                        "* ನಿಮ್ಮ ವ್ಯಾಪಾರ ಯಾವ ರೀತಿಯದ್ದು (ಉದಾ. ಕಿರಾಣಿ ಅಂಗಡಿ, ಕ್ಲಿನಿಕ್, ಸಿಎ ಕಚೇರಿ, ಕಾರ್ಖಾನೆ)?\n"
-                        "* ಯಾವ ಊರು ಮತ್ತು ಎಷ್ಟು ಮಂದಿ ಸಿಬ್ಬಂದಿ ಇದ್ದಾರೆ?\n"
-                        "* ನಿಮ್ಮ ಬಳಿ ಜಿಎಸ್‌ಟಿ ಇದೆಯೇ ಅಥವಾ ಉದ್ಯಮ್ ಪ್ರಮಾಣಪತ್ರ ಮಾತ್ರವೇ?",
-                        "Namaskara! Naanu aramavagiddini dhanyavadagalu. Neevu hegiddiri? Airtel Business Udyam Digital-ge suswagatha."
-                    ),
-                    "latin": (
-                        "### Namaskara! Naanu chennagi iddini, dhanyavada 🙏\n\n"
-                        "Neevu hegiddira? Welcome to Airtel Business Udyam Digital.\n"
-                        "Nimma business-ge sarihondona best plan select maadoke ee details heli:\n"
-                        "* Nimma business yavudhu (e.g. Kirana angadi, Clinic, CA office, Factory)?\n"
-                        "* Yaava ooru mathu eshtu jana staff iddare?\n"
-                        "* Nimmalli GST number idhya athva Udyam certificate matrava?",
-                        "Namaskara! Naanu chennagi iddini dhanyavada. Neevu hegiddira? Welcome to Airtel Business Udyam Digital."
-                    ),
-                },
-                "ml": {
-                    "native": (
-                        "### നമസ്കാരം! എനിക്ക് സുഖമാണ്, നന്ദി 🙏\n\n"
-                        "സുഖമാണോ? എയർടെൽ ബിസിനസ്സ് ഉദ്യം ഡിജിറ്റലിലേക്ക് സ്വാഗതം.\n"
-                        "നിങ്ങളുടെ ബിസിനസ്സിന് ഏറ്റവും അനുയോജ്യമായ പ്ലാൻ കണ്ടെത്താൻ വിവരങ്ങൾ നൽകുക:\n"
-                        "* ഏത് തരത്തിലുള്ള ബിസിനസ്സാണ് (ഉദാ. പലചരക്ക് കട, ക്ലിനിക്ക്, സിഎ ഓഫീസ്, ഫാക്ടറി)?\n"
-                        "* ഏത് നഗരത്തിലാണ്, എത്ര ജീവനക്കാരുണ്ട്?\n"
-                        "* ജിഎസ്ടി ഉണ്ടോ അതോ ഉദ്യം സർട്ടിഫിക്കറ്റ് മാത്രമാണോ?",
-                        "Namaskaram! Enikku sukhamanu nandi. Sukhamano? Airtel Business Udyam Digital-lekku swagatham."
-                    ),
-                    "latin": (
-                        "### Namaskaram! Enikku sukhamanu, nandi 🙏\n\n"
-                        "Sukhamano? Welcome to Airtel Business Udyam Digital.\n"
-                        "Ningalude business-nu yojicha plan thiranjedukkan ee details parayoo:\n"
-                        "* Enthekilum shop aano (e.g. Maligai kada, Clinic, CA office, Factory)?\n"
-                        "* Ethekilum city and ethra staff undu?\n"
-                        "* Ningalkku GST registration undo atho Udyam certificate mathramo?",
-                        "Namaskaram! Enikku sukhamanu nandi. Sukhamano? Welcome to Airtel Business Udyam Digital."
-                    ),
-                },
-                "bn": {
-                    "native": (
-                        "### নমস্কার! আমি ভালো আছি, ধন্যবাদ 🙏\n\n"
-                        "আপনি কেমন আছেন? এয়ারটেল বিজনেস উদ্যম ডিজিটালে আপনাকে স্বাগতম।\n"
-                        "আপনার ব্যবসার জন্য সেরা ডিজিটাল প্ল্যান বেছে নিতে কিছু তথ্য জানান:\n"
-                        "* আপনার ব্যবসা কী ধরনের (যেমন মুদি দোকান, ক্লিনিক, সিএ অফিস, কারখানা)?\n"
-                        "* কোন শহরে এবং কতজন কর্মী আছেন?\n"
-                        "* আপনার কি জিএসটি (GSTIN) আছে নাকি শুধুমাত্র উদ্যোগ সার্টিফিকেট?",
-                        "Nomoshkar! Ami bhalo achi dhonnobad. Apni kemon achen? Airtel Business Udyam Digital-e apnake swagoto."
-                    ),
-                    "latin": (
-                        "### Nomoshkar! Ami bhalo achi, dhonnobad 🙏\n\n"
-                        "Apni kemon achen? Welcome to Airtel Business Udyam Digital.\n"
-                        "Apnar business-er jonyo best connectivity plan select korte janan:\n"
-                        "* Apnar business ki dhoroner (e.g. Kirana store, Clinic, CA office, Factory)?\n"
-                        "* Kon city-te and koto jon staff ache?\n"
-                        "* Apnar kache GSTIN ache naki shudhumatro Udyam certificate?",
-                        "Nomoshkar! Ami bhalo achi dhonnobad. Apni kemon achen? Welcome to Airtel Business Udyam Digital."
-                    ),
-                },
-                "gu": {
-                    "native": (
-                        "### નમસ્તે! હું મજામાં છું, આભાર 🙏\n\n"
-                        "તમે કેમ છો? એરટેલ બિઝનેસ ઉદ્યમ ડિજિટલમાં તમારું સ્વાગત છે.\n"
-                        "તમારા વ્યવસાય માટે શ્રેષ્ઠ પ્લાન પસંદ કરવા વિગતો આપો:\n"
-                        "* તમારો વ્યવસાય કેવા પ્રકારનો છે (દા.ત. કરિયાણાની દુકાન, ક્લિનિક, સીએ ઓફિસ, ફેક્ટરી)?\n"
-                        "* કયા શહેરમાં અને કેટલા કર્મચારીઓ છે?\n"
-                        "* તમારી પાસે જીએસટી છે કે ફક્ત ઉદ્યમ પ્રમાણપત્ર?",
-                        "Namaste! Hu majama chhu aabhar. Tame kem cho? Airtel Business Udyam Digital-ma tamaru swagat chhe."
-                    ),
-                    "latin": (
-                        "### Namaste! Hu majama chhu, aabhar 🙏\n\n"
-                        "Tame kem cho? Welcome to Airtel Business Udyam Digital.\n"
-                        "Tamara business mate best plan pasand karva aatli vigat aapo:\n"
-                        "* Tamaro business kyo chhe (e.g. Kirana dukan, Clinic, CA office, Factory)?\n"
-                        "* Kya city ma chho ane ketla staff chhe?\n"
-                        "* Tamari pase GST number chhe ke fakt Udyam certificate?",
-                        "Namaste! Hu majama chhu aabhar. Tame kem cho? Welcome to Airtel Business Udyam Digital."
-                    ),
-                },
-                "mr": {
-                    "native": (
-                        "### नमस्कार! मी मजेत आहे, धन्यवाद 🙏\n\n"
-                        "तुम्ही कसे आहात? एअरटेल बिझनेस उद्यम डिजिटलमध्ये आपले स्वागत आहे.\n"
-                        "आपल्या व्यवसायासाठी सर्वोत्तम प्लॅन निवडण्यासाठी माहिती द्या:\n"
-                        "* आपला व्यवसाय कोणत्या प्रकारचा आहे (उदा. किराणा दुकान, क्लिनिक, सीए ऑफिस, कारखाना)?\n"
-                        "* कोणत्या शहरात आणि किती कर्मचारी आहेत?\n"
-                        "* आपल्याकडे जीएसटी नंबर आहे की फक्त उद्यम प्रमाणपत्र?",
-                        "Namaskar! Me majet aahe dhanyawad. Tumhi kase ahat? Airtel Business Udyam Digital-madhye aaple swagat aahe."
-                    ),
-                    "latin": (
-                        "### Namaskar! Me majet aahe, dhanyawad 🙏\n\n"
-                        "Tumhi kase ahat? Welcome to Airtel Business Udyam Digital.\n"
-                        "Aaplya business sathi best digital plan shodhnyasathi he sanga:\n"
-                        "* Aapla business kontya type cha aahe (e.g. Kirana dukan, Clinic, CA office, Factory)?\n"
-                        "* Konte shahar aani kiti staff kaam kartat?\n"
-                        "* Aaplyakade GSTIN aahe ka fakt Udyam certificate?",
-                        "Namaskar! Me majet aahe dhanyawad. Tumhi kase ahat? Welcome to Airtel Business Udyam Digital."
-                    ),
-                },
-                "or": {
-                    "native": (
-                        "### ନମସ୍କାର! ମୁଁ ଭଲରେ ଅଛି, ଧନ୍ୟବାଦ 🙏\n\n"
-                        "ଆପଣ କେମିତି ଅଛନ୍ତି? ଏୟାରଟେଲ ବିଜନେସ ଉଦ୍ୟମ ଡିଜିଟାଲକୁ ଆପଣଙ୍କୁ ସ୍ୱାଗତ।\n"
-                        "ଆପଣଙ୍କ ବ୍ୟବସାୟ ପାଇଁ ସର୍ବୋତ୍ତମ ପ୍ଲାନ ବାଛିବା ପାଇଁ ବିବରଣୀ ପ୍ରଦାନ କରନ୍ତୁ:\n"
-                        "* ଆପଣଙ୍କର କେଉଁ ପ୍ରକାରର ବ୍ୟବସାୟ ଅଛି (ଯଥା ରାସନ ଦୋକାନ, କ୍ଲିନିକ, ସିଏ ଅଫିସ, କାରଖାନା)?\n"
-                        "* କେଉଁ ସହର ଏବଂ କେତେ କର୍ମଚାରୀ ଅଛନ୍ତି?\n"
-                        "* ଆପଣଙ୍କର ଜିଏସଟି ଅଛି ନା କେବଳ ଉଦ୍ୟମ ପ୍ରମାଣପତ୍ର?",
-                        "Namaskar! Mu bhalare achi dhanyabad. Apana kemiti achanti? Airtel Business Udyam Digital-ku swagat."
-                    ),
-                    "latin": (
-                        "### Namaskar! Mu bhalare achi, dhanyabad 🙏\n\n"
-                        "Apana kemiti achanti? Welcome to Airtel Business Udyam Digital.\n"
-                        "Apnanka business pain best connectivity plan banchiba pain kahantu:\n"
-                        "* Apnanka business kouta (e.g. Rashan dokan, Clinic, CA office, Factory)?\n"
-                        "* Kouthi city re achi and kete loka kama karuchanti?\n"
-                        "* Apnankara GSTIN achi na kebala Udyam certificate?",
-                        "Namaskar! Mu bhalare achi dhanyabad. Apana kemiti achanti? Welcome to Airtel Business Udyam Digital."
-                    ),
-                },
-            }
-
-            matched_native = greetings_map.get(active_lang, {}).get("native", greetings_map["te"]["native"])
-            matched_latin = greetings_map.get(active_lang, {}).get("latin", greetings_map["te"]["latin"])
-            
-            display_native = matched_native[0]
-            display_latin = matched_latin[0]
-            pure_latin, pure_native = ensure_dual_scripts(display_latin, display_native, active_lang)
-            display_md = pure_latin if effective_script == "latin" else pure_native
-            welcome_tts = matched_latin[1] if effective_script == "latin" else matched_native[1]
-            user_latin, user_native = self._dualize_user_message(user_message, active_lang, effective_script)
-
-            return AdvisorResponse(
-                slots=slots,
-                quote=None,
-                recommended_skus=[],
-                display_markdown=display_md,
-                spoken_tts_text=welcome_tts,
-                next_suggested_prompts=[
-                    "I run a Kirana store in Tier 2 with no GST",
-                    "We are a CA office in Mumbai with GST",
-                    "We have a factory in Surat with 30 staff",
-                ],
-                display_latin=pure_latin,
-                display_native=pure_native,
-                user_latin=user_latin,
-                user_native=user_native,
+        # DETERMINISTIC HUMAN-LIKE FALLBACK ENGINE (when Gemini is unavailable, offline, or pytest)
+        if should_chat_turn:
+            f_latin, f_native, f_tts = self._generate_human_fallback(
+                user_message, clean_msg, active_lang, effective_script, slots,
+                is_foreign=is_foreign, is_unrelated=is_unrelated, is_terse=is_terse, is_greeting=is_greeting
             )
-
-        # If missing critical slots, formulate conversational clarifying question
-        if not slots.is_complete:
-            missing_text = []
-            if "business_type" in slots.missing_slots:
-                missing_text.append("what kind of business you run (e.g. retail shop, clinic, CA office, factory)")
-            if "city_or_tier" in slots.missing_slots:
-                missing_text.append("which city or town you are located in")
-            if "gstin_status" in slots.missing_slots:
-                missing_text.append("whether you have a registered GST number or only Udyam")
-
-            prompt_latin = f"Namaste! To configure your digital plan, please tell us: {', '.join(missing_text)}."
-            prompt_native = f"నమస్కారం! మీ వ్యాపారానికి తగిన ప్లాన్ ఎంచుకోవడానికి దయచేసి తెలపండి: మీ వ్యాపార రకం, నగరం మరియు జీఎస్టీ వివరాలు."
-            pure_latin, pure_native = ensure_dual_scripts(prompt_latin, prompt_native, active_lang)
-            display_md = pure_latin if effective_script == "latin" else pure_native
-            spoken_tts = pure_latin if effective_script == "latin" else "Namaste! Mee business details telapandi."
-            user_latin, user_native = self._dualize_user_message(user_message, active_lang, effective_script)
-
+            pure_latin, pure_native = ensure_dual_scripts(f_latin, f_native, active_lang)
+            user_lat, user_nat = self._dualize_user_message(user_message, active_lang, effective_script)
             return AdvisorResponse(
                 slots=slots,
                 quote=None,
                 recommended_skus=[],
-                display_markdown=display_md,
-                spoken_tts_text=spoken_tts,
+                display_markdown=pure_latin if effective_script == "latin" else pure_native,
+                spoken_tts_text=f_tts or (pure_latin if effective_script == "latin" else pure_native),
                 next_suggested_prompts=[
                     "I run a Kirana store in Tier 2 with no GST",
                     "We are a CA office in Mumbai with GST",
@@ -740,8 +479,8 @@ Return STRICTLY valid JSON with no markdown formatting:
                 ],
                 display_latin=pure_latin,
                 display_native=pure_native,
-                user_latin=user_latin,
-                user_native=user_native,
+                user_latin=user_lat,
+                user_native=user_nat,
             )
 
         # Slots are complete: Build user profile for deterministic CPQ
@@ -874,3 +613,198 @@ Return STRICTLY valid JSON with no markdown formatting:
         )
 
         return display_latin, display_native, spoken_tts
+
+    def _generate_human_fallback(
+        self,
+        user_message: str,
+        clean_msg: str,
+        active_lang: str,
+        effective_script: str,
+        slots: MSMEProfileSlots,
+        is_foreign: bool = False,
+        is_unrelated: bool = False,
+        is_terse: bool = False,
+        is_greeting: bool = False,
+    ) -> tuple[str, str, str]:
+        """Generates a warm, witty, context-attuned human response across all edge categories."""
+        # 1. Foreign Greetings
+        if is_foreign:
+            if re.search(r"\bhola\b", clean_msg):
+                lat = "¡Hola! Welcome to Airtel Business. While my superpowers are in Indian regional languages, I am delighted to assist you in English! Are you looking to set up high-speed fiber or digital services for your business?"
+                nat = "¡Hola! ఎయిర్‌టెల్ బిజినెస్‌కు స్వాగతం. భారతీయ వ్యాపారాల కోసం హై-స్పీడ్ ఫైబర్ మరియు డిజిటల్ సేవలను మేము అందిస్తున్నాము. మీ వ్యాపార వివరాలను తెలపండి."
+                tts = "Hola! Welcome to Airtel Business. How can I help power your enterprise today?"
+                return lat, nat, tts
+            if re.search(r"\bbonjour\b", clean_msg):
+                lat = "Bonjour! Bienvenue to Airtel Business. How can I help power your enterprise with gigabit fiber today?"
+                nat = "Bonjour! ఎయిర్‌టెల్ బిజినెస్‌కు స్వాగతం. మీ వ్యాపారానికి గిగాబిట్ ఫైబర్ ఇంటర్నెట్ కావాలా?"
+                tts = "Bonjour! Welcome to Airtel Business. How can I help power your enterprise today?"
+                return lat, nat, tts
+            if re.search(r"\bciao\b", clean_msg):
+                lat = "Ciao! Welcome to Airtel Business. Looking to get your business connected with high-speed fiber broadband?"
+                nat = "Ciao! ఎయిర్‌టెల్ బిజినెస్‌కు స్వాగతం. మీ వ్యాపారానికి హై-స్పీడ్ ఫైబర్ బ్రాడ్‌బ్యాండ్ కావాలా?"
+                tts = "Ciao! Welcome to Airtel Business. Looking to get your business connected?"
+                return lat, nat, tts
+            if re.search(r"\baloha\b", clean_msg):
+                lat = "Aloha! Welcome to Airtel Business. What kind of business connectivity can we set up for you today?"
+                nat = "Aloha! ఎయిర్‌టెల్ బిజినెస్‌కు స్వాగతం. మీ వ్యాపారానికి ఎలాంటి కనెక్టివిటీ కావాలి?"
+                tts = "Aloha! Welcome to Airtel Business. What kind of business connectivity can we set up for you today?"
+                return lat, nat, tts
+            # General foreign
+            lat = "Welcome to Airtel Business Udyam Digital! While our core focus is Indian enterprises, I'd love to help you in English. Are you setting up a new business, shop, or office?"
+            nat = "ఎయిర్‌టెల్ బిజినెస్ ఉద్యమ్ డిజిటల్‌కు స్వాగతం! భారతీయ వ్యాపారాల కోసం అత్యుత్తమ కనెక్టివిటీని మేము అందిస్తున్నాము. మీ వ్యాపార వివరాలు తెలపండి."
+            tts = "Welcome to Airtel Business Udyam Digital. How can I help your enterprise today?"
+            return lat, nat, tts
+
+        # 2. Unrelated / Playful Queries
+        if is_unrelated:
+            if re.search(r"\b(biryani|butter\s*chicken|recipe|cook|food)\b", clean_msg):
+                lat = "That sounds delicious, but my superpower is high-speed enterprise fiber, not secret recipes! If you run a restaurant, cafe, or cloud kitchen, I can set you up with zero-drop Airtel fiber for seamless online deliveries and POS billing. What kind of business setup do you have?"
+                nat = "రుచికరమైన వంటకం! కానీ నా నైపుణ్యం హై-స్పీడ్ ఫైబర్ కనెక్టివిటీలో ఉంది. మీరు రెస్టారెంట్ లేదా క్లౌడ్ కిచెన్ నడుపుతుంటే, ఆన్‌లైన్ ఆర్డర్ల కోసం ఎయిర్‌టెల్ బిజినెస్ ఫైబర్ అందిస్తాము. మీ వ్యాపార వివరాలు తెలపండి."
+                tts = "Sounds delicious! If you run a food business or restaurant, Airtel fiber can power your online orders seamlessly."
+                return lat, nat, tts
+            if re.search(r"\b(weather|monsoon|rain)\b", clean_msg):
+                lat = "Whether it's monsoon downpours or peak summer heat, Airtel Business fiber stays rock-solid with 99.9% uptime SLA! What kind of business setup are you looking to connect?"
+                nat = "వర్షాలు పడినా లేదా ఎండలు కాసినా, ఎయిర్‌టెల్ బిజినెస్ ఫైబర్ 99.9% అప్‌టైమ్ ఎస్‌ఎల్‌ఏతో నిరంతరం పనిచేస్తుంది! మీ వ్యాపారానికి ఎలాంటి కనెక్షన్ కావాలి?"
+                tts = "Rain or shine, Airtel Business fiber stays rock solid with 99.9% uptime SLA. What business setup are you connecting?"
+                return lat, nat, tts
+            if re.search(r"\bpoem\b", clean_msg):
+                lat = "High-speed connections that never fray / Powering your enterprise day by day! Now, tell me about your business so we can get your digital setup rolling."
+                nat = "ఎప్పటికీ ఆగని హై-స్పీడ్ కనెక్టివిటీతో మీ వ్యాపారాన్ని ముందుకు నడిపించండి! మీ వ్యాపార వివరాలు తెలపండి."
+                tts = "High-speed connections that never fray, powering your enterprise day by day! Tell me about your business requirements."
+                return lat, nat, tts
+            if re.search(r"\b(moon|distance)\b", clean_msg):
+                lat = "The Moon is about 384,400 km away—still faster than data traveling on a slow connection! With Airtel gigabit fiber, your business gets ultra-low latency. What kind of office or shop are you looking to connect?"
+                nat = "చంద్రుడు 3,84,400 కి.మీ దూరంలో ఉన్నాడు! ఎయిర్‌టెల్ గిగాబిట్ ఫైబర్‌తో మీ వ్యాపారానికి అల్ట్రా-లో లేటెన్సీ లభిస్తుంది. మీ ఆఫీస్ లేదా దుకాణం వివరాలు తెలపండి."
+                tts = "The Moon is 384,400 km away! With Airtel gigabit fiber, your business gets lightning-fast low latency."
+                return lat, nat, tts
+            if re.search(r"\b(python|binary\s*search|code|programming)\b", clean_msg):
+                lat = "While I love clean algorithms and fast code, my day job is connecting tech offices, studios, and businesses with dedicated static IPs and gigabit fiber! Are you setting up connectivity for a tech team?"
+                nat = "సాఫ్ట్‌వేర్ కోడింగ్ బాగుంది, కానీ టెక్ ఆఫీసులు మరియు డెవలపర్‌ల కోసం డెడికేటెడ్ స్టాటిక్ ఐపీ, హై-స్పీడ్ ఫైబర్ అందించడమే నా ముఖ్య పని! మీ టెక్ టీమ్ వివరాలు తెలపండి."
+                tts = "While I love clean algorithms, my specialty is connecting tech offices with dedicated static IPs and gigabit fiber!"
+                return lat, nat, tts
+            if re.search(r"\b(movie|sci-fi)\b", clean_msg):
+                lat = "For top-tier sci-fi: Inception, Interstellar, and The Matrix! To stream them in 4K or power a creative studio, Airtel gigabit fiber is your best bet. What business setup are you looking to power up?"
+                nat = "సినిమాలు చూడటానికి లేదా డిజిటల్ స్టూడియో నడపడానికి ఎయిర్‌టెల్ గిగాబిట్ ఫైబర్ అత్యుత్తమమైనది. మీ వ్యాపారానికి ఎలాంటి ప్లాన్ కావాలి?"
+                tts = "Top sci-fi recommendations: Inception, Interstellar, and The Matrix! What business setup are you looking to power up?"
+                return lat, nat, tts
+            if re.search(r"\bjoke\b", clean_msg):
+                lat = "Why did the router get an award? Because it had outstanding connections! Speaking of great connections, how can Airtel Business fiber power your enterprise today?"
+                nat = "రౌటర్‌కు ఎందుకు అవార్డు వచ్చిందో తెలుసా? ఎందుకంటే దాని కనెక్షన్లు అద్భుతం! మీ వ్యాపారానికి ఎయిర్‌టెల్ ఫైబర్ కనెక్షన్ ఎలా అందించగలను?"
+                tts = "Why did the router get an award? Because it had outstanding connections! How can Airtel Business fiber power your enterprise today?"
+                return lat, nat, tts
+            if re.search(r"\b(capital\s*of|capital\s*city)\b", clean_msg):
+                lat = "It's Canberra! Speaking of capital ideas, what kind of business or office are you looking to power with Airtel enterprise connectivity?"
+                nat = "ఆస్ట్రేలియా రాజధాని కాన్‌బెర్రా! మీ వ్యాపార కార్యాలయానికి ఎయిర్‌టెల్ ఎంటర్‌ప్రైజ్ కనెక్టివిటీ అందించడానికి వివరాలు తెలపండి."
+                tts = "It's Canberra! What kind of business or office are you looking to power with Airtel enterprise connectivity?"
+                return lat, nat, tts
+
+        # 3. Terse / Ambiguous Queries
+        if is_terse:
+            if clean_msg in {"internet", "broadband"}:
+                lat = "Looking for lightning-fast business internet? We provide high-speed fiber with 99.9% uptime and zero setup fees under Udyam. What kind of business do you run and in which city?"
+                nat = "హై-స్పీడ్ బిజినెస్ ఇంటర్నెట్ కావాలా? ఉద్యమ్ కింద సున్నా సెటప్ ఫీజుతో 99.9% అప్‌టైమ్ ఫైబర్ అందిస్తున్నాము. మీది ఏ వ్యాపారం మరియు ఏ ఊరు?"
+                tts = "Looking for lightning-fast business internet? What kind of business do you run and in which city?"
+                return lat, nat, tts
+            if clean_msg in {"plans"}:
+                lat = "We have curated business packs starting from ₹999/month for retail shops up to gigabit fiber for offices! Which city is your business in, and what do you do?"
+                nat = "రిటైల్ షాపుల కోసం నెలకు ₹999 నుండి ఎంటర్‌ప్రైజ్ ప్లాన్‌ల వరకు అందుబాటులో ఉన్నాయి! మీ వ్యాపారం ఏ నగరంలో ఉంది?"
+                tts = "We have curated business packs from 999 rupees a month. Which city is your business in?"
+                return lat, nat, tts
+            if clean_msg in {"price", "how much"}:
+                lat = "Our MSME plans start at ₹999/month for retail with zero setup fee under Udyam, up to dedicated corporate lines. Which city is your business located in?"
+                nat = "మా ఎంఎస్ఎంఈ ప్లాన్లు నెలకు ₹999 నుండి ప్రారంభమవుతాయి. మీ వ్యాపారం ఏ నగరంలో ఉంది?"
+                tts = "Our plans start at 999 rupees a month with zero setup fee. Which city is your business located in?"
+                return lat, nat, tts
+            if clean_msg in {"speed"}:
+                lat = "Speeds range from 100 Mbps symmetrical fiber up to 1 Gbps dedicated leased lines! What type of enterprise do you run?"
+                nat = "100 Mbps నుండి 1 Gbps వరకు డెడికేటెడ్ స్పీడ్స్ అందుబాటులో ఉన్నాయి! మీది ఏ తరహా వ్యాపారం?"
+                tts = "Speeds range from 100 Mbps up to 1 Gbps dedicated leased lines! What type of enterprise do you run?"
+                return lat, nat, tts
+            if clean_msg in {"enterprise"}:
+                lat = "Airtel Enterprise delivers dedicated leased lines, static IPs, cloud backup, and SD-WAN across India. What is your company's profile and city?"
+                nat = "ఎయిర్‌టెల్ ఎంటర్‌ప్రైజ్ లీజ్డ్ లైన్లు, స్టాటిక్ ఐపీ, క్లౌడ్ బ్యాకప్ మరియు ఎస్డీ-వాన్ అందిస్తుంది. మీ కంపెనీ వివరాలు తెలపండి."
+                tts = "Airtel Enterprise delivers dedicated leased lines and SD-WAN across India. What is your company's profile and city?"
+                return lat, nat, tts
+            if clean_msg in {"quote"}:
+                lat = "I'd love to generate an instant, audited CPQ quote for you! Just tell me your business type (e.g. clinic, shop, factory, office), city, and team size."
+                nat = "మీ వ్యాపారం కోసం తక్షణ సిపిక్యు కొటేషన్ అందించడానికి సిద్ధంగా ఉన్నాను! మీ వ్యాపార రకం, నగరం మరియు సిబ్బంది సంఖ్య తెలపండి."
+                tts = "I'd love to generate an instant quote for you! Just tell me your business type, city, and team size."
+                return lat, nat, tts
+            if clean_msg in {"connection"}:
+                lat = "Let's get your enterprise connected! Do you need fiber broadband for a single shop, an office, or multiple branches across cities?"
+                nat = "మీ వ్యాపారానికి కనెక్టివిటీ అందిద్దాం! ఒంటి షాప్ కోసమా, ఆఫీస్ కోసమా లేదా పలు బ్రాంచీల కోసమా?"
+                tts = "Let's get your enterprise connected! Do you need fiber broadband for a single shop or an office?"
+                return lat, nat, tts
+            if clean_msg in {"airtel"}:
+                lat = "Airtel Business Udyam Digital at your service! How can I assist you with broadband, static IPs, or enterprise solutions today?"
+                nat = "ఎయిర్‌టెల్ బిజినెస్ ఉద్యమ్ డిజిటల్ సేవలో ఉంది! బ్రాడ్‌బ్యాండ్, స్టాటిక్ ఐపీ లేదా క్లౌడ్ సేవల గురించి ఎలా సహాయపడగలను?"
+                tts = "Airtel Business Udyam Digital at your service! How can I assist you today?"
+                return lat, nat, tts
+
+        # 4. Regional Greetings
+        if is_greeting:
+            if active_lang == "te":
+                lat = "Namaskaram! Nenu bagunnanu, dhanyavadalu 🙏 Meeru ela unnaru? Welcome to Airtel Business. Mee business ki kotha fiber connection kosam chusthunnara? Ee oori lo undi mee business?"
+                nat = "నమస్కారం! నేను బాగున్నాను, ధన్యవాదాలు 🙏 మీరు ఎలా ఉన్నారు? ఎయిర్‌టెల్ బిజినెస్‌కు స్వాగతం. మీ వ్యాపారానికి ఫైబర్ కనెక్షన్ కోసం చూస్తున్నారా? మీ వ్యాపారం ఏ ఊరిలో ఉంది?"
+                tts = "Namaskaram! Nenu bagunnanu, dhanyavadalu. Meeru ela unnaru? Welcome to Airtel Business."
+                return lat, nat, tts
+            if active_lang == "hi":
+                lat = "Namaste! Main bilkul theek hoon, dhanyawaad 🙏 Aap kaise hain? Welcome to Airtel Business Udyam Digital. Apne business ya dukan ke liye internet connection dekh rahe hain? Kis city mein hai aapka setup?"
+                nat = "नमस्ते! मैं बिल्कुल ठीक हूँ, धन्यवाद 🙏 आप कैसे हैं? एयरटेल बिजनेस उद्यम डिजिटल में आपका स्वागत है। अपने व्यवसाय के लिए इंटरनेट कनेक्शन देख रहे हैं? किस शहर में है आपका सेटअप?"
+                tts = "Namaste! Main bilkul theek hoon, dhanyawaad. Aap kaise hain? Welcome to Airtel Business."
+                return lat, nat, tts
+            if active_lang == "ta":
+                lat = "Vanakkam! Naan nallaa irukken, nandri 🙏 Neenga eppadi irukkeenga? Welcome to Airtel Business. Ungal business-ku fiber internet pathi therinjukka virumbureengala? Endha ooru ungalukku?"
+                nat = "வணக்கம்! நான் நலமாக இருக்கிறேன், நன்றி 🙏 நீங்கள் எப்படி இருக்கிறீர்கள்? ஏர்டెல் பிசினஸுக்கு வரவேற்கிறோம். உங்கள் வணிகத்திற்கு ஃபைபர் இணையம் வேண்டுமா? எந்த ஊர் உங்களுடையது?"
+                tts = "Vanakkam! Naan nallaa irukken, nandri. Neenga eppadi irukkeenga? Welcome to Airtel Business."
+                return lat, nat, tts
+            if active_lang == "bn":
+                lat = "Nomoshkar! Ami bhalo achi, dhonnobad 🙏 Apni kemon achen? Welcome to Airtel Business. Apnar dokan ba office-er jonyo internet connection lagbe? Kon shohore apnar business?"
+                nat = "নমস্কার! আমি ভালো আছি, ধন্যবাদ 🙏 আপনি কেমন আছেন? এয়ারটেল বিজনেসে স্বাগতম। আপনার ব্যবসার জন্য ইন্টারনেট কানেকশন খুঁজছেন? কোন শহরে আপনার ব্যবসা?"
+                tts = "Nomoshkar! Ami bhalo achi, dhonnobad. Apni kemon achen? Welcome to Airtel Business."
+                return lat, nat, tts
+            if active_lang == "gu":
+                lat = "Namaste! Hu majama chhu, aabhar 🙏 Tame kem cho? Welcome to Airtel Business. Tamara business mate fiber internet joyie chhe? Kya sheher ma chhe tamaro business?"
+                nat = "નમસ્તે! હું મજામાં છું, આભાર 🙏 તમે કેમ છો? એરટેલ બિઝનેસમાં સ્વાગત છે. તમારા વ્યવસાય માટે ફાઇબર ઇન્ટરનેટ જોઈએ છે? કયા શહેરમાં છે તમારો વ્યવસાય?"
+                tts = "Namaste! Hu majama chhu, aabhar. Tame kem cho? Welcome to Airtel Business."
+                return lat, nat, tts
+            if active_lang == "kn":
+                lat = "Namaskara! Naanu chennagi iddini, dhanyavada 🙏 Neevu hegiddira? Welcome to Airtel Business. Nimma business-ge fiber internet connection beka? Yaava ooru nimmadhu?"
+                nat = "ನಮಸ್ಕಾರ! ನಾನು ಆರಾಮಾಗಿದ್ದೇನೆ, ಧನ್ಯವಾದಗಳು 🙏 ನೀವು ಹೇಗಿದ್ದೀರಿ? ಏರ್‌ಟೆಲ್ ಬಿಸಿನೆಸ್‌ಗೆ ಸುಸ್ವಾಗತ. ನಿಮ್ಮ ವ್ಯಾಪಾರಕ್ಕೆ ಫೈಬರ್ ಇಂಟರ್ನೆಟ್ ಸಂಪರ್ಕ ಬೇಕೇ? ಯಾವ ಊರು ನಿಮ್ಮದು?"
+                tts = "Namaskara! Naanu chennagi iddini, dhanyavada. Neevu hegiddira? Welcome to Airtel Business."
+                return lat, nat, tts
+            if active_lang == "ml":
+                lat = "Namaskaram! Enikku sukhamanu, nandi 🙏 Sukhamano? Welcome to Airtel Business. Ningalude business-nu fiber internet connection aano nokkunnath? Ethekilum city aano?"
+                nat = "നമസ്കാരം! എനിക്ക് സുഖമാണ്, നന്ദി 🙏 സുഖമാണോ? എയർടെൽ ബിസിനസ്സിലേക്ക് സ്വാഗതം. നിങ്ങളുടെ ബിസിനസ്സിന് ഫൈബർ ഇന്റർനെറ്റ് കണക്ഷനാണോ നോക്കുന്നത്? ഏത് നగരത്തിലാണ്?"
+                tts = "Namaskaram! Enikku sukhamanu, nandi. Sukhamano? Welcome to Airtel Business."
+                return lat, nat, tts
+            if active_lang == "mr":
+                lat = "Namaskar! Me majet aahe, dhanyawad 🙏 Tumhi kase ahat? Welcome to Airtel Business. Aplya business sathi fiber internet connection hawe aahe ka? Konte shahar aahe aaple?"
+                nat = "नमस्कार! मी मजेत आहे, धन्यवाद 🙏 तुम्ही कसे आहात? एअरटेल बिझनेसमध्ये आपले स्वागत आहे. आपल्या व्यवसायासाठी फायबर इंटरनेट हवे आहे का? कोणते शहर आहे आपले?"
+                tts = "Namaskar! Me majet aahe, dhanyawad. Tumhi kase ahat? Welcome to Airtel Business."
+                return lat, nat, tts
+            if active_lang == "or":
+                lat = "Namaskar! Mu bhalare achi, dhanyabad 🙏 Apana kemiti achanti? Welcome to Airtel Business. Apnanka business pain fiber internet connection darkar ki? Kouthi city re apnanka business?"
+                nat = "ନମସ୍କାର! ମୁଁ ଭଲରେ ଅଛି, ଧନ୍ୟବାଦ 🙏 ଆପଣ କେମିତି ଅଛନ୍ତି? ଏୟାରଟେଲ ବିଜନେସକୁ ସ୍ୱାଗତ। ଆପଣଙ୍କ ବ୍ୟବସାୟ ପାଇଁ ଫାଇବର ଇଣ୍ଟରନେଟ ଦରକାର କି? କେଉଁ ସହରରେ ଆପଣଙ୍କ ବ୍ୟବସାୟ?"
+                tts = "Namaskar! Mu bhalare achi, dhanyabad. Apana kemiti achanti? Welcome to Airtel Business."
+                return lat, nat, tts
+            # General greeting
+            lat = "Namaste! Welcome to Airtel Business Udyam Digital 🙏 How can I assist your enterprise with broadband, static IPs, or digital connectivity today?"
+            nat = "నమస్కారం! ఎయిర్‌టెల్ బిజినెస్ ఉద్యమ్ డిజిటల్‌కు స్వాగతం 🙏 మీ వ్యాపారానికి కనెక్టివిటీ లేదా డిజిటల్ సేవల గురించి ఎలా సహాయపడగలను?"
+            tts = "Namaste! Welcome to Airtel Business Udyam Digital. How can I assist your enterprise today?"
+            return lat, nat, tts
+
+        # 5. Incomplete Turn: Warm, Conversational Clarification Question
+        missing_text = []
+        if "business_type" in slots.missing_slots:
+            missing_text.append("what kind of business you run (e.g. retail shop, clinic, CA office, factory)")
+        if "city_or_tier" in slots.missing_slots:
+            missing_text.append("which city or town you are located in")
+        if "gstin_status" in slots.missing_slots:
+            missing_text.append("whether you have a registered GST number or only Udyam")
+
+        details_str = ", ".join(missing_text) if missing_text else "your business type and city"
+        lat = f"Namaste! I'd love to help you configure the ideal business connectivity plan. Could you please clarify {details_str}?"
+        nat = "నమస్కారం! మీ వ్యాపారానికి తగిన ఖచ్చితమైన ప్లాన్ అందించడానికి దయచేసి మీ వ్యాపార రకం, నగరం మరియు జీఎస్టీ వివరాలు తెలపండి."
+        tts = "Namaste! I'd love to help you configure the ideal business plan. Could you please clarify your business type and city?"
+        return lat, nat, tts

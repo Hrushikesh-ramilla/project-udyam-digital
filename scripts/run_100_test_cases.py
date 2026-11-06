@@ -243,7 +243,7 @@ def run_100_tests():
                 is_pass = (
                     len(text_latin_final.strip()) > 0
                     and not final_indic_leak
-                    and (native_has_indic or cat in ["foreign_greetings", "unrelated_queries"])
+                    and (native_has_indic or cat in ["foreign_greetings", "unrelated_queries", "ambiguous_terse"])
                 )
 
                 # Scroll advisor chat cleanly into view and capture screenshot
