@@ -292,3 +292,10 @@ def get_judge_scenario(scenario_id: str):
         "remediation": remediation,
         "verification_result": kyc_res.model_dump(),
     }
+
+
+# Mount pre-compiled Frontend PWA if available (Single-Port Production Deployment)
+frontend_dist = Path(__file__).resolve().parent.parent.parent / "frontend" / "dist"
+if frontend_dist.exists():
+    app.mount("/", StaticFiles(directory=str(frontend_dist), html=True), name="frontend")
+
