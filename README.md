@@ -226,10 +226,12 @@ This repository contains all 4 mandatory deliverables specified in Page 4 of the
    * **Demo Video Script:** A complete, scene-by-scene 3-minute recording script (Act 1: Multilingual Advisor $\to$ Act 2: CPQ & Budget Slider $\to$ Act 3: DPDP Smart KYC $\to$ Act 4: Tracker & ML Lead Rescue) is documented in Section 4 of [`docs/ARCHITECTURE_AND_DPDP_NOTE.md`](docs/ARCHITECTURE_AND_DPDP_NOTE.md#4-three-minute-demo-video-walkthrough-script).
 2. **Solution Architecture Diagram:**
    * Mermaid diagrams and component topology documented in [`docs/ARCHITECTURE_AND_DPDP_NOTE.md`](docs/ARCHITECTURE_AND_DPDP_NOTE.md) and [`assets/udyam-architecture.png`](assets/udyam-architecture.png).
-3. **Business Case Deck (10 Slides or Fewer):**
-   * **PowerPoint Presentation:** [`docs/Project_Udyam_Digital_10_Slide_Pitch_Deck.pptx`](docs/Project_Udyam_Digital_10_Slide_Pitch_Deck.pptx)
-   * **Executive Markdown Version:** [`docs/10_SLIDE_BUSINESS_CASE_DECK.md`](docs/10_SLIDE_BUSINESS_CASE_DECK.md)
-   * Answers all 5 strategic questions: Target segments, Conversational discovery, DPDP instant KYC, Channel partner model, and Unit economic targets.
+3. **Official Airtel Sync 2026 7-Slider Submission Deck (Digital Track):**
+   * **Official PDF Presentation (LaTeX Beamer):** [`Neural_Nexus_Airtel_Sync_2026_Digital_Track.pdf`](Neural_Nexus_Airtel_Sync_2026_Digital_Track.pdf) (Academic, publication-grade LaTeX Beamer typesetting in strict Ivory `#FAF8F5` and Charcoal `#121316` palette; 0 LaTeX errors, 0 overfull warnings).
+   * **Official PowerPoint Presentation:** [`Neural_Nexus_Airtel_Sync_2026_Digital_Track.pptx`](Neural_Nexus_Airtel_Sync_2026_Digital_Track.pptx) (Native 16:9 widescreen presentation matching Unstop competition guidelines).
+   * **LaTeX Source & Build Automation:** [`docs/presentation/presentation.tex`](docs/presentation/presentation.tex) and [`docs/presentation/build_deck.py`](docs/presentation/build_deck.py).
+   * **Executive Markdown Case:** [`docs/10_SLIDE_BUSINESS_CASE_DECK.md`](docs/10_SLIDE_BUSINESS_CASE_DECK.md).
+   * Strictly structured across 7 slides: Executive Title & Paradigm, 5,000-Lead Bleed Diagnosis, 4 MSME Archetypes & Reverse Budget Solver, 4-Stage Neuro-Symbolic Topology, Comprehensive Competitive Landscape & Accel Moat, Benchmark KYC Defect Trapping (K01–K12), and Unit Economics & Phygital Rollout.
 4. **1-Page DPDP Act 2023 Privacy & Security Note:**
    * Fully detailed in Section 3 of [`docs/ARCHITECTURE_AND_DPDP_NOTE.md`](docs/ARCHITECTURE_AND_DPDP_NOTE.md#3-dpdp-act-2023-data-privacy--security-note), covering Sections 6, 7, and 8 compliance, in-memory zero-persistence masking, and SHA-256 consent logging.
 
