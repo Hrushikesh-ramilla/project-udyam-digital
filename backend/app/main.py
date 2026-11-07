@@ -294,8 +294,37 @@ def get_judge_scenario(scenario_id: str):
     }
 
 
+# Direct download endpoints for official presentation deliverables
+root_dir = Path(__file__).resolve().parent.parent.parent
+pdf_deck = root_dir / "Neural_Nexus_Airtel_Sync_2026_Digital_Track.pdf"
+pptx_deck = root_dir / "Neural_Nexus_Airtel_Sync_2026_Digital_Track.pptx"
+
+
+@app.get("/presentation.pdf")
+def download_pdf():
+    if pdf_deck.exists():
+        return FileResponse(
+            path=str(pdf_deck),
+            media_type="application/pdf",
+            filename="Neural_Nexus_Airtel_Sync_2026_Digital_Track.pdf",
+        )
+    raise HTTPException(status_code=404, detail="Presentation PDF not found")
+
+
+@app.get("/presentation.pptx")
+def download_pptx():
+    if pptx_deck.exists():
+        return FileResponse(
+            path=str(pptx_deck),
+            media_type="application/vnd.openxmlformats-officedocument.presentationml.presentation",
+            filename="Neural_Nexus_Airtel_Sync_2026_Digital_Track.pptx",
+        )
+    raise HTTPException(status_code=404, detail="Presentation PPTX not found")
+
+
 # Mount pre-compiled Frontend PWA if available (Single-Port Production Deployment)
 frontend_dist = Path(__file__).resolve().parent.parent.parent / "frontend" / "dist"
 if frontend_dist.exists():
     app.mount("/", StaticFiles(directory=str(frontend_dist), html=True), name="frontend")
+
 
