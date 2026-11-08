@@ -376,5 +376,54 @@ class KYCVerifyAPIRequest(StrictBaseModel):
     custom_doc_hashes: Optional[dict[str, str]] = None
 
 
+class CreatePaymentIntentRequest(StrictBaseModel):
+    model_config = ConfigDict(extra="forbid")
+
+    order_id: str
+    amount_inr: float
+    payment_method: str = "UPI_INTENT"
+
+
+class PaymentIntentResponse(StrictBaseModel):
+    model_config = ConfigDict(extra="forbid")
+
+    payment_id: str
+    order_id: str
+    amount_inr: float
+    upi_uri: str
+    upi_pa: str
+    upi_pn: str
+    razorpay_order_id: Optional[str] = None
+    razorpay_key_id: Optional[str] = None
+
+
+class VerifyUPIPaymentRequest(StrictBaseModel):
+    model_config = ConfigDict(extra="forbid")
+
+    payment_id: str
+    order_id: str
+    utr_reference: str
+
+
+class VerifyRazorpayPaymentRequest(StrictBaseModel):
+    model_config = ConfigDict(extra="forbid")
+
+    payment_id: str
+    order_id: str
+    razorpay_order_id: str
+    razorpay_payment_id: str
+    razorpay_signature: str
+
+
+class PaymentVerificationResult(StrictBaseModel):
+    model_config = ConfigDict(extra="forbid")
+
+    payment_id: str
+    order_id: str
+    status: str
+    message: str
+    verified_at: Optional[str] = None
+
+
 
 

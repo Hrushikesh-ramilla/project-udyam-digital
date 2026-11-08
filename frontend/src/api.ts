@@ -218,3 +218,109 @@ export async function fetchJudgeScenario(scenarioId: string): Promise<JudgeScena
   if (!res.ok) throw new Error("Scenario not found");
   return await res.json();
 }
+
+export interface PaymentIntent {
+  payment_id: string;
+  order_id: string;
+  amount_inr: number;
+  upi_uri: string;
+  upi_pa: string;
+  upi_pn: string;
+  qr_data_url: string;
+  razorpay_order_id: string;
+  razorpay_key_id: string;
+}
+
+export interface PaymentVerificationResult {
+  payment_id: string;
+  order_id: string;
+  status: "SUCCESS" | "FAILED";
+  message: string;
+  verified_at?: string | null;
+}
+
+export interface LogisticsDispatch {
+  dispatch_id: string;
+  order_id: string;
+  awb_number: string;
+  carrier_name: string;
+  courier_hub: string;
+  field_engineer_name: string;
+  field_engineer_phone: string;
+  dispatch_status: string;
+  tracking_url: string;
+  whatsapp_dispatch_link: string;
+  created_at: string;
+}
+
+export async function createPaymentIntent(
+  orderId: string,
+  amountInr: number,
+  paymentMethod: string = "UPI_INTENT"
+): Promise<PaymentIntent> {
+  const res = await fetch(`${API_BASE}/payments/create-intent`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({
+      order_id: orderId,
+      amount_inr: amountInr,
+      payment_method: paymentMethod,
+    }),
+  });
+  if (!res.ok) throw new Error("Payment intent creation failed");
+  return await res.json();
+}
+
+export async function verifyUPIPayment(
+  paymentId: string,
+  orderId: string,
+  utrReference: string
+): Promise<PaymentVerificationResult> {
+  const res = await fetch(`${API_BASE}/payments/verify-upi`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({
+      payment_id: paymentId,
+      order_id: orderId,
+      utr_reference: utrReference,
+    }),
+  });
+  if (!res.ok) throw new Error("UPI payment verification failed");
+  return await res.json();
+}
+
+export async function verifyRazorpayPayment(
+  paymentId: string,
+  orderId: string,
+  razorpayOrderId: string,
+  razorpayPaymentId: string,
+  razorpaySignature: string
+): Promise<PaymentVerificationResult> {
+  const res = await fetch(`${API_BASE}/payments/verify-razorpay`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({
+      payment_id: paymentId,
+      order_id: orderId,
+      razorpay_order_id: razorpayOrderId,
+      razorpay_payment_id: razorpayPaymentId,
+      razorpay_signature: razorpaySignature,
+    }),
+  });
+  if (!res.ok) throw new Error("Razorpay payment verification failed");
+  return await res.json();
+}
+
+export async function fetchOrderLogistics(orderId: string): Promise<LogisticsDispatch> {
+  const res = await fetch(`${API_BASE}/logistics/${orderId}`);
+  if (!res.ok) throw new Error("Failed to fetch logistics dispatch");
+  return await res.json();
+}
+
+export async function triggerHardwareDispatch(orderId: string): Promise<LogisticsDispatch> {
+  const res = await fetch(`${API_BASE}/logistics/${orderId}/dispatch`, {
+    method: "POST",
+  });
+  if (!res.ok) throw new Error("Failed to trigger hardware dispatch");
+  return await res.json();
+}

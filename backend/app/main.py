@@ -14,20 +14,26 @@ from backend.app.models.schemas import (
     ChatRequest,
     CommercialBreakdown,
     CreateOrderRequest,
+    CreatePaymentIntentRequest,
     DPDPConsentPayload,
     DigiLockerVerifyRequest,
     KYCVerificationResult,
     KYCVerifyAPIRequest,
     LeadRescueItem,
     OptimizeBudgetRequest,
+    PaymentVerificationResult,
     ProductItem,
     ProvisioningOrder,
     ReverseBudgetResult,
+    VerifyRazorpayPaymentRequest,
+    VerifyUPIPaymentRequest,
 )
 from backend.app.services.advisor_agent import AdvisorAgent
 from backend.app.services.cpq_engine import CPQEngine
 from backend.app.services.kyc_engine import KYCEngine
 from backend.app.services.lead_rescue_ml import LeadRescueMLEngine
+from backend.app.services.logistics_engine import get_logistics_engine
+from backend.app.services.payment_gateway import get_payment_gateway
 from backend.app.services.provisioning_tracker import get_provisioning_tracker
 
 app = FastAPI(
@@ -57,6 +63,8 @@ advisor = AdvisorAgent(db)
 kyc = KYCEngine(db)
 lead_ml = LeadRescueMLEngine(db)
 tracker = get_provisioning_tracker()
+payments = get_payment_gateway()
+logistics = get_logistics_engine()
 
 
 @app.get("/api/health")
@@ -212,6 +220,61 @@ def get_order_status(order_id: str):
     if not order:
         raise HTTPException(status_code=404, detail="Order not found")
     return order
+
+
+# -----------------------------------------------------------------------------
+# PAYMENTS GATEWAY (NPCI DYNAMIC UPI & RAZORPAY DEVELOPER SANDBOX)
+# -----------------------------------------------------------------------------
+
+@app.post("/api/payments/create-intent")
+def create_payment_intent(req: CreatePaymentIntentRequest):
+    """Generates NPCI Dynamic UPI intent URI, offline base64 QR, and Razorpay order ID."""
+    return payments.create_payment_intent(
+        order_id=req.order_id,
+        amount_inr=req.amount_inr,
+        payment_method=req.payment_method,
+    )
+
+
+@app.post("/api/payments/verify-upi", response_model=PaymentVerificationResult)
+def verify_upi_payment(req: VerifyUPIPaymentRequest):
+    """Verifies 12-digit Indian banking UTR reference, updates status, and unlocks provisioning."""
+    return payments.verify_upi_payment(
+        payment_id=req.payment_id,
+        order_id=req.order_id,
+        utr_reference=req.utr_reference,
+    )
+
+
+@app.post("/api/payments/verify-razorpay", response_model=PaymentVerificationResult)
+def verify_razorpay_payment(req: VerifyRazorpayPaymentRequest):
+    """Verifies HMAC-SHA256 signature returned from Razorpay Developer Sandbox."""
+    return payments.verify_razorpay_signature(
+        payment_id=req.payment_id,
+        order_id=req.order_id,
+        razorpay_order_id=req.razorpay_order_id,
+        razorpay_payment_id=req.razorpay_payment_id,
+        razorpay_signature=req.razorpay_signature,
+    )
+
+
+# -----------------------------------------------------------------------------
+# TELECOM LOGISTICS & EVENT BUS (BLUEDART AWB & FIELD ENGINEER WHATSAPP)
+# -----------------------------------------------------------------------------
+
+@app.get("/api/logistics/{order_id}")
+def get_order_logistics(order_id: str):
+    """Returns BlueDart AWB tracking, regional hub, assigned field engineer, and WhatsApp dispatch link."""
+    details = logistics.get_dispatch_details(order_id)
+    if not details:
+        raise HTTPException(status_code=404, detail="Logistics dispatch not found for order")
+    return details
+
+
+@app.post("/api/logistics/{order_id}/dispatch")
+def trigger_hardware_dispatch(order_id: str):
+    """Dispatches hardware CPE unit, generates BlueDart AWB, assigns engineer, and saves event."""
+    return logistics.dispatch_hardware(order_id)
 
 
 @app.get("/api/demo/judge-scenario/{scenario_id}")

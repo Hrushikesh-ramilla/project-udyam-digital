@@ -4,6 +4,7 @@ import time
 import uuid
 from typing import Optional
 
+from backend.app.db.sqlite_engine import ProductionDatabase, get_production_db
 from backend.app.models.schemas import ProvisioningMilestone, ProvisioningOrder
 
 STAGES_METADATA = [
@@ -47,9 +48,10 @@ STAGES_METADATA = [
 
 
 class ProvisioningTracker:
-    """State machine and telemetry tracker for 6-stage enterprise provisioning."""
+    """State machine and telemetry tracker for 6-stage enterprise provisioning with SQLite WAL persistence."""
 
-    def __init__(self) -> None:
+    def __init__(self, db: Optional[ProductionDatabase] = None) -> None:
+        self.db = db or get_production_db()
         self._orders: dict[str, ProvisioningOrder] = {}
 
     def create_order(
@@ -60,7 +62,7 @@ class ProvisioningTracker:
         total_sla_days: int = 4,
         partner_id: Optional[str] = None,
     ) -> ProvisioningOrder:
-        """Initializes a new enterprise order with milestone pipeline and partner attribution."""
+        """Initializes a new enterprise order with milestone pipeline, partner attribution, and disk persistence."""
         order_id = f"AIRTEL-SMB-{uuid.uuid4().hex[:8].upper()}"
         commission = int(monthly_charge_inr * 0.15) if partner_id else 0
         tracker_url = f"https://udyam.airtel.in/track?order_id={order_id}"
@@ -104,11 +106,13 @@ class ProvisioningTracker:
             is_activated=False,
         )
         self._orders[order_id] = order
+        # Persist to SQLite WAL disk database
+        self.db.save_order(order)
         return order
 
     def advance_stage(self, order_id: str) -> Optional[ProvisioningOrder]:
-        """Advances order to the next milestone and updates status timestamps."""
-        order = self._orders.get(order_id)
+        """Advances order to the next milestone and updates status timestamps in memory & SQLite."""
+        order = self.get_order(order_id)
         if not order:
             return None
 
@@ -121,10 +125,19 @@ class ProvisioningTracker:
             if order.current_stage_idx == len(order.milestones) - 1:
                 order.is_activated = True
 
+            self._orders[order_id] = order
+            self.db.save_order(order)
+
         return order
 
     def get_order(self, order_id: str) -> Optional[ProvisioningOrder]:
-        return self._orders.get(order_id)
+        """Loads from memory cache, falling back to SQLite WAL disk store."""
+        if order_id in self._orders:
+            return self._orders[order_id]
+        order = self.db.get_order(order_id)
+        if order:
+            self._orders[order_id] = order
+        return order
 
     def generate_obo_handshake_link(self, order: ProvisioningOrder, partner_id: str) -> str:
         """Generates cryptographically signed deep-link for assisted On-Behalf-Of (OBO) mode."""

@@ -59,6 +59,9 @@ problem.zip
 # Secrets / Env
 .env
 .env.local
+*.db
+*.db-wal
+*.db-shm
 
 # Visual Audit captures
 *.png
