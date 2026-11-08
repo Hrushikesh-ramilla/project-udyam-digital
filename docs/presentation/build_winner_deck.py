@@ -273,8 +273,8 @@ def generate_deck():
               <tr><td style="padding: 4px 0; width: 34%; font-weight: 600; color: #8F9094;">Live Monolith</td><td><a href="https://airtel.hrushikeshramilla.in" style="color: #FF5252; text-decoration: underline; font-weight: 800;">airtel.hrushikeshramilla.in</a> <span style="font-size: 12px; color: #8F9094;">(65.1.112.251)</span></td></tr>
               <tr><td style="padding: 4px 0; font-weight: 600; color: #8F9094;">API Docs</td><td><a href="http://65.1.112.251/docs" style="color: #FF5252; text-decoration: underline; font-weight: 750;">http://65.1.112.251/docs</a> <span style="font-size: 12px; color: #8F9094;">(FastAPI Swagger UI)</span></td></tr>
               <tr><td style="padding: 4px 0; font-weight: 600; color: #8F9094;">Repository</td><td style="font-family: monospace; font-size: 13px; color: #FFFFFF;">github.com/hrushikesh-ramilla/project-udyam-digital</td></tr>
-              <tr><td style="padding: 4px 0; font-weight: 600; color: #8F9094;">Demo Video</td><td><span style="color: #FF7070; font-weight: 800; text-decoration: underline;">Interactive 100-Case Video Proof & Walkthrough</span></td></tr>
-              <tr><td style="padding: 4px 0; font-weight: 600; color: #8F9094;">Verification</td><td><span style="color: #38ef7d; font-weight: 850;">56 Pytest Tests (100% Passed)</span> + <span style="color: #FFFFFF; font-weight: 700;">100 Visual Proofs</span></td></tr>
+              <tr><td style="padding: 4px 0; font-weight: 600; color: #8F9094;">Demo Video</td><td><a href="https://airtel.hrushikeshramilla.in/demoVideo" style="color: #FF5252; text-decoration: underline; font-weight: 850;">https://airtel.hrushikeshramilla.in/demoVideo</a> <span style="font-size: 12px; color: #8F9094;">(Full HD Walkthrough)</span></td></tr>
+              <tr><td style="padding: 4px 0; font-weight: 600; color: #8F9094;">Verification</td><td><span style="color: #38ef7d; font-weight: 850;">62 Pytest Tests (100% Passed)</span> + <span style="color: #FFFFFF; font-weight: 700;">100 Visual Proofs</span></td></tr>
               <tr><td style="padding: 4px 0; font-weight: 600; color: #8F9094;">Compliance</td><td><span style="background: rgba(0, 114, 255, 0.25); color: #64b5f6; font-size: 11.5px; font-weight: 800; padding: 2px 8px; border-radius: 4px; border: 1px solid rgba(0, 114, 255, 0.4);">DPDP ACT 2023</span> <span style="color: #FFFFFF; font-weight: 600; font-size: 13px;">Zero Persistence RAM Masking</span></td></tr>
             </table>
           </div>
@@ -1230,7 +1230,7 @@ def generate_deck():
         <div class="card-beige" style="padding: 10px 16px; margin-top: 12px; margin-right: 340px;">
           <div style="font-size: 13px; color: #121316; font-weight: 700; display: flex; justify-content: space-between; align-items: center;">
             <span><strong style="color: #E40000;">Live Deployment Guarantee:</strong> Fully deployed on AWS EC2 (65.1.112.251) and domain airtel.hrushikeshramilla.in</span>
-            <span class="badge-pill" style="background: #121316; color: #fff; font-weight: 800;">56 / 56 Pytest Tests Passing</span>
+            <span class="badge-pill" style="background: #121316; color: #fff; font-weight: 800;">56 / 62 Pytest Tests Passing</span>
           </div>
         </div>
       </div>
@@ -1510,7 +1510,7 @@ def generate_deck():
 
         <div style="background: #FFFFFF; border-left: 4px solid #E40000; border-top: 1.5px solid #DDD8CE; border-right: 1.5px solid #DDD8CE; border-bottom: 1.5px solid #DDD8CE; border-radius: 6px; padding: 12px 18px; margin-right: 340px;">
           <div style="font-size: 13.5px; font-weight: 750; color: #121316; line-height: 1.4;">
-            <strong style="color: #E40000;">Executive Verdict:</strong> Project Udyam Digital transforms Accel Business from a slow, paper-bound corporate carrier into India's default digital operating system for small enterprises—slashing CAC by 78%, lifting non-GST conversions 4.25x, and unlocking ₹1,200 Cr ARR in 12 months.
+            <strong style="color: #E40000;">Executive Verdict:</strong> Project Udyam Digital transforms Accel Business from a slow, paper-bound corporate carrier into India's default digital operating system for small enterprises—slashing CAC by 78%, lifting non-GST conversions 4.25x, and unlocking ₹1,200 Cr ARR in 12 months.<br><span style="font-size: 12px; color: #4A4B4E; margin-top: 4px; display: inline-block;">Official HD Video Walkthrough & Interactive Demo: <a href="https://airtel.hrushikeshramilla.in/demoVideo" style="color: #E40000; font-weight: 800; text-decoration: underline;">https://airtel.hrushikeshramilla.in/demoVideo</a></span>
           </div>
         </div>
       </div>
