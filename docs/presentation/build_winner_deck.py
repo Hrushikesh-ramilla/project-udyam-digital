@@ -9,8 +9,8 @@ from pptx.util import Inches
 
 BUILD_DIR = "docs/presentation/build"
 PREVIEW_DIR = "docs/presentation/preview"
-OFFICIAL_PDF = "Neural Nexus_ABV-IIITM Gwalior.pdf"
-OFFICIAL_PPTX = "Neural Nexus_ABV-IIITM Gwalior.pptx"
+OFFICIAL_PDF = "Neural_Nexus_ABV_IIITM_Gwalior.pdf"
+OFFICIAL_PPTX = "Neural_Nexus_ABV_IIITM_Gwalior.pptx"
 TEAM_NAME = "Neural Nexus"
 
 os.makedirs(BUILD_DIR, exist_ok=True)
@@ -259,7 +259,7 @@ def generate_deck():
               <tr><td style="padding: 4px 0; width: 34%; font-weight: 600; color: #8F9094;">Team Name</td><td style="font-weight: 800; color: #FFFFFF;">Neural Nexus</td></tr>
               <tr><td style="padding: 4px 0; font-weight: 600; color: #8F9094;">Institution</td><td style="font-weight: 750; color: #FFFFFF;">ABV-IIITM Gwalior</td></tr>
               <tr><td style="padding: 4px 0; font-weight: 600; color: #8F9094;">Track</td><td style="font-weight: 700; color: #FFFFFF;">Digital Track (Enterprise Track A: Accel Business)</td></tr>
-              <tr><td style="padding: 4px 0; font-weight: 600; color: #8F9094;">Team Members</td><td style="font-weight: 700; color: #FFFFFF;">Hrushikesh Ramilla (HR) (Lead Architect)<br><span style="font-weight: 600; color: #A0A1A5;">G Yaswanth Kumar (YK) (Co-Author)</span></td></tr>
+              <tr><td style="padding: 4px 0; font-weight: 600; color: #8F9094;">Team Members</td><td style="font-weight: 700; color: #FFFFFF;">Hrushikesh Ramilla &nbsp;&nbsp;|&nbsp;&nbsp; G Yaswanth Kumar</td></tr>
               <tr><td style="padding: 4px 0; font-weight: 600; color: #8F9094;">Technical Stack</td><td style="font-weight: 600; color: #FFFFFF; font-size: 13px;">Python 3.11+, FastAPI, React 18, Vite, LightGBM, RapidFuzz, SQLite WAL</td></tr>
               <tr><td style="padding: 4px 0; font-weight: 600; color: #8F9094;">Evaluation Date</td><td style="font-weight: 750; color: #E40000; font-family: monospace;">2026-07-15 (Evaluation anchor strictly enforced)</td></tr>
             </table>
@@ -1615,8 +1615,8 @@ body {{ margin: 0; padding: 0; background-color: #FFFFFF; }}
     prs.save(OFFICIAL_PPTX)
     print(f"  -> Generated {OFFICIAL_PPTX} ({os.path.getsize(OFFICIAL_PPTX)/1024/1024:.2f} MB)")
 
-    shutil.copyfile(OFFICIAL_PDF, "Neural_Nexus_ABV_IIITM_Gwalior.pdf")
-    shutil.copyfile(OFFICIAL_PPTX, "Neural_Nexus_ABV_IIITM_Gwalior.pptx")
+    if OFFICIAL_PDF != "Neural_Nexus_ABV_IIITM_Gwalior.pdf": shutil.copyfile(OFFICIAL_PDF, "Neural_Nexus_ABV_IIITM_Gwalior.pdf")
+    if OFFICIAL_PPTX != "Neural_Nexus_ABV_IIITM_Gwalior.pptx": shutil.copyfile(OFFICIAL_PPTX, "Neural_Nexus_ABV_IIITM_Gwalior.pptx")
     print("  -> Mirrored to Neural_Nexus_ABV_IIITM_Gwalior.pdf and Neural_Nexus_ABV_IIITM_Gwalior.pptx")
 
     print("\n=== Presentation Build Complete! ===")
