@@ -226,12 +226,18 @@ This repository contains all 4 mandatory deliverables specified in Page 4 of the
    * **Demo Video Script:** A complete, scene-by-scene 3-minute recording script (Act 1: Multilingual Advisor $\to$ Act 2: CPQ & Budget Slider $\to$ Act 3: DPDP Smart KYC $\to$ Act 4: Tracker & ML Lead Rescue) is documented in Section 4 of [`docs/ARCHITECTURE_AND_DPDP_NOTE.md`](docs/ARCHITECTURE_AND_DPDP_NOTE.md#4-three-minute-demo-video-walkthrough-script).
 2. **Solution Architecture Diagram:**
    * Mermaid diagrams and component topology documented in [`docs/ARCHITECTURE_AND_DPDP_NOTE.md`](docs/ARCHITECTURE_AND_DPDP_NOTE.md) and [`assets/udyam-architecture.png`](assets/udyam-architecture.png).
-3. **Official Airtel Sync 2026 7-Slider Submission Deck (Digital Track):**
-   * **Official PDF Presentation (LaTeX Beamer):** [`Neural_Nexus_Airtel_Sync_2026_Digital_Track.pdf`](Neural_Nexus_Airtel_Sync_2026_Digital_Track.pdf) (Academic, publication-grade LaTeX Beamer typesetting in strict Ivory `#FAF8F5` and Charcoal `#121316` palette; 0 LaTeX errors, 0 overfull warnings).
-   * **Official PowerPoint Presentation:** [`Neural_Nexus_Airtel_Sync_2026_Digital_Track.pptx`](Neural_Nexus_Airtel_Sync_2026_Digital_Track.pptx) (Native 16:9 widescreen presentation matching Unstop competition guidelines).
-   * **LaTeX Source & Build Automation:** [`docs/presentation/presentation.tex`](docs/presentation/presentation.tex) and [`docs/presentation/build_deck.py`](docs/presentation/build_deck.py).
-   * **Executive Markdown Case:** [`docs/10_SLIDE_BUSINESS_CASE_DECK.md`](docs/10_SLIDE_BUSINESS_CASE_DECK.md).
-   * Strictly structured across 7 slides: Executive Title & Paradigm, 5,000-Lead Bleed Diagnosis, 4 MSME Archetypes & Reverse Budget Solver, 4-Stage Neuro-Symbolic Topology, Comprehensive Competitive Landscape & Accel Moat, Benchmark KYC Defect Trapping (K01–K12), and Unit Economics & Phygital Rollout.
+3. **Official Airtel Sync 2026 Submission Deck (Unstop Naming: `TeamName_Campus Name`):**
+   * **Mandatory File Naming:** `Neural Nexus_ABV-IIITM Gwalior.pdf` and `Neural Nexus_ABV-IIITM Gwalior.pptx`
+   * **Official PDF Submission (LaTeX Beamer):** [`Neural Nexus_ABV-IIITM Gwalior.pdf`](Neural%20Nexus_ABV-IIITM%20Gwalior.pdf) (Academic, publication-grade LaTeX Beamer typesetting in strict Ivory `#FAF8F5` and Charcoal `#121316` palette; 0 LaTeX errors, 0 overfull warnings).
+   * **Official 4K PowerPoint Presentation:** [`Neural Nexus_ABV-IIITM Gwalior.pptx`](Neural%20Nexus_ABV-IIITM%20Gwalior.pptx) (True 4K UHD $3840 \times 2160$ PowerPoint deck matching Unstop guidelines).
+   * **Direct Live Cloud Downloads:**
+     * PDF: `http://65.1.112.251/submission.pdf` (or `/Neural_Nexus_ABV-IIITM_Gwalior.pdf`)
+     * PPTX: `http://65.1.112.251/submission.pptx` (or `/Neural_Nexus_ABV-IIITM_Gwalior.pptx`)
+   * **Exact Slide Structure Mandated by Unstop Guidelines:**
+     * **Slide 0 (Intro Slide - Excluded from 7-slide count):** Team `Neural Nexus`, Campus `ABV-IIITM Gwalior`, Members `HR` & `YK`, Embedded Prototype Demo Video Hyperlinks, Live EC2 URL, GitHub Repo.
+     * **Slides 1–7 (Evaluated 7-Slide Core):** Slide 1: Funnel Bleed Dissection ($N=5,000$ leads) $\to$ Slide 2: Target Customer Personas $\to$ Slide 3: Proposed Solution & CPQ Bundles $\to$ Slide 4: 4-Stage System Architecture $\to$ Slide 5: Detailed Competitive Analysis $\to$ Slide 6: Planted KYC Defect Trapping (K01–K12) $\to$ Slide 7: Unit Economics Transformation & 12-Month Phased Rollout.
+     * **Annexures (Reference Only - Non-Evaluated Appendix):** Annexure A: Full 25-Product CPQ DAG $\to$ Annexure B: DPDP Act 2023 Invariant Architecture $\to$ Annexure C: Complete 37/37 Pytest Benchmark Suite.
+   * **Source & Build Automation:** [`docs/presentation/presentation.tex`](docs/presentation/presentation.tex) and [`docs/presentation/build_official_submission.py`](docs/presentation/build_official_submission.py).
 4. **1-Page DPDP Act 2023 Privacy & Security Note:**
    * Fully detailed in Section 3 of [`docs/ARCHITECTURE_AND_DPDP_NOTE.md`](docs/ARCHITECTURE_AND_DPDP_NOTE.md#3-dpdp-act-2023-data-privacy--security-note), covering Sections 6, 7, and 8 compliance, in-memory zero-persistence masking, and SHA-256 consent logging.
 

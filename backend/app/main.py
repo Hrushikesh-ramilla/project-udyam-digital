@@ -297,41 +297,37 @@ def get_judge_scenario(scenario_id: str):
 
 # Direct download endpoints for official presentation deliverables
 root_dir = Path(__file__).resolve().parent.parent.parent
-pdf_deck = root_dir / "Neural_Nexus_Airtel_Sync_2026_Digital_Track.pdf"
-pptx_deck = root_dir / "Neural_Nexus_Airtel_Sync_2026_Digital_Track.pptx"
-pptx_beamer_deck = root_dir / "Neural_Nexus_Airtel_Sync_2026_Digital_Track_Beamer.pptx"
+official_pdf = root_dir / "Neural Nexus_ABV-IIITM Gwalior.pdf"
+official_pptx = root_dir / "Neural Nexus_ABV-IIITM Gwalior.pptx"
+pdf_deck = official_pdf if official_pdf.exists() else (root_dir / "Neural_Nexus_Airtel_Sync_2026_Digital_Track.pdf")
+pptx_deck = official_pptx if official_pptx.exists() else (root_dir / "Neural_Nexus_Airtel_Sync_2026_Digital_Track.pptx")
+pptx_beamer_deck = official_pptx if official_pptx.exists() else (root_dir / "Neural_Nexus_Airtel_Sync_2026_Digital_Track_Beamer.pptx")
 
 
+@app.get("/submission.pdf")
 @app.get("/presentation.pdf")
+@app.get("/Neural_Nexus_ABV-IIITM_Gwalior.pdf")
 def download_pdf():
-    if pdf_deck.exists():
-        return FileResponse(
-            path=str(pdf_deck),
-            media_type="application/pdf",
-            filename="Neural_Nexus_Airtel_Sync_2026_Digital_Track.pdf",
-        )
-    raise HTTPException(status_code=404, detail="Presentation PDF not found")
+    target = official_pdf if official_pdf.exists() else pdf_deck
+    return FileResponse(
+        path=str(target),
+        media_type="application/pdf",
+        filename="Neural Nexus_ABV-IIITM Gwalior.pdf",
+    )
 
 
+@app.get("/submission.pptx")
 @app.get("/presentation.pptx")
-def download_pptx():
-    if pptx_deck.exists():
-        return FileResponse(
-            path=str(pptx_deck),
-            media_type="application/vnd.openxmlformats-officedocument.presentationml.presentation",
-            filename="Neural_Nexus_Airtel_Sync_2026_Digital_Track.pptx",
-        )
-    raise HTTPException(status_code=404, detail="Presentation PPTX not found")
-
-
 @app.get("/presentation_beamer.pptx")
-def download_pptx_beamer():
-    target = pptx_beamer_deck if pptx_beamer_deck.exists() else pptx_deck
+@app.get("/Neural_Nexus_ABV-IIITM_Gwalior.pptx")
+def download_pptx():
+    target = official_pptx if official_pptx.exists() else pptx_deck
     return FileResponse(
         path=str(target),
         media_type="application/vnd.openxmlformats-officedocument.presentationml.presentation",
-        filename="Neural_Nexus_Airtel_Sync_2026_Digital_Track_Beamer.pptx",
+        filename="Neural Nexus_ABV-IIITM Gwalior.pptx",
     )
+
 
 
 

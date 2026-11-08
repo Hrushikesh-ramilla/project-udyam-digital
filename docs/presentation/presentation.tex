@@ -10,6 +10,7 @@
 \usepackage{xcolor}
 \usepackage{tcolorbox}
 \usepackage{tikz}
+\usepackage{hyperref}
 
 % -------------------------------------------------------------
 % COLOR DEFINITIONS (Strict Ivory & Charcoal Palette)
@@ -23,7 +24,13 @@
 \definecolor{softgray}{HTML}{F4F2EC}
 \definecolor{successgreen}{HTML}{1E6B38}
 
-% Currency command (safe in pdfTeX)
+\hypersetup{
+  colorlinks=true,
+  linkcolor=airtelred,
+  urlcolor=airtelred
+}
+
+% Currency command
 \newcommand{\inr}{\text{Rs.\ }}
 
 % -------------------------------------------------------------
@@ -47,17 +54,35 @@
   \vspace{-0.22cm}%
 }
 
-% Footline Template
+% Footline Template: Slide X of 7 (excluding intro slide)
 \setbeamertemplate{footline}{%
-  \noindent\hspace*{6mm}\begin{minipage}{\dimexpr\paperwidth-12mm\relax}%
-    \textcolor{bordergray}{\rule{\linewidth}{0.35pt}}\\[0.03cm]%
-    {\fontsize{5.2pt}{6.5pt}\selectfont\textcolor{mutedgray}{Airtel Sync 2026 $\cdot$ Digital Track (Enterprise Track A) $\mid$ Project Udyam Digital}}%
-    \hfill%
-    {\fontsize{5.2pt}{6.5pt}\selectfont\textcolor{mutedgray}{\textbf{Team Neural Nexus} (YK, HR)}}%
-    \hfill%
-    {\fontsize{5.2pt}{6.5pt}\selectfont\textbf{Slide \insertframenumber{} of 7}}%
-  \end{minipage}%
-  \vspace{0.05cm}%
+  \ifnum\insertframenumber=1
+    % No footline on Introduction Slide
+  \else
+    \ifnum\insertframenumber>8
+      % Annexure Footline
+      \noindent\hspace*{6mm}\begin{minipage}{\dimexpr\paperwidth-12mm\relax}%
+        \textcolor{bordergray}{\rule{\linewidth}{0.35pt}}\\[0.03cm]%
+        {\fontsize{5.2pt}{6.5pt}\selectfont\textcolor{mutedgray}{Airtel Sync 2026 $\cdot$ Digital Track $\mid$ Project Udyam Digital $\cdot$ \textbf{Annexure (Reference Only)}}}%
+        \hfill%
+        {\fontsize{5.2pt}{6.5pt}\selectfont\textcolor{mutedgray}{\textbf{Neural Nexus} $\cdot$ ABV-IIITM Gwalior}}%
+        \hfill%
+        {\fontsize{5.2pt}{6.5pt}\selectfont\textbf{Annexure}}%
+      \end{minipage}%
+      \vspace{0.05cm}%
+    \else
+      % Core 7 Slides Footline
+      \noindent\hspace*{6mm}\begin{minipage}{\dimexpr\paperwidth-12mm\relax}%
+        \textcolor{bordergray}{\rule{\linewidth}{0.35pt}}\\[0.03cm]%
+        {\fontsize{5.2pt}{6.5pt}\selectfont\textcolor{mutedgray}{Airtel Sync 2026 $\cdot$ Digital Track $\mid$ Project Udyam Digital}}%
+        \hfill%
+        {\fontsize{5.2pt}{6.5pt}\selectfont\textcolor{mutedgray}{\textbf{Team Neural Nexus} $\cdot$ ABV-IIITM Gwalior}}%
+        \hfill%
+        {\fontsize{5.2pt}{6.5pt}\selectfont\textbf{Slide \the\numexpr\insertframenumber-1\relax{} of 7}}%
+      \end{minipage}%
+      \vspace{0.05cm}%
+    \fi
+  \fi
 }
 
 % Custom TColorBox Styles
@@ -91,40 +116,49 @@
 \begin{document}
 
 % =============================================================
-% SLIDE 1: TITLE & EXECUTIVE VISION (The Single-Sitting Paradigm)
+% SLIDE 0: OFFICIAL INTRODUCTION SLIDE (Excluded from 7-Slide Count)
 % =============================================================
 \begin{frame}[plain]
   \vspace{0.25cm}
   \begin{center}
-    {\fontsize{6.8pt}{8pt}\selectfont\textbf{\textcolor{airtelred}{AIRTEL SYNC 2026 $\cdot$ DIGITAL TRACK (ENTERPRISE TRACK A)}}} \\[0.12cm]
-    {\fontsize{15pt}{18pt}\selectfont\textbf{Project Udyam Digital}} \\[0.08cm]
-    {\fontsize{9pt}{11pt}\selectfont\textcolor{mutedgray}{Making 6 Crore+ Indian MSMEs Go Digital in One Sitting}} \\[0.04cm]
-    {\fontsize{6.5pt}{7.8pt}\selectfont\textcolor{mutedgray}{Autonomous Neuro-Symbolic CPQ, Instant DPDP KYC \& Multi-Site Orchestration}} \\[0.15cm]
-    \textcolor{bordergray}{\rule{0.8\paperwidth}{0.4pt}} \\[0.15cm]
+    {\fontsize{7pt}{8.5pt}\selectfont\textbf{\textcolor{airtelred}{BHARTI AIRTEL $\cdot$ AIRTEL SYNC 2026 $\cdot$ DIGITAL TRACK (ENTERPRISE TRACK A)}}} \\[0.12cm]
+    {\fontsize{16pt}{19pt}\selectfont\textbf{Project Udyam Digital}} \\[0.06cm]
+    {\fontsize{9.5pt}{11.5pt}\selectfont\textcolor{mutedgray}{Making 6 Crore+ Indian MSMEs Go Digital in One Sitting}} \\[0.03cm]
+    {\fontsize{6.8pt}{8.2pt}\selectfont\textcolor{mutedgray}{Autonomous Neuro-Symbolic CPQ, Instant DPDP KYC \& Multi-Site Orchestration for Accel Business}} \\[0.15cm]
+    \textcolor{bordergray}{\rule{0.85\paperwidth}{0.4pt}} \\[0.12cm]
   \end{center}
 
   \begin{columns}[T]
     \begin{column}{0.48\textwidth}
-      \begin{tcolorbox}[academicbox, title={\fontsize{6.8pt}{8pt}\selectfont\textbf{\textcolor{charcoal}{The Enterprise MSME Acquisition Bottleneck}}}, coltitle=charcoal]
-        {\fontsize{6.0pt}{7.2pt}\selectfont
-        \begin{itemize}\setlength{\itemsep}{1pt}
-          \item \textbf{Massive TAM with Low Penetration:} Accel Business dominates large enterprises but serves $<10\%$ of India's 63M MSMEs (Kiranas, clinics, CA firms, workshops).
-          \item \textbf{17.6-Day Manual Sales Ordeal:} Journey relies on physical sales rep visits, 3--5 day PDF quoting lags, and 3.2 customer status chase calls.
-          \item \textbf{The 56.4\% Quoting Drop-off:} Prospective owners drop off while awaiting cryptic enterprise quotes, defecting to fragmented local unmanaged ISPs.
-          \item \textbf{Crippling CAC Burden:} Blended acquisition cost of \textbf{\inr 15,000} against a median monthly ARPU of \inr 6,900 (\inr 2,500 for micro-retail).
+      \begin{tcolorbox}[academicbox, title={\fontsize{7pt}{8.5pt}\selectfont\textbf{\textcolor{charcoal}{Team \& Institutional Registration}}}, coltitle=charcoal]
+        {\fontsize{6.2pt}{7.5pt}\selectfont
+        \begin{itemize}\setlength{\itemsep}{1.5pt}
+          \item \textbf{Team Name:} Neural Nexus
+          \item \textbf{Institution:} ABV-Indian Institute of Information Technology and Management (ABV-IIITM), Gwalior
+          \item \textbf{Track:} Airtel Sync 2026 -- Digital Track (Enterprise Track A)
+          \item \textbf{Team Members:}
+            \begin{itemize}\setlength{\itemsep}{1pt}
+              \item \textbf{Hrushikesh Ramilla (HR)} -- Lead Systems \& ML Architect
+              \item \textbf{YK} -- Product Engineering \& Applied Research
+            \end{itemize}
+          \item \textbf{Evaluation Anchor Date:} Strictly invariant to \texttt{2026-07-15}
         \end{itemize}
         }
       \end{tcolorbox}
     \end{column}
 
     \begin{column}{0.48\textwidth}
-      \begin{tcolorbox}[accentbox, title={\fontsize{6.8pt}{8pt}\selectfont\textbf{\textcolor{charcoal}{The Single-Sitting Breakthrough Solution}}}, coltitle=charcoal]
-        {\fontsize{6.0pt}{7.2pt}\selectfont
-        \begin{itemize}\setlength{\itemsep}{1pt}
-          \item \textbf{$<$15-Minute Mobile Self-Serve:} Multi-turn conversational advisor in 10 Indic languages translating ambiguous merchant needs into deterministic quotes.
-          \item \textbf{GST-Free Udyam Onboarding:} Unlocks 3.5 Crore unregistered MSMEs (historically 2.0\% conversion) via composite declaration rules.
-          \item \textbf{DPDP Act 2023 Compliant:} Zero-persistence in-memory PII masking, cryptographic SHA-256 byte caching, and tamper-evident audit trails.
-          \item \textbf{Deployed Production Monolith:} Fully functional on AWS EC2 (\texttt{http://65.1.112.251}) with 37/37 Pytest test suite verified.
+      \begin{tcolorbox}[accentbox, title={\fontsize{7pt}{8.5pt}\selectfont\textbf{\textcolor{charcoal}{Live Production Deliverables \& Video Walkthrough}}}, coltitle=charcoal]
+        {\fontsize{6.2pt}{7.5pt}\selectfont
+        \begin{itemize}\setlength{\itemsep}{1.5pt}
+          \item \textbf{Prototype Demo Video Walkthrough:} \\
+            \href{http://65.1.112.251/audit/audit_dashboard.html}{\textcolor{airtelred}{\textbf{Click to Open: Live 100-Case Video/Audit Proof}}} \\
+            \href{https://github.com/Hrushikesh-ramilla/project-udyam-digital}{\textcolor{airtelred}{\texttt{github.com/Hrushikesh-ramilla/project-udyam-digital}}}
+          \item \textbf{Live Production Cloud Monolith (AWS EC2):} \\
+            \href{http://65.1.112.251}{\textcolor{airtelred}{\textbf{\texttt{http://65.1.112.251}}}} (Port 80 Caddy Reverse Proxy)
+          \item \textbf{Interactive Swagger API Documentation:} \\
+            \href{http://65.1.112.251/docs}{\textcolor{airtelred}{\texttt{http://65.1.112.251/docs}}} (37/37 Automated Pytest Verification)
+          \item \textbf{Production Technology Stack:} FastAPI, React 18, TypeScript, LightGBM, RapidFuzz, DPDP SHA-256 Engine.
         \end{itemize}
         }
       \end{tcolorbox}
@@ -133,16 +167,15 @@
 
   \vspace{0.2cm}
   \begin{center}
-    {\fontsize{6.0pt}{7.2pt}\selectfont
-    \textbf{Team Neural Nexus:} YK $\cdot$ HR (Hrushikesh Ramilla) \quad $\vert$ \quad
-    \textbf{Live Deployment:} \texttt{http://65.1.112.251} \quad $\vert$ \quad
-    \textbf{GitHub:} \texttt{Hrushikesh-ramilla/project-udyam-digital}
+    {\fontsize{6.2pt}{7.5pt}\selectfont
+    \textbf{Submission Note:} This slide is the mandatory Introduction Slide (excluded from formal 7-slide evaluation count). \\
+    The following 7 slides present our technical approach, detailed competitive analysis, and quantified business impact.
     }
   \end{center}
 \end{frame}
 
 % =============================================================
-% SLIDE 2: PROBLEM & 5,000-LEAD SMB FUNNEL BLEED DISSECTION
+% SLIDE 1 OF 7: PROBLEM STATEMENT & FUNNEL BLEED DISSECTION
 % =============================================================
 \begin{frame}{Problem Statement \& Funnel Bleed Dissection}{Empirical Analysis of 5,000 SMB Leads (smb\_leads.csv, Apr--Jun 2026)}
   \begin{columns}[T]
@@ -194,78 +227,164 @@
 \end{frame}
 
 % =============================================================
-% SLIDE 3: CUSTOMER SEGMENTATION & BUNDLE MATRIX
+% SLIDE 2 OF 7: TARGET CUSTOMER SEGMENTATION & PERSONA MATRIX
 % =============================================================
-\begin{frame}{Customer Segmentation \& CPQ Bundle Synthesis}{Synthesizing 25 Catalogue Products into 4 High-Conversion MSME Bundles}
+\begin{frame}{Target Customer Segmentation \& Persona Deep-Dive}{Four Priority MSME Archetypes Derived from Case Appendix A2}
   \begin{columns}[T]
     \begin{column}{0.24\textwidth}
       \begin{tcolorbox}[academicbox, title={\fontsize{5.5pt}{6.6pt}\selectfont\textbf{1. Kirana \& Retail}}, coltitle=charcoal]
-        {\fontsize{4.6pt}{5.5pt}\selectfont
-        \textbf{Share:} 55\% $\cdot$ \textbf{Price Sens:} High \\
-        \textbf{Setup:} Mobile hotspot + QR \\
+        {\fontsize{4.8pt}{5.8pt}\selectfont
+        \textbf{Base Share:} 55\% of MSMEs \\
+        \textbf{Price Sensitivity:} Very High \\
+        \textbf{Current Setup:} \\
+        $\bullet$ Owner smartphone + personal hotspot \\
+        $\bullet$ Paper/cardboard UPI QR codes \\
         \textcolor{bordergray}{\rule{\linewidth}{0.25pt}} \\
-        \textbf{Udyam Vyapar Pack} \\
-        \textbf{\inr 1,499 / month} \\
-        $\bullet$ 100 Mbps Fiber + Wi-Fi 6 \\
-        $\bullet$ UPI Priority SLA Guarantee \\
-        $\bullet$ 2x Biz SIMs (100GB Pool) \\
+        \textbf{Core Operational Pain:} \\
+        $\bullet$ UPI transaction drops in evening rush \\
+        $\bullet$ Disconnected personal WhatsApp \\
         \textcolor{bordergray}{\rule{\linewidth}{0.25pt}} \\
-        \textbf{GST-Free Onboarding:} \\
-        Udyam Reg + PAN Decl.
+        \textbf{Target ARPU:} \inr 1,499 / month \\
+        \textbf{Regulatory Status:} GST-Exempt
         }
       \end{tcolorbox}
     \end{column}
 
     \begin{column}{0.24\textwidth}
       \begin{tcolorbox}[academicbox, title={\fontsize{5.5pt}{6.6pt}\selectfont\textbf{2. Clinics \& Labs}}, coltitle=charcoal]
-        {\fontsize{4.6pt}{5.5pt}\selectfont
-        \textbf{Share:} 25\% $\cdot$ \textbf{Price Sens:} Med \\
-        \textbf{Setup:} Home ISP + Gmail \\
+        {\fontsize{4.8pt}{5.8pt}\selectfont
+        \textbf{Base Share:} 25\% of MSMEs \\
+        \textbf{Price Sensitivity:} Medium \\
+        \textbf{Current Setup:} \\
+        $\bullet$ Unmanaged home broadband \\
+        $\bullet$ Free personal Gmail / Drive \\
         \textcolor{bordergray}{\rule{\linewidth}{0.25pt}} \\
-        \textbf{Udyam Professional} \\
-        \textbf{\inr 2,499 / month} \\
-        $\bullet$ 300 Mbps Fiber + Static IP \\
-        $\bullet$ 5x Google Workspace \\
-        $\bullet$ 500GB Cloud Backup \\
+        \textbf{Core Operational Pain:} \\
+        $\bullet$ Health records unencrypted (ABHA) \\
+        $\bullet$ Frequent diagnostic downtime \\
         \textcolor{bordergray}{\rule{\linewidth}{0.25pt}} \\
-        \textbf{Key Value Driver:} \\
-        ABHA regulatory compliance
+        \textbf{Target ARPU:} \inr 2,499 / month \\
+        \textbf{Regulatory Status:} Mandatory SLA
         }
       \end{tcolorbox}
     \end{column}
 
     \begin{column}{0.24\textwidth}
       \begin{tcolorbox}[academicbox, title={\fontsize{5.5pt}{6.6pt}\selectfont\textbf{3. Multi-Site Chains}}, coltitle=charcoal]
-        {\fontsize{4.6pt}{5.5pt}\selectfont
-        \textbf{Share:} 15\% $\cdot$ \textbf{Price Sens:} Med--Low \\
-        \textbf{Setup:} 3--10 branch outlets \\
+        {\fontsize{4.8pt}{5.8pt}\selectfont
+        \textbf{Base Share:} 15\% of MSMEs \\
+        \textbf{Price Sensitivity:} Med--Low \\
+        \textbf{Current Setup:} \\
+        $\bullet$ 3--10 branch outlets \\
+        $\bullet$ Mixed local ISPs per branch \\
         \textcolor{bordergray}{\rule{\linewidth}{0.25pt}} \\
-        \textbf{Udyam Multi-Site} \\
-        \textbf{\inr 4,999 / mo / hub} \\
-        $\bullet$ 500 Mbps Fiber + 4G \\
-        $\bullet$ Auto-Failover Gateway \\
-        $\bullet$ 4-Cam Cloud CCTV (30d) \\
+        \textbf{Core Operational Pain:} \\
+        $\bullet$ Fragmented billing (5+ vendors) \\
+        $\bullet$ No centralized CCTV / POS failover \\
         \textcolor{bordergray}{\rule{\linewidth}{0.25pt}} \\
-        \textbf{Key Value Driver:} \\
-        Zero POS payment outage
+        \textbf{Target ARPU:} \inr 4,999 / mo / hub \\
+        \textbf{Regulatory Status:} GSTIN Active
         }
       \end{tcolorbox}
     \end{column}
 
     \begin{column}{0.24\textwidth}
       \begin{tcolorbox}[academicbox, title={\fontsize{5.5pt}{6.6pt}\selectfont\textbf{4. Manufacturing}}, coltitle=charcoal]
+        {\fontsize{4.8pt}{5.8pt}\selectfont
+        \textbf{Base Share:} 5\% of MSMEs \\
+        \textbf{Price Sensitivity:} Low \\
+        \textbf{Current Setup:} \\
+        $\bullet$ Local cable or shared fiber \\
+        $\bullet$ Standalone factory machines \\
+        \textcolor{bordergray}{\rule{\linewidth}{0.25pt}} \\
+        \textbf{Core Operational Pain:} \\
+        $\bullet$ Latency jitter halts CNC tooling \\
+        $\bullet$ Zero perimeter cybersecurity \\
+        \textcolor{bordergray}{\rule{\linewidth}{0.25pt}} \\
+        \textbf{Target ARPU:} \inr 14,999 / month \\
+        \textbf{Regulatory Status:} Corporate GST
+        }
+      \end{tcolorbox}
+    \end{column}
+  \end{columns}
+
+  \vspace{0.06cm}
+  \begin{tcolorbox}[accentbox]
+    {\fontsize{5.5pt}{6.8pt}\selectfont
+    \textbf{Strategic Segmentation Insight:} Over 80\% of Accel Business's addressable MSME volume lies in Kiranas and Clinics. Winning this market requires eliminating the rigid corporate GST requirement while delivering dedicated business-grade SLAs at consumer-accessible price points.
+    }
+  \end{tcolorbox}
+\end{frame}
+
+% =============================================================
+% SLIDE 3 OF 7: PROPOSED SOLUTION & CPQ BUNDLE MATRIX
+% =============================================================
+\begin{frame}{Proposed Solution: Single-Sitting Onboarding \& CPQ Bundles}{Synthesizing 25 Catalogue Products into 4 High-Conversion MSME Bundles}
+  \begin{columns}[T]
+    \begin{column}{0.24\textwidth}
+      \begin{tcolorbox}[academicbox, title={\fontsize{5.5pt}{6.6pt}\selectfont\textbf{Udyam Vyapar Pack}}, coltitle=charcoal]
         {\fontsize{4.6pt}{5.5pt}\selectfont
-        \textbf{Share:} 5\% $\cdot$ \textbf{Price Sens:} Low \\
-        \textbf{Setup:} Leased line / Local ISP \\
+        \textbf{Target:} Kirana, Salons, Pharmacies \\
+        \textbf{\inr 1,499 / month} (12-mo lock, \inr 0 setup) \\
         \textcolor{bordergray}{\rule{\linewidth}{0.25pt}} \\
-        \textbf{Udyam Industrial} \\
-        \textbf{\inr 14,999 / month} \\
-        $\bullet$ 1 Gbps Leased Line (1:1) \\
-        $\bullet$ Industrial IoT Gateway \\
-        $\bullet$ Perimeter Cloud Firewall \\
+        $\bullet$ 100 Mbps Fixed Fiber Broadband \\
+        $\bullet$ Dual-Band Wi-Fi 6 Router \\
+        $\bullet$ Merchant UPI Priority SLA \\
+        $\bullet$ 2x Business SIMs (100GB Pool) \\
         \textcolor{bordergray}{\rule{\linewidth}{0.25pt}} \\
-        \textbf{Key Value Driver:} \\
-        Deterministic CNC latency
+        \textbf{Breakthrough Advantage:} \\
+        100\% GST-Free Onboarding via Udyam Registration \& Composite PAN declaration.
+        }
+      \end{tcolorbox}
+    \end{column}
+
+    \begin{column}{0.24\textwidth}
+      \begin{tcolorbox}[academicbox, title={\fontsize{5.5pt}{6.6pt}\selectfont\textbf{Udyam Professional}}, coltitle=charcoal]
+        {\fontsize{4.6pt}{5.5pt}\selectfont
+        \textbf{Target:} Clinics, Labs, CA Chambers \\
+        \textbf{\inr 2,499 / month} (12-mo contract) \\
+        \textcolor{bordergray}{\rule{\linewidth}{0.25pt}} \\
+        $\bullet$ 300 Mbps Dedicated Fiber \\
+        $\bullet$ Static IP (EMR/ABHA compliance) \\
+        $\bullet$ 5x Google Workspace Enterprise \\
+        $\bullet$ 500GB Airtel Cloud Backup \\
+        \textcolor{bordergray}{\rule{\linewidth}{0.25pt}} \\
+        \textbf{Breakthrough Advantage:} \\
+        Regulatory compliance for digital health records \& guaranteed 99.9\% uptime.
+        }
+      \end{tcolorbox}
+    \end{column}
+
+    \begin{column}{0.24\textwidth}
+      \begin{tcolorbox}[academicbox, title={\fontsize{5.5pt}{6.6pt}\selectfont\textbf{Udyam Multi-Site}}, coltitle=charcoal]
+        {\fontsize{4.6pt}{5.5pt}\selectfont
+        \textbf{Target:} Retail \& Restaurant Chains \\
+        \textbf{\inr 4,999 / mo / hub} (Multi-branch) \\
+        \textcolor{bordergray}{\rule{\linewidth}{0.25pt}} \\
+        $\bullet$ 500 Mbps Fiber + 4G Auto-Backup \\
+        $\bullet$ Automated Failover Gateway \\
+        $\bullet$ 4-Cam Cloud CCTV (30-day buffer) \\
+        $\bullet$ Central Multi-Site Portal \\
+        \textcolor{bordergray}{\rule{\linewidth}{0.25pt}} \\
+        \textbf{Breakthrough Advantage:} \\
+        Zero POS payment outages and single-bill consolidation across all locations.
+        }
+      \end{tcolorbox}
+    \end{column}
+
+    \begin{column}{0.24\textwidth}
+      \begin{tcolorbox}[academicbox, title={\fontsize{5.5pt}{6.6pt}\selectfont\textbf{Udyam Industrial}}, coltitle=charcoal]
+        {\fontsize{4.6pt}{5.5pt}\selectfont
+        \textbf{Target:} Auto-Parts, Textiles, Workshops \\
+        \textbf{\inr 14,999 / month} (24-mo SLA) \\
+        \textcolor{bordergray}{\rule{\linewidth}{0.25pt}} \\
+        $\bullet$ 1 Gbps Leased Line (1:1 Symmetrical) \\
+        $\bullet$ Industrial IoT Gateway for CNC \\
+        $\bullet$ Perimeter Cloud Security Firewall \\
+        $\bullet$ Dedicated Enterprise RM \\
+        \textcolor{bordergray}{\rule{\linewidth}{0.25pt}} \\
+        \textbf{Breakthrough Advantage:} \\
+        Deterministic latency, zero packet loss, and real-time cloud ERP telemetry.
         }
       \end{tcolorbox}
     \end{column}
@@ -291,7 +410,7 @@
 \end{frame}
 
 % =============================================================
-% SLIDE 4: SYSTEM ARCHITECTURE — 4-STAGE PIPELINE
+% SLIDE 4 OF 7: TECHNICAL SYSTEM ARCHITECTURE
 % =============================================================
 \begin{frame}{System Architecture: 4-Stage Neuro-Symbolic Pipeline}{Autonomous Acquisition Topology: From Ambient Natural Language to Fulfilled Order}
   \begin{center}
@@ -343,9 +462,9 @@
 \end{frame}
 
 % =============================================================
-% SLIDE 5: COMPREHENSIVE COMPETITIVE LANDSCAPE & ACCEL MOAT
+% SLIDE 5 OF 7: DETAILED COMPETITIVE ANALYSIS & ACCEL MOAT
 % =============================================================
-\begin{frame}{Comprehensive Competitive Landscape \& Accel Strategic Moat}{Rigorous Comparison Against Incumbents, Telco Peers, and SaaS Aggregators}
+\begin{frame}{Detailed Competitive Analysis \& Accel Strategic Moat}{Rigorous Comparison Against Incumbents, Telco Peers, and SaaS Aggregators}
   \begin{tcolorbox}[academicbox]
     \centering
     {\fontsize{5.2pt}{6.4pt}\selectfont
@@ -378,9 +497,9 @@
 \end{frame}
 
 % =============================================================
-% SLIDE 6: HOSTILE AUDIT & PLANTED DEFECT TRAPPING
+% SLIDE 6 OF 7: EMPIRICAL VERIFICATION & DEFECT TRAPPING
 % =============================================================
-\begin{frame}{Adversarial Verification: Trapping Planted KYC Defects \& Edge Cases}{Empirical Validation Against Benchmark Anomaly Suite (kyc\_documents/ K01--K12)}
+\begin{frame}{Empirical Verification: Trapping Planted KYC Defects \& Edge Cases}{Hostile Validation Against Benchmark Anomaly Suite (kyc\_documents/ K01--K12)}
   \begin{columns}[T]
     \begin{column}{0.48\textwidth}
       \begin{tcolorbox}[academicbox, title={\fontsize{6.5pt}{7.8pt}\selectfont\textbf{Benchmark Anomaly Trapping Matrix}}, coltitle=charcoal]
@@ -433,9 +552,9 @@
 \end{frame}
 
 % =============================================================
-% SLIDE 7: QUANTIFIED UNIT ECONOMICS & PHYGITAL ROLLOUT
+% SLIDE 7 OF 7: QUANTIFIED BUSINESS IMPACT & PHYGITAL ROLLOUT
 % =============================================================
-\begin{frame}{Unit Economics Transformation, Business Impact \& Rollout}{Quantified Before vs. After Funnel Economics and 12-Month National Scale Strategy}
+\begin{frame}{Quantified Business Impact, Unit Economics \& Rollout}{Before vs. After Funnel Economics and 12-Month National Scale Strategy}
   \begin{columns}[T]
     \begin{column}{0.51\textwidth}
       \begin{tcolorbox}[academicbox, title={\fontsize{6.5pt}{7.8pt}\selectfont\textbf{Funnel Unit Economic Transformation}}, coltitle=charcoal]
@@ -488,6 +607,103 @@
       \end{tcolorbox}
     \end{column}
   \end{columns}
+\end{frame}
+
+% =============================================================
+% ANNEXURE A: FULL 25-PRODUCT CPQ DAG SPECIFICATION
+% =============================================================
+\begin{frame}{Annexure A: CPQ Directed Acyclic Graph Specification}{Reference Only -- Mathematical Dependency Structure Across 25 Catalogue Products}
+  \begin{columns}[T]
+    \begin{column}{0.54\textwidth}
+      \begin{tcolorbox}[academicbox, title={\fontsize{6.5pt}{7.8pt}\selectfont\textbf{CPQ Topological Prerequisite Constraints}}, coltitle=charcoal]
+        {\fontsize{4.8pt}{5.8pt}\selectfont
+        \textbf{Layer 0 (Connectivity):} Fixed Fiber (100M/300M/1G), Leased Line (100M/1G). \\
+        \textbf{Layer 1 (Add-Ons):} Static IP (requires Fiber/LL), 4G Failover (requires Fiber), Wi-Fi 6. \\
+        \textbf{Layer 2 (Security \& IoT):} Cloud CCTV 4-Cam (requires $\ge$ 100M Fiber), IoT Gateway (requires LL), Cloud Backup (requires Workspace). \\
+        \textbf{Layer 3 (Mobility \& SaaS):} Business SIMs (2x/5x 100GB Pool), Google Workspace (Starter/Enterprise). \\[0.05cm]
+        \textcolor{bordergray}{\rule{\linewidth}{0.25pt}} \\[0.04cm]
+        \textbf{GSTIN Hard Firewall:} Non-GST applicants cannot select enterprise Leased Line or Static IP; CPQ automatically diverts to compliant Udyam Composite alternatives.
+        }
+      \end{tcolorbox}
+    \end{column}
+
+    \begin{column}{0.44\textwidth}
+      \begin{tcolorbox}[academicbox, title={\fontsize{6.5pt}{7.8pt}\selectfont\textbf{Symbolic DAG Solver Topology}}, coltitle=charcoal]
+        \centering
+        \includegraphics[width=\linewidth,height=1.8cm,keepaspectratio]{assets/udyam-cpq-dag.png}
+        \vspace{0.04cm}
+        {\fontsize{4.8pt}{5.8pt}\selectfont
+        \textbf{Performance:} The symbolic DAG evaluator executes in \textbf{$<0.5\text{ms}$}, validating edge compatibility, contract discounting, and reverse budget limits with zero network latency.
+        }
+      \end{tcolorbox}
+    \end{column}
+  \end{columns}
+\end{frame}
+
+% =============================================================
+% ANNEXURE B: DPDP ACT 2023 DATA PRIVACY ARCHITECTURE
+% =============================================================
+\begin{frame}{Annexure B: DPDP Act 2023 Compliance Architecture}{Reference Only -- Cryptographic Zero-Persistence Privacy Guarantee}
+  \begin{columns}[T]
+    \begin{column}{0.48\textwidth}
+      \begin{tcolorbox}[academicbox, title={\fontsize{6.5pt}{7.8pt}\selectfont\textbf{Statutory DPDP Principles Implemented}}, coltitle=charcoal]
+        {\fontsize{5.2pt}{6.4pt}\selectfont
+        \textbf{1. Purpose Limitation (Section 6, DPDP Act 2023):} \\
+        Data collected strictly for B2B telecom feasibility, CPQ pricing, and DoT statutory KYC. No secondary data monetization. \\[0.08cm]
+        \textbf{2. Data Minimisation \& Zero Persistence (Section 7):} \\
+        12-digit Signatory National ID numbers are masked in-memory immediately upon byte stream ingestion (\texttt{[ID Redacted]}). Only redacted tokens (\texttt{XXXX-XXXX-1234}) persist to disk. \\[0.08cm]
+        \textbf{3. Verifiable Consent Artifacts (Section 8):} \\
+        Each transaction logs an immutable consent token:
+        \texttt{SHA-256(ApplicantID + Timestamp + ConsentPurpose + ClientIP)}, creating a tamper-evident audit trail.
+        }
+      \end{tcolorbox}
+    \end{column}
+
+    \begin{column}{0.48\textwidth}
+      \begin{tcolorbox}[accentbox, title={\fontsize{6.5pt}{7.8pt}\selectfont\textbf{Cryptographic Verification Pipeline}}, coltitle=charcoal]
+        {\fontsize{5.2pt}{6.4pt}\selectfont
+        \textbf{In-Memory Ingestion Stream:} \\
+        \texttt{Raw File Bytes} $\longrightarrow$ \texttt{SHA-256 Fingerprint} $\longrightarrow$ \texttt{Volatile Memory OCR} $\longrightarrow$ \texttt{Regex PII Stripping} $\longrightarrow$ \texttt{Registry Cross-Match} $\longrightarrow$ \texttt{Buffer Zeroization}. \\[0.08cm]
+        \textbf{Replay Attack Resistance:} \\
+        If an identical byte payload is re-uploaded, the SHA-256 cache resolves the request in $<2\text{ms}$ without re-invoking OCR services or unmasking PII. \\[0.08cm]
+        \textbf{Evaluation Anchor Invariant:} \\
+        Document freshness logic is strictly pinned to \texttt{datetime.date(2026, 7, 15)} to guarantee deterministic test replay across all evaluation jurisdictions.
+        }
+      \end{tcolorbox}
+    \end{column}
+  \end{columns}
+\end{frame}
+
+% =============================================================
+% ANNEXURE C: 37/37 PYTEST TEST BENCH & AUDIT PROOF
+% =============================================================
+\begin{frame}{Annexure C: Complete 37/37 Pytest Verification Suite}{Reference Only -- Deterministic Test Matrix Running on CI/CD and Production EC2}
+  \begin{tcolorbox}[academicbox]
+    \centering
+    {\fontsize{5.0pt}{6.2pt}\selectfont
+    \begin{tabularx}{\linewidth}{p{2.8cm}p{1.4cm}X}
+      \toprule
+      \textbf{Test Module} & \textbf{Pass Count} & \textbf{Edge Cases \& Boundary Invariants Verified} \\
+      \midrule
+      \texttt{test\_phase1\_data\_ingestion.py} & \textbf{7 / 7 Passed} & 25 products loaded, 3,534 GSTINs indexed, 2,723 Udyam records, 5,000 lead telemetry rows. \\
+      \texttt{test\_phase2\_cpq\_dag.py} & \textbf{5 / 5 Passed} & DAG topological sort, prerequisite violations, reverse knapsack budget solver under 0.5ms. \\
+      \texttt{test\_phase3\_advisor.py} & \textbf{4 / 4 Passed} & Multi-turn state retention, 10 Indic language parsing, budget constraint extraction. \\
+      \texttt{test\_phase4\_kyc\_anomalies.py} & \textbf{9 / 9 Passed} & Trapping cancelled GSTIN (K01), missing POA (K05), entity mismatch (K07), stale utility bill (K11). \\
+      \texttt{test\_phase5\_partner\_ml.py} & \textbf{4 / 4 Passed} & LightGBM GBDT model training, AUC 0.84 inference, high-risk lead WhatsApp rescue dispatch. \\
+      \texttt{test\_api\_endpoints.py} & \textbf{7 / 7 Passed} & REST contracts: \texttt{/api/advisor/chat}, \texttt{/api/cpq/quote}, \texttt{/api/kyc/verify}, \texttt{/api/order/create}. \\
+      \texttt{test\_e2e\_journey.py} & \textbf{1 / 1 Passed} & Full end-to-end journey from Hindi discovery to activated order with zero manual intervention. \\
+      \midrule
+      \textbf{Total Verification Suite} & \textbf{37 / 37 Passed} & \textcolor{successgreen}{\textbf{100\% Pass Rate | Zero Mocks in Core Business Logic | Exit Code 0}} \\
+      \bottomrule
+    \end{tabularx}
+    }
+  \end{tcolorbox}
+  \vspace{0.06cm}
+  \begin{center}
+    {\fontsize{5.5pt}{6.8pt}\selectfont
+    \textbf{Live Audit Dashboard:} \href{http://65.1.112.251/audit/audit_dashboard.html}{\textcolor{airtelred}{\texttt{http://65.1.112.251/audit/audit\_dashboard.html}}} $\cdot$ 100 Visual Case Proofs Documented.
+    }
+  \end{center}
 \end{frame}
 
 \end{document}
