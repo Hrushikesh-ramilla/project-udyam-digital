@@ -164,3 +164,56 @@ def test_romanized_telugu_query_preserves_language(advisor: AdvisorAgent):
     hi_lower = res_hi.display_latin.lower()
     assert any(term in hi_lower for term in ["samajh", "kam", "budget", "airfiber", "bataiye"])
     assert not re.search(r"[\u0900-\u0D7F]", res_hi.display_latin)
+
+
+def test_english_query_does_not_convert_to_telugu_in_native_script_mode(advisor: AdvisorAgent):
+    """Verifies that English queries remain in English even when script_mode='native'
+    (Issue #8: English chat turns must not turn into hardcoded Telugu).
+    """
+    import re
+
+    # 1. English greeting in native script mode
+    res = advisor.process_turn("Hello", language_code="en", script_mode="native")
+    assert res.display_native is not None
+    # Must NOT contain Telugu characters
+    assert not re.search(r"[\u0C00-\u0C7F]", res.display_native)
+    assert not re.search(r"[\u0C00-\u0C7F]", res.display_markdown)
+    assert "Airtel" in res.display_native or "Welcome" in res.display_native or "Namaste" in res.display_native
+
+    # 2. English query with auto language code in native script mode
+    res_auto = advisor.process_turn("Hi, I want internet for my store", language_code="auto", script_mode="native")
+    assert not re.search(r"[\u0C00-\u0C7F]", res_auto.display_native)
+
+
+def test_simple_greeting_fast_path_latency(advisor: AdvisorAgent):
+    """Verifies that basic greetings hit an instant deterministic sub-100ms fast-path."""
+    import time
+
+    start = time.time()
+    res = advisor.process_turn("Hello", language_code="en")
+    elapsed_ms = (time.time() - start) * 1000
+
+    assert elapsed_ms < 100, f"Greeting latency too high: {elapsed_ms:.1f}ms"
+    assert res.display_latin is not None
+    assert len(res.display_latin) > 10
+
+
+def test_universal_multilingual_no_language_restriction(advisor: AdvisorAgent):
+    """Verifies that international queries (e.g. Spanish 'hola', French 'bonjour')
+    are auto-detected and responded to in that language without inverted punctuation
+    artifacts (no ¡) or restrictive disclaimers.
+    """
+    import re
+
+    # 1. Spanish 'hola'
+    res_es = advisor.process_turn("hola")
+    assert res_es.display_latin.startswith("Hola!"), f"Expected clean Hola!, got: {res_es.display_latin[:10]}"
+    assert "¡" not in res_es.display_latin, "Found unexpected inverted exclamation mark ¡"
+    assert "superpower" not in res_es.display_latin.lower()
+    # Native mode must not have Telugu
+    assert not re.search(r"[\u0C00-\u0C7F]", res_es.display_native)
+
+    # 2. French 'bonjour'
+    res_fr = advisor.process_turn("bonjour")
+    assert res_fr.display_latin.startswith("Bonjour!")
+    assert not re.search(r"[\u0C00-\u0C7F]", res_fr.display_native)

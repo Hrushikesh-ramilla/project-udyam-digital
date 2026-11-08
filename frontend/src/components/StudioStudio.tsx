@@ -10,6 +10,7 @@ import {
   ShieldCheck,
   Clock,
   Languages,
+  Globe,
   Check,
   Building2,
   Cpu,
@@ -322,7 +323,7 @@ export const StudioStudio: React.FC<StudioStudioProps> = ({
     },
   ];
 
-  const activeGreetingKey = selectedLang === "auto" ? "te" : selectedLang;
+  const activeGreetingKey = selectedLang === "auto" ? "en" : selectedLang;
   const activeGreeting = GREETINGS[activeGreetingKey] || GREETINGS["te"];
 
   const handleSelectArchetype = (arch: typeof archetypes[0]) => {
@@ -361,7 +362,7 @@ export const StudioStudio: React.FC<StudioStudioProps> = ({
     }
 
     const qLatin = hasIndic ? toLatinScript(q) : q;
-    const qNative = hasIndic ? q : toNativeScript(q, activeGreetingKey);
+    const qNative = hasIndic ? q : toNativeScript(q, "auto");
 
     const userMsg: ChatMessage = {
       id: `usr_${Date.now()}`,
@@ -383,7 +384,7 @@ export const StudioStudio: React.FC<StudioStudioProps> = ({
       const res = await sendChatMessage(
         q,
         profileSlots,
-        selectedLang !== "auto" ? selectedLang : null,
+        null, // Unconstrained AI multilingual auto-detect for all 22 Indian languages
         effectiveMode,
         historyPayload
       );
@@ -396,7 +397,7 @@ export const StudioStudio: React.FC<StudioStudioProps> = ({
       const rawNative = res.display_native || res.display_markdown || "";
 
       const advLatin = hasIndicScript(rawLatin) ? toLatinScript(rawLatin) : (rawLatin || toLatinScript(rawNative));
-      const advNative = hasIndicScript(rawNative) ? rawNative : (toNativeScript(rawNative || rawLatin, activeGreetingKey));
+      const advNative = hasIndicScript(rawNative) ? rawNative : (rawNative ? toNativeScript(rawNative, "auto") : advLatin);
 
       const advMsg: ChatMessage = {
         id: `adv_${Date.now()}`,
@@ -495,7 +496,7 @@ export const StudioStudio: React.FC<StudioStudioProps> = ({
                 <span className="live-pulse-dot" />
               </div>
               <p className="text-[10px] text-[#B39D82] font-mono">
-                Multilingual AI Engine · 10 Indic Languages
+                Universal AI Engine · Auto-Detects Any Global & Indian Language
               </p>
             </div>
           </div>
@@ -538,25 +539,14 @@ export const StudioStudio: React.FC<StudioStudioProps> = ({
           </div>
         </div>
 
-        {/* Language selector chips */}
-        <div className="flex items-center space-x-1.5 overflow-x-auto no-scrollbar pb-1">
-          <span className="text-[10px] font-mono text-[#B39D82]/70 uppercase tracking-widest mr-2 flex items-center space-x-1.5 shrink-0">
-            <Languages className="w-3.5 h-3.5 text-[#e40000]" />
-            <span>Language:</span>
-          </span>
-          {INDIC_LANGS.map((l) => (
-            <button
-              key={l.code}
-              onClick={() => setSelectedLang(l.code)}
-              className={`px-3 py-1 rounded-full text-xs font-medium transition-all shrink-0 cursor-pointer ${
-                selectedLang === l.code
-                  ? "bg-[#e40000] text-white shadow-[0_0_14px_rgba(228,0,0,0.45)]"
-                  : "bg-white/[0.03] text-[#B39D82] hover:text-[#EBE5D9] hover:bg-white/[0.06]"
-              }`}
-            >
-              {scriptMode === "latin" && l.code !== "auto" ? l.latinName : l.native}
-            </button>
-          ))}
+        {/* Ambient AI Multilingual Auto-Detect Badge (Unconstrained to all 22 Indian Languages) */}
+        <div className="flex items-center justify-between pb-1">
+          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white/[0.04] border border-white/[0.08] text-[#B39D82]">
+            <Globe className="w-3.5 h-3.5 text-[#e40000] animate-pulse" />
+            <span className="text-[11px] font-medium text-[#EBE5D9]">
+              AI Multilingual Auto-Detect <span className="text-[#B39D82]/60">·</span> <span className="text-[#B39D82]/90">Speaks all 22 Indian Languages & Dialects</span>
+            </span>
+          </div>
         </div>
 
         {/* Scrollable Preserved Message Thread Container (Empty on initial load) */}
@@ -578,7 +568,7 @@ export const StudioStudio: React.FC<StudioStudioProps> = ({
               if (scriptMode === "latin" && hasIndicScript(displayedText)) {
                 displayedText = toLatinScript(displayedText);
               } else if (scriptMode === "native" && !hasIndicScript(displayedText)) {
-                displayedText = toNativeScript(displayedText, activeGreetingKey);
+                displayedText = toNativeScript(displayedText, "auto");
               }
               return (
                 <motion.div
@@ -648,7 +638,7 @@ export const StudioStudio: React.FC<StudioStudioProps> = ({
             placeholder={
               scriptMode === "latin"
                 ? "Type a message..."
-                : (selectedLang === "hi" ? "संदेश टाइप करें..." : "సందేశాన్ని టైప్ చేయండి...")
+                : "Type or speak in any Indian language (22 languages supported)..."
             }
             className="flex-1 bg-transparent px-4 py-2 text-xs sm:text-sm text-[#EBE5D9] placeholder-[#B39D82]/40 focus:outline-none"
           />

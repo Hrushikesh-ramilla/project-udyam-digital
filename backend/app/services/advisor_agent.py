@@ -150,12 +150,17 @@ Script mode: {script_mode or 'auto'}
 INSTRUCTIONS FOR YOUR CONVERSATIONAL RESPONSE:
 1. Chat NATURALLY like Gemini: warm, sharp, conversational, empathetic, and insightful.
 2. NEVER regurgitate a generic, rigid, canned questionnaire or bullet-point form letter.
-3. LANGUAGE FIDELITY (MANDATORY):
-   - If user writes in Romanized Indic (e.g. Tenglish, Hinglish, Tanglish) or if language code is Indic ({language_code or 'auto'}):
-     * Respond in the SAME Romanized Indic dialect in "display_latin" using English/Latin alphabet (e.g. natural Tenglish: "Arthamaindi! 5-members team kosam budget takkuvalo kavali ante, Biz 5G AirFiber 100 net Rs 1,199/month lo best option...").
-     * Provide the corresponding authentic native script transliteration in "display_native" (e.g. Telugu script "తెలుగు" or Hindi "हिन्दी").
-     * NEVER reply in standard English in "display_latin" when the user query is in Romanized Indic or when an Indic language is selected!
-   - If the user writes in English, provide natural English in "display_latin" and corresponding authentic native script in "display_native".
+3. UNCONSTRAINED MULTILINGUAL SUPPORT & LANGUAGE FIDELITY:
+   - You natively support ALL 22 official Indian languages (Hindi, Telugu, Tamil, Bengali, Marathi, Gujarati, Kannada, Malayalam, Odia, Punjabi, Assamese, Urdu, Maithili, etc.) and colloquial Romanized Indic dialects (Hinglish, Tenglish, Tanglish, Banglish, etc.) as well as Indian English.
+   - Automatically detect the user's language, dialect, and script dynamically without restricting to any predefined list.
+   - If the user writes in Romanized Indic (e.g. Tenglish, Hinglish, Tanglish, etc.):
+     * Respond in the SAME Romanized Indic dialect in "display_latin" using English/Latin alphabet.
+     * Provide the corresponding authentic native script transliteration in "display_native" (e.g. Telugu, Hindi, Tamil, Punjabi, Bengali, etc.).
+     * NEVER reply in standard English in "display_latin" when the user writes in Romanized Indic!
+   - If the user writes in authentic native Indic script:
+     * Provide the native script response in "display_native", and the corresponding Romanized transliteration in "display_latin".
+   - If the user writes in English:
+     * Provide natural, conversational English in BOTH "display_latin" and "display_native" (never translate English to Telugu or other Indic scripts).
 4. If the user asks for COMPARISON (e.g. "compare multiple", "is it only one?", "what are other options?", "vs"):
    - Enthusiastically acknowledge that there are multiple great options!
    - Compare 2 to 3 distinct practical configurations (e.g. Wireless AirFiber vs Fixed Fiber vs Added Failover/Wi-Fi), clearly explaining prices, setup times, and real-world advantages.
@@ -351,9 +356,9 @@ Return STRICTLY valid JSON:
             "ജിഎസ്ടി ഉണ്ട്", "ଜିଏସଟି ଅଛି"
         ]
 
-        if re.search(r"\b(no\s*gst(?:in)?|without\s*gst(?:in)?|bina\s*gst|gst(?:in)?\s*(?:nahi|nhi|nai|ni)\b|dont\s*have\s*gst(?:in)?|don't\s*have\s*gst(?:in)?|gst\s*number\s*(?:nahi|nhi|nai|ni)|gst\s*vst\s*(?:kuch\s*)?(?:nahi|nhi|nai|ni)|zero\s*gst|sirf\s*udyam|udyam\s*only)\b", norm_text) or any(w in norm_text for w in no_gst_regional):
+        if re.search(r"\b(no\s*gst(?:in)?|without\s*gst(?:in)?|bina\s*gst|gst(?:in)?\s*(?:nahi|nhi|nai|ni|ledu|ledhu|illa|illai|nei|nathi)\b|dont\s*have\s*gst(?:in)?|don't\s*have\s*gst(?:in)?|gst\s*number\s*(?:nahi|nhi|nai|ni)|gst\s*vst\s*(?:kuch\s*)?(?:nahi|nhi|nai|ni)|zero\s*gst|sirf\s*udyam|udyam\s*only)\b", norm_text) or any(w in norm_text for w in no_gst_regional):
             slots.has_gstin = False
-        elif re.search(r"\b(have\s*gst(?:in)?|has\s*gst(?:in)?|with\s*gst(?:in)?|gst\s*registered|gst\s*(?:hai|h\b)|gstin\s*(?:hai|h\b)|gst\s*number\s*(?:hai|h\b)|gstin\s*available|active\s*gst(?:in)?|gst\s*(?:number\s*)?mil\s*gaya|mil\s*gaya\s*gst)\b", norm_text) or any(w in norm_text for w in has_gst_regional):
+        elif re.search(r"\b(have\s*gst(?:in)?|has\s*gst(?:in)?|with\s*gst(?:in)?|gst\s*registered|gst\s*(?:hai|h\b|undi|undhi|irukku|ache|che|ahe|ide)|gstin\s*(?:hai|h\b)|gst\s*number\s*(?:hai|h\b)|gstin\s*available|active\s*gst(?:in)?|gst\s*(?:number\s*)?mil\s*gaya|mil\s*gaya\s*gst)\b", norm_text) or any(w in norm_text for w in has_gst_regional):
             slots.has_gstin = True
         elif slots.segment in {"mfg", "multi"} and slots.has_gstin is None:
             # Factories and multi-site enterprise chains in India require statutory GST registration
@@ -495,6 +500,32 @@ Return STRICTLY valid JSON:
         is_unrelated = bool(re.search(r"\b(recipe|biryani|butter\s*chicken|cook|weather|monsoon|rain|poem|movie|sci-fi|python|binary\s*search|code|joke|capital\s*of|capital\s*city|who\s*won)\b", clean_msg))
         is_terse = clean_msg in {"internet", "broadband", "plans", "price", "how much", "speed", "enterprise", "connection", "quote", "airtel"}
         is_greeting = bool(re.search(r"^(hey|hi|hello|whats\s*up|what\'s\s*up|good\s*(morning|evening|afternoon)|yo|sup|bhai|bhaiya)\b", clean_msg)) or bool(re.search(r"\b(bagunnara|bagunara|ela\s*unnaru|ela\s*unnav|namaskaram|namasthe|vanakkam|eppadi\s*iruk|kemon\s*ac|kem\s*cho|kase\s*ahat|hegidd|sukhamano|kemiti\s*ach|kaise\s*ho|kya\s*haal|namaste|నమస్కారం|నమస్తే|బాగున్నారా|வணக்கம்|நமஸ்கார்|নমস্কার|નમસ્તે|नमस्कार|ನಮಸ್ಕಾರ|നമസ്കാരം|ନମସ୍କାର)\b", clean_msg))
+
+        # Fast-path for simple 1-4 word conversational greetings (instant <50ms handshake)
+        is_simple_greeting = is_greeting and not is_question and not is_comparison and not slots.segment and not slots.city_tier and not slots.employee_count and len(clean_msg.split()) <= 4
+        if is_simple_greeting:
+            f_latin, f_native, f_tts = self._generate_human_fallback(
+                user_message, clean_msg, active_lang, effective_script, slots,
+                is_foreign=is_foreign, is_unrelated=False, is_terse=False, is_greeting=True
+            )
+            pure_latin, pure_native = ensure_dual_scripts(f_latin, f_native, active_lang)
+            user_lat, user_nat = self._dualize_user_message(user_message, active_lang, effective_script)
+            return AdvisorResponse(
+                slots=slots,
+                quote=None,
+                recommended_skus=[],
+                display_markdown=pure_latin if effective_script == "latin" else pure_native,
+                spoken_tts_text=f_tts,
+                next_suggested_prompts=[
+                    "Show plans for retail shop",
+                    "We need high speed fiber for clinic",
+                    "What plans are under ₹1,500/month?",
+                ],
+                display_latin=pure_latin,
+                display_native=pure_native,
+                user_latin=user_lat,
+                user_native=user_nat,
+            )
 
         # -------------------------------------------------------------
         # TIER 1: LIVE GEMINI ENTERPRISE CONSULTATION (If online)
@@ -870,32 +901,52 @@ Return STRICTLY valid JSON:
                 )
                 return lat, nat, tts
 
-        # 1. Foreign Greetings
+        # 1. Global Multilingual Greetings (Universal zero-restriction capability in any language)
         if is_foreign:
-            if re.search(r"\bhola\b", clean_msg):
-                lat = "¡Hola! Welcome to Airtel Business. While my superpowers are in Indian regional languages, I am delighted to assist you in English! Are you looking to set up high-speed fiber or digital services for your business?"
-                nat = "¡Hola! ఎయిర్‌టెల్ బిజినెస్‌కు స్వాగతం. భారతీయ వ్యాపారాల కోసం హై-స్పీడ్ ఫైబర్ మరియు డిజిటల్ సేవలను మేము అందిస్తున్నాము. మీ వ్యాపార వివరాలను తెలపండి."
-                tts = "Hola! Welcome to Airtel Business. How can I help power your enterprise today?"
+            if re.search(r"\b(hola|buenos\s*dias|buenas|que\s*tal)\b", clean_msg):
+                lat = "Hola! Bienvenido a Airtel Business. Como puedo ayudarte hoy con la conectividad de fibra de alta velocidad o soluciones digitales para tu negocio?"
+                nat = lat
+                tts = "Hola! Bienvenido a Airtel Business. Como puedo ayudarte hoy con la conectividad para tu negocio?"
                 return lat, nat, tts
-            if re.search(r"\bbonjour\b", clean_msg):
-                lat = "Bonjour! Bienvenue to Airtel Business. How can I help power your enterprise with gigabit fiber today?"
-                nat = "Bonjour! ఎయిర్‌టెల్ బిజినెస్‌కు స్వాగతం. మీ వ్యాపారానికి గిగాబిట్ ఫైబర్ ఇంటర్నెట్ కావాలా?"
-                tts = "Bonjour! Welcome to Airtel Business. How can I help power your enterprise today?"
+            if re.search(r"\b(bonjour|salut)\b", clean_msg):
+                lat = "Bonjour! Bienvenue chez Airtel Business. Comment puis-je vous aider aujourd'hui pour la connectivite fibre haute vitesse ou les solutions numeriques de votre entreprise?"
+                nat = lat
+                tts = "Bonjour! Bienvenue chez Airtel Business. Comment puis-je vous aider pour votre entreprise?"
                 return lat, nat, tts
-            if re.search(r"\bciao\b", clean_msg):
-                lat = "Ciao! Welcome to Airtel Business. Looking to get your business connected with high-speed fiber broadband?"
-                nat = "Ciao! ఎయిర్‌టెల్ బిజినెస్‌కు స్వాగతం. మీ వ్యాపారానికి హై-స్పీడ్ ఫైబర్ బ్రాడ్‌బ్యాండ్ కావాలా?"
-                tts = "Ciao! Welcome to Airtel Business. Looking to get your business connected?"
+            if re.search(r"\b(ciao|buongiorno)\b", clean_msg):
+                lat = "Ciao! Benvenuto in Airtel Business. Come posso aiutarti oggi con la connettivita in fibra ad alta velocita o i servizi digitali per la tua azienda?"
+                nat = lat
+                tts = "Ciao! Benvenuto in Airtel Business. Come posso aiutarti oggi per la tua azienda?"
                 return lat, nat, tts
-            if re.search(r"\baloha\b", clean_msg):
-                lat = "Aloha! Welcome to Airtel Business. What kind of business connectivity can we set up for you today?"
-                nat = "Aloha! ఎయిర్‌టెల్ బిజినెస్‌కు స్వాగతం. మీ వ్యాపారానికి ఎలాంటి కనెక్టివిటీ కావాలి?"
-                tts = "Aloha! Welcome to Airtel Business. What kind of business connectivity can we set up for you today?"
+            if re.search(r"\b(hallo|guten\s*tag|wie\s*gehts)\b", clean_msg):
+                lat = "Hallo! Willkommen bei Airtel Business. Wie kann ich Ihnen heute bei Highspeed-Glasfaser oder digitalen Diensten fur Ihr Unternehmen helfen?"
+                nat = lat
+                tts = "Hallo! Willkommen bei Airtel Business. Wie kann ich Ihnen heute helfen?"
                 return lat, nat, tts
-            # General foreign
-            lat = "Welcome to Airtel Business Udyam Digital! While our core focus is Indian enterprises, I'd love to help you in English. Are you setting up a new business, shop, or office?"
-            nat = "ఎయిర్‌టెల్ బిజినెస్ ఉద్యమ్ డిజిటల్‌కు స్వాగతం! భారతీయ వ్యాపారాల కోసం అత్యుత్తమ కనెక్టివిటీని మేము అందిస్తున్నాము. మీ వ్యాపార వివరాలు తెలపండి."
-            tts = "Welcome to Airtel Business Udyam Digital. How can I help your enterprise today?"
+            if re.search(r"\b(ola|bom\s*dia|tudo\s*bem)\b", clean_msg):
+                lat = "Ola! Bem-vindo a Airtel Business. Como posso ajudar a sua empresa hoje com conectividade de fibra de alta velocidade ou solucoes digitais?"
+                nat = lat
+                tts = "Ola! Bem-vindo a Airtel Business. Como posso ajudar a sua empresa hoje?"
+                return lat, nat, tts
+            if re.search(r"\b(konnichiwa|arigato)\b", clean_msg):
+                lat = "Konnichiwa! Airtel Business e yokoso. Kisha no kousoku faiba ya dejitaru sabisu ni tsuite nanika o-tetsudai dekimasu ka?"
+                nat = "こんにちは！Airtel Businessへようこそ。企業の高速光ファイバーやデジタルサービスについて、どのようなご用件でしょうか？"
+                tts = "Konnichiwa! Airtel Business e yokoso."
+                return lat, nat, tts
+            if re.search(r"\b(marhaban|ahlan|as-salamu\s*alaykum)\b", clean_msg):
+                lat = "Marhaban! Ahlan bikum fi Airtel Business. Kayfa yumkinuna musa'adatukum al-yawm fi khadamat al-alyaf aw al-hulul al-raqmiya li-sharikatikum?"
+                nat = "مرحباً بكم في إيرتل بيزنس! كيف يمكننا مساعدتكم اليوم في خدمات الألياف الضوئية عالية السرعة والحلول الرقمية لشركتكم؟"
+                tts = "Marhaban! Ahlan bikum fi Airtel Business."
+                return lat, nat, tts
+            if re.search(r"\b(privet|zdravstvuyte)\b", clean_msg):
+                lat = "Zdravstvuyte! Dobro pozhalovat v Airtel Business. Chem ya mogu pomoch vashemu predpriyatiyu s vysokoskorostnym internetom ili tsifrovymi uslugami segodnya?"
+                nat = "Здравствуйте! Добро пожаловать в Airtel Business. Чем я могу помочь вашему предприятию с высокоскоростным интернетом или цифровыми услугами сегодня?"
+                tts = "Zdravstvuyte! Dobro pozhalovat v Airtel Business."
+                return lat, nat, tts
+            # General international greeting
+            lat = "Hello! Welcome to Airtel Business. I converse fluently in any language worldwide! How can I help power your enterprise with high-speed fiber or digital connectivity today?"
+            nat = lat
+            tts = "Hello! Welcome to Airtel Business. How can I help power your enterprise today?"
             return lat, nat, tts
 
         # 2. Unrelated / Playful Queries
@@ -1033,7 +1084,7 @@ Return STRICTLY valid JSON:
                 return lat, nat, tts
             # General greeting
             lat = "Namaste! Welcome to Airtel Business Udyam Digital 🙏 How can I assist your enterprise with broadband, static IPs, or digital connectivity today?"
-            nat = "నమస్కారం! ఎయిర్‌టెల్ బిజినెస్ ఉద్యమ్ డిజిటల్‌కు స్వాగతం 🙏 మీ వ్యాపారానికి కనెక్టివిటీ లేదా డిజిటల్ సేవల గురించి ఎలా సహాయపడగలను?"
+            nat = lat if active_lang == "en" else "నమస్కారం! ఎయిర్‌టెల్ బిజినెస్ ఉద్యమ్ డిజిటల్‌కు స్వాగతం 🙏 మీ వ్యాపారానికి కనెక్టివిటీ లేదా డిజిటల్ సేవల గురించి ఎలా సహాయపడగలను?"
             tts = "Namaste! Welcome to Airtel Business Udyam Digital. How can I assist your enterprise today?"
             return lat, nat, tts
 
@@ -1085,6 +1136,6 @@ Return STRICTLY valid JSON:
             tts = "Namaskar! Apnanka business pain thik plan suggest kariba pain business type janantu."
         else:
             lat = f"Namaste! I'd love to help you configure the ideal business connectivity plan. Could you please clarify {details_str}?"
-            nat = "నమస్కారం! మీ వ్యాపారానికి తగిన ఖచ్చితమైన ప్లాన్ అందించడానికి దయచేసి మీ వ్యాపార రకం, నగరం మరియు జీఎస్టీ వివరాలు తెలపండి."
+            nat = lat if active_lang == "en" else "నమస్కారం! మీ వ్యాపారానికి తగిన ఖచ్చితమైన ప్లాన్ అందించడానికి దయచేసి మీ వ్యాపార రకం, నగరం మరియు జీఎస్టీ వివరాలు తెలపండి."
             tts = "Namaste! I'd love to help you configure the ideal business plan. Could you please clarify your business type and city?"
         return lat, nat, tts

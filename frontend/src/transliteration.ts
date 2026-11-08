@@ -272,14 +272,16 @@ export function toLatinScript(text: string): string {
 /**
  * Translates Romanized English words to authentic regional script.
  */
-export function toNativeScript(text: string, lang: string = "te"): string {
+export function toNativeScript(text: string, lang: string = "auto"): string {
   if (!text) return "";
   if (hasIndicScript(text)) return text;
+  if (lang === "en") return text;
 
   const lower = text.toLowerCase().trim();
 
   // Telugu
-  if (lang === "te" || lower.includes("bagunnara") || lower.includes("ela unna") || lower.includes("kavali") || lower.includes("ekkuva") || lower.includes("karchu") || lower.includes("takkuva") || lower.includes("enthalo") || lower.includes("artham")) {
+  const isTelugu = lang === "te" || lower.includes("bagunnara") || lower.includes("ela unna") || lower.includes("kavali") || lower.includes("ekkuva") || lower.includes("karchu") || lower.includes("takkuva") || lower.includes("enthalo") || lower.includes("artham");
+  if (isTelugu) {
     if (lower.includes("ekkuva") || lower.includes("karchu") || lower.includes("takkuva") || lower.includes("enthalo")) {
       return "ఎక్కువ ఖర్చు పెట్టాలనుకోవట్లేదు, కనీసం ఎంతలో అయిపోతుందో చెప్పండి";
     }
