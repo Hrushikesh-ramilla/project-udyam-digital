@@ -196,3 +196,24 @@ def test_simple_greeting_fast_path_latency(advisor: AdvisorAgent):
     assert elapsed_ms < 100, f"Greeting latency too high: {elapsed_ms:.1f}ms"
     assert res.display_latin is not None
     assert len(res.display_latin) > 10
+
+
+def test_universal_multilingual_no_language_restriction(advisor: AdvisorAgent):
+    """Verifies that international queries (e.g. Spanish 'hola', French 'bonjour')
+    are auto-detected and responded to in that language without inverted punctuation
+    artifacts (no ¡) or restrictive disclaimers.
+    """
+    import re
+
+    # 1. Spanish 'hola'
+    res_es = advisor.process_turn("hola")
+    assert res_es.display_latin.startswith("Hola!"), f"Expected clean Hola!, got: {res_es.display_latin[:10]}"
+    assert "¡" not in res_es.display_latin, "Found unexpected inverted exclamation mark ¡"
+    assert "superpower" not in res_es.display_latin.lower()
+    # Native mode must not have Telugu
+    assert not re.search(r"[\u0C00-\u0C7F]", res_es.display_native)
+
+    # 2. French 'bonjour'
+    res_fr = advisor.process_turn("bonjour")
+    assert res_fr.display_latin.startswith("Bonjour!")
+    assert not re.search(r"[\u0C00-\u0C7F]", res_fr.display_native)

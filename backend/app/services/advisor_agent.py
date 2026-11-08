@@ -901,32 +901,52 @@ Return STRICTLY valid JSON:
                 )
                 return lat, nat, tts
 
-        # 1. Foreign Greetings
+        # 1. Global Multilingual Greetings (Universal zero-restriction capability in any language)
         if is_foreign:
-            if re.search(r"\bhola\b", clean_msg):
-                lat = "¡Hola! Welcome to Airtel Business. While my superpowers are in Indian regional languages, I am delighted to assist you in English! Are you looking to set up high-speed fiber or digital services for your business?"
-                nat = "¡Hola! ఎయిర్‌టెల్ బిజినెస్‌కు స్వాగతం. భారతీయ వ్యాపారాల కోసం హై-స్పీడ్ ఫైబర్ మరియు డిజిటల్ సేవలను మేము అందిస్తున్నాము. మీ వ్యాపార వివరాలను తెలపండి."
-                tts = "Hola! Welcome to Airtel Business. How can I help power your enterprise today?"
+            if re.search(r"\b(hola|buenos\s*dias|buenas|que\s*tal)\b", clean_msg):
+                lat = "Hola! Bienvenido a Airtel Business. Como puedo ayudarte hoy con la conectividad de fibra de alta velocidad o soluciones digitales para tu negocio?"
+                nat = lat
+                tts = "Hola! Bienvenido a Airtel Business. Como puedo ayudarte hoy con la conectividad para tu negocio?"
                 return lat, nat, tts
-            if re.search(r"\bbonjour\b", clean_msg):
-                lat = "Bonjour! Bienvenue to Airtel Business. How can I help power your enterprise with gigabit fiber today?"
-                nat = "Bonjour! ఎయిర్‌టెల్ బిజినెస్‌కు స్వాగతం. మీ వ్యాపారానికి గిగాబిట్ ఫైబర్ ఇంటర్నెట్ కావాలా?"
-                tts = "Bonjour! Welcome to Airtel Business. How can I help power your enterprise today?"
+            if re.search(r"\b(bonjour|salut)\b", clean_msg):
+                lat = "Bonjour! Bienvenue chez Airtel Business. Comment puis-je vous aider aujourd'hui pour la connectivite fibre haute vitesse ou les solutions numeriques de votre entreprise?"
+                nat = lat
+                tts = "Bonjour! Bienvenue chez Airtel Business. Comment puis-je vous aider pour votre entreprise?"
                 return lat, nat, tts
-            if re.search(r"\bciao\b", clean_msg):
-                lat = "Ciao! Welcome to Airtel Business. Looking to get your business connected with high-speed fiber broadband?"
-                nat = "Ciao! ఎయిర్‌టెల్ బిజినెస్‌కు స్వాగతం. మీ వ్యాపారానికి హై-స్పీడ్ ఫైబర్ బ్రాడ్‌బ్యాండ్ కావాలా?"
-                tts = "Ciao! Welcome to Airtel Business. Looking to get your business connected?"
+            if re.search(r"\b(ciao|buongiorno)\b", clean_msg):
+                lat = "Ciao! Benvenuto in Airtel Business. Come posso aiutarti oggi con la connettivita in fibra ad alta velocita o i servizi digitali per la tua azienda?"
+                nat = lat
+                tts = "Ciao! Benvenuto in Airtel Business. Come posso aiutarti oggi per la tua azienda?"
                 return lat, nat, tts
-            if re.search(r"\baloha\b", clean_msg):
-                lat = "Aloha! Welcome to Airtel Business. What kind of business connectivity can we set up for you today?"
-                nat = "Aloha! ఎయిర్‌టెల్ బిజినెస్‌కు స్వాగతం. మీ వ్యాపారానికి ఎలాంటి కనెక్టివిటీ కావాలి?"
-                tts = "Aloha! Welcome to Airtel Business. What kind of business connectivity can we set up for you today?"
+            if re.search(r"\b(hallo|guten\s*tag|wie\s*gehts)\b", clean_msg):
+                lat = "Hallo! Willkommen bei Airtel Business. Wie kann ich Ihnen heute bei Highspeed-Glasfaser oder digitalen Diensten fur Ihr Unternehmen helfen?"
+                nat = lat
+                tts = "Hallo! Willkommen bei Airtel Business. Wie kann ich Ihnen heute helfen?"
                 return lat, nat, tts
-            # General foreign
-            lat = "Welcome to Airtel Business Udyam Digital! While our core focus is Indian enterprises, I'd love to help you in English. Are you setting up a new business, shop, or office?"
-            nat = "ఎయిర్‌టెల్ బిజినెస్ ఉద్యమ్ డిజిటల్‌కు స్వాగతం! భారతీయ వ్యాపారాల కోసం అత్యుత్తమ కనెక్టివిటీని మేము అందిస్తున్నాము. మీ వ్యాపార వివరాలు తెలపండి."
-            tts = "Welcome to Airtel Business Udyam Digital. How can I help your enterprise today?"
+            if re.search(r"\b(ola|bom\s*dia|tudo\s*bem)\b", clean_msg):
+                lat = "Ola! Bem-vindo a Airtel Business. Como posso ajudar a sua empresa hoje com conectividade de fibra de alta velocidade ou solucoes digitais?"
+                nat = lat
+                tts = "Ola! Bem-vindo a Airtel Business. Como posso ajudar a sua empresa hoje?"
+                return lat, nat, tts
+            if re.search(r"\b(konnichiwa|arigato)\b", clean_msg):
+                lat = "Konnichiwa! Airtel Business e yokoso. Kisha no kousoku faiba ya dejitaru sabisu ni tsuite nanika o-tetsudai dekimasu ka?"
+                nat = "こんにちは！Airtel Businessへようこそ。企業の高速光ファイバーやデジタルサービスについて、どのようなご用件でしょうか？"
+                tts = "Konnichiwa! Airtel Business e yokoso."
+                return lat, nat, tts
+            if re.search(r"\b(marhaban|ahlan|as-salamu\s*alaykum)\b", clean_msg):
+                lat = "Marhaban! Ahlan bikum fi Airtel Business. Kayfa yumkinuna musa'adatukum al-yawm fi khadamat al-alyaf aw al-hulul al-raqmiya li-sharikatikum?"
+                nat = "مرحباً بكم في إيرتل بيزنس! كيف يمكننا مساعدتكم اليوم في خدمات الألياف الضوئية عالية السرعة والحلول الرقمية لشركتكم؟"
+                tts = "Marhaban! Ahlan bikum fi Airtel Business."
+                return lat, nat, tts
+            if re.search(r"\b(privet|zdravstvuyte)\b", clean_msg):
+                lat = "Zdravstvuyte! Dobro pozhalovat v Airtel Business. Chem ya mogu pomoch vashemu predpriyatiyu s vysokoskorostnym internetom ili tsifrovymi uslugami segodnya?"
+                nat = "Здравствуйте! Добро пожаловать в Airtel Business. Чем я могу помочь вашему предприятию с высокоскоростным интернетом или цифровыми услугами сегодня?"
+                tts = "Zdravstvuyte! Dobro pozhalovat v Airtel Business."
+                return lat, nat, tts
+            # General international greeting
+            lat = "Hello! Welcome to Airtel Business. I converse fluently in any language worldwide! How can I help power your enterprise with high-speed fiber or digital connectivity today?"
+            nat = lat
+            tts = "Hello! Welcome to Airtel Business. How can I help power your enterprise today?"
             return lat, nat, tts
 
         # 2. Unrelated / Playful Queries

@@ -294,8 +294,9 @@ def ensure_dual_scripts(
     else:
         pure_latin = "Namaste! Welcome to Airtel Enterprise Digital."
 
-    # If English, native script is identical to Latin (English has no Indic script)
-    if active_lang == "en":
+    # If non-Indic language (English, Spanish, French, German, etc.) or no Indic script present, native is identical to Latin
+    indic_langs = {"te", "hi", "ta", "bn", "gu", "mr", "kn", "ml", "or", "pa", "as", "ur"}
+    if (active_lang not in indic_langs and not has_indic_script(raw_native)) or active_lang in {"en", "es", "fr", "de", "it", "pt", "ru", "ja", "zh", "ar"}:
         pure_native = raw_native if has_indic_script(raw_native) else pure_latin
         return pure_latin, pure_native
 

@@ -496,7 +496,7 @@ export const StudioStudio: React.FC<StudioStudioProps> = ({
                 <span className="live-pulse-dot" />
               </div>
               <p className="text-[10px] text-[#B39D82] font-mono">
-                Multilingual AI Engine · 10 Indic Languages
+                Universal AI Engine · Auto-Detects Any Global & Indian Language
               </p>
             </div>
           </div>
