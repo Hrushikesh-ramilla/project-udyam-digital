@@ -76,8 +76,8 @@ export const App: React.FC = () => {
         // Seamless nested scroll chaining: only prevent while container has scroll room
         const scrollable = node.closest(".overflow-y-auto") as HTMLElement | null;
         if (scrollable && scrollable.scrollHeight > scrollable.clientHeight) {
-          const atTop = scrollable.scrollTop <= 2;
-          const atBottom = scrollable.scrollTop + scrollable.clientHeight >= scrollable.scrollHeight - 2;
+          const atTop = scrollable.scrollTop <= 5;
+          const atBottom = scrollable.scrollTop + scrollable.clientHeight >= scrollable.scrollHeight - 5;
           if (atTop || atBottom) {
             return false;
           }
