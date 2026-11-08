@@ -111,6 +111,38 @@ export async function verifyKYC(
   return await res.json();
 }
 
+export async function verifyDigiLocker(params: {
+  aadhaarNumber: string;
+  otp: string;
+  declaredGstin?: string;
+  declaredUdyam?: string;
+  applicantId?: string;
+  cartRequiresGstin?: boolean;
+}): Promise<KYCVerificationResult> {
+  const res = await fetch(`${API_BASE}/kyc/digilocker`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({
+      aadhaar_number: params.aadhaarNumber,
+      otp: params.otp,
+      declared_gstin: params.declaredGstin || null,
+      declared_udyam: params.declaredUdyam || null,
+      applicant_id: params.applicantId || null,
+      cart_requires_gstin: params.cartRequiresGstin ?? false,
+      consent: {
+        consent_id: `CONSENT_DIGI_${Date.now()}`,
+        user_id: "DIGILOCKER_USER",
+        purpose: "DigiLocker telecom onboarding, instant registry pull, and DPDP Act 2023 compliance.",
+        timestamp: "2026-07-15T10:00:00Z",
+        ip_hash: "2c26b46b68ffc68ff99b453c1d30413413422d706483bfa0f98a5e886266e7ae",
+        granted: true,
+      },
+    }),
+  });
+  if (!res.ok) throw new Error("DigiLocker verification failed");
+  return await res.json();
+}
+
 export interface KYCUploadResponse {
   filename: string;
   size_bytes: number;

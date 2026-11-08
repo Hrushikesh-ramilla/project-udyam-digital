@@ -18,9 +18,11 @@ import {
   Building,
   CreditCard,
   FileCheck,
+  Smartphone,
+  KeyRound,
 } from "lucide-react";
 import { KYCVerificationResult, CommercialBreakdown } from "../types";
-import { verifyKYC, uploadKYCDocument, KYCUploadResponse } from "../api";
+import { verifyKYC, uploadKYCDocument, verifyDigiLocker, KYCUploadResponse } from "../api";
 
 interface SmartKYCProps {
   quote: CommercialBreakdown | null;
@@ -34,11 +36,44 @@ export const SmartKYC: React.FC<SmartKYCProps> = ({ quote, onKYCApproved, onSwit
   const [isVerifying, setIsVerifying] = useState<boolean>(false);
   const [kycResult, setKycResult] = useState<KYCVerificationResult | null>(null);
   const [showConsentModal, setShowConsentModal] = useState<boolean>(false);
-  const [activeTab, setActiveTab] = useState<"preset" | "upload">("preset");
+  const [activeTab, setActiveTab] = useState<"preset" | "upload" | "digilocker">("preset");
   const [uploadDocType, setUploadDocType] = useState<string>("gst_certificate");
   const [uploadResponse, setUploadResponse] = useState<KYCUploadResponse | null>(null);
   const [uploadedSlots, setUploadedSlots] = useState<Record<string, { file: File; res: KYCUploadResponse }>>({});
   const [remediationNotice, setRemediationNotice] = useState<string | null>(null);
+
+  // DigiLocker Fast-Track State
+  const [digiAadhaar, setDigiAadhaar] = useState<string>("2345 6789 0124");
+  const [digiOtp, setDigiOtp] = useState<string>("1234");
+  const [digiGstin, setDigiGstin] = useState<string>("32TTNXB7384T1ZW");
+  const [digiUdyam, setDigiUdyam] = useState<string>("UDYAM-KL-00-1234567");
+
+  const handleDigiLockerVerify = async () => {
+    if (!consentGranted) {
+      alert("DPDP Act 2023 requires explicit digital consent before DigiLocker verification.");
+      return;
+    }
+    setIsVerifying(true);
+    try {
+      const cartRequiresGstin = quote ? !quote.gst_exempt_eligible : false;
+      const res = await verifyDigiLocker({
+        aadhaarNumber: digiAadhaar,
+        otp: digiOtp,
+        declaredGstin: digiGstin,
+        declaredUdyam: digiUdyam,
+        applicantId: "DIGI_MERCHANT",
+        cartRequiresGstin: cartRequiresGstin,
+      });
+      setKycResult(res);
+      if (res.status === "APPROVED") {
+        onKYCApproved(res);
+      }
+    } catch (err: unknown) {
+      alert(err instanceof Error ? err.message : "DigiLocker verification failed.");
+    } finally {
+      setIsVerifying(false);
+    }
+  };
 
   const handleFileUpload = async (file: File, docTypeOverride?: string) => {
     if (!consentGranted) {
@@ -197,7 +232,7 @@ export const SmartKYC: React.FC<SmartKYCProps> = ({ quote, onKYCApproved, onSwit
       )}
 
       {/* Mode Switcher */}
-      <div className="flex space-x-2 border-b border-[rgba(235,229,217,0.06)] pb-3">
+      <div className="flex flex-wrap gap-2 border-b border-[rgba(235,229,217,0.06)] pb-3">
         <button
           onClick={() => {
             setActiveTab("preset");
@@ -223,6 +258,21 @@ export const SmartKYC: React.FC<SmartKYCProps> = ({ quote, onKYCApproved, onSwit
           }`}
         >
           Live Document Staging (4 Slots)
+        </button>
+        <button
+          onClick={() => {
+            setActiveTab("digilocker");
+            setKycResult(null);
+            setUploadResponse(null);
+          }}
+          className={`px-4 py-2 rounded-full text-xs font-medium transition-all cursor-pointer flex items-center space-x-1.5 ${
+            activeTab === "digilocker"
+              ? "bg-[#e40000] text-white shadow-[0_0_16px_rgba(228,0,0,0.4)]"
+              : "text-[#d9ad63] hover:text-[#EBE5D9] hover:bg-white/[0.03] border border-[#d9ad63]/30"
+          }`}
+        >
+          <Zap className="w-3.5 h-3.5 text-[#d9ad63]" />
+          <span>⚡ DigiLocker Fast-Track (10s)</span>
         </button>
       </div>
 
@@ -280,7 +330,7 @@ export const SmartKYC: React.FC<SmartKYCProps> = ({ quote, onKYCApproved, onSwit
             </motion.button>
           </div>
         </div>
-      ) : (
+      ) : activeTab === "upload" ? (
         /* 4 Upload Slots */
         <div className="luxury-glass rounded-3xl p-6 sm:p-7 space-y-6 border border-[rgba(235,229,217,0.08)] shadow-[0_20px_50px_rgba(0,0,0,0.7)]">
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
@@ -357,6 +407,184 @@ export const SmartKYC: React.FC<SmartKYCProps> = ({ quote, onKYCApproved, onSwit
               className="bg-emerald-600 hover:bg-emerald-500 text-white font-medium py-2.5 px-6 rounded-2xl text-xs sm:text-sm disabled:opacity-40 cursor-pointer shadow-lg transition-all"
             >
               Verify Staged Package
+            </motion.button>
+          </div>
+        </div>
+      ) : (
+        /* DigiLocker Fast-Track Gateway */
+        <div className="luxury-glass rounded-3xl p-6 sm:p-7 space-y-6 border border-[rgba(235,229,217,0.08)] shadow-[0_20px_50px_rgba(0,0,0,0.7)]">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-4 border-b border-[rgba(235,229,217,0.06)]">
+            <div className="flex items-center space-x-3">
+              <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-amber-500/20 to-red-500/20 border border-amber-500/30 flex items-center justify-center text-amber-400">
+                <Zap className="w-5 h-5" />
+              </div>
+              <div>
+                <h3 className="text-sm font-semibold text-[#EBE5D9]">
+                  DigiLocker 1-Tap Fast-Track (National e-KYC Gateway)
+                </h3>
+                <p className="text-[11px] text-[#B39D82]">
+                  Pulls verified GSTIN &amp; Udyam directly from issuer registries · Verhoeff D₅ dihedral checksum validation
+                </p>
+              </div>
+            </div>
+            <div className="flex items-center space-x-2">
+              <span className="text-[10px] px-2.5 py-1 rounded-full bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 font-mono">
+                DPDP Zero-Persistence Active
+              </span>
+            </div>
+          </div>
+
+          {/* Quick Demo Preset Chips */}
+          <div className="space-y-2">
+            <label className="text-[11px] font-mono uppercase tracking-wider text-[#B39D82]">
+              Jury Test Bench · 1-Click Simulation Presets
+            </label>
+            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-2">
+              <button
+                type="button"
+                onClick={() => {
+                  setDigiAadhaar("2345 6789 0124");
+                  setDigiOtp("1234");
+                  setDigiGstin("32TTNXB7384T1ZW");
+                  setDigiUdyam("UDYAM-KL-00-1234567");
+                  setKycResult(null);
+                }}
+                className="text-left p-2.5 rounded-xl border border-emerald-500/30 bg-emerald-950/10 hover:bg-emerald-950/20 transition-all cursor-pointer"
+              >
+                <div className="text-[11px] font-semibold text-emerald-300">🌟 Golden Merchant</div>
+                <div className="text-[9px] text-[#B39D82] font-mono mt-0.5">Valid UID + Active GST</div>
+              </button>
+
+              <button
+                type="button"
+                onClick={() => {
+                  setDigiAadhaar("2345 6789 0120");
+                  setDigiOtp("1234");
+                  setDigiGstin("32TTNXB7384T1ZW");
+                  setDigiUdyam("UDYAM-KL-00-1234567");
+                  setKycResult(null);
+                }}
+                className="text-left p-2.5 rounded-xl border border-red-500/30 bg-red-950/10 hover:bg-red-950/20 transition-all cursor-pointer"
+              >
+                <div className="text-[11px] font-semibold text-red-300">❌ Verhoeff UID Trap</div>
+                <div className="text-[9px] text-[#B39D82] font-mono mt-0.5">Invalid Checksum (0120)</div>
+              </button>
+
+              <button
+                type="button"
+                onClick={() => {
+                  setDigiAadhaar("2345 6789 0124");
+                  setDigiOtp("9999");
+                  setDigiGstin("32TTNXB7384T1ZW");
+                  setDigiUdyam("UDYAM-KL-00-1234567");
+                  setKycResult(null);
+                }}
+                className="text-left p-2.5 rounded-xl border border-red-500/30 bg-red-950/10 hover:bg-red-950/20 transition-all cursor-pointer"
+              >
+                <div className="text-[11px] font-semibold text-red-300">❌ Invalid OTP Trap</div>
+                <div className="text-[9px] text-[#B39D82] font-mono mt-0.5">OTP &quot;9999&quot; Rejected</div>
+              </button>
+
+              <button
+                type="button"
+                onClick={() => {
+                  setDigiAadhaar("2345 6789 0124");
+                  setDigiOtp("1234");
+                  setDigiGstin("37IHKXV5167L1ZS");
+                  setDigiUdyam("UDYAM-AP-00-1234567");
+                  setKycResult(null);
+                }}
+                className="text-left p-2.5 rounded-xl border border-amber-500/30 bg-amber-950/10 hover:bg-amber-950/20 transition-all cursor-pointer"
+              >
+                <div className="text-[11px] font-semibold text-amber-300">❌ Inactive GSTIN</div>
+                <div className="text-[9px] text-[#B39D82] font-mono mt-0.5">Cancelled in Registry</div>
+              </button>
+            </div>
+          </div>
+
+          {/* Form Fields */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <div className="space-y-1.5">
+              <label className="text-xs font-medium text-[#EBE5D9] flex items-center justify-between">
+                <span>Signatory 12-digit Aadhaar UID</span>
+                <span className="text-[10px] text-[#d9ad63] font-mono">Verhoeff D₅</span>
+              </label>
+              <div className="relative">
+                <input
+                  type="text"
+                  value={digiAadhaar}
+                  onChange={(e) => setDigiAadhaar(e.target.value)}
+                  placeholder="2345 6789 0124"
+                  className="w-full bg-[#030405] border border-[rgba(235,229,217,0.12)] rounded-2xl px-4 py-2.5 text-xs text-[#EBE5D9] font-mono focus:outline-none focus:border-[#e40000]"
+                />
+              </div>
+              <p className="text-[10px] text-[#B39D82]">Masked to [Aadhaar Redacted-XXXX] in-memory.</p>
+            </div>
+
+            <div className="space-y-1.5">
+              <label className="text-xs font-medium text-[#EBE5D9] flex items-center justify-between">
+                <span>Authentication OTP</span>
+                <span className="text-[10px] text-emerald-400 font-mono">Demo: 1234</span>
+              </label>
+              <input
+                type="text"
+                value={digiOtp}
+                onChange={(e) => setDigiOtp(e.target.value)}
+                placeholder="1234"
+                className="w-full bg-[#030405] border border-[rgba(235,229,217,0.12)] rounded-2xl px-4 py-2.5 text-xs text-[#EBE5D9] font-mono focus:outline-none focus:border-[#e40000]"
+              />
+              <p className="text-[10px] text-[#B39D82]">Simulated DigiLocker mobile OTP authorization.</p>
+            </div>
+
+            <div className="space-y-1.5">
+              <label className="text-xs font-medium text-[#EBE5D9]">
+                Declared GSTIN (Optional / Bundle Dependent)
+              </label>
+              <input
+                type="text"
+                value={digiGstin}
+                onChange={(e) => setDigiGstin(e.target.value)}
+                placeholder="32TTNXB7384T1ZW"
+                className="w-full bg-[#030405] border border-[rgba(235,229,217,0.12)] rounded-2xl px-4 py-2.5 text-xs text-[#EBE5D9] font-mono focus:outline-none focus:border-[#e40000]"
+              />
+            </div>
+
+            <div className="space-y-1.5">
+              <label className="text-xs font-medium text-[#EBE5D9]">
+                Declared Udyam Number (Optional)
+              </label>
+              <input
+                type="text"
+                value={digiUdyam}
+                onChange={(e) => setDigiUdyam(e.target.value)}
+                placeholder="UDYAM-KL-00-1234567"
+                className="w-full bg-[#030405] border border-[rgba(235,229,217,0.12)] rounded-2xl px-4 py-2.5 text-xs text-[#EBE5D9] font-mono focus:outline-none focus:border-[#e40000]"
+              />
+            </div>
+          </div>
+
+          <div className="flex flex-col sm:flex-row items-center justify-between gap-4 pt-2 border-t border-[rgba(235,229,217,0.06)]">
+            <div className="text-[11px] text-[#B39D82]">
+              ⚡ Fast-tracks onboarding from 17.6 days to <strong className="text-emerald-400">&lt; 10 seconds</strong>.
+            </div>
+            <motion.button
+              whileHover={{ scale: 1.02 }}
+              whileTap={{ scale: 0.98 }}
+              onClick={handleDigiLockerVerify}
+              disabled={isVerifying || !consentGranted}
+              className="w-full sm:w-auto bg-[#e40000] hover:bg-[#b80000] text-white font-medium py-2.5 px-6 rounded-2xl text-xs sm:text-sm disabled:opacity-40 cursor-pointer shadow-[0_0_20px_rgba(228,0,0,0.3)] transition-all flex items-center justify-center space-x-2"
+            >
+              {isVerifying ? (
+                <>
+                  <RefreshCw className="w-4 h-4 animate-spin" />
+                  <span>Connecting DigiLocker...</span>
+                </>
+              ) : (
+                <>
+                  <Zap className="w-4 h-4" />
+                  <span>Authenticate &amp; Pull from DigiLocker</span>
+                </>
+              )}
             </motion.button>
           </div>
         </div>

@@ -1,0 +1,260 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <title>Project Udyam Digital — Data Privacy & Security Note (DPDP Act 2023 Compliance)</title>
+  <style>
+    @page {
+      size: A4 portrait;
+      margin: 10mm 12mm 10mm 12mm;
+    }
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+      color: #121316;
+      background: #FFFFFF;
+      font-size: 8.5pt;
+      line-height: 1.35;
+    }
+    .header {
+      border-bottom: 2px solid #121316;
+      padding-bottom: 8px;
+      margin-bottom: 10px;
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-end;
+    }
+    .header h1 {
+      font-size: 16pt;
+      font-weight: 900;
+      letter-spacing: -0.5px;
+      color: #121316;
+      text-transform: uppercase;
+    }
+    .header .subtitle {
+      font-size: 8.5pt;
+      color: #5A5A5D;
+      font-weight: 600;
+      margin-top: 2px;
+    }
+    .header .badge {
+      background: #EFECE6;
+      border: 1px solid #DDD8CE;
+      padding: 4px 10px;
+      border-radius: 4px;
+      font-size: 7.5pt;
+      font-weight: 700;
+      text-align: right;
+    }
+    .grid-2 {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+      margin-bottom: 9px;
+    }
+    .card {
+      border: 1px solid #E4E0D8;
+      border-radius: 6px;
+      padding: 9px 11px;
+      background: #FAFAF7;
+    }
+    .card h2 {
+      font-size: 9.5pt;
+      font-weight: 800;
+      color: #121316;
+      margin-bottom: 5px;
+      border-bottom: 1px solid #E4E0D8;
+      padding-bottom: 3px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .card h2 span {
+      font-size: 7.5pt;
+      font-weight: 700;
+      color: #e40000;
+      text-transform: uppercase;
+    }
+    p {
+      margin-bottom: 5px;
+      color: #333336;
+    }
+    ul {
+      margin-left: 14px;
+      margin-bottom: 4px;
+    }
+    li {
+      margin-bottom: 3.5px;
+      color: #333336;
+    }
+    li strong {
+      color: #121316;
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 7.5pt;
+      margin-top: 4px;
+    }
+    th {
+      background: #EFECE6;
+      color: #121316;
+      font-weight: 800;
+      text-align: left;
+      padding: 4px 6px;
+      border: 1px solid #DDD8CE;
+    }
+    td {
+      padding: 3.5px 6px;
+      border: 1px solid #EFECE6;
+      color: #333336;
+      vertical-align: top;
+    }
+    .footer {
+      border-top: 1px solid #DDD8CE;
+      padding-top: 6px;
+      margin-top: 6px;
+      font-size: 7.2pt;
+      color: #7A7B7E;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .highlight {
+      background: #FFF8E7;
+      padding: 1px 4px;
+      border-radius: 3px;
+      font-weight: 600;
+      color: #8A6D3B;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Top Header -->
+  <div class="header">
+    <div>
+      <h1>Project Udyam Digital</h1>
+      <div class="subtitle">Mandatory 1-Page Privacy & Security Note · Statutory Compliance under India's Digital Personal Data Protection Act (DPDP Act), 2023</div>
+    </div>
+    <div class="badge">
+      <div>Airtel Sync 2026 · Track A</div>
+      <div style="color: #e40000; font-weight: 800;">DPDP ACT 2023 SHIELD</div>
+    </div>
+  </div>
+
+  <!-- Row 1: Legal Principles & In-Memory Redaction -->
+  <div class="grid-2">
+    <div class="card">
+      <h2>1. Legal Consent & Purpose Limitation <span>DPDP §6 & §7</span></h2>
+      <p>Project Udyam Digital treats small business owners as autonomous Data Principals:</p>
+      <ul>
+        <li><strong>Itemized, Unconditional Consent Screen:</strong> Before document ingest, users receive an explicit, bilingual notice detailing the exact processing purpose (telecom KYC, port feasibility, and statutory fraud prevention).</li>
+        <li><strong>Granular Revocation Mechanism:</strong> Consent tokens carry cryptographic identifiers (<code style="font-size: 7pt;">CONSENT_YYYY_MM_DD_UUID</code>). If consent is declined or withdrawn, session caches are purged instantly.</li>
+        <li><strong>Zero Bundled Approvals:</strong> KYC consent is never co-mingled with marketing, ad-tracking, or third-party lead brokers.</li>
+      </ul>
+    </div>
+
+    <div class="card">
+      <h2>2. Zero-Persistence In-Memory Redaction <span>DPDP §8</span></h2>
+      <p>National identity numbers (Aadhaar 12-digit UIDs, PAN, Signatory voter IDs) are treated as high-risk PII:</p>
+      <ul>
+        <li><strong>RAM-Level Byte Filtering:</strong> During OCR parsing (via PyMuPDF and Regex), raw byte buffers are parsed in transient RAM and redacted into non-numeric tokens (<code style="font-size: 7pt;">[Aadhaar Redacted-XXXX]</code>) immediately.</li>
+        <li><strong>Zero Unmasked Disk Exposure:</strong> Neither SQLite registries, local caches, application logs, nor cloud telemetry ever persist unredacted 12-digit identity numbers.</li>
+        <li><strong>Verhoeff Checksum Without Persistence:</strong> Checksum mathematical verification occurs in-flight; raw digits are discarded immediately after validity confirmation.</li>
+      </ul>
+    </div>
+  </div>
+
+  <!-- Row 2: LLM Boundary & Registry Leak Prevention -->
+  <div class="grid-2">
+    <div class="card">
+      <h2>3. Generative AI & Voice Privacy Firewall <span>Data Minimization</span></h2>
+      <p>Strict boundary enforcement isolates the external Multimodal LLM from sensitive business PII:</p>
+      <ul>
+        <li><strong>Pre-LLM Sanitization:</strong> The conversational advisor filters user messages through localized regex scrubbers before invoking Gemini. GSTINs, phone numbers, email addresses, and turnover values are anonymized.</li>
+        <li><strong>On-Device Voice Synthesis:</strong> Audio turns utilize the browser Web Speech API. Voice sound waves never transit or persist on backend servers; only scrubbed text tokens reach the orchestrator.</li>
+        <li><strong>Strict Pydantic Schema Guards:</strong> Every LLM structured response is validated against <code style="font-size: 7pt;">Pydantic v2</code> models with <code style="font-size: 7pt;">extra="forbid"</code>, discarding prompt injections and unauthenticated tariffs.</li>
+      </ul>
+    </div>
+
+    <div class="card">
+      <h2>4. Registry Lookups & Anti-Scraping Protection <span>Security Shield</span></h2>
+      <p>Protecting the 3,534 GSTIN and 2,723 Udyam merchant database from enumeration attacks:</p>
+      <ul>
+        <li><strong>Strict Exact-Match Invariant:</strong> Registry queries require full 15-character GSTINs or 19-character Udyam numbers. Prefix searching, wildcard scans, and "did you mean" autocompletes are explicitly disabled.</li>
+        <li><strong>IP Hash Telemetry:</strong> Requesting IP addresses are hashed using one-way SHA-256 before logging to prevent user geolocation tracking.</li>
+        <li><strong>Rate-Limiting & Air-Gap:</strong> Mock government API lookups are throttled per session token, preventing bulk competitor crawling of competitor trade names or turnover bands.</li>
+      </ul>
+    </div>
+  </div>
+
+  <!-- Section 3: Data Mapping Matrix Table -->
+  <div class="card" style="margin-bottom: 9px;">
+    <h2>5. Data Lifecycle & Retention Matrix <span>Enterprise Architecture</span></h2>
+    <table>
+      <thead>
+        <tr>
+          <th>Data Category</th>
+          <th>Specific Elements Collected</th>
+          <th>Lawful Purpose & Justification</th>
+          <th>Storage Medium</th>
+          <th>Retention Horizon</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><strong>Business Identity</strong></td>
+          <td>Trade name, 15-char GSTIN, Udyam Number, Segment, City Tier</td>
+          <td>Catalog eligibility, CPQ discount calculation, statutory B2B tax compliance</td>
+          <td>FastAPI in-memory registry / Relational DB</td>
+          <td>Active contract term + 30 days post-churn</td>
+        </tr>
+        <tr>
+          <td><strong>Signatory Verification</strong></td>
+          <td>Signatory Name, masked ID token (<code style="font-size: 7pt;">[ID Redacted-XXXX]</code>)</td>
+          <td>Legal authority confirmation and digital service agreement execution</td>
+          <td>Ephemeral RAM buffer (PyMuPDF in-flight)</td>
+          <td>Purged from memory &lt; 2 seconds post-verification</td>
+        </tr>
+        <tr>
+          <td><strong>Premises Utility Proof</strong></td>
+          <td>Electricity bill date, address line, utility consumer reference</td>
+          <td>Physical optical fiber trenching feasibility and address freshness (<90 days)</td>
+          <td>Transient memory verification</td>
+          <td>Deleted immediately after SLA confirmation</td>
+        </tr>
+        <tr>
+          <td><strong>Conversational Context</strong></td>
+          <td>Team size, preferred Indic language, budget limit, add-on needs</td>
+          <td>Deterministic DAG bundling and optimal tariff recommendation</td>
+          <td>Session token cache (browser session)</td>
+          <td>Auto-expires on tab close or session reset</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- Section 4: Architecture Guarantee Box -->
+  <div class="card" style="background: #FFFFFF; border-left: 3px solid #121316;">
+    <div style="font-size: 8pt; font-weight: 800; color: #121316; margin-bottom: 2px;">
+      Architectural Invariant Guarantee for Hackathon Jury Evaluation:
+    </div>
+    <div style="font-size: 7.5pt; color: #4A4B4E; line-height: 1.35;">
+      Project Udyam Digital achieves regulatory compliance not as an afterthought or compliance checklist, but as a mathematical constraint baked into the system architecture. By enforcing zero-persistence in-memory redaction, deterministic schema validation, and air-gapped LLM boundaries, the platform ensures that 6 Crore+ Indian MSMEs can onboard digitally with zero risk of identity theft, credential leakage, or unauthorized data monetization.
+    </div>
+  </div>
+
+  <!-- Bottom Footer -->
+  <div class="footer">
+    <div><strong>Team Neural Nexus</strong> (Hrushikesh Ramilla &amp; G Yaswanth Kumar) · ABV-IIITM Gwalior</div>
+    <div>Live Cloud Monolith: <strong>http://65.1.112.251</strong> · Evaluation Anchor: <strong>2026-07-15</strong></div>
+    <div>Page 1 of 1 (Mandatory DPDP Act 2023 Deliverable)</div>
+  </div>
+
+</body>
+</html>

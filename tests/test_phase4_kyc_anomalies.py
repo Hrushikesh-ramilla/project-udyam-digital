@@ -206,6 +206,66 @@ def test_valid_applicant_k09_approval(kyc_engine: KYCEngine, valid_consent: DPDP
     assert len([a for a in res.anomalies if a.severity == "BLOCKER"]) == 0
 
 
+def test_digilocker_verhoeff_checksum():
+    from backend.app.services.kyc_engine import validate_verhoeff
+    # Valid Aadhaar UID
+    assert validate_verhoeff("234567890124") is True
+    assert validate_verhoeff("2345 6789 0124") is True
+    assert validate_verhoeff("2345-6789-0124") is True
+    # Corrupted last digit
+    assert validate_verhoeff("234567890123") is False
+    # Wrong length
+    assert validate_verhoeff("12345") is False
+
+
+def test_digilocker_fast_track_success(kyc_engine: KYCEngine, valid_consent: DPDPConsentPayload):
+    from backend.app.models.schemas import DigiLockerVerifyRequest
+    req = DigiLockerVerifyRequest(
+        aadhaar_number="2345 6789 0124",
+        otp="1234",
+        consent=valid_consent,
+        declared_gstin="32TTNXB7384T1ZW",
+        declared_udyam="UDYAM-KL-00-1234567",
+        applicant_id="K03",
+        cart_requires_gstin=True,
+    )
+    res = kyc_engine.verify_via_digilocker(req)
+    assert res.status == "APPROVED"
+    assert res.redacted_signatory_id == "[Aadhaar Redacted-0124]"
+    assert res.gst_status == "Active"
+    assert res.udyam_status == "ACTIVE"
+    assert len(res.anomalies) == 0
+
+
+def test_digilocker_fast_track_invalid_otp(kyc_engine: KYCEngine, valid_consent: DPDPConsentPayload):
+    from backend.app.models.schemas import DigiLockerVerifyRequest
+    req = DigiLockerVerifyRequest(
+        aadhaar_number="2345 6789 0124",
+        otp="9999",
+        consent=valid_consent,
+        declared_gstin="32TTNXB7384T1ZW",
+        cart_requires_gstin=True,
+    )
+    res = kyc_engine.verify_via_digilocker(req)
+    assert res.status == "REJECTED"
+    assert any(a.code == "INVALID_DIGILOCKER_OTP" for a in res.anomalies)
+
+
+def test_digilocker_fast_track_invalid_checksum(kyc_engine: KYCEngine, valid_consent: DPDPConsentPayload):
+    from backend.app.models.schemas import DigiLockerVerifyRequest
+    req = DigiLockerVerifyRequest(
+        aadhaar_number="2345 6789 0120",
+        otp="1234",
+        consent=valid_consent,
+        declared_gstin="32TTNXB7384T1ZW",
+        cart_requires_gstin=True,
+    )
+    res = kyc_engine.verify_via_digilocker(req)
+    assert res.status == "REJECTED"
+    assert any(a.code == "INVALID_AADHAAR_CHECKSUM" for a in res.anomalies)
+
+
+
 def test_valid_applicant_k12_approval(kyc_engine: KYCEngine, valid_consent: DPDPConsentPayload):
     data_dir = Path("data/kyc_documents")
     docs = {
@@ -218,3 +278,63 @@ def test_valid_applicant_k12_approval(kyc_engine: KYCEngine, valid_consent: DPDP
     assert res.status == "APPROVED"
     assert res.gst_status == "ACTIVE"
     assert len([a for a in res.anomalies if a.severity == "BLOCKER"]) == 0
+
+
+def test_digilocker_verhoeff_checksum():
+    from backend.app.services.kyc_engine import validate_verhoeff
+    # Valid Aadhaar UID
+    assert validate_verhoeff("234567890124") is True
+    assert validate_verhoeff("2345 6789 0124") is True
+    assert validate_verhoeff("2345-6789-0124") is True
+    # Corrupted last digit
+    assert validate_verhoeff("234567890123") is False
+    # Wrong length
+    assert validate_verhoeff("12345") is False
+
+
+def test_digilocker_fast_track_success(kyc_engine: KYCEngine, valid_consent: DPDPConsentPayload):
+    from backend.app.models.schemas import DigiLockerVerifyRequest
+    req = DigiLockerVerifyRequest(
+        aadhaar_number="2345 6789 0124",
+        otp="1234",
+        consent=valid_consent,
+        declared_gstin="32TTNXB7384T1ZW",
+        declared_udyam="UDYAM-KL-00-1234567",
+        applicant_id="K03",
+        cart_requires_gstin=True,
+    )
+    res = kyc_engine.verify_via_digilocker(req)
+    assert res.status == "APPROVED"
+    assert res.redacted_signatory_id == "[Aadhaar Redacted-0124]"
+    assert res.gst_status == "Active"
+    assert res.udyam_status == "ACTIVE"
+    assert len(res.anomalies) == 0
+
+
+def test_digilocker_fast_track_invalid_otp(kyc_engine: KYCEngine, valid_consent: DPDPConsentPayload):
+    from backend.app.models.schemas import DigiLockerVerifyRequest
+    req = DigiLockerVerifyRequest(
+        aadhaar_number="2345 6789 0124",
+        otp="9999",
+        consent=valid_consent,
+        declared_gstin="32TTNXB7384T1ZW",
+        cart_requires_gstin=True,
+    )
+    res = kyc_engine.verify_via_digilocker(req)
+    assert res.status == "REJECTED"
+    assert any(a.code == "INVALID_DIGILOCKER_OTP" for a in res.anomalies)
+
+
+def test_digilocker_fast_track_invalid_checksum(kyc_engine: KYCEngine, valid_consent: DPDPConsentPayload):
+    from backend.app.models.schemas import DigiLockerVerifyRequest
+    req = DigiLockerVerifyRequest(
+        aadhaar_number="2345 6789 0120",
+        otp="1234",
+        consent=valid_consent,
+        declared_gstin="32TTNXB7384T1ZW",
+        cart_requires_gstin=True,
+    )
+    res = kyc_engine.verify_via_digilocker(req)
+    assert res.status == "REJECTED"
+    assert any(a.code == "INVALID_AADHAAR_CHECKSUM" for a in res.anomalies)
+

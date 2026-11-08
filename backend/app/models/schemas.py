@@ -240,6 +240,18 @@ class DPDPConsentPayload(StrictBaseModel):
     granted: bool
 
 
+class DigiLockerVerifyRequest(StrictBaseModel):
+    model_config = ConfigDict(extra="forbid")
+
+    aadhaar_number: str
+    otp: str
+    consent: DPDPConsentPayload
+    declared_gstin: Optional[str] = None
+    declared_udyam: Optional[str] = None
+    applicant_id: Optional[str] = None
+    cart_requires_gstin: bool = False
+
+
 class ExtractedDocPayload(StrictBaseModel):
     model_config = ConfigDict(extra="forbid")
 

@@ -505,6 +505,10 @@ def generate_slides_html():
                 <strong style="color: #121316;">High Cost of Delay:</strong> 17.6-day average cycle time and 3.2 chase calls consume ₹15,000 in sales rep labor per deal, requiring 14.2 months to break even on CAC.
               </div>
             </div>
+
+            <div style="font-size: 11px; color: #4A4B4E; line-height: 1.35; background: #FAF0F0; border-left: 3px solid #E40000; padding: 7px 12px; border-radius: 6px; margin-top: 6px;">
+              <strong style="color: #900;">15.2% Mis-Selling Discovery:</strong> Data audit of <code>smb_leads.csv</code> reveals <strong>56 of 368 activated bundles (15.2%) violated Airtel catalogue rules</strong> (24 wrong tier, 8 below size, 21 inactive GSTIN, 9 missing parent dependencies) due to quota pressure. Udyam Digital's CPQ DAG mathematically guarantees a <strong>0% violation rate</strong>.
+            </div>
           </div>
 
           <!-- The 3 Root Causes + Key Metrics + Financial Impact -->
@@ -546,23 +550,27 @@ def generate_slides_html():
               </div>
             </div>
 
-            <!-- 4-Stat Box Grid -->
-            <div style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px;">
-              <div style="background: #FAF8F5; border: 1px solid #DDD8CE; padding: 7px 8px; border-radius: 6px; text-align: center;">
-                <div style="font-size: 9px; color: #7A7B7E; font-weight: 700; text-transform: uppercase;">Quoting Drop</div>
-                <div style="font-size: 15px; font-weight: 900; color: #121316;">-56.4%</div>
+            <!-- 5-Stat Box Grid -->
+            <div style="display: grid; grid-template-columns: repeat(5, 1fr); gap: 6px;">
+              <div style="background: #FAF8F5; border: 1px solid #DDD8CE; padding: 7px 5px; border-radius: 6px; text-align: center;">
+                <div style="font-size: 8.5px; color: #7A7B7E; font-weight: 700; text-transform: uppercase;">Quoting Drop</div>
+                <div style="font-size: 14px; font-weight: 900; color: #121316;">-56.4%</div>
               </div>
-              <div style="background: #FAF8F5; border: 1px solid #DDD8CE; padding: 7px 8px; border-radius: 6px; text-align: center;">
-                <div style="font-size: 9px; color: #7A7B7E; font-weight: 700; text-transform: uppercase;">Non-GST Gap</div>
-                <div style="font-size: 15px; font-weight: 900; color: #121316;">4.8x Lower</div>
+              <div style="background: #FAF8F5; border: 1px solid #DDD8CE; padding: 7px 5px; border-radius: 6px; text-align: center;">
+                <div style="font-size: 8.5px; color: #7A7B7E; font-weight: 700; text-transform: uppercase;">Non-GST Gap</div>
+                <div style="font-size: 14px; font-weight: 900; color: #121316;">4.8x Lower</div>
               </div>
-              <div style="background: #FAF8F5; border: 1px solid #DDD8CE; padding: 7px 8px; border-radius: 6px; text-align: center;">
-                <div style="font-size: 9px; color: #7A7B7E; font-weight: 700; text-transform: uppercase;">Cycle Time</div>
-                <div style="font-size: 15px; font-weight: 900; color: #121316;">17.6 Days</div>
+              <div style="background: #FAF8F5; border: 1.5px solid #E40000; padding: 7px 5px; border-radius: 6px; text-align: center; background: #FFF5F5;">
+                <div style="font-size: 8.5px; color: #E40000; font-weight: 700; text-transform: uppercase;">Mis-Sell Rate</div>
+                <div style="font-size: 14px; font-weight: 900; color: #E40000;">15.2% (56)</div>
               </div>
-              <div style="background: #FAF8F5; border: 1px solid #DDD8CE; padding: 7px 8px; border-radius: 6px; text-align: center;">
-                <div style="font-size: 9px; color: #7A7B7E; font-weight: 700; text-transform: uppercase;">Direct CAC</div>
-                <div style="font-size: 15px; font-weight: 900; color: #121316;">₹15,000</div>
+              <div style="background: #FAF8F5; border: 1px solid #DDD8CE; padding: 7px 5px; border-radius: 6px; text-align: center;">
+                <div style="font-size: 8.5px; color: #7A7B7E; font-weight: 700; text-transform: uppercase;">Cycle Time</div>
+                <div style="font-size: 14px; font-weight: 900; color: #121316;">17.6 Days</div>
+              </div>
+              <div style="background: #FAF8F5; border: 1px solid #DDD8CE; padding: 7px 5px; border-radius: 6px; text-align: center;">
+                <div style="font-size: 8.5px; color: #7A7B7E; font-weight: 700; text-transform: uppercase;">Direct CAC</div>
+                <div style="font-size: 14px; font-weight: 900; color: #121316;">₹15,000</div>
               </div>
             </div>
 
@@ -1015,6 +1023,7 @@ def generate_slides_html():
               <li><strong>Multi-Product Discount:</strong> 5% off for 2 categories, 10% for 3, 15% for 4+.</li>
               <li><strong>Setup Fee Waiver:</strong> 100% setup fee waived on 12-month plans (₹0 upfront).</li>
               <li><strong>GST Input Credit:</strong> Automatic 18% GST tax deduction calculated for registered firms.</li>
+              <li><strong>0% Mis-Sell Guarantee:</strong> CPQ DAG solver eliminates the 15.2% legacy rule violations (56/368 historic deals had tier/GST/size mismatches).</li>
             </ul>
           </div>
         </div>
@@ -1425,6 +1434,10 @@ def generate_slides_html():
                 <tr style="border-bottom: 1px solid #EFECE6;">
                   <td style="padding: 7px 0; color: #5A5A5D;">6-Month Customer Churn Rate</td>
                   <td style="padding: 7px 0; text-align: right; font-weight: 800; color: #121316;">14.2% → 6.8% (-52.1% via SLAs)</td>
+                </tr>
+                <tr style="border-bottom: 1px solid #EFECE6;">
+                  <td style="padding: 7px 0; color: #5A5A5D;">Catalogue Rule Violation / Mis-Sell Rate</td>
+                  <td style="padding: 7px 0; text-align: right; font-weight: 800; color: #121316;">15.2% (56/368) → 0.0% (-100% via CPQ DAG)</td>
                 </tr>
                 <tr style="border-bottom: 1px solid #EFECE6;">
                   <td style="padding: 7px 0; color: #5A5A5D;">Gross Margin on Bundles</td>

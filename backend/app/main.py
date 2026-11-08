@@ -15,6 +15,7 @@ from backend.app.models.schemas import (
     CommercialBreakdown,
     CreateOrderRequest,
     DPDPConsentPayload,
+    DigiLockerVerifyRequest,
     KYCVerificationResult,
     KYCVerifyAPIRequest,
     LeadRescueItem,
@@ -131,6 +132,15 @@ def verify_kyc(req: KYCVerifyAPIRequest):
     )
 
     return kyc.verify_application(docs, cart_requires_gstin=req.cart_requires_gstin, consent=consent)
+
+
+@app.post("/api/kyc/digilocker", response_model=KYCVerificationResult)
+def verify_digilocker(req: DigiLockerVerifyRequest):
+    """Instant 1-tap DigiLocker e-KYC verification.
+    Validates Aadhaar Verhoeff checksum, redacts UID in-memory, verifies OTP,
+    and pulls verified entity registration directly from GSTN/Udyam registries.
+    """
+    return kyc.verify_via_digilocker(req)
 
 
 @app.post("/api/kyc/upload")
@@ -331,6 +341,17 @@ def download_pptx():
         path=str(target),
         media_type="application/vnd.openxmlformats-officedocument.presentationml.presentation",
         filename="Neural Nexus_ABV-IIITM Gwalior.pptx",
+    )
+
+
+@app.get("/DPDP_Privacy_Note.pdf")
+@app.get("/dpdp_note.pdf")
+def download_dpdp_note():
+    dpdp_file = root_dir / "DPDP_Privacy_Note.pdf"
+    return FileResponse(
+        path=str(dpdp_file),
+        media_type="application/pdf",
+        filename="DPDP_Privacy_Note.pdf",
     )
 
 
