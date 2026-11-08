@@ -1,3 +1,5 @@
+export type AppPersona = "CUSTOMER" | "PARTNER_OPS";
+
 export interface ProductItem {
   product_id: string;
   category: string;
