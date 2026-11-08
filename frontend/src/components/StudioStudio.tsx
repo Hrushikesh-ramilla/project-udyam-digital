@@ -244,14 +244,15 @@ export const StudioStudio: React.FC<StudioStudioProps> = ({
     async function load() {
       const prods = await fetchProducts();
       setProducts(prods);
-      if (!initializedRef.current) {
-        if (recommendedSkus && recommendedSkus.length > 0) {
-          setSelectedProductIds(recommendedSkus);
-        }
-        initializedRef.current = true;
-      }
     }
     load();
+  }, []);
+
+  // Real-time synchronization of recommendedSkus to Dynamic Cart (Issue #15)
+  useEffect(() => {
+    if (recommendedSkus && recommendedSkus.length > 0) {
+      setSelectedProductIds(recommendedSkus);
+    }
   }, [recommendedSkus]);
 
   // Recalculate quote

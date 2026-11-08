@@ -278,3 +278,23 @@ def test_session_language_switches_when_user_explicitly_speaks_hindi(advisor: Ad
     # Should contain Hindi/Hinglish words acknowledging the request
     hi_text = res.display_latin.lower()
     assert any(w in hi_text for w in ["bhai", "aapki", "dukan", "plan", "airfiber", "sasta", "hoga", "hai"])
+
+
+def test_mid_conversation_pivot_to_campus_leased_line_updates_skus(advisor: AdvisorAgent):
+    """Verifies Issue #15: when user pivots mid-conversation to campus scale,
+    advisor extracts P06, P08, P22 and updates recommended_skus and quote in real-time.
+    """
+    from backend.app.models.schemas import MSMEProfileSlots
+
+    # Initial retail store slots
+    initial_slots = MSMEProfileSlots(segment="micro", city_tier=2, employee_count=3, has_gstin=False)
+
+    # Pivot query
+    pivot_msg = "I have another college with 500 students... heavy ML work center, let's go with Biz Leased Line 1G (P06) + Static IPv4 (P08) + Secure Wi-Fi (P22)"
+    res = advisor.process_turn(pivot_msg, previous_slots=initial_slots)
+
+    assert "P06" in res.recommended_skus
+    assert "P08" in res.recommended_skus or "P11" in res.recommended_skus
+    assert "P22" in res.recommended_skus
+    assert res.quote is not None
+    assert res.quote.net_mrc_inr > 10000
