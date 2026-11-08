@@ -294,6 +294,11 @@ def ensure_dual_scripts(
     else:
         pure_latin = "Namaste! Welcome to Airtel Enterprise Digital."
 
+    # If English, native script is identical to Latin (English has no Indic script)
+    if active_lang == "en":
+        pure_native = raw_native if has_indic_script(raw_native) else pure_latin
+        return pure_latin, pure_native
+
     # 2. Guarantee authentic_native has native script
     if has_indic_script(raw_native):
         pure_native = raw_native
@@ -313,8 +318,10 @@ def ensure_dual_scripts(
                 "kn": "ನಮಸ್ಕಾರ! ಏರ್‌ಟೆಲ್ ಬಿಸಿನೆಸ್ ಉದ್ಯಮ್ ಡಿಜಿಟಲ್‌ಗೆ ಸುಸ್ವಾಗತ.",
                 "ml": "നമസ്കാരം! എയർടെൽ ബിസിനസ്സ് ഉദ്യം ഡിജിറ്റലിലേക്ക് സ്വാഗതം.",
                 "or": "ନମସ୍କାର! ଏୟାରଟେଲ ବିଜନେସ ଉଦ୍ୟମ ଡିଜିଟାଲକୁ ଆପଣଙ୍କୁ ସ୍ୱାଗତ।",
-                "en": "నమస్కారం! ఎయిర్‌టెల్ బిజినెస్ ఉద్యమ్ డిజిటల్‌కు స్వాగతం. మీ వ్యాపారానికి కనెక్టివిటీ వివరాలు తెలపండి.",
+                "pa": "ਸਤਿ ਸ੍ਰੀ ਅਕਾਲ! ਏਅਰਟੈੱਲ ਬਿਜ਼ਨਸ ਉੱਦਮ ਡਿਜੀਟਲ ਵਿੱਚ ਤੁਹਾਡਾ ਸਵਾਗਤ ਹੈ।",
+                "as": "নমস্কাৰ! এয়াৰটেল বিজনেছ উদ্যম ডিজিটেললৈ আপোনাক স্বাগতম।",
+                "ur": "خوش آمدید! ایئرٹیل بزنس ادیام ڈیجیٹل میں آپ کا خیر مقدم ہے۔",
             }
-            pure_native = defaults.get(active_lang, defaults["te"])
+            pure_native = defaults.get(active_lang, pure_latin)
 
     return pure_latin, pure_native
