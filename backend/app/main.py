@@ -309,6 +309,7 @@ pptx_beamer_deck = official_pptx if official_pptx.exists() else (root_dir / "Neu
 @app.get("/presentation.pdf")
 @app.get("/Neural_Nexus_ABV-IIITM_Gwalior.pdf")
 @app.get("/Neural_Nexus_ABV_IIITM_Gwalior.pdf")
+@app.get("/Neural Nexus_ABV-IIITM Gwalior.pdf")
 def download_pdf():
     target = official_pdf if official_pdf.exists() else pdf_deck
     return FileResponse(
@@ -323,6 +324,7 @@ def download_pdf():
 @app.get("/presentation_beamer.pptx")
 @app.get("/Neural_Nexus_ABV-IIITM_Gwalior.pptx")
 @app.get("/Neural_Nexus_ABV_IIITM_Gwalior.pptx")
+@app.get("/Neural Nexus_ABV-IIITM Gwalior.pptx")
 def download_pptx():
     target = official_pptx if official_pptx.exists() else pptx_deck
     return FileResponse(
