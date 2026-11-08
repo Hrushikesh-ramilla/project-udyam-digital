@@ -108,8 +108,9 @@ export interface LeadRescueItem {
   stage_reached: string;
   drop_reason?: string | null;
   propensity_score: number;
-  priority_tier: "HIGH" | "MEDIUM" | "LOW";
+  priority_tier: "HIGH" | "MEDIUM" | "NURTURE" | "LOW";
   top_risk_factors: string[];
+  factor_chips?: string[];
   next_best_action: string;
   whatsapp_rescue_link: string;
 }

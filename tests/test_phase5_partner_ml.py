@@ -29,7 +29,7 @@ def test_lightgbm_lead_rescue_training_and_scoring(ml_engine: LeadRescueMLEngine
 
     assert scored.lead_id == sample_lead.lead_id
     assert 0.0 <= scored.propensity_score <= 100.0
-    assert scored.priority_tier in {"HIGH", "MEDIUM", "LOW"}
+    assert scored.priority_tier in {"HIGH", "MEDIUM", "NURTURE", "LOW"}
     assert len(scored.top_risk_factors) >= 1
     assert len(scored.next_best_action) >= 5
     assert "udyam.airtel.in" in scored.whatsapp_rescue_link
@@ -96,3 +96,25 @@ def test_phygital_obo_handshake_link(tracker: ProvisioningTracker):
     assert "obo-approval" in obo_link
     assert order.order_id in obo_link
     assert "PARTNER_KOLKATA_09" in obo_link
+
+
+def test_calibrated_propensity_distribution_and_factor_chips(ml_engine: LeadRescueMLEngine):
+    """Verifies Issue #26: rescue propensity scores are calibrated across stratified tiers
+    (HIGH, MEDIUM, NURTURE) with explanatory factor chips.
+    """
+    top_leads = ml_engine.get_top_rescue_leads(limit=50)
+    assert len(top_leads) > 0
+
+    scores = [l.propensity_score for l in top_leads]
+    assert max(scores) >= 85.0
+    # Must have factor chips explaining the prediction
+    for l in top_leads:
+        assert isinstance(l.factor_chips, list)
+        assert len(l.factor_chips) <= 2
+        assert l.priority_tier in {"HIGH", "MEDIUM", "NURTURE"}
+        if l.propensity_score >= 80.0:
+            assert l.priority_tier == "HIGH"
+        elif l.propensity_score >= 60.0:
+            assert l.priority_tier == "MEDIUM"
+        else:
+            assert l.priority_tier == "NURTURE"
