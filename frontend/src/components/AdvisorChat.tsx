@@ -327,8 +327,8 @@ export const AdvisorChat: React.FC<AdvisorChatProps> = ({ onProfileUpdated }) =>
           const { scrollTop, scrollHeight, clientHeight } = el;
           const isDown = e.deltaY > 0;
           const isUp = e.deltaY < 0;
-          const atBottom = scrollTop + clientHeight >= scrollHeight - 2;
-          const atTop = scrollTop <= 2;
+          const atBottom = scrollTop + clientHeight >= scrollHeight - 5;
+          const atTop = scrollTop <= 5;
           if ((isDown && atBottom) || (isUp && atTop)) {
             return;
           }
