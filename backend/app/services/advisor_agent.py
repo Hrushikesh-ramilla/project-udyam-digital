@@ -7,10 +7,11 @@ import os
 import re
 from typing import Optional
 
+import urllib.request
 try:
     from google import genai
     GENAI_AVAILABLE = True
-except ImportError:
+except Exception:
     GENAI_AVAILABLE = False
 
 from backend.app.db.registry import RegistryDatabase, get_registry
@@ -53,114 +54,159 @@ class AdvisorAgent:
             except Exception as e:
                 logging.warning("Could not initialize google.genai Client: %s", e)
 
-    def _extract_slots_with_gemini(
+
+    def _call_gemini_api(self, prompt: str, timeout: float = 6.0) -> Optional[dict]:
+        """Direct HTTP REST call to Google Gemini API (bypassing SDK packaging issues)."""
+        if not self.api_key or os.environ.get("PYTEST_CURRENT_TEST"):
+            return None
+
+        payload = {
+            "contents": [{"parts": [{"text": prompt}]}],
+            "generationConfig": {
+                "responseMimeType": "application/json",
+                "temperature": 0.7,
+            },
+        }
+        data_bytes = json.dumps(payload).encode("utf-8")
+        models = [
+            "gemini-flash-lite-latest",
+            "gemini-2.5-flash-lite",
+            "gemini-flash-latest",
+        ]
+
+        for mod in models:
+            url = f"https://generativelanguage.googleapis.com/v1beta/models/{mod}:generateContent?key={self.api_key}"
+            try:
+                req = urllib.request.Request(
+                    url,
+                    data=data_bytes,
+                    headers={"Content-Type": "application/json"},
+                )
+                with urllib.request.urlopen(req, timeout=timeout) as resp:
+                    if resp.status == 200:
+                        body = json.loads(resp.read().decode("utf-8"))
+                        text = body["candidates"][0]["content"]["parts"][0]["text"]
+                        return json.loads(text)
+            except Exception as e:
+                logging.warning("Gemini REST model %s failed: %s", mod, e)
+                continue
+        return None
+
+    def _consult_gemini(
         self,
         text: str,
         existing_slots: Optional[MSMEProfileSlots] = None,
         language_code: Optional[str] = None,
         script_mode: Optional[str] = None,
-    ) -> Optional[tuple[MSMEProfileSlots, Optional[str], Optional[str], Optional[str]]]:
-        """Tier 1: Live Multimodal LLM slot-extraction and natural conversational response via Gemini API."""
-        if os.environ.get("PYTEST_CURRENT_TEST") or not self.client:
-            return None
+        history: Optional[list[dict[str, str]]] = None,
+    ) -> Optional[dict]:
+        """Consults live Gemini LLM with complete Project Udyam Enterprise Knowledge Base."""
+        history_context = ""
+        history_context = ""
+        if history:
+            recent_turns = [f"{turn.get('role', 'user')}: {turn.get('content', '')}" for turn in history[-4:]]
+            history_context = "RECENT CONVERSATION HISTORY:\n" + "\n".join(recent_turns) + "\n\n"
+
+        current_profile_str = ""
+        if existing_slots:
+            current_profile_str = (
+                f"CURRENT USER PROFILE: Segment: {existing_slots.segment or 'unknown'}, "
+                f"City Tier: {existing_slots.city_tier or 'unknown'}, "
+                f"Staff: {existing_slots.employee_count or 'unknown'}, "
+                f"GSTIN: {existing_slots.has_gstin}, "
+                f"Budget: ₹{existing_slots.monthly_budget_cap or 'unknown'}/mo, "
+                f"Needs: {existing_slots.detected_needs}\n\n"
+            )
 
         prompt = f"""You are the principal Multilingual AI Enterprise Telecom Advisor for Project Udyam Digital (Accel Telecom / Airtel Business).
-You are a warm, witty, charismatic, and highly intelligent human advisor—NOT a robotic form filler or IVR!
+You are a warm, witty, highly knowledgeable human consultant—NOT an automated form or robotic IVR!
 
-User message: "{text}"
+OUR ENTERPRISE PRODUCT CATALOGUE & KNOWLEDGE BASE:
+1. Base Connectivity:
+   - Biz 5G AirFiber 100 (P04): ₹1,199/month, 100 Mbps, 3-day SLA, wireless 5G antenna, zero road-digging delay, ideal for retail shops & clinics in Tier 1-2.
+   - Biz Fibre 100 (P01): ₹1,099/month, 100 Mbps symmetric, 4-day SLA, physical optical fiber, rock-solid stability.
+   - Biz Fibre 300 (P02): ₹1,699/month, 300 Mbps symmetric, 4-day SLA, high bandwidth for clinics, CA firms, 10+ devices.
+   - Biz Fibre 1G (P03): ₹3,999/month, 1 Gbps symmetric, high-throughput commercial fiber.
+   - Biz Leased Line 100 (P05): ₹6,500/month, 1:1 dedicated, 99.95% uptime SLA, sub-5ms latency.
+   - Biz Leased Line 1G (P06): ₹14,999/month, 1:1 dedicated, mission-critical factory automation.
+2. Value-Added Add-ons:
+   - 4G LTE Auto-Failover (P09): ₹299/mo, automatic instant switchover during fiber cuts, keeps UPI/POS active.
+   - Secure Wi-Fi with Guest Network (P22): ₹199/mo, isolates customer Wi-Fi from billing/UPI.
+   - Airtel Soundbox (P13): ₹149/mo, instant voice alerts for UPI payment confirmations.
+   - Cloud AI CCTV (P23): ₹399/mo, 30-day offsite cloud recording, theft deterrence.
+   - Static IPv4 (P08): ₹299/mo, fixed IP for billing servers, EMR software, remote access.
+   - Google Workspace (P16): ₹125/user/mo, branded business email & Cloud Drive.
+3. Commercial Terms:
+   - 12-month agreement: 100% Setup Fee (OTC) is WAIVED (₹0 upfront!).
+   - Multi-category discounts: 5% off for 2 categories, 10% for 3, 15% for 4+.
+4. Regulatory & Compliance:
+   - Under Indian law, MSMEs with turnover under ₹40 Lakhs are legally GST-exempt. Udyam Registration is 100% legally sufficient for enterprise telecom connection.
+   - DPDP Act 2023: 12-digit national IDs are masked in-memory immediately upon ingestion.
+
+{history_context}{current_profile_str}CURRENT USER MESSAGE: "{text}"
 Language code: {language_code or 'auto'}
-Preferred Script mode: {script_mode or 'auto'}
+Script mode: {script_mode or 'auto'}
 
-GUIDELINES FOR YOUR CONVERSATIONAL RESPONSE:
-1. NEVER dump a generic, canned, bullet-point questionnaire or repetitive template.
-2. If the user greets in any language (e.g. "hola", "bonjour", "namaste", "bagunnara"), warmly acknowledge their greeting in that language or cultural style with genuine hospitality.
-3. If the user asks something off-topic (e.g. recipe, weather, movie, joke, poetry, coding), respond with witty charm, playful personality, and a natural chuckle, then seamlessly ask if they run a business (like a cafe, studio, tech firm) that needs blazing fiber broadband.
-4. If the user gives terse or ambiguous input (e.g. "internet", "price", "speed"), respond with high energy and ask 1 single natural, friendly question about their setup.
-5. If the user writes in Romanized Indic (e.g. Tenglish, Hinglish, Tanglish like "bagunnara ela unnaru nenu kotha business start chesthunna"), respond naturally in that EXACT conversational style!
-6. Generate both:
-   - "display_latin": Natural conversational markdown reply in pure English alphabet (Latin characters only, zero Indic script characters).
-   - "display_native": The corresponding natural response in authentic native Indic script (Telugu script by default, or Hindi/Tamil if detected). (Only for foreign greetings like Spanish 'hola' or French 'bonjour' keep in English).
-   - "spoken_tts": A short, friendly 1-2 sentence voice TTS version without markdown symbols.
-7. Extract business slots if mentioned (segment, city_tier, employee_count, num_sites, has_gstin, detected_needs, monthly_budget_cap).
+INSTRUCTIONS FOR YOUR CONVERSATIONAL RESPONSE:
+1. Chat NATURALLY like Gemini: warm, sharp, conversational, empathetic, and insightful.
+2. NEVER regurgitate a generic, rigid, canned questionnaire or bullet-point form letter.
+3. If the user asks for COMPARISON (e.g. "compare multiple", "is it only one?", "what are other options?", "vs"):
+   - Enthusiastically acknowledge that there are multiple great options!
+   - Compare 2 to 3 distinct practical configurations (e.g. Wireless AirFiber vs Fixed Fiber vs Added Failover/Wi-Fi), clearly explaining prices, setup times, and real-world advantages.
+4. If the user asks ANY question, answer it directly and conversationally with accurate telecom advice.
+5. If the user greets or jokes, respond with warmth and natural wit, then smoothly connect back to their business connectivity.
+6. Provide:
+   - "display_latin": Natural conversational markdown reply in English alphabet.
+   - "display_native": Corresponding natural response in authentic native Indic script (Telugu/Hindi/Tamil etc.).
+   - "spoken_tts": Plain-text conversational audio summary (1-2 sentences, zero markdown symbols like *, #, []).
+   - "recommended_skus": list of 1 to 4 product IDs matching the best plan discussed (e.g. ["P04", "P22"] or ["P01", "P09"]).
+   - Extract business profile slots if mentioned or implied.
 
 Return STRICTLY valid JSON:
 {{
+  "display_latin": "Conversational markdown in English",
+  "display_native": "Conversational markdown in native Indic script",
+  "spoken_tts": "Conversational plain text voice readout",
+  "recommended_skus": ["P04", "P22"],
   "segment": "micro" | "prof" | "multi" | "mfg" | null,
   "city_tier": 1 | 2 | 3 | null,
   "employee_count": integer or null,
   "num_sites": integer or null,
   "has_gstin": true | false | null,
-  "detected_needs": ["broadband", "wifi", "calling", "cloud", "security", "cctv", "iot"],
+  "detected_needs": ["broadband", "wifi", ...],
   "monthly_budget_cap": integer or null,
-  "display_latin": "Conversational markdown response in English alphabet",
-  "display_native": "Conversational markdown response in native Indic script",
-  "spoken_tts": "Natural plain text voice response"
+  "next_suggested_prompts": ["Suggestion 1", "Suggestion 2", "Suggestion 3"]
 }}"""
-        try:
-            def _call():
-                for mod in ["gemini-flash-lite-latest", "gemini-flash-latest"]:
-                    try:
-                        return self.client.models.generate_content(
-                            model=mod,
-                            contents=prompt,
-                            config={"response_mime_type": "application/json"}
-                        )
-                    except Exception as e:
-                        logging.warning("Gemini model %s failed: %s", mod, e)
-                        continue
-                return None
+        return self._call_gemini_api(prompt)
 
-            executor = concurrent.futures.ThreadPoolExecutor(max_workers=1)
-            try:
-                future = executor.submit(_call)
-                res = future.result(timeout=4.0)
-            finally:
-                executor.shutdown(wait=False, cancel_futures=True)
+    def _select_skus_for_slots(self, slots: MSMEProfileSlots) -> list[str]:
+        """Determines best base plan and compatible add-ons based on profile slots."""
+        segment = slots.segment or "micro"
+        tier = slots.city_tier or 2
+        has_gst = bool(slots.has_gstin)
+        needs = set(slots.detected_needs)
 
-            if not res or not res.text:
-                return None
+        if segment == "mfg":
+            base = "P05" if has_gst else "P01"
+        elif segment in {"prof", "multi"}:
+            base = "P02"
+        elif segment == "micro":
+            base = "P04"  # 5G AirFiber for micro
+        else:
+            base = "P01"
 
-            raw_text = res.text.strip()
-            data = json.loads(raw_text)
-
-            slots = existing_slots.model_copy() if existing_slots else MSMEProfileSlots()
-            if not slots.segment and data.get("segment"):
-                slots.segment = str(data["segment"]).lower()
-            if not slots.city_tier and data.get("city_tier"):
-                slots.city_tier = int(data["city_tier"])
-            if not slots.employee_count and data.get("employee_count"):
-                slots.employee_count = int(data["employee_count"])
-            if not slots.num_sites and data.get("num_sites"):
-                slots.num_sites = int(data["num_sites"])
-            if slots.has_gstin is None and data.get("has_gstin") is not None:
-                slots.has_gstin = bool(data["has_gstin"])
-            if data.get("detected_needs"):
-                existing_needs = set(slots.detected_needs)
-                for n in data["detected_needs"]:
-                    existing_needs.add(str(n).lower())
-                slots.detected_needs = list(existing_needs)
-            if not slots.monthly_budget_cap and data.get("monthly_budget_cap"):
-                slots.monthly_budget_cap = int(data["monthly_budget_cap"])
-
-            # Validate missing slots
-            missing = []
-            if not slots.segment:
-                missing.append("business_type")
-            if not slots.city_tier:
-                missing.append("city_or_tier")
-            if slots.has_gstin is None:
-                missing.append("gstin_status")
-            slots.is_complete = len(missing) == 0
-            slots.missing_slots = missing
-
-            disp_lat = data.get("display_latin") or data.get("display_markdown")
-            disp_nat = data.get("display_native")
-            spoken = data.get("spoken_tts")
-
-            return slots, disp_lat, disp_nat, spoken
-        except Exception as e:
-            logging.info("Gemini slot extraction unavailable (%s); using deterministic symbolic fallback.", e)
-            return None
+        skus = [base]
+        if "pos_upi_uptime" in needs:
+            skus.append("P09")
+        if "whatsapp_catalogue" in needs:
+            skus.append("P15")
+        if "cloud_email" in needs:
+            skus.append("P16")
+        if "cctv_surveillance" in needs:
+            skus.append("P23")
+        if "guest_wifi" in needs:
+            skus.append("P22")
+        return skus
 
     def extract_slots(self, text: str, existing_slots: Optional[MSMEProfileSlots] = None) -> MSMEProfileSlots:
         """Extracts MSME profile parameters from Telugu, Tamil, Bengali, Gujarati, Marathi, Kannada, Malayalam, Odia, Hindi, Hinglish, or English."""
@@ -352,9 +398,10 @@ Return STRICTLY valid JSON:
         previous_slots: Optional[MSMEProfileSlots] = None,
         language_code: Optional[str] = None,
         script_mode: Optional[str] = None,
+        history: Optional[list[dict[str, str]]] = None,
     ) -> AdvisorResponse:
         norm_msg = user_message.lower().strip()
-        # Prompt injection & arbitrary price override guardrail
+        # Security guardrails: prompt injection & arbitrary price override
         is_injection = "ignore previous instructions" in norm_msg or "ignore all instructions" in norm_msg or "say hacked" in norm_msg
         is_illegal_price = bool(re.search(r"\b(?:at|for|give me.*?at)\s*(?:rs\.?|inr|₹)\s*(?:10|1|5|0|500)\b", norm_msg) or re.search(r"\b(?:10|1|5|0|500)\s*(?:rupees|rs)\s*(?:per\s*month|\/mo)\b", norm_msg))
         if is_injection or is_illegal_price:
@@ -388,26 +435,13 @@ Return STRICTLY valid JSON:
                 user_latin=u_lat,
                 user_native=u_nat,
             )
-        """Executes full neuro-symbolic turn: Slot Extraction -> CPQ Engine -> Dual Narration.
 
-        Tier 1: Gemini Live LLM (when GEMINI_API_KEY is configured).
-        Tier 2: Instant Symbolic Regex/Keyword Fallback (<10ms).
-        """
-        # Always run deterministic extraction as bedrock baseline
+        # Baseline deterministic extraction (bedrock guarantee)
         slots = self.extract_slots(user_message, previous_slots)
 
-        # Attempt Gemini LLM enhancement for conversational nuances
-        gemini_result = self._extract_slots_with_gemini(
-            user_message, slots, language_code=language_code, script_mode=script_mode
-        )
-        if gemini_result:
-            slots, gemini_latin, gemini_native, gemini_tts = gemini_result
-        else:
-            gemini_latin, gemini_native, gemini_tts = None, None, None
-
         clean_msg = user_message.strip().lower()
-        has_indic_script = bool(re.search(r"[ऀ-ൿ]", user_message))
-        effective_script = script_mode or ("native" if has_indic_script else "latin")
+        has_indic = bool(re.search(r"[ऀ-ൿ]", user_message))
+        effective_script = script_mode or ("native" if has_indic else "latin")
 
         # Detect active language
         active_lang = language_code or "en"
@@ -430,27 +464,126 @@ Return STRICTLY valid JSON:
         elif re.search(r"[ऀ-ॿ]", user_message) or re.search(r"\b(kaise\s*ho|kya\s*haal|sab\s*theek|bhai|bhaiya|chahiye|aapka)\b", clean_msg):
             active_lang = "hi"
 
+        # Intent detection
+        is_comparison = bool(re.search(
+            r"\b(compare|comparison|multiple|options|alternatives|vs|other plans?|not only one|only one|another plan|different plan|kore option|aur option)\b",
+            clean_msg
+        ))
+        is_question = bool(re.search(
+            r"\b(what|why|how|can|is|will|do|explain|tell|difference|kya|kaise|kyun|enti|ela|eppudu)\b",
+            clean_msg
+        ))
         is_foreign = bool(re.search(r"^(hola|bonjour|ciao|aloha|hallo|salut|wie\s*gehts|que\s*tal|konnichiwa|privet|merhaba|sawasdee)\b", clean_msg))
         is_unrelated = bool(re.search(r"\b(recipe|biryani|butter\s*chicken|cook|weather|monsoon|rain|poem|movie|sci-fi|python|binary\s*search|code|joke|capital\s*of|capital\s*city|who\s*won)\b", clean_msg))
         is_terse = clean_msg in {"internet", "broadband", "plans", "price", "how much", "speed", "enterprise", "connection", "quote", "airtel"}
-        is_greeting = bool(re.search(r"^(hey|hi|hello|whats\s*up|what\'s\s*up|good\s*(morning|evening|afternoon)|yo|sup|bhai|bhaiya)\b", clean_msg)) or bool(re.search(r"\b(bagunnara|bagunara|ela\s*unnaru|ela\s*unnav|namaskaram|namasthe|vanakkam|eppadi\s*iruk|kemon\s*ac|kem\s*cho|kase\s*ahat|hegidd|sukhamano|kemiti\s*ach|kaise\s*ho|kya\s*haal|namaste|నమస్కారం|నమస్తే|బాగున్నారా|வணக்கம்|நமஸ்கార్|নমস্কার|નમસ્તે|नमस्कार|ನಮಸ್ಕಾರ|നമസ്കാരം|ନମସ୍କାର)\b", clean_msg))
-        pure_greeting = is_greeting and not slots.is_complete and not bool(slots.segment or slots.city_tier or slots.has_gstin is not None or slots.detected_needs)
-        should_chat_turn = (not slots.is_complete) or is_foreign or is_unrelated or pure_greeting or is_terse
+        is_greeting = bool(re.search(r"^(hey|hi|hello|whats\s*up|what\'s\s*up|good\s*(morning|evening|afternoon)|yo|sup|bhai|bhaiya)\b", clean_msg)) or bool(re.search(r"\b(bagunnara|bagunara|ela\s*unnaru|ela\s*unnav|namaskaram|namasthe|vanakkam|eppadi\s*iruk|kemon\s*ac|kem\s*cho|kase\s*ahat|hegidd|sukhamano|kemiti\s*ach|kaise\s*ho|kya\s*haal|namaste|నమస్కారం|నమస్తే|బాగున్నారా|வணக்கம்|நமஸ்கார்|নমস্কার|નમસ્તે|नमस्कार|ನಮಸ್ಕಾರ|നമസ്കാരം|ନମସ୍କାର)\b", clean_msg))
 
-        # IF GEMINI LIVE RESPONSE AVAILABLE & SLOTS NOT READY FOR QUOTE: USE LIVE LLM
-        if gemini_latin and gemini_native and should_chat_turn:
-            pure_latin, pure_native = ensure_dual_scripts(gemini_latin, gemini_native, active_lang)
+        # -------------------------------------------------------------
+        # TIER 1: LIVE GEMINI ENTERPRISE CONSULTATION (If online)
+        # -------------------------------------------------------------
+        gemini_data = self._consult_gemini(
+            user_message,
+            existing_slots=slots,
+            language_code=active_lang,
+            script_mode=effective_script,
+            history=history,
+        )
+
+        if gemini_data:
+            # Update slots from Gemini
+            if not slots.segment and gemini_data.get("segment"):
+                slots.segment = str(gemini_data["segment"]).lower()
+            if not slots.city_tier and gemini_data.get("city_tier"):
+                slots.city_tier = int(gemini_data["city_tier"])
+            if not slots.employee_count and gemini_data.get("employee_count"):
+                slots.employee_count = int(gemini_data["employee_count"])
+            if not slots.num_sites and gemini_data.get("num_sites"):
+                slots.num_sites = int(gemini_data["num_sites"])
+            if slots.has_gstin is None and gemini_data.get("has_gstin") is not None:
+                slots.has_gstin = bool(gemini_data["has_gstin"])
+            if gemini_data.get("detected_needs"):
+                existing_needs = set(slots.detected_needs)
+                for n in gemini_data["detected_needs"]:
+                    existing_needs.add(str(n).lower())
+                slots.detected_needs = sorted(list(existing_needs))
+            if not slots.monthly_budget_cap and gemini_data.get("monthly_budget_cap"):
+                slots.monthly_budget_cap = int(gemini_data["monthly_budget_cap"])
+
+            missing = []
+            if not slots.segment:
+                missing.append("business_type")
+            if not slots.city_tier:
+                missing.append("city_or_tier")
+            if slots.has_gstin is None:
+                missing.append("gstin_status")
+            slots.is_complete = len(missing) == 0
+            slots.missing_slots = missing
+
+            disp_lat = gemini_data.get("display_latin") or gemini_data.get("display_markdown") or ""
+            disp_nat = gemini_data.get("display_native") or disp_lat
+            spoken = gemini_data.get("spoken_tts") or ""
+            spoken = re.sub(r"[\*#\[\]]", "", spoken).replace("₹", "rupaye ").strip()
+
+            gem_skus = gemini_data.get("recommended_skus") or []
+            valid_skus = [s for s in gem_skus if self.db.get_product(s)]
+            if not valid_skus:
+                valid_skus = self._select_skus_for_slots(slots)
+
+            # Deterministic CPQ Engine execution for live commercials & cart sync
+            quote = None
+            if slots.is_complete or len(valid_skus) > 0:
+                try:
+                    cart_items = [CartItem(product_id=s) for s in valid_skus]
+                    quote = self.cpq.calculate_commercials(cart_items, contract_months=12, strict_dag=True)
+                except Exception as e:
+                    logging.warning("CPQ calculation on Gemini SKUs failed: %s", e)
+
+            pure_latin, pure_native = ensure_dual_scripts(disp_lat, disp_nat, active_lang)
+            user_lat, user_nat = self._dualize_user_message(user_message, active_lang, effective_script)
+
+            prompts = gemini_data.get("next_suggested_prompts") or [
+                "Show details of Biz 5G AirFiber",
+                "Can I add 4G Auto-Failover?",
+                "Proceed to instant KYC",
+            ]
+
+            return AdvisorResponse(
+                slots=slots,
+                quote=quote,
+                recommended_skus=valid_skus,
+                display_markdown=pure_latin if effective_script == "latin" else pure_native,
+                spoken_tts_text=spoken or (pure_latin if effective_script == "latin" else pure_native),
+                next_suggested_prompts=prompts,
+                display_latin=pure_latin,
+                display_native=pure_native,
+                user_latin=user_lat,
+                user_native=user_nat,
+            )
+
+        # -------------------------------------------------------------
+        # TIER 2: DETERMINISTIC SYMBOLIC / HUMAN FALLBACK (offline / pytest)
+        # -------------------------------------------------------------
+        # 1. Comparison & Multiple Options request
+        if is_comparison:
+            f_latin, f_native, f_tts = self._generate_human_fallback(
+                user_message, clean_msg, active_lang, effective_script, slots,
+                is_foreign=False, is_unrelated=False, is_terse=False, is_greeting=False
+            )
+            valid_skus = self._select_skus_for_slots(slots)
+            cart_items = [CartItem(product_id=s) for s in valid_skus]
+            quote = self.cpq.calculate_commercials(cart_items, contract_months=12, strict_dag=True)
+            pure_latin, pure_native = ensure_dual_scripts(f_latin, f_native, active_lang)
             user_lat, user_nat = self._dualize_user_message(user_message, active_lang, effective_script)
             return AdvisorResponse(
                 slots=slots,
-                quote=None,
-                recommended_skus=[],
+                quote=quote,
+                recommended_skus=valid_skus,
                 display_markdown=pure_latin if effective_script == "latin" else pure_native,
-                spoken_tts_text=gemini_tts or (pure_latin if effective_script == "latin" else pure_native),
+                spoken_tts_text=f_tts,
                 next_suggested_prompts=[
-                    "I run a Kirana store in Tier 2 with no GST",
-                    "We are a CA office in Mumbai with GST",
-                    "We have a factory in Surat with 30 staff",
+                    "Tell me more about AirFiber",
+                    "What if I choose Fixed Fiber?",
+                    "Proceed to instant KYC",
                 ],
                 display_latin=pure_latin,
                 display_native=pure_native,
@@ -458,8 +591,8 @@ Return STRICTLY valid JSON:
                 user_native=user_nat,
             )
 
-        # DETERMINISTIC HUMAN-LIKE FALLBACK ENGINE (when Gemini is unavailable, offline, or pytest)
-        if should_chat_turn:
+        # 2. Greeting, Unrelated, Terse, Foreign
+        if is_foreign or is_unrelated or is_terse or (is_greeting and not slots.is_complete):
             f_latin, f_native, f_tts = self._generate_human_fallback(
                 user_message, clean_msg, active_lang, effective_script, slots,
                 is_foreign=is_foreign, is_unrelated=is_unrelated, is_terse=is_terse, is_greeting=is_greeting
@@ -471,7 +604,7 @@ Return STRICTLY valid JSON:
                 quote=None,
                 recommended_skus=[],
                 display_markdown=pure_latin if effective_script == "latin" else pure_native,
-                spoken_tts_text=f_tts or (pure_latin if effective_script == "latin" else pure_native),
+                spoken_tts_text=f_tts,
                 next_suggested_prompts=[
                     "I run a Kirana store in Tier 2 with no GST",
                     "We are a CA office in Mumbai with GST",
@@ -483,7 +616,31 @@ Return STRICTLY valid JSON:
                 user_native=user_nat,
             )
 
-        # Slots are complete: Build user profile for deterministic CPQ
+        # 3. Slots are incomplete: prompt for clarification
+        if not slots.is_complete:
+            f_latin, f_native, f_tts = self._generate_human_fallback(
+                user_message, clean_msg, active_lang, effective_script, slots
+            )
+            pure_latin, pure_native = ensure_dual_scripts(f_latin, f_native, active_lang)
+            user_lat, user_nat = self._dualize_user_message(user_message, active_lang, effective_script)
+            return AdvisorResponse(
+                slots=slots,
+                quote=None,
+                recommended_skus=[],
+                display_markdown=pure_latin if effective_script == "latin" else pure_native,
+                spoken_tts_text=f_tts,
+                next_suggested_prompts=[
+                    "I run a Kirana store in Tier 2 with no GST",
+                    "We are a CA office in Mumbai with GST",
+                    "We have a factory in Surat with 30 staff",
+                ],
+                display_latin=pure_latin,
+                display_native=pure_native,
+                user_latin=user_lat,
+                user_native=user_nat,
+            )
+
+        # 4. Slots are complete & standard recommendation requested
         profile = UserProfile(
             segment=slots.segment or "micro",
             city_tier=slots.city_tier or 2,
@@ -494,45 +651,15 @@ Return STRICTLY valid JSON:
             monthly_budget_cap=slots.monthly_budget_cap,
         )
 
-        # Run deterministic CPQ Engine
         if slots.monthly_budget_cap and slots.monthly_budget_cap > 0:
             budget_res = self.cpq.optimize_budget(profile, slots.monthly_budget_cap)
             quote = budget_res.commercials
             selected_skus = budget_res.selected_skus
         else:
-            # Standard recommendation based on segment and needs
-            eligible = self.cpq.filter_eligible_products(profile)
-            eligible_ids = {sku.product_id for sku in eligible}
-
-            # Select best base plan
-            base_sku = "P01"  # Default Biz Fibre 100
-            if profile.segment == "mfg" and ("P05" in eligible_ids or "P06" in eligible_ids):
-                base_sku = "P05" if "P05" in eligible_ids else "P06"
-            elif profile.segment in {"prof", "multi"} and "P02" in eligible_ids:
-                base_sku = "P02"
-            elif profile.segment == "micro" and "P04" in eligible_ids:
-                base_sku = "P04"  # 5G AirFiber for micro
-            elif "P01" in eligible_ids:
-                base_sku = "P01"
-
-            cart_pids = [base_sku]
-            # Add compatible need-based add-ons
-            if "pos_upi_uptime" in profile.detected_needs and "P09" in eligible_ids:
-                cart_pids.append("P09")
-            if "whatsapp_catalogue" in profile.detected_needs and "P15" in eligible_ids:
-                cart_pids.append("P15")
-            if "cloud_email" in profile.detected_needs and "P16" in eligible_ids:
-                cart_pids.append("P16")
-            if "cctv_surveillance" in profile.detected_needs and "P23" in eligible_ids:
-                cart_pids.append("P23")
-            if "guest_wifi" in profile.detected_needs and "P22" in eligible_ids:
-                cart_pids.append("P22")
-
-            cart_items = [CartItem(product_id=pid) for pid in cart_pids]
+            selected_skus = self._select_skus_for_slots(slots)
+            cart_items = [CartItem(product_id=pid) for pid in selected_skus]
             quote = self.cpq.calculate_commercials(cart_items, contract_months=12, strict_dag=True)
-            selected_skus = cart_pids
 
-        # Generate Dual-Channel Narration
         display_latin, display_native, spoken_tts = self._generate_dual_narration(profile, quote, selected_skus)
         pure_latin, pure_native = ensure_dual_scripts(display_latin, display_native, active_lang)
         display_md = pure_latin if effective_script == "latin" else pure_native
@@ -545,7 +672,7 @@ Return STRICTLY valid JSON:
             display_markdown=display_md,
             spoken_tts_text=spoken_tts,
             next_suggested_prompts=[
-                "Add 2 more business SIMs",
+                "Can you compare with other options?",
                 "Can I add CCTV surveillance?",
                 "Proceed to instant KYC",
             ],
@@ -627,6 +754,50 @@ Return STRICTLY valid JSON:
         is_greeting: bool = False,
     ) -> tuple[str, str, str]:
         """Generates a warm, witty, context-attuned human response across all edge categories."""
+        # 0. Plan Comparison & Alternative Options Query
+        if re.search(r"\b(compare|comparison|multiple|options|alternatives|vs|other plans?|not only one|only one|another plan|different plan|kore option|aur option)\b", clean_msg):
+            budget = slots.monthly_budget_cap or 1500
+            tier = slots.city_tier or 2
+            lat = (
+                "### Flexible Airtel Business Options for Your Enterprise\n\n"
+                "You definitely have multiple great options—we never force just one setup on you! "
+                f"Based on your profile in Tier {tier} (budget ~₹{budget:,}/mo), here is how our top options compare:\n\n"
+                "1. **Option 1: The Wireless Champion (Biz 5G AirFiber 100 + Secure Wi-Fi)**\n"
+                "   * **Net Monthly:** ₹1,298/month (includes bundle discount)\n"
+                "   * **SLA & Install:** Ready in **3 days** with zero road-digging or wire cuts.\n"
+                "   * **Why it fits:** Plug-and-play 5G antenna gives 100 Mbps with an isolated guest Wi-Fi for customers so your billing counter never slows down.\n\n"
+                "2. **Option 2: The High-Reliability Wired Pack (Biz Fibre 100 + 4G LTE Auto-Failover)**\n"
+                "   * **Net Monthly:** ₹1,398/month\n"
+                "   * **SLA & Install:** Ready in **4 business days** via physical optical fiber.\n"
+                "   * **Why it fits:** High physical fiber stability plus automatic 4G cellular backup so UPI payment checkouts never freeze during cable cuts.\n\n"
+                "3. **Option 3: Pure Essential Fiber (Biz Fibre 100)**\n"
+                "   * **Net Monthly:** ₹1,099/month (Waived ₹0 setup fee on 12-month agreement)\n"
+                "   * **Why it fits:** Maximum savings, symmetric 100 Mbps pipe, 100% legal onboarding with your Udyam certificate.\n\n"
+                "Which configuration aligns best with your day-to-day business priority?"
+            )
+            nat = (
+                "### మీ వ్యాపారం కోసం ఎయిర్‌టెల్ బిజినెస్ ప్లాన్‌ల పోలిక\n\n"
+                "మీ వ్యాపారానికి ఖచ్చితంగా బహుళ ఉత్తమ ఎంపికలు ఉన్నాయి! "
+                f"టైర్ {tier} లోని మీ వ్యాపారం కోసం (బడ్జెట్ సుమారు ₹{budget:,}/నెల) ప్రధాన ఎంపికలు ఇక్కడ ఉన్నాయి:\n\n"
+                "1. **ఎంపిక 1: వైర్‌లెస్ ఛాంపియన్ (బిజ్ 5G ఎయిర్‌ఫైబర్ 100 + సురక్షిత వై-ఫై)**\n"
+                "   * **నెలవారీ:** నెలకు ₹1,298 (బండిల్ డిస్కౌంట్‌తో)\n"
+                "   * **యాక్టివేషన్:** కేబుల్ కట్స్ లేకుండా 3 రోజుల్లో ప్రారంభం.\n"
+                "   * **ప్రయోజనం:** ప్లగ్ అండ్ ప్లే 5G యాంటెన్నాతో కస్టమర్ల కోసం ప్రత్యేక గెస్ట్ వై-ఫై.\n\n"
+                "2. **ఎంపిక 2: హై-రెసిలెన్స్ వైర్డ్ ప్యాక్ (బిజ్ ఫైబర్ 100 + 4G ఆటో-ఫెయిల్‌ఓవర్)**\n"
+                "   * **నెలవారీ:** నెలకు ₹1,398\n"
+                "   * **ప్రయోజనం:** వైర్ కట్ అయినా ఆటోమేటిక్ 4G సెల్యులార్ బ్యాకప్‌తో నిరంతర యూపీఐ లావాదేవీలు.\n\n"
+                "3. **ఎంపిక 3: ఎసెన్షియల్ ఫైబర్ (బిజ్ ఫైబర్ 100)**\n"
+                "   * **నెలవారీ:** నెలకు ₹1,099 (12 నెలల ఒప్పందంపై ₹0 సెటప్ రుసుము)\n"
+                "   * **ప్రయోజనం:** ఉద్యమ్ సర్టిఫికేట్‌తో తక్కువ ఖర్చులో హై-స్పీడ్ ఇంటర్నెట్.\n\n"
+                "మీ రోజువారీ వ్యాపారానికి ఏ ప్లాన్ అనుకూలంగా ఉంటుంది?"
+            )
+            tts = (
+                "Aapke business ke liye hamare paas AirFiber wireless aur Fixed Fiber dono ke shandar vikalp hain. "
+                "AirFiber 1298 rupaye mein guest Wi-Fi ke saath 3 din mein activate hota hai, "
+                "jabki Fixed Fiber 4G failover ke saath 1398 rupaye mein aata hai."
+            )
+            return lat, nat, tts
+
         # 1. Foreign Greetings
         if is_foreign:
             if re.search(r"\bhola\b", clean_msg):

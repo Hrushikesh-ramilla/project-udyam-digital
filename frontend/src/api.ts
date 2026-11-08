@@ -26,7 +26,8 @@ export async function sendChatMessage(
   message: string,
   previousSlots?: MSMEProfileSlots | null,
   languageCode?: string | null,
-  scriptMode?: "native" | "latin" | null
+  scriptMode?: "native" | "latin" | null,
+  history?: Array<{ role: string; content: string }> | null
 ): Promise<AdvisorResponse> {
   const res = await fetch(`${API_BASE}/advisor/chat`, {
     method: "POST",
@@ -36,6 +37,7 @@ export async function sendChatMessage(
       previous_slots: previousSlots,
       language_code: languageCode,
       script_mode: scriptMode,
+      history: history || null,
     }),
   });
   if (!res.ok) throw new Error("Chat request failed");

@@ -82,6 +82,7 @@ def advisor_chat(req: ChatRequest):
         req.previous_slots,
         language_code=req.language_code,
         script_mode=req.script_mode,
+        history=req.history,
     )
 
 

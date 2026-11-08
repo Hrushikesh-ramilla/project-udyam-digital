@@ -105,3 +105,27 @@ def test_romanized_latin_script_indic_flow(advisor: AdvisorAgent):
     assert res_slots.slots.segment == "prof"
     assert res_slots.slots.city_tier == 1  # Hyderabad is Tier 1
     assert res_slots.slots.employee_count == 4
+
+
+def test_advisor_comparison_query(advisor: AdvisorAgent):
+    from backend.app.models.schemas import MSMEProfileSlots
+
+    prev = MSMEProfileSlots(
+        segment="micro",
+        city_tier=2,
+        employee_count=3,
+        has_gstin=False,
+        monthly_budget_cap=1500,
+        is_complete=True,
+    )
+
+    # When user asks to compare between multiple plans instead of accepting just one
+    response = advisor.process_turn("can u compare between multiple its not like only oie right", previous_slots=prev)
+
+    # Must provide comparison between options, not just dump a single rigid bundle template
+    assert "Option 1" in response.display_markdown or "options" in response.display_markdown.lower() or "compare" in response.display_markdown.lower()
+    assert response.quote is not None
+    assert len(response.recommended_skus) > 0
+    assert response.spoken_tts_text is not None
+    assert "*" not in response.spoken_tts_text
+    assert "#" not in response.spoken_tts_text

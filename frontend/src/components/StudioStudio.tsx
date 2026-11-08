@@ -375,11 +375,17 @@ export const StudioStudio: React.FC<StudioStudioProps> = ({
     setLoading(true);
 
     try {
+      const historyPayload = messages.slice(-4).map((m) => ({
+        role: m.sender === "user" ? "user" : "assistant",
+        content: scriptMode === "latin" ? (m.textLatin || m.textNative) : (m.textNative || m.textLatin),
+      }));
+
       const res = await sendChatMessage(
         q,
         profileSlots,
         selectedLang !== "auto" ? selectedLang : null,
-        effectiveMode
+        effectiveMode,
+        historyPayload
       );
       onProfileUpdated(res.slots, res.recommended_skus);
       if (res.recommended_skus && res.recommended_skus.length > 0) {

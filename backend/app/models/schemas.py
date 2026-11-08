@@ -11,6 +11,16 @@ class StrictBaseModel(BaseModel):
     class Config:
         extra = "forbid"
 
+    def model_copy(self, **kwargs):
+        if hasattr(super(), "model_copy"):
+            return super().model_copy(**kwargs)
+        return self.copy(**kwargs)
+
+    def model_dump(self, **kwargs):
+        if hasattr(super(), "model_dump"):
+            return super().model_dump(**kwargs)
+        return self.dict(**kwargs)
+
 
 class ProductItem(StrictBaseModel):
     model_config = ConfigDict(extra="forbid")
@@ -313,6 +323,7 @@ class ChatRequest(StrictBaseModel):
     previous_slots: Optional[MSMEProfileSlots] = None
     language_code: Optional[str] = None
     script_mode: Optional[str] = None
+    history: Optional[list[dict[str, str]]] = Field(default=None, description="Recent conversation turns [{'role': 'user'|'assistant', 'content': '...'}]")
 
 
 class CalculateQuoteRequest(StrictBaseModel):
