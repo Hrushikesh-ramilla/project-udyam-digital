@@ -420,6 +420,25 @@ def download_dpdp_note():
 
 
 
+@app.get("/demoVideo")
+@app.get("/demovideo")
+@app.get("/demo.mp4")
+@app.get("/video")
+def serve_demo_video():
+    demo_video_path = root_dir / "Project_Udyam_Digital_Official_Demo.mp4"
+    if not demo_video_path.exists():
+        mp4s = list(root_dir.glob("*.mp4"))
+        if mp4s:
+            demo_video_path = mp4s[0]
+        else:
+            raise HTTPException(status_code=404, detail="Demo video being processed.")
+    return FileResponse(
+        path=str(demo_video_path),
+        media_type="video/mp4",
+        filename="Project_Udyam_Digital_Official_Demo.mp4",
+    )
+
+
 # Mount pre-compiled Frontend PWA if available (Single-Port Production Deployment)
 frontend_dist = Path(__file__).resolve().parent.parent.parent / "frontend" / "dist"
 if frontend_dist.exists():
