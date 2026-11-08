@@ -5,11 +5,15 @@ from typing import Optional
 from pydantic import BaseModel, ConfigDict, Field
 
 
-class StrictBaseModel(BaseModel):
-    model_config = ConfigDict(extra="forbid")
+import pydantic
 
-    class Config:
-        extra = "forbid"
+
+class StrictBaseModel(BaseModel):
+    if getattr(pydantic, "__version__", "").startswith("1."):
+        class Config:
+            extra = "forbid"
+    else:
+        model_config = ConfigDict(extra="forbid")
 
     def model_copy(self, **kwargs):
         if hasattr(super(), "model_copy"):
