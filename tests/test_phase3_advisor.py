@@ -332,3 +332,21 @@ def test_navigation_query_accurately_explains_cart_and_order_tracker(advisor: Ad
     assert "cart" in combined_text or "tracker" in combined_text or "below" in combined_text
     # Must NOT hallucinate that the app dashboard is 'booting up'
     assert "booting up" not in combined_text
+
+
+def test_english_query_with_greeting_history_maintains_english(advisor: AdvisorAgent):
+    """Verifies that an English query preserves English even if prior turns contain
+    greetings like 'Namaste' or prior assistant messages.
+    """
+    import re
+    history = [
+        {"role": "user", "content": "hello"},
+        {"role": "assistant", "content": "Namaste! Welcome to Airtel Business Udyam Digital 🙏 How can I assist your enterprise with broadband, static IPs, or digital connectivity today?"}
+    ]
+    query = "I run a gaming centre with multiple PlayStations. Could you recommend the best internet setup to ensure minimal latency while playing Call of Duty online?"
+    res = advisor.process_turn(query, history=history)
+
+    assert res.display_latin is not None
+    hi_leak = re.findall(r"\b(aapka|aapke|aapki|hoga|hogi|hain|hai|mein|zaroorat|karna|karke|badiya|shandar|chinta|dukaan|matlab|saste|liye|goliya|goliyan|bacche)\b", res.display_latin.lower())
+    assert len(hi_leak) == 0, f"Leaked Hindi in English gaming response: {hi_leak} - full text: {res.display_latin}"
+    assert not re.search(r"[\u0900-\u097F]", res.display_native)

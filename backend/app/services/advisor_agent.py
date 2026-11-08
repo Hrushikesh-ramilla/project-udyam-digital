@@ -157,11 +157,12 @@ Script mode: {script_mode or 'auto'}
 INSTRUCTIONS FOR YOUR CONVERSATIONAL RESPONSE:
 1. Chat NATURALLY like Gemini: warm, sharp, conversational, empathetic, and insightful.
 2. NEVER regurgitate a generic, rigid, canned questionnaire or bullet-point form letter.
-3. CONVERSATION LANGUAGE CONTINUITY & LANGUAGE INERTIA:
-   - You must strictly maintain conversation language inertia across turns. The ongoing conversation language is: {active_lang_name}.
+3. CONVERSATION LANGUAGE CONTINUITY & BIDIRECTIONAL LANGUAGE SWITCHING:
+   - The detected active language for this turn is: {active_lang_name} ({language_code or 'en'}).
+   - IF THE USER ASKS IN ENGLISH, YOU MUST RESPOND IN NATURAL, CONVERSATIONAL ENGLISH in both "display_latin" and "display_native". NEVER reply in Hindi, Hinglish, or any Indic language when the user message is in English!
    - GEOGRAPHIC & ENTITY ISOLATION: NEVER switch languages merely because an Indian city, state, or region is mentioned (e.g. Gwalior, Patna, Varanasi, Jaipur, Lucknow, Kochi, Hyderabad, Bengaluru, etc.) or because of business entity terms like "kirana", "dukan", or "shop".
    - If the ongoing conversation language is English, and the user provides order details, entity names, addresses, or phone numbers (e.g. "hhh shop gwalior 1234567890 number"), you MUST continue responding in ENGLISH in both "display_latin" and "display_native".
-   - ONLY switch languages if the user explicitly switches the conversation by writing substantial sentences in Hindi, Telugu, or another language.
+   - If the user explicitly switches languages (e.g. writes in Hindi, Telugu, Tamil, Bengali, or switches back to English), seamlessly match their current language in this turn.
    - If the user writes in Romanized Indic (e.g. Tenglish, Hinglish, Tanglish, etc.):
      * Respond in the SAME Romanized Indic dialect in "display_latin" using English/Latin alphabet.
      * Provide the corresponding authentic native script transliteration in "display_native" (e.g. Telugu, Hindi, Tamil, Punjabi, Bengali, etc.).
@@ -540,7 +541,7 @@ Return STRICTLY valid JSON:
         effective_script = script_mode or ("native" if has_indic else "latin")
 
         te_romanized = r"\b(ekkuva|takkuva|karchu\w*|entha\w*|cheppan\w*|ayipotha\w*|ayipotu\w*|avuthu\w*|kavali|kavala|chudan\w*|dabbul\w*|kosam|bagunn\w*|ela\s*unna\w*|namaskar\w*|namasthe|meeru|unnam\w*|undi|ledu|enti|eppudu|chala|inka|mari|nenu|memu|maaku|meeku|artham\w*|telusuko\w*|vaddhu|chesuko\w*|dukanam|vyaparam)\b"
-        hi_romanized = r"\b(kaise|kya|kyun|kyu|kaun|kab|kaha|kahan|kitna|kitne|kitni|chahiye|bhai|bhaiya|dukan|dukaan|paise|kharch\w*|sasta|mehanga|batao|bataiye|hoga|hogi|honge|karo|karein|karna|karne|chahte|chahta|chahti|madad|theek|achha|accha|hum|mera|meri|mere|aapka|aapki|aapke|kuch|nahi|nhi|bilkul|namaste)\b"
+        hi_romanized = r"\b(kaise|kya|kyun|kyu|kaun|kab|kaha|kahan|kitna|kitne|kitni|chahiye|bhai|bhaiya|dukan|dukaan|paise|kharch\w*|sasta|mehanga|batao|bataiye|hoga|hogi|honge|karo|karein|karna|karne|chahte|chahta|chahti|madad|theek|achha|accha|hum|mera|meri|mere|aapka|aapki|aapke|kuch|nahi|nhi|bilkul)\b"
         ta_romanized = r"\b(vanakkam|eppadi|iruk\w*|nalama|sollu\w*|irukku|illa|illai|venum|ungal\w*|kaasu|panam|evvalavu|romba|nalla|kadai|theriyum)\b"
         bn_romanized = r"\b(nomoshkar|kemon|ach\w*|bhalo|lagbe|nei|apnar|dokan|koto|taka|shundor)\b"
         gu_romanized = r"\b(kem\s*cho|majama|tamare|tamaro|tamari|joie|nathi|ketla|paisa|dukan)\b"
@@ -549,10 +550,11 @@ Return STRICTLY valid JSON:
         mr_romanized = r"\b(kase\s*ahat|pahije|aahe|ahe|tumhi|tumche|kiti|sangnyasathi|sanga|kasa|kashi|kashe|aamhi)\b"
         or_romanized = r"\b(kemiti|ach\w*|bhalare|darkar|nahin|apana|apnanka|kete|paisa|dokana)\b"
 
-        # Determine session baseline language from conversation history (Session Language Inertia)
+        # Determine session baseline language from conversation history (ONLY from USER turns, never bot greetings)
         session_lang = "en"
         if history:
-            for turn in reversed(history[-4:]):
+            user_turns = [turn for turn in history if turn.get("role") == "user"]
+            for turn in reversed(user_turns[-4:]):
                 txt = (turn.get("content") or "").lower()
                 if re.search(r"[ఀ-౿]", txt) or re.search(te_romanized, txt):
                     session_lang = "te"
@@ -582,6 +584,9 @@ Return STRICTLY valid JSON:
                     session_lang = "or"
                     break
 
+        en_words = r"\b(i|we|my|our|you|your|the|a|an|is|are|am|was|were|can|could|would|should|will|do|does|did|have|has|had|with|for|to|in|on|at|of|from|by|about|minimal|latency|playing|online|recommend|setup|best|internet|broadband|multiple|centre|center|gaming|playstations|office|hospital|clinic|business|shop|company|firm|store|hello|hi|hey|good|morning|evening|afternoon|please|need|want|help|me|us)\b"
+        en_matches = len(re.findall(en_words, clean_msg))
+
         detected_in_msg = None
         if re.search(r"[ఀ-౿]", user_message) or re.search(te_romanized, clean_msg):
             detected_in_msg = "te"
@@ -601,6 +606,8 @@ Return STRICTLY valid JSON:
             detected_in_msg = "mr"
         elif re.search(r"[଀-୿]", user_message) or re.search(or_romanized, clean_msg):
             detected_in_msg = "or"
+        elif not has_indic and en_matches >= 2:
+            detected_in_msg = "en"
 
         if language_code and language_code != "auto":
             active_lang = language_code
