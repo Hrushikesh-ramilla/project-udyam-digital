@@ -4,7 +4,7 @@
 
 Project Udyam Digital is an enterprise-grade solution built for the **Airtel SYNC Hackathon 2026 (Enterprise Track A: Accel Business)**. It replaces the legacy, fragmented, multi-week B2B sales cycle with a unified, four-stage deterministic digital pipeline. The system decouples high-performance client interactivity from sub-millisecond symbolic rule execution, ensuring zero price discrepancies, guaranteed DPDP Act 2023 privacy, resilient Indic transliteration, session language inertia, real-time carrier logistics dispatch, and autonomous partner lead recovery.
 
-[![Live Demo](https://img.shields.io/badge/live%20demo-udyam.hrushikeshramilla.in-brightgreen)](https://udyam.hrushikeshramilla.in)
+[![Live Demo](https://img.shields.io/badge/live%20demo-airtel.hrushikeshramilla.in-brightgreen)](http://airtel.hrushikeshramilla.in)
 [![Cloud IP](https://img.shields.io/badge/cloud%20ip-65.1.112.251-blue)](http://65.1.112.251)
 [![Tests](https://img.shields.io/badge/pytest-56%20passed%20(100%25)-brightgreen)](#testing--verification)
 [![Visual Audit](https://img.shields.io/badge/visual%20audit-100%2F100%20verified-brightgreen)](#hostile-audit--verification-bench)
@@ -248,7 +248,7 @@ The system was audited against an adversarial test suite of **100 diverse, non-r
 This repository contains all 4 mandatory deliverables specified in Page 4 of the official Airtel SYNC Case Study:
 
 1. **Working Prototype:**
-   * **Live Production Instance:** Hosted on AWS EC2 at [`https://udyam.hrushikeshramilla.in`](https://udyam.hrushikeshramilla.in) and `http://65.1.112.251`.
+   * **Live Production Instance:** Hosted on AWS EC2 at [`http://airtel.hrushikeshramilla.in`](http://airtel.hrushikeshramilla.in) (and `https://airtel.hrushikeshramilla.in`), [`https://udyam.hrushikeshramilla.in`](https://udyam.hrushikeshramilla.in), and `http://65.1.112.251`.
    * **Code Repository:** Production codebase with zero mocks or stubs.
    * **Demo Video Script:** A complete, scene-by-scene 3-minute recording script is documented in Section 4 of [`docs/ARCHITECTURE_AND_DPDP_NOTE.md`](docs/ARCHITECTURE_AND_DPDP_NOTE.md#4-three-minute-demo-video-walkthrough-script).
 2. **Solution Architecture Diagram:**

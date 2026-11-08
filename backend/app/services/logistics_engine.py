@@ -57,7 +57,7 @@ class LogisticsEngine:
             f"📑 Tracking AWB: {awb_number}\n"
             f"👷 Field Engineer: {field_engineer} ({engineer_phone})\n"
             f"📍 Origin Hub: {courier_hub}\n\n"
-            f"Track live delivery: https://udyam.hrushikeshramilla.in/track?order_id={order_id}"
+            f"Track live delivery: http://airtel.hrushikeshramilla.in/track?order_id={order_id}"
         )
         whatsapp_link = f"https://wa.me/{engineer_phone.replace(' ', '').replace('+', '')}?text={urllib.parse.quote(wa_text)}"
 

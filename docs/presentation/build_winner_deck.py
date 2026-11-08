@@ -270,7 +270,7 @@ def generate_deck():
               Live Working Prototype & Direct Audit Links
             </div>
             <table style="width: 100%; font-size: 14px; color: #C5C6C9; border-collapse: collapse;">
-              <tr><td style="padding: 4px 0; width: 34%; font-weight: 600; color: #8F9094;">Live Monolith</td><td><a href="https://udyam.hrushikeshramilla.in" style="color: #FF5252; text-decoration: underline; font-weight: 800;">udyam.hrushikeshramilla.in</a> <span style="font-size: 12px; color: #8F9094;">(65.1.112.251)</span></td></tr>
+              <tr><td style="padding: 4px 0; width: 34%; font-weight: 600; color: #8F9094;">Live Monolith</td><td><a href="https://airtel.hrushikeshramilla.in" style="color: #FF5252; text-decoration: underline; font-weight: 800;">airtel.hrushikeshramilla.in</a> <span style="font-size: 12px; color: #8F9094;">(65.1.112.251)</span></td></tr>
               <tr><td style="padding: 4px 0; font-weight: 600; color: #8F9094;">API Docs</td><td><a href="http://65.1.112.251/docs" style="color: #FF5252; text-decoration: underline; font-weight: 750;">http://65.1.112.251/docs</a> <span style="font-size: 12px; color: #8F9094;">(FastAPI Swagger UI)</span></td></tr>
               <tr><td style="padding: 4px 0; font-weight: 600; color: #8F9094;">Repository</td><td style="font-family: monospace; font-size: 13px; color: #FFFFFF;">github.com/hrushikesh-ramilla/project-udyam-digital</td></tr>
               <tr><td style="padding: 4px 0; font-weight: 600; color: #8F9094;">Demo Video</td><td><span style="color: #FF7070; font-weight: 800; text-decoration: underline;">Interactive 100-Case Video Proof & Walkthrough</span></td></tr>
@@ -1229,7 +1229,7 @@ def generate_deck():
 
         <div class="card-beige" style="padding: 10px 16px; margin-top: 12px; margin-right: 340px;">
           <div style="font-size: 13px; color: #121316; font-weight: 700; display: flex; justify-content: space-between; align-items: center;">
-            <span><strong style="color: #E40000;">Live Deployment Guarantee:</strong> Fully deployed on AWS EC2 (65.1.112.251) and domain udyam.hrushikeshramilla.in</span>
+            <span><strong style="color: #E40000;">Live Deployment Guarantee:</strong> Fully deployed on AWS EC2 (65.1.112.251) and domain airtel.hrushikeshramilla.in</span>
             <span class="badge-pill" style="background: #121316; color: #fff; font-weight: 800;">56 / 56 Pytest Tests Passing</span>
           </div>
         </div>
