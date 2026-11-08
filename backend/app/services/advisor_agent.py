@@ -186,6 +186,13 @@ INSTRUCTIONS FOR YOUR CONVERSATIONAL RESPONSE:
      * If the user asks where to find or see their order before KYC: Guide them to scroll down directly below this chat to find the Dynamic Cart ("Configured Solution Architecture") and click "Accept Quote & Start Smart KYC".
      * If the user asks how to navigate or track an existing order: Direct them to the "Order Tracker" tab in the top navigation bar.
      * NEVER claim the portal or dashboard is "booting up", "under construction", or "coming soon". The portal and order tracker are fully active right now.
+9. STRICT ORDER STAGE GATING & ZERO GHOST BOOKING CODES:
+   - You are strictly an exploratory Solution & CPQ Advisor in Stage 1. You CANNOT place, seal, create, or register orders in the database directly in chat.
+   - NEVER generate or hallucinate fake booking references or synthetic IDs (such as "AUDYAM-2023-LL1G", "ORD-1234", "BK-999", etc.).
+   - When the user asks or confirms to place the order ("place the order", "order please", "lock this in", "confirm order", "proceed to buy", "book this", "chalo order kardo", "order cheyandi", etc.):
+     * Inform them with excitement that their selected bundle has been locked in and pre-hydrated into the Dynamic Cart ("Configured Solution Architecture") right below this chat window.
+     * Explain clearly: To finalize the order and generate their official database Order ID with dispatch tracking, they must scroll down to the Cart and click "Accept Quote & Start Smart KYC" (or click the button in this chat).
+     * Once Smart KYC is verified, their real order is created in SQLite and live engineer dispatch tracking begins!
 9. Provide:
    - "display_latin": Conversational markdown in matching Romanized Indic dialect (English alphabet) or English.
    - "display_native": Conversational markdown in authentic native Indic script (Telugu/Hindi/Tamil etc.).
@@ -665,6 +672,17 @@ Return STRICTLY valid JSON:
                     disp_nat = disp_lat
                     spoken = re.sub(r"[\*#\[\]]", "", disp_lat)
 
+            # Sanitize any hallucinated booking references (Issue #12)
+            ghost_booking_regex = r"\b(AUDYAM-[0-9]{4}-[A-Z0-9]+|AUDYAM-[A-Z0-9-]+)\b"
+            if re.search(ghost_booking_regex, disp_lat, re.IGNORECASE):
+                disp_lat = re.sub(ghost_booking_regex, "your staged configuration", disp_lat, flags=re.IGNORECASE)
+                disp_nat = re.sub(ghost_booking_regex, "మీ ఎంపిక చేసిన ప్లాన్", disp_nat, flags=re.IGNORECASE)
+                spoken = re.sub(ghost_booking_regex, "your staged configuration", spoken, flags=re.IGNORECASE)
+
+            # Ensure order placement intent guides user to Cart & KYC instead of fake booking
+            if re.search(r"\b(order\s*placed\s*and\s*sealed|order\s*is\s*officially\s*in\s*our\s*system)\b", disp_lat, re.IGNORECASE):
+                disp_lat += "\n\nTo officially finalize this order and activate live dispatch tracking, please scroll down to the **Dynamic Cart** below and click **'Accept Quote & Start Smart KYC'**."
+
             gem_skus = gemini_data.get("recommended_skus") or []
             valid_skus = [s for s in gem_skus if self.db.get_product(s)]
             if not valid_skus:
@@ -704,9 +722,10 @@ Return STRICTLY valid JSON:
         # -------------------------------------------------------------
         # TIER 2: DETERMINISTIC SYMBOLIC / HUMAN FALLBACK (offline / pytest)
         # -------------------------------------------------------------
-        # 1. Comparison & Navigation request
+        # 1. Comparison, Order Intent & Navigation request
+        is_order_intent = bool(re.search(r"\b(place\s*(?:the\s*)?order|book\s*(?:it|now)?|order\s*(?:kardo|cheyandi|pannunga|kora)|lock\s*(?:this\s*)?in|buy\s*now|proceed\s*to\s*order|so\s*u\s*placed\s*order)\b", clean_msg))
         is_navigation_query = bool(re.search(r"\b(where\s*(?:can\s*i\s*)?(?:see|find|look|track|view)\s*(?:my\s*)?order|how\s*to\s*navigate|where\s*is\s*(?:the\s*)?(?:cart|tracker|dashboard|app|orders?)|navigate\s*me|look\s*it\s*up\s*in\s*my\s*orders)\b", clean_msg))
-        if is_comparison or is_navigation_query:
+        if is_comparison or is_order_intent or is_navigation_query:
             f_latin, f_native, f_tts = self._generate_human_fallback(
                 user_message, clean_msg, active_lang, effective_script, slots,
                 is_foreign=False, is_unrelated=False, is_terse=False, is_greeting=False
@@ -915,6 +934,30 @@ Return STRICTLY valid JSON:
             tts = (
                 "Aapki screen par chat ke theek neeche Dynamic Cart hai jahan aapka plan configured hai. "
                 "KYC complete hone ke baad aap top navigation bar mein Order Tracker tab se live tracking dekh sakte hain."
+            )
+            return lat, nat, tts
+
+        # 0.2 Order Placement Intent & Zero Ghost Bookings (Issue #12)
+        if re.search(r"\b(place\s*(?:the\s*)?order|book\s*(?:it|now)?|order\s*(?:kardo|cheyandi|pannunga|kora)|lock\s*(?:this\s*)?in|buy\s*now|proceed\s*to\s*order|so\s*u\s*placed\s*order)\b", clean_msg):
+            lat = (
+                "### 🚀 Your Enterprise Bundle is Locked & Staged!\n\n"
+                "Your customized Airtel Business configuration has been locked in and pre-hydrated into the **Dynamic Cart** (*Configured Solution Architecture*) directly below this chat window.\n\n"
+                "To officially generate your verified database Order ID and schedule deployment:\n"
+                "1. Scroll down to the **Dynamic Cart** below (or click the action button in this chat).\n"
+                "2. Click **'Accept Quote & Start Smart KYC'** to complete instant DPDP-compliant verification.\n\n"
+                "Once Smart KYC passes, your real database Order ID is generated and our installation dispatch team is instantly scheduled!"
+            )
+            nat = (
+                "### 🚀 మీ ఎంటర్‌ప్రైజ్ ప్లాన్ ఖరారైంది!\n\n"
+                "మీ అనుకూలీకరించిన ప్లాన్ ఈ చాట్ విండో కింద ఉన్న **డైనమిక్ కార్ట్** లో సిద్ధంగా ఉంది.\n\n"
+                "అధికారిక ఆర్డర్ ఐడీని పొందడానికి మరియు ఇన్‌స్టాలేషన్ ప్రారంభించడానికి:\n"
+                "1. క్రింద ఉన్న **డైనమిక్ కార్ట్** వద్దకు వెళ్ళండి.\n"
+                "2. **'Accept Quote & Start Smart KYC'** బటన్ క్లిక్ చేసి సురక్షిత ధృవీకరణ పూర్తి చేయండి.\n\n"
+                "కేవైసీ పూర్తయిన వెంటనే మీ రియల్ ఆర్డర్ ఐడీ రూపొందించబడుతుంది మరియు ఫీల్డ్ ఇంజనీర్ కేటాయించబడతారు!"
+            )
+            tts = (
+                "Aapka plan lock karke chat ke theek neeche Dynamic Cart mein stage kar diya gaya hai. "
+                "Official order ID generate karne ke liye neeche diye gaye Accept Quote and Start Smart KYC button par click karein."
             )
             return lat, nat, tts
 
