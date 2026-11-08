@@ -150,3 +150,26 @@ input[type="range"]::-webkit-slider-thumb:hover {
 ::-webkit-scrollbar-thumb:hover {
   background: rgba(235, 229, 217, 0.25);
 }
+
+
+/* Custom Chat & Container Scrollbar */
+.scrollbar-thin::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+.scrollbar-thin::-webkit-scrollbar-track {
+  background: rgba(3, 4, 5, 0.4);
+  border-radius: 9999px;
+}
+.scrollbar-thin::-webkit-scrollbar-thumb {
+  background: rgba(235, 229, 217, 0.28);
+  border-radius: 9999px;
+  border: 1px solid rgba(235, 229, 217, 0.08);
+}
+.scrollbar-thin::-webkit-scrollbar-thumb:hover {
+  background: rgba(235, 229, 217, 0.55);
+}
+.scrollbar-thin {
+  scrollbar-width: thin;
+  scrollbar-color: rgba(235, 229, 217, 0.28) rgba(3, 4, 5, 0.4);
+}

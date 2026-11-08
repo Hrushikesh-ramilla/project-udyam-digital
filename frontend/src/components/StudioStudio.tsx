@@ -223,6 +223,11 @@ export const StudioStudio: React.FC<StudioStudioProps> = ({
         behavior: "smooth",
       });
     }
+    setTimeout(() => {
+      if (chatScrollRef.current) {
+        chatScrollRef.current.scrollTop = chatScrollRef.current.scrollHeight;
+      }
+    }, 100);
   };
 
   useEffect(() => {
@@ -469,7 +474,7 @@ export const StudioStudio: React.FC<StudioStudioProps> = ({
       </div>
 
       {/* WhatsApp / ChatGPT Preserved Chat Thread Box */}
-      <div className="luxury-glass rounded-3xl p-5 sm:p-7 border border-[rgba(235,229,217,0.08)] shadow-[0_20px_50px_rgba(0,0,0,0.7)] space-y-4">
+      <div data-lenis-prevent="true" className="luxury-glass rounded-3xl p-5 sm:p-7 border border-[rgba(235,229,217,0.08)] shadow-[0_20px_50px_rgba(0,0,0,0.7)] space-y-4">
         {/* Chat Header & Dual-Script Mode Switch */}
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-3 border-b border-[rgba(235,229,217,0.06)]">
           <div className="flex items-center space-x-3">
@@ -550,7 +555,17 @@ export const StudioStudio: React.FC<StudioStudioProps> = ({
 
         {/* Scrollable Preserved Message Thread Container (Empty on initial load) */}
         {(messages.length > 0 || loading) && (
-          <div ref={chatScrollRef} className="max-h-[380px] overflow-y-auto space-y-3 pr-2 no-scrollbar">
+          <div
+            ref={chatScrollRef}
+            data-lenis-prevent="true"
+            data-lenis-prevent-wheel="true"
+            data-lenis-prevent-touch="true"
+            className="max-h-[420px] overflow-y-auto overscroll-contain space-y-3 pr-2 scrollbar-thin"
+            style={{ overscrollBehavior: "contain" }}
+            onWheel={(e) => {
+              e.stopPropagation();
+            }}
+          >
             {messages.map((m) => {
               const isUser = m.sender === "user";
               let displayedText = scriptMode === "latin" ? (m.textLatin || m.textNative) : (m.textNative || m.textLatin);

@@ -251,7 +251,13 @@ export const CPQCart: React.FC<CPQCartProps> = ({
               })()}
 
               {/* Itemized SKUs */}
-              <div className="divide-y divide-[rgba(235,229,217,0.04)] max-h-48 overflow-y-auto pr-1">
+              <div
+                data-lenis-prevent="true"
+                data-lenis-prevent-wheel="true"
+                className="divide-y divide-[rgba(235,229,217,0.04)] max-h-48 overflow-y-auto overscroll-contain pr-1 scrollbar-thin"
+                style={{ overscrollBehavior: "contain" }}
+                onWheel={(e) => e.stopPropagation()}
+              >
                 {quote && quote.items.length > 0 ? (
                   quote.items.map((item) => (
                     <div key={item.product_id} className="py-2 flex items-center justify-between text-xs">
@@ -353,7 +359,11 @@ export const CPQCart: React.FC<CPQCartProps> = ({
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: -6 }}
             transition={{ duration: 0.2, ease: [0.22, 1, 0.36, 1] }}
-            className="space-y-3 max-h-[580px] overflow-y-auto pr-1"
+            data-lenis-prevent="true"
+            data-lenis-prevent-wheel="true"
+            className="space-y-3 max-h-[580px] overflow-y-auto overscroll-contain pr-1 scrollbar-thin"
+            style={{ overscrollBehavior: "contain" }}
+            onWheel={(e) => e.stopPropagation()}
           >
             {categories.map((cat) => {
               const catProds = products.filter((p) => p.category === cat);

@@ -26,11 +26,24 @@ export const App: React.FC = () => {
   const [kycResult, setKycResult] = useState<KYCVerificationResult | null>(null);
   const [order, setOrder] = useState<ProvisioningOrder | null>(null);
 
-  // Initialize Lenis smooth inertial scroll
+  // Initialize Lenis smooth inertial scroll with nested scroll protection
   useEffect(() => {
     const lenis = new Lenis({
-      duration: 1.2,
+      duration: 1.0,
       easing: (t) => Math.min(1, 1.001 - Math.pow(2, -10 * t)),
+      allowNestedScroll: true,
+      prevent: (node) => {
+        return (
+          node instanceof HTMLElement && (
+            node.hasAttribute("data-lenis-prevent") ||
+            Boolean(node.closest("[data-lenis-prevent]")) ||
+            node.classList.contains("overflow-y-auto") ||
+            Boolean(node.closest(".overflow-y-auto")) ||
+            node.classList.contains("overflow-x-auto") ||
+            Boolean(node.closest(".overflow-x-auto"))
+          )
+        );
+      },
     });
     function raf(time: number) {
       lenis.raf(time);
