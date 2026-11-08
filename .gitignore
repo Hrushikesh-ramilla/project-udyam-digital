@@ -44,7 +44,9 @@ yarn-error.log*
 frontend/.next/
 frontend/out/
 
-# IDE & OS
+# Presentation builds
+docs/presentation/build_html/
+
 .vscode/
 .idea/
 *.swp

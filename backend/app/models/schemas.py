@@ -5,7 +5,14 @@ from typing import Optional
 from pydantic import BaseModel, ConfigDict, Field
 
 
-class ProductItem(BaseModel):
+class StrictBaseModel(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+
+    class Config:
+        extra = "forbid"
+
+
+class ProductItem(StrictBaseModel):
     model_config = ConfigDict(extra="forbid")
 
     product_id: str = Field(description="Unique product identifier (e.g., P01)")
@@ -26,7 +33,7 @@ class ProductItem(BaseModel):
     target_segments: list[str] = Field(description="Target business segments (micro, prof, multi, mfg)")
 
 
-class GSTINRecord(BaseModel):
+class GSTINRecord(StrictBaseModel):
     model_config = ConfigDict(extra="forbid")
 
     gstin: str = Field(description="15-character GST identification number")
@@ -39,7 +46,7 @@ class GSTINRecord(BaseModel):
     status: str = Field(description="Taxpayer status: Active, Cancelled, Suspended, etc.")
 
 
-class UdyamRecord(BaseModel):
+class UdyamRecord(StrictBaseModel):
     model_config = ConfigDict(extra="forbid")
 
     udyam_number: str = Field(description="Official Udyam registration number (e.g. UDYAM-XX-00-XXXXXXX)")
@@ -52,7 +59,7 @@ class UdyamRecord(BaseModel):
     date_of_registration: str = Field(description="Registration date in YYYY-MM-DD format")
 
 
-class SMBLeadRecord(BaseModel):
+class SMBLeadRecord(StrictBaseModel):
     model_config = ConfigDict(extra="forbid")
 
     lead_id: str
@@ -97,7 +104,7 @@ class SMBLeadRecord(BaseModel):
     acquisition_cost_inr: int
 
 
-class RegistryLookupResponse(BaseModel):
+class RegistryLookupResponse(StrictBaseModel):
     model_config = ConfigDict(extra="forbid")
 
     found: bool
@@ -107,7 +114,7 @@ class RegistryLookupResponse(BaseModel):
 
 
 # CPQ & DAG Schemas
-class UserProfile(BaseModel):
+class UserProfile(StrictBaseModel):
     model_config = ConfigDict(extra="forbid")
 
     segment: str = Field(description="Business segment: micro, prof, multi, mfg")
@@ -119,14 +126,14 @@ class UserProfile(BaseModel):
     monthly_budget_cap: Optional[int] = Field(default=None, description="Optional monthly budget cap in INR")
 
 
-class CartItem(BaseModel):
+class CartItem(StrictBaseModel):
     model_config = ConfigDict(extra="forbid")
 
     product_id: str
     quantity: int = Field(default=1, ge=1)
 
 
-class CartItemBreakdown(BaseModel):
+class CartItemBreakdown(StrictBaseModel):
     model_config = ConfigDict(extra="forbid")
 
     product_id: str
@@ -141,7 +148,7 @@ class CartItemBreakdown(BaseModel):
     requires_gstin: bool
 
 
-class DependencyLock(BaseModel):
+class DependencyLock(StrictBaseModel):
     model_config = ConfigDict(extra="forbid")
 
     dependent_sku: str
@@ -151,7 +158,7 @@ class DependencyLock(BaseModel):
     reason: str
 
 
-class CommercialBreakdown(BaseModel):
+class CommercialBreakdown(StrictBaseModel):
     model_config = ConfigDict(extra="forbid")
 
     items: list[CartItemBreakdown]
@@ -167,7 +174,7 @@ class CommercialBreakdown(BaseModel):
     dependency_locks: list[DependencyLock]
 
 
-class ReverseBudgetResult(BaseModel):
+class ReverseBudgetResult(StrictBaseModel):
     model_config = ConfigDict(extra="forbid")
 
     budget_inr: int
@@ -178,7 +185,7 @@ class ReverseBudgetResult(BaseModel):
 
 
 # Advisor Schemas
-class MSMEProfileSlots(BaseModel):
+class MSMEProfileSlots(StrictBaseModel):
     model_config = ConfigDict(extra="forbid")
 
     segment: Optional[str] = Field(default=None, description="micro, prof, multi, mfg")
@@ -192,7 +199,7 @@ class MSMEProfileSlots(BaseModel):
     missing_slots: list[str] = Field(default_factory=list, description="Remaining slots needed")
 
 
-class AdvisorResponse(BaseModel):
+class AdvisorResponse(StrictBaseModel):
     model_config = ConfigDict(extra="forbid")
 
     slots: MSMEProfileSlots
@@ -208,7 +215,7 @@ class AdvisorResponse(BaseModel):
 
 
 # KYC & DPDP Schemas
-class DPDPConsentPayload(BaseModel):
+class DPDPConsentPayload(StrictBaseModel):
     model_config = ConfigDict(extra="forbid")
 
     consent_id: str
@@ -219,7 +226,7 @@ class DPDPConsentPayload(BaseModel):
     granted: bool
 
 
-class ExtractedDocPayload(BaseModel):
+class ExtractedDocPayload(StrictBaseModel):
     model_config = ConfigDict(extra="forbid")
 
     file_sha256: str
@@ -227,7 +234,7 @@ class ExtractedDocPayload(BaseModel):
     extracted_fields: dict[str, str]
 
 
-class KYCAnomaly(BaseModel):
+class KYCAnomaly(StrictBaseModel):
     model_config = ConfigDict(extra="forbid")
 
     code: str
@@ -236,7 +243,7 @@ class KYCAnomaly(BaseModel):
     remediation: Optional[str] = None
 
 
-class KYCVerificationResult(BaseModel):
+class KYCVerificationResult(StrictBaseModel):
     model_config = ConfigDict(extra="forbid")
 
     applicant_id: Optional[str] = None
@@ -252,7 +259,7 @@ class KYCVerificationResult(BaseModel):
 
 
 # Lead Rescue ML & Provisioning Schemas
-class LeadRescueItem(BaseModel):
+class LeadRescueItem(StrictBaseModel):
     model_config = ConfigDict(extra="forbid")
 
     lead_id: str
@@ -271,7 +278,7 @@ class LeadRescueItem(BaseModel):
     whatsapp_rescue_link: str
 
 
-class ProvisioningMilestone(BaseModel):
+class ProvisioningMilestone(StrictBaseModel):
     model_config = ConfigDict(extra="forbid")
 
     stage_id: str
@@ -283,7 +290,7 @@ class ProvisioningMilestone(BaseModel):
     whatsapp_preview: str
 
 
-class ProvisioningOrder(BaseModel):
+class ProvisioningOrder(StrictBaseModel):
     model_config = ConfigDict(extra="forbid")
 
     order_id: str
@@ -299,7 +306,7 @@ class ProvisioningOrder(BaseModel):
 
 
 # API Request Schemas
-class ChatRequest(BaseModel):
+class ChatRequest(StrictBaseModel):
     model_config = ConfigDict(extra="forbid")
 
     user_message: str
@@ -308,21 +315,21 @@ class ChatRequest(BaseModel):
     script_mode: Optional[str] = None
 
 
-class CalculateQuoteRequest(BaseModel):
+class CalculateQuoteRequest(StrictBaseModel):
     model_config = ConfigDict(extra="forbid")
 
     cart: list[CartItem]
     contract_months: int = 12
 
 
-class OptimizeBudgetRequest(BaseModel):
+class OptimizeBudgetRequest(StrictBaseModel):
     model_config = ConfigDict(extra="forbid")
 
     profile: UserProfile
     max_monthly_budget: int
 
 
-class CreateOrderRequest(BaseModel):
+class CreateOrderRequest(StrictBaseModel):
     model_config = ConfigDict(extra="forbid")
 
     business_name: str
@@ -332,7 +339,7 @@ class CreateOrderRequest(BaseModel):
     partner_id: Optional[str] = None
 
 
-class KYCVerifyAPIRequest(BaseModel):
+class KYCVerifyAPIRequest(StrictBaseModel):
     model_config = ConfigDict(extra="forbid")
 
     applicant_preset: Optional[str] = None  # K01, K03, K05, K07, K11, K12

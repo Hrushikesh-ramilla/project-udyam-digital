@@ -291,7 +291,7 @@ def get_judge_scenario(scenario_id: str):
         "expected_behavior": expected_behavior,
         "notes": notes,
         "remediation": remediation,
-        "verification_result": kyc_res.model_dump(),
+        "verification_result": kyc_res.model_dump() if hasattr(kyc_res, "model_dump") else kyc_res.dict(),
     }
 
 
