@@ -14,12 +14,18 @@ import {
 } from "lucide-react";
 import { LeadRescueItem } from "../types";
 import { fetchRescueLeads } from "../api";
+import { LeadRecoveryModal } from "./LeadRecoveryModal";
 
-export const PartnerRescueConsole: React.FC = () => {
+export interface PartnerRescueConsoleProps {
+  onPreHydrateCart?: (lead: LeadRescueItem, skus: string[]) => void;
+}
+
+export const PartnerRescueConsole: React.FC<PartnerRescueConsoleProps> = ({ onPreHydrateCart }) => {
   const [leads, setLeads] = useState<LeadRescueItem[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
   const [filterSegment, setFilterSegment] = useState<string>("ALL");
   const [searchQuery, setSearchQuery] = useState<string>("");
+  const [selectedLead, setSelectedLead] = useState<LeadRescueItem | null>(null);
 
   useEffect(() => {
     async function load() {
@@ -181,17 +187,15 @@ export const PartnerRescueConsole: React.FC = () => {
                         </div>
                       </td>
                       <td className="py-3.5 px-4 text-right">
-                        <motion.a
+                        <motion.button
                           whileHover={{ scale: 1.03 }}
                           whileTap={{ scale: 0.97 }}
-                          href={lead.whatsapp_rescue_link}
-                          target="_blank"
-                          rel="noreferrer"
-                          className="inline-flex items-center space-x-1.5 bg-emerald-600 hover:bg-emerald-500 text-white font-medium py-1.5 px-3.5 rounded-xl text-xs transition-all shadow-[0_0_12px_rgba(16,185,129,0.3)]"
+                          onClick={() => setSelectedLead(lead)}
+                          className="inline-flex items-center space-x-1.5 bg-emerald-600 hover:bg-emerald-500 text-white font-medium py-1.5 px-3.5 rounded-xl text-xs transition-all shadow-[0_0_12px_rgba(16,185,129,0.3)] cursor-pointer"
                         >
                           <MessageSquare className="w-3.5 h-3.5" />
                           <span>Rescue Lead</span>
-                        </motion.a>
+                        </motion.button>
                       </td>
                     </tr>
                   );
@@ -201,6 +205,14 @@ export const PartnerRescueConsole: React.FC = () => {
           </table>
         </div>
       </div>
+
+      {/* In-App Next-Best-Action (NBA) Recovery Drawer */}
+      <LeadRecoveryModal
+        lead={selectedLead}
+        isOpen={Boolean(selectedLead)}
+        onClose={() => setSelectedLead(null)}
+        onPreHydrateCart={onPreHydrateCart}
+      />
     </div>
   );
 };

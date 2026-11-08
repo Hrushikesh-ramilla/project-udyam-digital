@@ -13,6 +13,7 @@ import {
   KYCVerificationResult,
   ProvisioningOrder,
   AppPersona,
+  LeadRescueItem,
 } from "./types";
 import { createProvisioningOrder, calculateQuote } from "./api";
 import { ShieldCheck, Sparkles, ArrowRight } from "lucide-react";
@@ -33,6 +34,34 @@ export const App: React.FC = () => {
   const [quote, setQuote] = useState<CommercialBreakdown | null>(null);
   const [kycResult, setKycResult] = useState<KYCVerificationResult | null>(null);
   const [order, setOrder] = useState<ProvisioningOrder | null>(null);
+  const [rescueBanner, setRescueBanner] = useState<string | null>(null);
+
+  const handleRescueLeadPreHydrate = (lead: LeadRescueItem, skus: string[]) => {
+    const seg = lead.segment.toLowerCase();
+    const mappedSegment = seg.includes("mfg") || seg.includes("manufactur")
+      ? "mfg"
+      : seg.includes("multi") || seg.includes("chain")
+      ? "multi"
+      : seg.includes("prof") || seg.includes("office")
+      ? "prof"
+      : "micro";
+
+    setProfileSlots({
+      segment: mappedSegment,
+      city_tier: lead.city_tier,
+      has_gstin: lead.has_gstin,
+      monthly_budget_cap: lead.monthly_spend_inr,
+      num_sites: 1,
+      employee_count: 5,
+      detected_needs: ["broadband", "wifi"],
+      is_complete: true,
+      missing_slots: [],
+    });
+    setRecommendedSkus(skus);
+    setTab("studio");
+    setRescueBanner(`Pre-hydrated dynamic cart for ${lead.business_name} with recommended rescue bundle!`);
+    setTimeout(() => setRescueBanner(null), 5000);
+  };
 
   // Initialize Lenis smooth inertial scroll with nested scroll protection
   useEffect(() => {
@@ -49,8 +78,8 @@ export const App: React.FC = () => {
         // Seamless nested scroll chaining: only prevent while container has scroll room
         const scrollable = node.closest(".overflow-y-auto") as HTMLElement | null;
         if (scrollable && scrollable.scrollHeight > scrollable.clientHeight) {
-          const atTop = scrollable.scrollTop <= 2;
-          const atBottom = scrollable.scrollTop + scrollable.clientHeight >= scrollable.scrollHeight - 2;
+          const atTop = scrollable.scrollTop <= 5;
+          const atBottom = scrollable.scrollTop + scrollable.clientHeight >= scrollable.scrollHeight - 5;
           if (atTop || atBottom) {
             return false;
           }
@@ -294,6 +323,27 @@ export const App: React.FC = () => {
       <Navbar currentTab={currentTab} setTab={setTab} persona={persona} setPersona={setPersona} />
 
       <main className="flex-1 max-w-5xl w-full mx-auto px-4 sm:px-6 py-10 sm:py-14">
+        {/* Pre-Hydrate Rescue Winback Toast/Banner */}
+        {rescueBanner && (
+          <motion.div
+            initial={{ opacity: 0, y: -8 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -8 }}
+            className="mb-5 p-3.5 bg-emerald-950/60 border border-emerald-500/40 rounded-2xl flex items-center justify-between text-xs text-emerald-300 font-mono shadow-[0_0_20px_rgba(16,185,129,0.2)]"
+          >
+            <div className="flex items-center space-x-2">
+              <span className="w-2 h-2 rounded-full bg-emerald-400 animate-ping" />
+              <span>{rescueBanner}</span>
+            </div>
+            <button
+              onClick={() => setRescueBanner(null)}
+              className="text-emerald-400 hover:text-white px-2 py-0.5 rounded-lg bg-emerald-900/40 cursor-pointer"
+            >
+              Dismiss
+            </button>
+          </motion.div>
+        )}
+
         <AnimatePresence mode="wait">
           {currentTab === "studio" && (
             <motion.div
@@ -380,7 +430,7 @@ export const App: React.FC = () => {
               exit={{ opacity: 0, y: -12, filter: "blur(4px)" }}
               transition={{ duration: 0.38, ease: [0.16, 1, 0.3, 1] }}
             >
-              <PartnerRescueConsole />
+              <PartnerRescueConsole onPreHydrateCart={handleRescueLeadPreHydrate} />
             </motion.div>
           )}
 

@@ -2,6 +2,7 @@ import React, { useState, useEffect, useRef } from "react";
 import { motion, AnimatePresence } from "motion/react";
 import {
   Sparkles,
+  ArrowDown,
   Send,
   Volume2,
   Sliders,
@@ -37,6 +38,8 @@ export interface ChatMessage {
   textNative: string;
   timestamp: string;
   spokenTts?: string | null;
+  quote?: CommercialBreakdown | null;
+  recommendedSkus?: string[] | null;
 }
 
 const INDIC_LANGS = [
@@ -220,6 +223,22 @@ export const StudioStudio: React.FC<StudioStudioProps> = ({
     if (profileSlots) latestSlotsRef.current = profileSlots;
   }, [profileSlots]);
 
+  // Smooth scroll and pulse trigger for Configured Solution Architecture (Issue #14)
+  const scrollToCartSection = () => {
+    const el = document.getElementById("cpq-cart-section");
+    if ((window as unknown as { __lenis?: { scrollTo: (target: string, opts?: { offset?: number }) => void } }).__lenis) {
+      (window as unknown as { __lenis: { scrollTo: (target: string, opts?: { offset?: number }) => void } }).__lenis.scrollTo("#cpq-cart-section", { offset: -30 });
+    } else if (el) {
+      el.scrollIntoView({ behavior: "smooth" });
+    }
+    if (el) {
+      el.classList.add("ring-2", "ring-[#e40000]", "transition-all", "duration-500");
+      setTimeout(() => {
+        el.classList.remove("ring-2", "ring-[#e40000]");
+      }, 2000);
+    }
+  };
+
   // Auto-scroll inner chat container smoothly without jumping page
   const scrollToBottom = () => {
     if (chatScrollRef.current) {
@@ -244,14 +263,15 @@ export const StudioStudio: React.FC<StudioStudioProps> = ({
     async function load() {
       const prods = await fetchProducts();
       setProducts(prods);
-      if (!initializedRef.current) {
-        if (recommendedSkus && recommendedSkus.length > 0) {
-          setSelectedProductIds(recommendedSkus);
-        }
-        initializedRef.current = true;
-      }
     }
     load();
+  }, []);
+
+  // Real-time synchronization of recommendedSkus to Dynamic Cart (Issue #15)
+  useEffect(() => {
+    if (recommendedSkus && recommendedSkus.length > 0) {
+      setSelectedProductIds(recommendedSkus);
+    }
   }, [recommendedSkus]);
 
   // Recalculate quote
@@ -412,6 +432,8 @@ export const StudioStudio: React.FC<StudioStudioProps> = ({
         textNative: advNative,
         timestamp: new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }),
         spokenTts: scriptMode === "latin" ? advLatin : (res.spoken_tts_text || advNative),
+        quote: res.quote,
+        recommendedSkus: res.recommended_skus,
       };
       setMessages((prev) => [...prev, advMsg]);
     } catch {
@@ -566,8 +588,8 @@ export const StudioStudio: React.FC<StudioStudioProps> = ({
               const { scrollTop, scrollHeight, clientHeight } = el;
               const isDown = e.deltaY > 0;
               const isUp = e.deltaY < 0;
-              const atBottom = scrollTop + clientHeight >= scrollHeight - 2;
-              const atTop = scrollTop <= 2;
+              const atBottom = scrollTop + clientHeight >= scrollHeight - 5;
+              const atTop = scrollTop <= 5;
               // Seamless scroll chaining: bubble to parent page when at scroll boundaries
               if ((isDown && atBottom) || (isUp && atTop)) {
                 return;
@@ -599,6 +621,33 @@ export const StudioStudio: React.FC<StudioStudioProps> = ({
                     }`}
                   >
                     <FormattedChatText text={displayedText} />
+
+                    {/* Issue #14: Interactive In-Chat CTA Card */}
+                    {!isUser && (m.quote || (quote && (m.recommendedSkus?.length || 0) > 0)) && (
+                      <div className="mt-2.5 pt-2.5 border-t border-white/[0.08] space-y-2">
+                        <div className="p-3 rounded-xl bg-gradient-to-r from-white/[0.04] to-white/[0.02] border border-white/[0.08] flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                          <div className="space-y-0.5">
+                            <div className="flex items-center space-x-1.5 text-[10px] font-mono text-[#d9ad63] uppercase tracking-wider">
+                              <Sparkles className="w-3 h-3 text-[#d9ad63]" />
+                              <span>Configured Plan Confirmed</span>
+                            </div>
+                            <div className="text-xs font-semibold text-[#EBE5D9]">
+                              {(m.quote || quote)?.items.map((i) => i.product_name).join(" + ") || "Enterprise Connectivity Pack"} · ₹{(m.quote || quote)?.net_mrc_inr.toLocaleString()}/mo
+                            </div>
+                            <div className="text-[10px] text-[#B39D82]">
+                              {(m.quote || quote)?.net_otc_inr === 0 ? "₹0 Setup Fee Waived (12-Mo Agreement)" : "Fast Track Setup"} · {(m.quote || quote)?.guaranteed_sla_days || 3}d SLA
+                            </div>
+                          </div>
+                          <button
+                            onClick={scrollToCartSection}
+                            className="inline-flex items-center justify-center space-x-1.5 px-3 py-2 rounded-xl bg-[#e40000] hover:bg-[#b30000] text-white text-xs font-medium shadow-[0_0_15px_rgba(228,0,0,0.4)] transition-all cursor-pointer shrink-0"
+                          >
+                            <span>Review in Cart & Start KYC</span>
+                            <ArrowDown className="w-3.5 h-3.5 animate-bounce" />
+                          </button>
+                        </div>
+                      </div>
+                    )}
 
                     {/* Audio Listen Button for Advisor */}
                     {!isUser && m.spokenTts && (
@@ -670,9 +719,10 @@ export const StudioStudio: React.FC<StudioStudioProps> = ({
       {/* Live Solution Blueprint & Commercial Action Card */}
       {quote && (
         <motion.div
+          id="cpq-cart-section"
           initial={{ opacity: 0, y: 15 }}
           animate={{ opacity: 1, y: 0 }}
-          className="luxury-glass rounded-3xl p-6 sm:p-8 border border-[rgba(235,229,217,0.12)] space-y-6"
+          className="luxury-glass rounded-3xl p-6 sm:p-8 border border-[rgba(235,229,217,0.12)] space-y-6 scroll-mt-6"
         >
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-4 border-b border-[rgba(235,229,217,0.08)]">
             <div>
