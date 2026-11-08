@@ -299,6 +299,7 @@ def get_judge_scenario(scenario_id: str):
 root_dir = Path(__file__).resolve().parent.parent.parent
 pdf_deck = root_dir / "Neural_Nexus_Airtel_Sync_2026_Digital_Track.pdf"
 pptx_deck = root_dir / "Neural_Nexus_Airtel_Sync_2026_Digital_Track.pptx"
+pptx_beamer_deck = root_dir / "Neural_Nexus_Airtel_Sync_2026_Digital_Track_Beamer.pptx"
 
 
 @app.get("/presentation.pdf")
@@ -321,6 +322,17 @@ def download_pptx():
             filename="Neural_Nexus_Airtel_Sync_2026_Digital_Track.pptx",
         )
     raise HTTPException(status_code=404, detail="Presentation PPTX not found")
+
+
+@app.get("/presentation_beamer.pptx")
+def download_pptx_beamer():
+    target = pptx_beamer_deck if pptx_beamer_deck.exists() else pptx_deck
+    return FileResponse(
+        path=str(target),
+        media_type="application/vnd.openxmlformats-officedocument.presentationml.presentation",
+        filename="Neural_Nexus_Airtel_Sync_2026_Digital_Track_Beamer.pptx",
+    )
+
 
 
 # Mount pre-compiled Frontend PWA if available (Single-Port Production Deployment)
