@@ -38,8 +38,8 @@ export const Navbar: React.FC<NavbarProps> = ({ currentTab, setTab, persona, set
   };
 
   return (
-    <header className="sticky top-0 z-50 w-full bg-[#030405]/85 backdrop-blur-2xl border-b border-[rgba(235,229,217,0.06)]">
-      <div className="max-w-6xl mx-auto px-4 sm:px-6 h-16 flex items-center justify-between gap-4">
+    <header className="sticky top-0 z-50 w-full bg-[#0B0F19]/90 backdrop-blur-2xl border-b border-slate-800/80 shadow-sm">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between gap-4">
         {/* Brand Architecture */}
         <motion.div
           whileHover={{ scale: 1.01 }}
@@ -50,55 +50,55 @@ export const Navbar: React.FC<NavbarProps> = ({ currentTab, setTab, persona, set
           }}
           className="flex items-center space-x-3 cursor-pointer shrink-0"
         >
-          <div className="w-8 h-8 rounded-xl bg-[#e40000] flex items-center justify-center shadow-[0_0_20px_rgba(228,0,0,0.35)]">
-            <Zap className="w-4 h-4 text-white fill-white" />
+          <div className="w-9 h-9 rounded-xl bg-[#e40000] flex items-center justify-center shadow-[0_0_20px_rgba(228,0,0,0.4)]">
+            <Zap className="w-5 h-5 text-white fill-white" />
           </div>
           <div className="flex items-baseline space-x-2">
-            <span className="font-sans text-sm font-semibold tracking-tight text-[#EBE5D9]">
-              Airtel Digital
+            <span className="font-sans text-base font-bold tracking-tight text-white">
+              Airtel Business
             </span>
-            <span className="text-[10px] font-mono tracking-widest text-[#B39D82] uppercase hidden sm:inline">
-              Udyam Studio
+            <span className="text-xs font-mono font-medium tracking-wider text-slate-400 uppercase hidden sm:inline">
+              Project Udyam
             </span>
           </div>
         </motion.div>
 
         {/* Dual-Persona Role Switcher (Issue #24) */}
-        <div className="flex items-center p-1 bg-[#080a0d] border border-[rgba(235,229,217,0.08)] rounded-full shadow-[0_2px_12px_rgba(0,0,0,0.5)]">
+        <div className="flex items-center p-1 bg-slate-900/90 border border-slate-700/60 rounded-full shadow-inner">
           <button
             onClick={() => handlePersonaSwitch("CUSTOMER")}
-            className={`relative px-3 py-1 rounded-full text-xs font-medium transition-all duration-200 cursor-pointer flex items-center space-x-1.5 ${
-              persona === "CUSTOMER" ? "text-white" : "text-[#B39D82] hover:text-[#EBE5D9]"
+            className={`relative px-3.5 py-1.5 rounded-full text-xs font-semibold transition-all duration-200 cursor-pointer flex items-center space-x-1.5 ${
+              persona === "CUSTOMER" ? "text-white" : "text-slate-400 hover:text-white"
             }`}
           >
             {persona === "CUSTOMER" && (
               <motion.div
                 layoutId="personaPill"
                 transition={{ type: "spring", stiffness: 450, damping: 32 }}
-                className="absolute inset-0 bg-[#e40000] rounded-full shadow-[0_0_12px_rgba(228,0,0,0.35)]"
+                className="absolute inset-0 bg-[#e40000] rounded-full shadow-[0_0_14px_rgba(228,0,0,0.4)]"
               />
             )}
             <span className="relative z-10">🏬 MSME Customer</span>
           </button>
           <button
             onClick={() => handlePersonaSwitch("PARTNER_OPS")}
-            className={`relative px-3 py-1 rounded-full text-xs font-medium transition-all duration-200 cursor-pointer flex items-center space-x-1.5 ${
-              persona === "PARTNER_OPS" ? "text-white" : "text-[#B39D82] hover:text-[#EBE5D9]"
+            className={`relative px-3.5 py-1.5 rounded-full text-xs font-semibold transition-all duration-200 cursor-pointer flex items-center space-x-1.5 ${
+              persona === "PARTNER_OPS" ? "text-white" : "text-slate-400 hover:text-white"
             }`}
           >
             {persona === "PARTNER_OPS" && (
               <motion.div
                 layoutId="personaPill"
                 transition={{ type: "spring", stiffness: 450, damping: 32 }}
-                className="absolute inset-0 bg-[#e40000] rounded-full shadow-[0_0_12px_rgba(228,0,0,0.35)]"
+                className="absolute inset-0 bg-[#e40000] rounded-full shadow-[0_0_14px_rgba(228,0,0,0.4)]"
               />
             )}
             <span className="relative z-10">🛡️ Partner &amp; Ops</span>
           </button>
         </div>
 
-        {/* Apple-style Unified Floating Nav */}
-        <nav className="flex items-center space-x-1 bg-[#080a0d] p-1 rounded-full border border-[rgba(235,229,217,0.08)] shadow-[0_4px_24px_rgba(0,0,0,0.6)]">
+        {/* Unified Floating Nav */}
+        <nav className="flex items-center space-x-1 bg-slate-900/90 p-1 rounded-full border border-slate-700/60 shadow-md">
           {navItems.map((item) => {
             const Icon = item.icon;
             const isActive = currentTab === item.id;
@@ -106,8 +106,8 @@ export const Navbar: React.FC<NavbarProps> = ({ currentTab, setTab, persona, set
               <button
                 key={item.id}
                 onClick={() => setTab(item.id)}
-                className={`relative px-3.5 py-1.5 rounded-full text-xs font-medium transition-colors duration-200 cursor-pointer flex items-center space-x-1.5 ${
-                  isActive ? "text-[#EBE5D9]" : "text-[#B39D82]/70 hover:text-[#EBE5D9]"
+                className={`relative px-4 py-1.5 rounded-full text-xs font-semibold transition-colors duration-200 cursor-pointer flex items-center space-x-1.5 ${
+                  isActive ? "text-white" : "text-slate-400 hover:text-white"
                 }`}
               >
                 {isActive && (
@@ -123,12 +123,6 @@ export const Navbar: React.FC<NavbarProps> = ({ currentTab, setTab, persona, set
             );
           })}
         </nav>
-
-        {/* Telemetry Pill */}
-        <div className="hidden lg:flex items-center space-x-2 font-mono text-[11px] text-[#B39D82] bg-[#080a0d] border border-[rgba(235,229,217,0.06)] px-3 py-1 rounded-full">
-          <span className="live-pulse-dot" />
-          <span>MUMBAI · 11MS</span>
-        </div>
       </div>
     </header>
   );

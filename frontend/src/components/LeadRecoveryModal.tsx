@@ -110,21 +110,21 @@ export const LeadRecoveryModal: React.FC<LeadRecoveryModalProps> = ({
           className="relative w-full max-w-2xl bg-[#090b0e] border border-[rgba(235,229,217,0.12)] rounded-3xl p-6 sm:p-7 shadow-[0_25px_60px_rgba(0,0,0,0.85)] z-10 space-y-5 overflow-hidden"
         >
           {/* Header */}
-          <div className="flex items-start justify-between gap-4 pb-4 border-b border-[rgba(235,229,217,0.08)]">
+          <div className="flex items-start justify-between gap-4 pb-4 border-b border-slate-700/70">
             <div className="space-y-1">
               <div className="flex items-center space-x-2">
                 <span className="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-mono tracking-wider bg-[#e40000]/15 text-[#e40000] border border-[#e40000]/30 font-semibold uppercase">
                   Next-Best-Action (NBA)
                 </span>
-                <span className="text-xs text-[#B39D82] font-mono">Lead ID: {lead.lead_id}</span>
+                <span className="text-xs text-slate-300 font-mono">Lead ID: {lead.lead_id}</span>
               </div>
-              <h2 className="font-serif text-xl sm:text-2xl font-normal text-[#EBE5D9]">
-                Automated Recovery Pitch — <span className="text-[#d9ad63]">{lead.business_name}</span> ({lead.city})
+              <h2 className="text-2xl sm:text-3xl font-extrabold text-white tracking-tight">
+                Automated Recovery Pitch — <span className="text-amber-400">{lead.business_name}</span> ({lead.city})
               </h2>
             </div>
             <button
               onClick={onClose}
-              className="p-2 text-[#B39D82] hover:text-[#EBE5D9] hover:bg-white/5 rounded-xl transition-colors"
+              className="p-2 text-slate-300 hover:text-white hover:bg-white/5 rounded-xl transition-colors"
               aria-label="Close dialog"
             >
               <X className="w-5 h-5" />
@@ -132,30 +132,30 @@ export const LeadRecoveryModal: React.FC<LeadRecoveryModalProps> = ({
           </div>
 
           {/* Lead Context Chips */}
-          <div className="grid grid-cols-2 sm:grid-cols-4 gap-2.5 p-3.5 bg-[#030405] border border-[rgba(235,229,217,0.06)] rounded-2xl text-xs">
+          <div className="grid grid-cols-2 sm:grid-cols-4 gap-2.5 p-3.5 bg-slate-900/90 border border-slate-800 rounded-2xl text-xs">
             <div className="space-y-0.5">
-              <span className="text-[10px] text-[#B39D82] uppercase font-mono">Segment</span>
-              <div className="text-[#EBE5D9] font-medium flex items-center space-x-1">
-                <Building2 className="w-3.5 h-3.5 text-[#B39D82]" />
+              <span className="text-[10px] text-slate-300 uppercase font-mono">Segment</span>
+              <div className="text-white font-medium flex items-center space-x-1">
+                <Building2 className="w-3.5 h-3.5 text-slate-300" />
                 <span className="truncate">{lead.segment}</span>
               </div>
             </div>
             <div className="space-y-0.5">
-              <span className="text-[10px] text-[#B39D82] uppercase font-mono">Location</span>
-              <div className="text-[#EBE5D9] font-medium flex items-center space-x-1">
+              <span className="text-[10px] text-slate-300 uppercase font-mono">Location</span>
+              <div className="text-white font-medium flex items-center space-x-1">
                 <MapPin className="w-3.5 h-3.5 text-blue-400" />
                 <span>{lead.city} (Tier {lead.city_tier})</span>
               </div>
             </div>
             <div className="space-y-0.5">
-              <span className="text-[10px] text-[#B39D82] uppercase font-mono">Monthly Budget</span>
-              <div className="text-[#d9ad63] font-medium font-mono flex items-center">
+              <span className="text-[10px] text-slate-300 uppercase font-mono">Monthly Budget</span>
+              <div className="text-amber-400 font-medium font-mono flex items-center">
                 <IndianRupee className="w-3 h-3" />
                 <span>{lead.monthly_spend_inr.toLocaleString()}</span>
               </div>
             </div>
             <div className="space-y-0.5">
-              <span className="text-[10px] text-[#B39D82] uppercase font-mono">Winback Score</span>
+              <span className="text-[10px] text-slate-300 uppercase font-mono">Winback Score</span>
               <div className="text-emerald-400 font-medium font-mono">
                 {lead.propensity_score > 1.0 ? lead.propensity_score.toFixed(1) : (lead.propensity_score * 100).toFixed(1)}% ({lead.priority_tier})
               </div>
@@ -167,7 +167,7 @@ export const LeadRecoveryModal: React.FC<LeadRecoveryModalProps> = ({
             <AlertCircle className="w-4 h-4 text-red-400 shrink-0 mt-0.5" />
             <div className="space-y-0.5">
               <span className="text-red-300 font-medium">Drop-Off Root Cause Identified:</span>
-              <p className="text-[#EBE5D9]/80 font-mono text-[11px]">{lead.drop_reason || "Quoting funnel timeout"}</p>
+              <p className="text-white/80 font-mono text-[11px]">{lead.drop_reason || "Quoting funnel timeout"}</p>
             </div>
           </div>
 
@@ -175,8 +175,8 @@ export const LeadRecoveryModal: React.FC<LeadRecoveryModalProps> = ({
           <div className="space-y-2">
             <div className="flex items-center justify-between">
               <div className="flex items-center space-x-2">
-                <Sparkles className="w-4 h-4 text-[#d9ad63]" />
-                <span className="text-xs font-mono uppercase text-[#B39D82] tracking-wider">
+                <Sparkles className="w-4 h-4 text-amber-400" />
+                <span className="text-xs font-mono uppercase text-slate-300 tracking-wider">
                   Tailored WhatsApp Pitch ({bundleName})
                 </span>
               </div>
@@ -187,8 +187,8 @@ export const LeadRecoveryModal: React.FC<LeadRecoveryModalProps> = ({
                 </span>
               )}
             </div>
-            <div className="relative p-4 bg-[#030405] border border-[rgba(235,229,217,0.08)] rounded-2xl">
-              <p className="text-xs sm:text-sm text-[#EBE5D9] leading-relaxed whitespace-pre-line font-sans">
+            <div className="relative p-4 bg-slate-900/90 border border-slate-700/70 rounded-2xl">
+              <p className="text-xs sm:text-sm text-white leading-relaxed whitespace-pre-line font-sans">
                 {pitch}
               </p>
             </div>
@@ -200,9 +200,9 @@ export const LeadRecoveryModal: React.FC<LeadRecoveryModalProps> = ({
               whileHover={{ scale: 1.02 }}
               whileTap={{ scale: 0.98 }}
               onClick={handleCopy}
-              className="w-full sm:w-auto flex-1 inline-flex items-center justify-center space-x-2 px-4 py-2.5 bg-white/5 hover:bg-white/10 border border-[rgba(235,229,217,0.12)] text-[#EBE5D9] rounded-xl text-xs font-medium transition-all"
+              className="w-full sm:w-auto flex-1 inline-flex items-center justify-center space-x-2 px-4 py-2.5 bg-white/5 hover:bg-white/10 border border-[rgba(235,229,217,0.12)] text-white rounded-xl text-xs font-medium transition-all"
             >
-              {copied ? <Check className="w-4 h-4 text-emerald-400" /> : <Copy className="w-4 h-4 text-[#B39D82]" />}
+              {copied ? <Check className="w-4 h-4 text-emerald-400" /> : <Copy className="w-4 h-4 text-slate-300" />}
               <span>{copied ? "Copied to Clipboard" : "Copy Recovery Pitch"}</span>
             </motion.button>
 

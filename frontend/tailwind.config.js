@@ -7,37 +7,37 @@ export default {
   theme: {
     extend: {
       fontFamily: {
-        sans: ['"Sora"', '"DM Sans"', '-apple-system', 'sans-serif'],
-        serif: ['"Cormorant Garamond"', 'Georgia', 'serif'],
+        sans: ['"Plus Jakarta Sans"', '"Inter"', 'system-ui', '-apple-system', 'sans-serif'],
+        serif: ['"Plus Jakarta Sans"', '"Inter"', 'system-ui', '-apple-system', 'sans-serif'],
         mono: ['"JetBrains Mono"', 'monospace'],
       },
       colors: {
-        // Apple / Ivory / Dark Navy Palette from hrushikeshramilla.in & DALE
-        canvas: "#030405",
+        // Modern Crisp High-Contrast Airtel Enterprise Palette
+        canvas: "#090D16",
         surface: {
-          DEFAULT: "#080a0d",
-          soft: "#0b0e12",
-          elevated: "#0f1216",
-          hover: "#15191f",
+          DEFAULT: "#111827",
+          soft: "#141D2E",
+          elevated: "#1E293B",
+          hover: "#243248",
         },
         ivory: {
-          DEFAULT: "#EBE5D9",
-          soft: "#d8d1c3",
-          muted: "#8c867a",
+          DEFAULT: "#FFFFFF",
+          soft: "#F8FAFC",
+          muted: "#94A3B8",
         },
         sand: {
-          DEFAULT: "#B39D82",
-          light: "#c9b69f",
-          dark: "#8f7a62",
+          DEFAULT: "#94A3B8",
+          light: "#CBD5E1",
+          dark: "#64748B",
         },
         gold: {
-          DEFAULT: "#a68a50",
-          warm: "#d9ad63",
-          glow: "rgba(217, 173, 99, 0.25)",
+          DEFAULT: "#F59E0B",
+          warm: "#F59E0B",
+          glow: "rgba(245, 158, 11, 0.25)",
         },
         steel: {
-          DEFAULT: "#7EA8C4",
-          soft: "rgba(126, 168, 196, 0.15)",
+          DEFAULT: "#60A5FA",
+          soft: "rgba(96, 165, 250, 0.15)",
         },
         airtel: {
           DEFAULT: "#e40000",
@@ -47,10 +47,10 @@ export default {
         }
       },
       boxShadow: {
-        'apple-card': '0 20px 40px -15px rgba(0, 0, 0, 0.7), 0 0 0 1px rgba(235, 229, 217, 0.06)',
-        'apple-elevated': '0 30px 60px -20px rgba(0, 0, 0, 0.85), 0 0 0 1px rgba(235, 229, 217, 0.1)',
+        'apple-card': '0 10px 30px -10px rgba(0, 0, 0, 0.5), 0 0 0 1px rgba(255, 255, 255, 0.08)',
+        'apple-elevated': '0 20px 40px -15px rgba(0, 0, 0, 0.7), 0 0 0 1px rgba(255, 255, 255, 0.12)',
         'apple-glow': '0 0 25px -4px rgba(228, 0, 0, 0.35)',
-        'ivory-glow': '0 0 25px -4px rgba(235, 229, 217, 0.15)',
+        'ivory-glow': '0 0 25px -4px rgba(255, 255, 255, 0.15)',
       },
       transitionTimingFunction: {
         'apple-spring': 'cubic-bezier(0.22, 1, 0.36, 1)',

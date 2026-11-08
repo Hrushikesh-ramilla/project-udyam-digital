@@ -319,10 +319,10 @@ export const App: React.FC = () => {
   };
 
   return (
-    <div className="min-h-screen bg-[#030405] text-[#EBE5D9] flex flex-col font-sans selection:bg-[#e40000]/30 selection:text-white relative">
+    <div className="min-h-screen bg-[#090D16] text-[#F8FAFC] flex flex-col font-sans selection:bg-[#e40000]/30 selection:text-white relative">
       <Navbar currentTab={currentTab} setTab={setTab} persona={persona} setPersona={setPersona} />
 
-      <main className="flex-1 max-w-5xl w-full mx-auto px-4 sm:px-6 py-10 sm:py-14">
+      <main className="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-8 sm:py-10">
         {/* Pre-Hydrate Rescue Winback Toast/Banner */}
         {rescueBanner && (
           <motion.div
@@ -449,8 +449,8 @@ export const App: React.FC = () => {
       </main>
 
       {/* Minimal Luxury Footer */}
-      <footer className="border-t border-[rgba(235,229,217,0.06)] bg-[#030405]/90 py-8 mt-20">
-        <div className="max-w-5xl mx-auto px-4 sm:px-6 flex flex-col sm:flex-row items-center justify-between gap-4 text-xs text-[#B39D82]/60 font-mono">
+      <footer className="border-t border-slate-800 bg-[#0B0F19]/95 py-8 mt-20">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col sm:flex-row items-center justify-between gap-4 text-xs text-slate-400 font-mono">
           <div className="flex items-center space-x-2 text-[11px]">
             <span className="text-[#EBE5D9] font-medium tracking-wide">Airtel Digital</span>
             <span>·</span>

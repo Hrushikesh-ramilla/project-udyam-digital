@@ -150,9 +150,9 @@ export const OrderTracker: React.FC<OrderTrackerProps> = ({ order, onOrderUpdate
   };
 
   return (
-    <div className="max-w-4xl mx-auto space-y-7">
+    <div className="w-full space-y-7">
       {/* Order Header & Action Bar */}
-      <div className="luxury-glass rounded-3xl p-6 sm:p-7 flex flex-col sm:flex-row sm:items-center justify-between gap-5 border border-[rgba(235,229,217,0.08)] shadow-[0_20px_50px_rgba(0,0,0,0.7)]">
+      <div className="luxury-glass rounded-3xl p-6 sm:p-7 flex flex-col sm:flex-row sm:items-center justify-between gap-5 border border-slate-700/70 shadow-[0_20px_50px_rgba(0,0,0,0.7)]">
         <div>
           <div className="flex items-center space-x-2.5">
             <span className="text-[10px] font-mono bg-[#e40000] text-white px-2.5 py-0.5 rounded-full font-semibold tracking-wider">
@@ -168,10 +168,10 @@ export const OrderTracker: React.FC<OrderTrackerProps> = ({ order, onOrderUpdate
               {order.is_activated ? "ACTIVATED · 100% LIVE" : "IN-PROGRESS · DAY 1"}
             </span>
           </div>
-          <h2 className="font-serif text-2xl sm:text-3xl font-normal text-[#EBE5D9] mt-2">
+          <h2 className="text-2xl sm:text-3xl font-extrabold text-white tracking-tight mt-2">
             {order.business_name}
           </h2>
-          <p className="text-xs text-[#B39D82] mt-1 font-sans">
+          <p className="text-xs text-slate-300 mt-1 font-sans">
             {order.bundle_name} · SLA: {order.total_sla_days} Days Guaranteed · MRC: ₹{order.monthly_charge_inr.toLocaleString()}/mo
           </p>
         </div>
@@ -189,15 +189,15 @@ export const OrderTracker: React.FC<OrderTrackerProps> = ({ order, onOrderUpdate
           </motion.button>
 
           {/* Partner Commission Card */}
-          <div className="bg-[#030405] border border-[rgba(235,229,217,0.08)] rounded-2xl p-3.5 flex items-center space-x-3 shadow-inner">
-            <div className="w-9 h-9 rounded-xl bg-[#d9ad63]/15 border border-[#d9ad63]/30 flex items-center justify-center text-[#d9ad63]">
+          <div className="bg-slate-900/90 border border-slate-700/70 rounded-2xl p-3.5 flex items-center space-x-3 shadow-inner">
+            <div className="w-9 h-9 rounded-xl bg-[#d9ad63]/15 border border-[#d9ad63]/30 flex items-center justify-center text-amber-400">
               <Award className="w-4 h-4" />
             </div>
             <div className="text-xs">
-              <span className="text-[#B39D82] block text-[10px] font-mono uppercase tracking-wider">
+              <span className="text-slate-300 block text-[10px] font-mono uppercase tracking-wider">
                 Partner Commission
               </span>
-              <span className="font-serif text-xl text-[#d9ad63] font-normal">
+              <span className="text-xl font-bold text-amber-400">
                 ₹{order.partner_commission_inr.toLocaleString()}
               </span>
             </div>
@@ -207,22 +207,22 @@ export const OrderTracker: React.FC<OrderTrackerProps> = ({ order, onOrderUpdate
 
       {/* Telecommunications Logistics & Field Engineer Dispatch Card */}
       {logistics && (
-        <div className="luxury-glass rounded-3xl p-6 space-y-4 border border-[rgba(235,229,217,0.08)] shadow-[0_20px_50px_rgba(0,0,0,0.7)]">
-          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-3 border-b border-[rgba(235,229,217,0.06)]">
+        <div className="luxury-glass rounded-3xl p-6 space-y-4 border border-slate-700/70 shadow-[0_20px_50px_rgba(0,0,0,0.7)]">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-3 border-b border-slate-800">
             <div className="flex items-center space-x-3">
               <div className="w-9 h-9 rounded-xl bg-blue-500/15 border border-blue-500/30 flex items-center justify-center text-blue-400">
                 <Truck className="w-4 h-4" />
               </div>
               <div>
                 <div className="flex items-center space-x-2">
-                  <h3 className="font-sans text-xs font-semibold text-[#EBE5D9] uppercase tracking-wider">
+                  <h3 className="font-sans text-xs font-semibold text-white uppercase tracking-wider">
                     BlueDart Telecom Hardware Dispatch &amp; Field Engineer
                   </h3>
                   <span className="text-[9px] font-mono bg-blue-500/20 text-blue-300 border border-blue-500/30 px-2 py-0.5 rounded-full">
                     {logistics.awb_number}
                   </span>
                 </div>
-                <p className="text-[11px] text-[#B39D82] mt-0.5">
+                <p className="text-[11px] text-slate-300 mt-0.5">
                   Courier Origin: {logistics.courier_hub}
                 </p>
               </div>
@@ -233,10 +233,10 @@ export const OrderTracker: React.FC<OrderTrackerProps> = ({ order, onOrderUpdate
                 href={logistics.tracking_url}
                 target="_blank"
                 rel="noreferrer"
-                className="inline-flex items-center space-x-1.5 px-3 py-1.5 rounded-xl bg-white/[0.05] hover:bg-white/[0.1] text-[11px] font-medium text-[#EBE5D9] border border-white/[0.08] transition-colors"
+                className="inline-flex items-center space-x-1.5 px-3 py-1.5 rounded-xl bg-white/[0.05] hover:bg-white/[0.1] text-[11px] font-medium text-white border border-slate-700/80 transition-colors"
               >
                 <span>Track BlueDart</span>
-                <ExternalLink className="w-3 h-3 text-[#B39D82]" />
+                <ExternalLink className="w-3 h-3 text-slate-300" />
               </a>
 
               <a
@@ -252,22 +252,22 @@ export const OrderTracker: React.FC<OrderTrackerProps> = ({ order, onOrderUpdate
           </div>
 
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 text-xs">
-            <div className="bg-[#030405] p-3 rounded-xl border border-white/[0.05]">
-              <span className="text-[10px] text-[#B39D82] font-mono uppercase block">Assigned Engineer</span>
+            <div className="bg-slate-900/90 p-3 rounded-xl border border-slate-800">
+              <span className="text-[10px] text-slate-300 font-mono uppercase block">Assigned Engineer</span>
               <span className="text-white font-medium flex items-center space-x-1 mt-0.5">
-                <User className="w-3.5 h-3.5 text-[#d9ad63]" />
+                <User className="w-3.5 h-3.5 text-amber-400" />
                 <span>{logistics.field_engineer_name}</span>
               </span>
             </div>
-            <div className="bg-[#030405] p-3 rounded-xl border border-white/[0.05]">
-              <span className="text-[10px] text-[#B39D82] font-mono uppercase block">Field Phone</span>
+            <div className="bg-slate-900/90 p-3 rounded-xl border border-slate-800">
+              <span className="text-[10px] text-slate-300 font-mono uppercase block">Field Phone</span>
               <span className="text-white font-mono mt-0.5 flex items-center space-x-1">
                 <PhoneCall className="w-3.5 h-3.5 text-emerald-400" />
                 <span>{logistics.field_engineer_phone}</span>
               </span>
             </div>
-            <div className="bg-[#030405] p-3 rounded-xl border border-white/[0.05]">
-              <span className="text-[10px] text-[#B39D82] font-mono uppercase block">Dispatch Status</span>
+            <div className="bg-slate-900/90 p-3 rounded-xl border border-slate-800">
+              <span className="text-[10px] text-slate-300 font-mono uppercase block">Dispatch Status</span>
               <span className="text-emerald-400 font-mono mt-0.5 flex items-center space-x-1">
                 <Clock className="w-3.5 h-3.5 text-emerald-400" />
                 <span>OUT FOR DISPATCH (SLA: ON-TRACK)</span>
@@ -278,13 +278,13 @@ export const OrderTracker: React.FC<OrderTrackerProps> = ({ order, onOrderUpdate
       )}
 
       {/* 6-Stage Fulfillment Stepper */}
-      <div className="luxury-glass rounded-3xl p-6 sm:p-7 space-y-6 border border-[rgba(235,229,217,0.08)] shadow-[0_20px_50px_rgba(0,0,0,0.7)]">
-        <div className="flex items-center justify-between pb-3 border-b border-[rgba(235,229,217,0.06)]">
-          <h3 className="font-sans text-xs font-semibold text-[#EBE5D9] uppercase tracking-widest flex items-center space-x-2">
+      <div className="luxury-glass rounded-3xl p-6 sm:p-7 space-y-6 border border-slate-700/70 shadow-[0_20px_50px_rgba(0,0,0,0.7)]">
+        <div className="flex items-center justify-between pb-3 border-b border-slate-800">
+          <h3 className="font-sans text-xs font-semibold text-white uppercase tracking-widest flex items-center space-x-2">
             <Truck className="w-4 h-4 text-[#e40000]" />
             <span>6-Stage Digital Fulfillment Pipeline (SQLite WAL Engine)</span>
           </h3>
-          <span className="text-xs font-mono text-[#d9ad63] bg-white/[0.04] px-2.5 py-0.5 rounded-full border border-white/[0.06]">
+          <span className="text-xs font-mono text-amber-400 bg-white/[0.04] px-2.5 py-0.5 rounded-full border border-slate-700">
             Stage {Math.min(order.current_stage_idx + 1, 6)} of 6
           </span>
         </div>
@@ -309,11 +309,11 @@ export const OrderTracker: React.FC<OrderTrackerProps> = ({ order, onOrderUpdate
                     ? "border-[#e40000] bg-gradient-to-b from-[#e40000]/15 to-transparent shadow-[0_0_20px_rgba(228,0,0,0.25)]"
                     : isPassed
                     ? "border-emerald-500/30 bg-emerald-950/15"
-                    : "border-[rgba(235,229,217,0.05)] bg-[#030405] opacity-50"
+                    : "border-[rgba(235,229,217,0.05)] bg-slate-900/90 opacity-50"
                 }`}
               >
                 <div className="flex items-center justify-between mb-2">
-                  <span className="text-[10px] font-mono text-[#B39D82] font-semibold">STAGE 0{idx + 1}</span>
+                  <span className="text-[10px] font-mono text-slate-300 font-semibold">STAGE 0{idx + 1}</span>
                   {isPassed ? (
                     <div className="w-5 h-5 rounded-full bg-emerald-500/20 text-emerald-400 flex items-center justify-center">
                       <Check className="w-3 h-3" />
@@ -324,8 +324,8 @@ export const OrderTracker: React.FC<OrderTrackerProps> = ({ order, onOrderUpdate
                     <span className="w-2 h-2 rounded-full bg-white/20" />
                   )}
                 </div>
-                <h4 className="text-xs font-semibold text-[#EBE5D9] leading-snug">{ms.stage_name}</h4>
-                <p className="text-[11px] text-[#B39D82] mt-1.5 line-clamp-2 leading-relaxed">
+                <h4 className="text-xs font-semibold text-white leading-snug">{ms.stage_name}</h4>
+                <p className="text-[11px] text-slate-300 mt-1.5 line-clamp-2 leading-relaxed">
                   {ms.description}
                 </p>
                 <div className="mt-2.5 text-[9px] font-mono uppercase tracking-wider">
@@ -334,7 +334,7 @@ export const OrderTracker: React.FC<OrderTrackerProps> = ({ order, onOrderUpdate
                   ) : isCurrent ? (
                     <span className="text-amber-400 font-medium">● In Progress</span>
                   ) : (
-                    <span className="text-[#B39D82]/50">○ Scheduled</span>
+                    <span className="text-slate-300/50">○ Scheduled</span>
                   )}
                 </div>
               </motion.div>
@@ -361,19 +361,19 @@ export const OrderTracker: React.FC<OrderTrackerProps> = ({ order, onOrderUpdate
 
       {/* WhatsApp Preview Drawer */}
       {selectedPreview && (
-        <div className="luxury-glass rounded-3xl p-6 space-y-4 border border-[rgba(235,229,217,0.08)] shadow-[0_20px_50px_rgba(0,0,0,0.7)]">
+        <div className="luxury-glass rounded-3xl p-6 space-y-4 border border-slate-700/70 shadow-[0_20px_50px_rgba(0,0,0,0.7)]">
           <div className="flex items-center justify-between">
-            <div className="flex items-center space-x-2 text-xs font-medium text-[#EBE5D9]">
+            <div className="flex items-center space-x-2 text-xs font-medium text-white">
               <MessageSquare className="w-4 h-4 text-emerald-400" />
               <span>Customer WhatsApp Webhook Notification (Automated SLA Hook)</span>
             </div>
-            <span className="text-[10px] font-mono text-[#d9ad63] uppercase bg-white/[0.04] px-2 py-0.5 rounded-full">
+            <span className="text-[10px] font-mono text-amber-400 uppercase bg-white/[0.04] px-2 py-0.5 rounded-full">
               Meta WhatsApp API
             </span>
           </div>
 
-          <div className="bg-[#0b141a] p-4 sm:p-5 rounded-2xl border border-[rgba(235,229,217,0.06)] space-y-3 max-w-lg">
-            <div className="flex items-center space-x-2.5 pb-2 border-b border-white/[0.06]">
+          <div className="bg-[#0b141a] p-4 sm:p-5 rounded-2xl border border-slate-800 space-y-3 max-w-lg">
+            <div className="flex items-center space-x-2.5 pb-2 border-b border-slate-700">
               <div className="w-6 h-6 rounded-full bg-[#e40000] flex items-center justify-center text-[10px] font-bold text-white shadow-sm">
                 A
               </div>
@@ -384,7 +384,7 @@ export const OrderTracker: React.FC<OrderTrackerProps> = ({ order, onOrderUpdate
             </div>
             <div className="bg-[#202c33] p-3.5 rounded-xl text-xs text-white/95 font-sans leading-relaxed shadow-sm">
               <p className="whitespace-pre-line">{selectedPreview.whatsapp_preview}</p>
-              <div className="flex items-center justify-end space-x-1 mt-2 text-[10px] text-[#B39D82]/70 font-mono">
+              <div className="flex items-center justify-end space-x-1 mt-2 text-[10px] text-slate-300/70 font-mono">
                 <span>10:16 AM</span>
                 <CheckCheck className="w-3.5 h-3.5 text-blue-400 inline" />
               </div>
@@ -403,36 +403,36 @@ export const OrderTracker: React.FC<OrderTrackerProps> = ({ order, onOrderUpdate
               exit={{ opacity: 0, scale: 0.95 }}
               className="luxury-glass-elevated rounded-3xl max-w-lg w-full p-6 space-y-5 border border-white/[0.12] shadow-2xl relative"
             >
-              <div className="flex items-center justify-between pb-3 border-b border-white/[0.08]">
+              <div className="flex items-center justify-between pb-3 border-b border-slate-700/80">
                 <div className="flex items-center space-x-2.5">
                   <div className="w-8 h-8 rounded-xl bg-emerald-500/20 border border-emerald-500/30 flex items-center justify-center text-emerald-400">
                     <CreditCard className="w-4 h-4" />
                   </div>
                   <div>
-                    <h3 className="font-serif text-lg font-normal text-[#EBE5D9]">
+                    <h3 className="font-sans font-bold text-lg font-normal text-white">
                       Airtel Business Enterprise Checkout
                     </h3>
-                    <p className="text-[11px] text-[#B39D82]">
+                    <p className="text-[11px] text-slate-300">
                       Total Payable: <strong className="text-white font-mono">₹{order.monthly_charge_inr.toLocaleString()}</strong>
                     </p>
                   </div>
                 </div>
                 <button
                   onClick={() => setShowPaymentModal(false)}
-                  className="w-7 h-7 rounded-lg bg-white/[0.05] hover:bg-white/[0.1] flex items-center justify-center text-[#B39D82] hover:text-white"
+                  className="w-7 h-7 rounded-lg bg-white/[0.05] hover:bg-white/[0.1] flex items-center justify-center text-slate-300 hover:text-white"
                 >
                   <X className="w-4 h-4" />
                 </button>
               </div>
 
               {/* Payment Method Switcher */}
-              <div className="flex space-x-2 bg-[#030405] p-1 rounded-2xl border border-white/[0.06]">
+              <div className="flex space-x-2 bg-slate-900/90 p-1 rounded-2xl border border-slate-700">
                 <button
                   onClick={() => setPaymentMethodTab("upi")}
                   className={`flex-1 py-2 rounded-xl text-xs font-medium transition-all cursor-pointer flex items-center justify-center space-x-1.5 ${
                     paymentMethodTab === "upi"
                       ? "bg-[#e40000] text-white shadow-md"
-                      : "text-[#B39D82] hover:text-white"
+                      : "text-slate-300 hover:text-white"
                   }`}
                 >
                   <QrCode className="w-3.5 h-3.5" />
@@ -443,7 +443,7 @@ export const OrderTracker: React.FC<OrderTrackerProps> = ({ order, onOrderUpdate
                   className={`flex-1 py-2 rounded-xl text-xs font-medium transition-all cursor-pointer flex items-center justify-center space-x-1.5 ${
                     paymentMethodTab === "razorpay"
                       ? "bg-[#e40000] text-white shadow-md"
-                      : "text-[#B39D82] hover:text-white"
+                      : "text-slate-300 hover:text-white"
                   }`}
                 >
                   <ShieldCheck className="w-3.5 h-3.5 text-blue-400" />
@@ -455,7 +455,7 @@ export const OrderTracker: React.FC<OrderTrackerProps> = ({ order, onOrderUpdate
               {paymentMethodTab === "upi" && (
                 <div className="space-y-4">
                   {paymentIntent ? (
-                    <div className="flex flex-col sm:flex-row items-center gap-4 bg-[#030405] p-4 rounded-2xl border border-white/[0.06]">
+                    <div className="flex flex-col sm:flex-row items-center gap-4 bg-slate-900/90 p-4 rounded-2xl border border-slate-700">
                       <div className="bg-[#FAF8F5] p-2 rounded-xl shrink-0 shadow-md">
                         <img
                           src={paymentIntent.qr_data_url}
@@ -468,10 +468,10 @@ export const OrderTracker: React.FC<OrderTrackerProps> = ({ order, onOrderUpdate
                       </div>
 
                       <div className="space-y-2 text-xs flex-1">
-                        <div className="text-[11px] text-[#B39D82]">
+                        <div className="text-[11px] text-slate-300">
                           VPA: <strong className="text-white font-mono">{paymentIntent.upi_pa}</strong>
                         </div>
-                        <div className="text-[11px] text-[#B39D82]">
+                        <div className="text-[11px] text-slate-300">
                           Merchant: <strong className="text-white">{paymentIntent.upi_pn}</strong>
                         </div>
 
@@ -485,7 +485,7 @@ export const OrderTracker: React.FC<OrderTrackerProps> = ({ order, onOrderUpdate
                       </div>
                     </div>
                   ) : (
-                    <div className="flex items-center justify-center py-6 text-xs text-[#B39D82]">
+                    <div className="flex items-center justify-center py-6 text-xs text-slate-300">
                       <RefreshCw className="w-4 h-4 animate-spin mr-2" />
                       Generating Dynamic UPI QR...
                     </div>
@@ -493,7 +493,7 @@ export const OrderTracker: React.FC<OrderTrackerProps> = ({ order, onOrderUpdate
 
                   {/* 12-Digit Bank UTR Verification Input */}
                   <div className="space-y-2">
-                    <label className="text-xs font-medium text-[#EBE5D9] flex items-center justify-between">
+                    <label className="text-xs font-medium text-white flex items-center justify-between">
                       <span>12-Digit Bank UTR / Transaction Reference</span>
                       <span className="text-[10px] text-emerald-400 font-mono">Demo: 202607159841</span>
                     </label>
@@ -504,7 +504,7 @@ export const OrderTracker: React.FC<OrderTrackerProps> = ({ order, onOrderUpdate
                         onChange={(e) => setUtrInput(e.target.value)}
                         placeholder="202607159841"
                         maxLength={12}
-                        className="flex-1 bg-[#030405] border border-[rgba(235,229,217,0.12)] rounded-xl px-3 py-2 text-xs text-[#EBE5D9] font-mono focus:outline-none focus:border-emerald-500"
+                        className="flex-1 bg-slate-900/90 border border-[rgba(235,229,217,0.12)] rounded-xl px-3 py-2 text-xs text-white font-mono focus:outline-none focus:border-emerald-500"
                       />
                       <button
                         onClick={handleVerifyUPI}
@@ -521,8 +521,8 @@ export const OrderTracker: React.FC<OrderTrackerProps> = ({ order, onOrderUpdate
               {/* TAB 2: Razorpay Developer Sandbox */}
               {paymentMethodTab === "razorpay" && (
                 <div className="space-y-4">
-                  <div className="bg-[#030405] p-4 rounded-2xl border border-white/[0.06] space-y-2.5 text-xs text-[#B39D82]">
-                    <div className="flex items-center justify-between text-white font-medium pb-1.5 border-b border-white/[0.06]">
+                  <div className="bg-slate-900/90 p-4 rounded-2xl border border-slate-700 space-y-2.5 text-xs text-slate-300">
+                    <div className="flex items-center justify-between text-white font-medium pb-1.5 border-b border-slate-700">
                       <span>Razorpay Developer Sandbox Mode</span>
                       <span className="text-[10px] font-mono bg-blue-500/20 text-blue-300 px-2 py-0.5 rounded">
                         rzp_test_airtel_udyam

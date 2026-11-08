@@ -73,42 +73,42 @@ export const PartnerRescueConsole: React.FC<PartnerRescueConsoleProps> = ({ onPr
       : 78.4;
 
   return (
-    <div className="max-w-6xl mx-auto space-y-7">
+    <div className="w-full space-y-7">
       {/* 4 Dynamic Operational Winback KPI Cards (Issue #25) */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
         <motion.div
           whileHover={{ y: -3 }}
-          className="luxury-glass p-5 rounded-2xl border border-[rgba(235,229,217,0.08)] space-y-2 shadow-sm"
+          className="luxury-glass p-5 rounded-2xl border border-slate-700/70 space-y-2 shadow-sm"
         >
-          <div className="flex items-center justify-between text-xs text-[#B39D82]">
+          <div className="flex items-center justify-between text-xs text-slate-300">
             <span className="font-mono uppercase tracking-wider text-[10px]">Recovered ARR Potential</span>
-            <DollarSign className="w-4 h-4 text-[#d9ad63]" />
+            <DollarSign className="w-4 h-4 text-amber-400" />
           </div>
-          <div className="font-serif text-3xl sm:text-4xl font-normal text-[#d9ad63] tracking-tight">
+          <div className="text-3xl sm:text-4xl font-extrabold text-amber-400 tracking-tight">
             {formatArrDisplay(recoveredArr)}
           </div>
-          <p className="text-[11px] text-[#B39D82]/70 font-mono">Live pipeline value rescuable via automated NBA</p>
+          <p className="text-[11px] text-slate-300/70 font-mono">Live pipeline value rescuable via automated NBA</p>
         </motion.div>
 
         <motion.div
           whileHover={{ y: -3 }}
-          className="luxury-glass p-5 rounded-2xl border border-[rgba(235,229,217,0.08)] space-y-2 shadow-sm"
+          className="luxury-glass p-5 rounded-2xl border border-slate-700/70 space-y-2 shadow-sm"
         >
-          <div className="flex items-center justify-between text-xs text-[#B39D82]">
+          <div className="flex items-center justify-between text-xs text-slate-300">
             <span className="font-mono uppercase tracking-wider text-[10px]">Autonomous Winback Rate</span>
             <Percent className="w-4 h-4 text-[#10b981]" />
           </div>
-          <div className="font-serif text-3xl sm:text-4xl font-normal text-[#10b981] tracking-tight">
+          <div className="text-3xl sm:text-4xl font-extrabold text-emerald-400 tracking-tight">
             {avgWinbackRate.toFixed(1)}%
           </div>
-          <p className="text-[11px] text-[#B39D82]/70 font-mono">Predicted conversion upon WhatsApp dispatch</p>
+          <p className="text-[11px] text-slate-300/70 font-mono">Predicted conversion upon WhatsApp dispatch</p>
         </motion.div>
 
         <motion.div
           whileHover={{ y: -3 }}
-          className="luxury-glass p-5 rounded-2xl border border-[rgba(235,229,217,0.08)] space-y-2 shadow-sm"
+          className="luxury-glass p-5 rounded-2xl border border-slate-700/70 space-y-2 shadow-sm"
         >
-          <div className="flex items-center justify-between text-xs text-[#B39D82]">
+          <div className="flex items-center justify-between text-xs text-slate-300">
             <span className="font-mono uppercase tracking-wider text-[10px]">Turnaround SLA Compression</span>
             <Clock className="w-4 h-4 text-blue-400" />
           </div>
@@ -117,52 +117,52 @@ export const PartnerRescueConsole: React.FC<PartnerRescueConsoleProps> = ({ onPr
             <span className="text-white text-base">➔</span>
             <span>&lt;10s</span>
           </div>
-          <p className="text-[11px] text-[#B39D82]/70 font-mono">Instant automated pitch vs 2.5-week manual follow-up</p>
+          <p className="text-[11px] text-slate-300/70 font-mono">Instant automated pitch vs 2.5-week manual follow-up</p>
         </motion.div>
 
         <motion.div
           whileHover={{ y: -3 }}
-          className="luxury-glass p-5 rounded-2xl border border-[rgba(235,229,217,0.08)] space-y-2 shadow-sm"
+          className="luxury-glass p-5 rounded-2xl border border-slate-700/70 space-y-2 shadow-sm"
         >
-          <div className="flex items-center justify-between text-xs text-[#B39D82]">
+          <div className="flex items-center justify-between text-xs text-slate-300">
             <span className="font-mono uppercase tracking-wider text-[10px]">Marginal Winback CAC</span>
             <TrendingDown className="w-4 h-4 text-emerald-400" />
           </div>
-          <div className="font-serif text-3xl sm:text-4xl font-normal text-emerald-400 tracking-tight">₹350</div>
-          <p className="text-[11px] text-[#B39D82]/70 font-mono">97.7% reduction vs ₹15,000 baseline CAC</p>
+          <div className="text-3xl sm:text-4xl font-extrabold text-emerald-400 tracking-tight">₹350</div>
+          <p className="text-[11px] text-slate-300/70 font-mono">97.7% reduction vs ₹15,000 baseline CAC</p>
         </motion.div>
       </div>
 
       {/* Table Card */}
-      <div className="luxury-glass rounded-3xl p-6 sm:p-7 space-y-5 border border-[rgba(235,229,217,0.08)] shadow-[0_20px_50px_rgba(0,0,0,0.7)]">
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-3 border-b border-[rgba(235,229,217,0.06)]">
+      <div className="luxury-glass rounded-3xl p-6 sm:p-7 space-y-5 border border-slate-700/70 shadow-[0_20px_50px_rgba(0,0,0,0.7)]">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-3 border-b border-slate-800">
           <div className="flex items-center space-x-2.5">
             <div className="w-7 h-7 rounded-lg bg-[#e40000]/15 flex items-center justify-center text-[#e40000]">
               <Zap className="w-4 h-4" />
             </div>
             <div>
-              <h3 className="font-serif text-lg sm:text-xl font-normal text-[#EBE5D9]">
+              <h3 className="text-xl sm:text-2xl font-bold text-white tracking-tight">
                 High-Propensity Rescuable Leads
               </h3>
-              <p className="text-xs text-[#B39D82]">Airtel Autonomous Winback Engine™ · Calibrated Propensity Scoring (5,000 Verified Telemetry Points)</p>
+              <p className="text-xs text-slate-300">Airtel Autonomous Winback Engine™ · Calibrated Propensity Scoring (5,000 Verified Telemetry Points)</p>
             </div>
           </div>
 
           <div className="flex items-center space-x-2.5">
             <div className="relative">
-              <Search className="w-3.5 h-3.5 text-[#B39D82] absolute left-3.5 top-3" />
+              <Search className="w-3.5 h-3.5 text-slate-300 absolute left-3.5 top-3" />
               <input
                 type="text"
                 placeholder="Search leads, cities..."
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                className="bg-[#030405] border border-[rgba(235,229,217,0.08)] rounded-xl pl-9 pr-3.5 py-2 text-xs text-[#EBE5D9] placeholder-[#B39D82]/40 focus:outline-none focus:border-[#e40000] w-48 sm:w-56 transition-colors"
+                className="bg-slate-900/90 border border-slate-700/70 rounded-xl pl-9 pr-3.5 py-2 text-xs text-white placeholder-[#B39D82]/40 focus:outline-none focus:border-[#e40000] w-48 sm:w-56 transition-colors"
               />
             </div>
             <select
               value={filterSegment}
               onChange={(e) => setFilterSegment(e.target.value)}
-              className="bg-[#030405] border border-[rgba(235,229,217,0.08)] rounded-xl px-3 py-2 text-xs text-[#EBE5D9] focus:outline-none cursor-pointer"
+              className="bg-slate-900/90 border border-slate-700/70 rounded-xl px-3 py-2 text-xs text-white focus:outline-none cursor-pointer"
             >
               <option value="ALL">All Segments</option>
               <option value="Retail">Retail</option>
@@ -174,8 +174,8 @@ export const PartnerRescueConsole: React.FC<PartnerRescueConsoleProps> = ({ onPr
 
         {/* Table */}
         <div className="overflow-x-auto">
-          <table className="w-full text-left text-xs text-[#EBE5D9]">
-            <thead className="bg-[#030405] text-[#B39D82] uppercase font-mono text-[9px] tracking-wider border-b border-[rgba(235,229,217,0.06)]">
+          <table className="w-full text-left text-xs text-white">
+            <thead className="bg-slate-900/90 text-slate-300 uppercase font-mono text-[9px] tracking-wider border-b border-slate-800">
               <tr>
                 <th className="py-3 px-4">Enterprise Lead</th>
                 <th className="py-3 px-4">City &amp; Monthly Spend</th>
@@ -187,13 +187,13 @@ export const PartnerRescueConsole: React.FC<PartnerRescueConsoleProps> = ({ onPr
             <tbody className="divide-y divide-[rgba(235,229,217,0.04)]">
               {loading ? (
                 <tr>
-                  <td colSpan={5} className="py-10 text-center text-[#B39D82] font-mono">
+                  <td colSpan={5} className="py-10 text-center text-slate-300 font-mono">
                     Loading ML predictions...
                   </td>
                 </tr>
               ) : filteredLeads.length === 0 ? (
                 <tr>
-                  <td colSpan={5} className="py-10 text-center text-[#B39D82]">
+                  <td colSpan={5} className="py-10 text-center text-slate-300">
                     No leads match your search query.
                   </td>
                 </tr>
@@ -203,17 +203,17 @@ export const PartnerRescueConsole: React.FC<PartnerRescueConsoleProps> = ({ onPr
                   return (
                     <tr key={lead.lead_id} className="hover:bg-white/[0.03] transition-colors">
                       <td className="py-3.5 px-4">
-                        <div className="font-medium text-[#EBE5D9] text-xs sm:text-sm">{lead.business_name}</div>
-                        <div className="text-[10px] text-[#B39D82] font-mono">{lead.segment}</div>
+                        <div className="font-medium text-white text-xs sm:text-sm">{lead.business_name}</div>
+                        <div className="text-[10px] text-slate-300 font-mono">{lead.segment}</div>
                       </td>
                       <td className="py-3.5 px-4">
                         <div className="font-medium">{lead.city}</div>
-                        <div className="text-[10px] text-[#d9ad63] font-mono">
+                        <div className="text-[10px] text-amber-400 font-mono">
                           ₹{lead.monthly_spend_inr.toLocaleString()} / mo
                         </div>
                       </td>
                       <td className="py-3.5 px-4 space-y-1">
-                        <div className="text-[#EBE5D9]">{lead.drop_reason || "Pending"}</div>
+                        <div className="text-white">{lead.drop_reason || "Pending"}</div>
                         {lead.factor_chips && lead.factor_chips.length > 0 && (
                           <div className="flex flex-wrap gap-1 pt-0.5">
                             {lead.factor_chips.map((chip, idx) => (
@@ -244,7 +244,7 @@ export const PartnerRescueConsole: React.FC<PartnerRescueConsoleProps> = ({ onPr
                           >
                             <span>{scoreVal.toFixed(1)}%</span>
                           </div>
-                          <div className="text-[10px] font-mono text-[#B39D82]/70 uppercase tracking-wider">
+                          <div className="text-[10px] font-mono text-slate-300/70 uppercase tracking-wider">
                             {lead.priority_tier}
                           </div>
                         </div>

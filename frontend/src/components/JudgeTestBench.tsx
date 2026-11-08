@@ -76,24 +76,24 @@ export const JudgeTestBench: React.FC = () => {
   };
 
   return (
-    <div className="max-w-5xl mx-auto space-y-7">
+    <div className="w-full space-y-7">
       {/* Header */}
-      <div className="luxury-glass rounded-3xl p-6 flex flex-col sm:flex-row sm:items-center justify-between gap-4 border border-[rgba(235,229,217,0.08)] shadow-[0_20px_50px_rgba(0,0,0,0.7)]">
+      <div className="luxury-glass rounded-3xl p-6 flex flex-col sm:flex-row sm:items-center justify-between gap-4 border border-slate-700/70 shadow-[0_20px_50px_rgba(0,0,0,0.7)]">
         <div className="flex items-center space-x-3.5">
-          <div className="w-10 h-10 rounded-2xl bg-[#d9ad63]/15 border border-[#d9ad63]/30 flex items-center justify-center text-[#d9ad63]">
+          <div className="w-10 h-10 rounded-2xl bg-[#d9ad63]/15 border border-[#d9ad63]/30 flex items-center justify-center text-amber-400">
             <Scale className="w-5 h-5" />
           </div>
           <div>
-            <h2 className="font-serif text-xl sm:text-2xl font-normal text-[#EBE5D9]">
+            <h2 className="text-2xl sm:text-3xl font-extrabold text-white tracking-tight">
               Jury Adversarial Test Bench
             </h2>
-            <p className="text-xs text-[#B39D82] mt-0.5">
+            <p className="text-xs text-slate-300 mt-0.5">
               Live statutory edge-case validation against running production microservices
             </p>
           </div>
         </div>
 
-        <div className="font-mono text-xs text-[#d9ad63] bg-[#030405] px-3.5 py-1.5 rounded-full border border-white/[0.08]">
+        <div className="font-mono text-xs text-amber-400 bg-slate-900/90 px-3.5 py-1.5 rounded-full border border-slate-700/80">
           Anchor Date: 2026-07-15
         </div>
       </div>
@@ -111,21 +111,21 @@ export const JudgeTestBench: React.FC = () => {
               className={`p-4 rounded-2xl border transition-all cursor-pointer ${
                 isSelected
                   ? "border-[#d9ad63] bg-[#d9ad63]/10 shadow-[0_0_24px_rgba(217,173,99,0.2)]"
-                  : "border-[rgba(235,229,217,0.06)] bg-[#080a0d] hover:border-[rgba(235,229,217,0.16)]"
+                  : "border-slate-800 bg-slate-900/80 hover:border-[rgba(235,229,217,0.16)]"
               }`}
             >
               <div className="flex items-center justify-between mb-2">
-                <span className="text-[9px] px-2 py-0.5 rounded-full font-mono uppercase font-semibold border border-white/[0.08] text-[#EBE5D9] bg-white/[0.04]">
+                <span className="text-[9px] px-2 py-0.5 rounded-full font-mono uppercase font-semibold border border-slate-700/80 text-white bg-white/[0.04]">
                   {sc.badge}
                 </span>
                 <Play
                   className={`w-3.5 h-3.5 transition-colors ${
-                    isSelected ? "text-[#d9ad63]" : "text-[#B39D82]/50"
+                    isSelected ? "text-amber-400" : "text-slate-300/50"
                   }`}
                 />
               </div>
-              <h4 className="text-xs font-semibold text-[#EBE5D9]">{sc.title}</h4>
-              <p className="text-[11px] text-[#B39D82] mt-1.5 leading-relaxed">{sc.desc}</p>
+              <h4 className="text-xs font-semibold text-white">{sc.title}</h4>
+              <p className="text-[11px] text-slate-300 mt-1.5 leading-relaxed">{sc.desc}</p>
             </motion.div>
           );
         })}
@@ -137,14 +137,14 @@ export const JudgeTestBench: React.FC = () => {
           initial={{ opacity: 0, y: 12 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.3, ease: [0.16, 1, 0.3, 1] }}
-          className="luxury-glass rounded-3xl p-6 sm:p-7 space-y-5 border border-[rgba(235,229,217,0.08)] shadow-[0_20px_50px_rgba(0,0,0,0.7)]"
+          className="luxury-glass rounded-3xl p-6 sm:p-7 space-y-5 border border-slate-700/70 shadow-[0_20px_50px_rgba(0,0,0,0.7)]"
         >
-          <div className="flex items-center justify-between pb-3 border-b border-[rgba(235,229,217,0.06)]">
-            <h3 className="font-serif text-lg sm:text-xl font-normal text-[#EBE5D9]">
+          <div className="flex items-center justify-between pb-3 border-b border-slate-800">
+            <h3 className="text-lg sm:text-xl font-bold text-white tracking-tight">
               {scenarioData.scenario_id}: {scenarioData.title}
             </h3>
             <div className="flex items-center space-x-2.5 text-xs font-mono">
-              <span className="text-[#B39D82]">Latency: {executionTimeMs}ms</span>
+              <span className="text-slate-300">Latency: {executionTimeMs}ms</span>
               <span
                 className={`px-2.5 py-0.5 rounded-full font-semibold border ${
                   scenarioData.verification_result?.status === "APPROVED"
@@ -158,18 +158,18 @@ export const JudgeTestBench: React.FC = () => {
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-3.5 text-xs">
-            <div className="p-4 rounded-2xl bg-[#030405] border border-white/[0.06] space-y-1.5">
-              <span className="text-[#d9ad63] font-mono text-[10px] uppercase tracking-wider block">Rule Enforced:</span>
-              <p className="text-[#EBE5D9] leading-relaxed">{scenarioData.expected_behavior}</p>
+            <div className="p-4 rounded-2xl bg-slate-900/90 border border-slate-700 space-y-1.5">
+              <span className="text-amber-400 font-mono text-[10px] uppercase tracking-wider block">Rule Enforced:</span>
+              <p className="text-white leading-relaxed">{scenarioData.expected_behavior}</p>
             </div>
-            <div className="p-4 rounded-2xl bg-[#030405] border border-white/[0.06] space-y-1.5">
-              <span className="text-[#d9ad63] font-mono text-[10px] uppercase tracking-wider block">Engine Output:</span>
-              <p className="text-[#EBE5D9] leading-relaxed">{scenarioData.notes}</p>
+            <div className="p-4 rounded-2xl bg-slate-900/90 border border-slate-700 space-y-1.5">
+              <span className="text-amber-400 font-mono text-[10px] uppercase tracking-wider block">Engine Output:</span>
+              <p className="text-white leading-relaxed">{scenarioData.notes}</p>
             </div>
           </div>
 
-          <details className="text-xs bg-[#030405] p-4 rounded-2xl border border-white/[0.06]">
-            <summary className="cursor-pointer font-mono text-[#B39D82] hover:text-[#EBE5D9] select-none">
+          <details className="text-xs bg-slate-900/90 p-4 rounded-2xl border border-slate-700">
+            <summary className="cursor-pointer font-mono text-slate-300 hover:text-white select-none">
               Inspect Raw Pydantic Payload (Strict ConfigDict Verification)
             </summary>
             <pre className="mt-3 text-[10px] font-mono text-emerald-400 overflow-x-auto p-2 bg-black/40 rounded-xl">

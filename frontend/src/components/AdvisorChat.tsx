@@ -33,7 +33,7 @@ const renderInlineFormatting = (line: string) => {
   return parts.map((part, i) => {
     if (part.startsWith("**") && part.endsWith("**")) {
       return (
-        <strong key={i} className="font-semibold text-[#EBE5D9]">
+        <strong key={i} className="font-semibold text-white">
           {part.slice(2, -2)}
         </strong>
       );
@@ -52,7 +52,7 @@ const renderFormattedMessage = (text: string) => {
 
         if (trimmed.startsWith("### ")) {
           return (
-            <h4 key={idx} className="font-serif text-base font-normal text-[#EBE5D9] tracking-tight">
+            <h4 key={idx} className="font-sans font-bold text-base font-normal text-white tracking-tight">
               {trimmed.replace("### ", "")}
             </h4>
           );
@@ -61,14 +61,14 @@ const renderFormattedMessage = (text: string) => {
         if (trimmed.startsWith("* ") || trimmed.startsWith("- ")) {
           const content = trimmed.substring(2);
           return (
-            <div key={idx} className="flex items-start space-x-2 pl-1 text-[#EBE5D9]/90">
+            <div key={idx} className="flex items-start space-x-2 pl-1 text-white/90">
               <span className="text-[#e40000] font-bold mt-0.5">•</span>
               <span>{renderInlineFormatting(content)}</span>
             </div>
           );
         }
 
-        return <p key={idx} className="text-[#EBE5D9]/90">{renderInlineFormatting(line)}</p>;
+        return <p key={idx} className="text-white/90">{renderInlineFormatting(line)}</p>;
       })}
     </div>
   );
@@ -275,28 +275,28 @@ export const AdvisorChat: React.FC<AdvisorChatProps> = ({ onProfileUpdated }) =>
   ];
 
   return (
-    <div className="flex flex-col h-[620px] luxury-glass rounded-2xl overflow-hidden border border-[rgba(235,229,217,0.06)] shadow-apple-card">
+    <div className="flex flex-col h-[620px] luxury-glass rounded-2xl overflow-hidden border border-slate-800 shadow-apple-card">
       {/* Header */}
-      <div className="p-4 bg-[#080a0d]/90 border-b border-[rgba(235,229,217,0.06)] flex items-center justify-between">
+      <div className="p-4 bg-slate-900/80/90 border-b border-slate-800 flex items-center justify-between">
         <div className="flex items-center space-x-2.5">
           <div className="w-7 h-7 rounded-lg bg-[#e40000]/15 border border-[#e40000]/30 flex items-center justify-center text-[#e40000]">
             <Sparkles className="w-3.5 h-3.5" />
           </div>
           <div>
-            <h3 className="font-sans text-sm font-medium text-[#EBE5D9]">
+            <h3 className="font-sans text-sm font-medium text-white">
               Telecom Copilot
             </h3>
-            <p className="text-[10px] font-mono text-[#B39D82]">10 Indic Languages · DAG Solver</p>
+            <p className="text-[10px] font-mono text-slate-300">10 Indic Languages · DAG Solver</p>
           </div>
         </div>
 
         {/* Live Slot Tags */}
         {currentSlots?.is_complete && (
           <div className="flex items-center space-x-1 text-[10px] font-mono">
-            <span className="bg-white/[0.04] text-[#EBE5D9] px-2 py-0.5 rounded-full border border-white/[0.06]">
+            <span className="bg-white/[0.04] text-white px-2 py-0.5 rounded-full border border-white/[0.06]">
               Tier {currentSlots.city_tier}
             </span>
-            <span className="bg-white/[0.04] text-[#EBE5D9] px-2 py-0.5 rounded-full border border-white/[0.06] capitalize">
+            <span className="bg-white/[0.04] text-white px-2 py-0.5 rounded-full border border-white/[0.06] capitalize">
               {currentSlots.segment}
             </span>
             <span
@@ -314,7 +314,7 @@ export const AdvisorChat: React.FC<AdvisorChatProps> = ({ onProfileUpdated }) =>
 
       {/* Indic Language Pills */}
       <div className="px-3 py-1.5 bg-[#050709] border-b border-[rgba(235,229,217,0.04)] flex items-center space-x-1 overflow-x-auto no-scrollbar">
-        <span className="text-[9px] font-mono tracking-wider text-[#B39D82]/60 uppercase shrink-0 mr-1 flex items-center space-x-1">
+        <span className="text-[9px] font-mono tracking-wider text-slate-300/60 uppercase shrink-0 mr-1 flex items-center space-x-1">
           <Languages className="w-3 h-3 text-[#e40000]" />
           <span>Script:</span>
         </span>
@@ -327,7 +327,7 @@ export const AdvisorChat: React.FC<AdvisorChatProps> = ({ onProfileUpdated }) =>
             className={`px-2.5 py-0.5 rounded-full text-[11px] font-medium transition-colors shrink-0 cursor-pointer ${
               selectedLang === lang.code
                 ? "bg-[#e40000] text-white shadow-[0_0_12px_rgba(228,0,0,0.4)]"
-                : "bg-white/[0.03] text-[#B39D82] hover:text-[#EBE5D9] border border-white/[0.04]"
+                : "bg-white/[0.03] text-slate-300 hover:text-white border border-white/[0.04]"
             }`}
           >
             {lang.native}
@@ -364,7 +364,7 @@ export const AdvisorChat: React.FC<AdvisorChatProps> = ({ onProfileUpdated }) =>
                 className={`w-6 h-6 rounded-lg flex items-center justify-center shrink-0 text-xs font-mono ${
                   m.sender === "user"
                     ? "bg-[#e40000] text-white shadow-[0_0_12px_rgba(228,0,0,0.3)]"
-                    : "bg-[#0f1216] text-[#B39D82] border border-[rgba(235,229,217,0.06)]"
+                    : "bg-[#0f1216] text-slate-300 border border-slate-800"
                 }`}
               >
                 {m.sender === "user" ? <User className="w-3 h-3" /> : <Bot className="w-3 h-3" />}
@@ -374,7 +374,7 @@ export const AdvisorChat: React.FC<AdvisorChatProps> = ({ onProfileUpdated }) =>
                 className={`max-w-[85%] rounded-2xl p-3.5 shadow-md ${
                   m.sender === "user"
                     ? "bg-[#e40000] text-white rounded-tr-none"
-                    : "bg-[#0b0e12]/95 text-[#EBE5D9] border border-[rgba(235,229,217,0.06)] rounded-tl-none"
+                    : "bg-[#0b0e12]/95 text-white border border-slate-800 rounded-tl-none"
                 }`}
               >
                 {renderFormattedMessage(m.text)}
@@ -393,11 +393,11 @@ export const AdvisorChat: React.FC<AdvisorChatProps> = ({ onProfileUpdated }) =>
                 )}
 
                 {m.spokenTts && (
-                  <div className="mt-2.5 pt-2 border-t border-[rgba(235,229,217,0.06)] flex items-center justify-between text-xs text-[#B39D82]">
+                  <div className="mt-2.5 pt-2 border-t border-slate-800 flex items-center justify-between text-xs text-slate-300">
                     <span className="text-[9px] font-mono uppercase tracking-wider">Voice Ready</span>
                     <button
                       onClick={() => speakText(m.spokenTts!)}
-                      className="flex items-center space-x-1 text-[#d9ad63] hover:text-[#EBE5D9] transition-colors cursor-pointer text-xs"
+                      className="flex items-center space-x-1 text-amber-400 hover:text-white transition-colors cursor-pointer text-xs"
                     >
                       <Volume2 className="w-3 h-3" />
                       <span>Play</span>
@@ -413,7 +413,7 @@ export const AdvisorChat: React.FC<AdvisorChatProps> = ({ onProfileUpdated }) =>
           <motion.div
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
-            className="flex items-center space-x-2 text-[#B39D82] text-xs bg-[#0b0e12] border border-[rgba(235,229,217,0.06)] w-fit px-3 py-1.5 rounded-full"
+            className="flex items-center space-x-2 text-slate-300 text-xs bg-[#0b0e12] border border-slate-800 w-fit px-3 py-1.5 rounded-full"
           >
             <span className="w-1.5 h-1.5 rounded-full bg-[#e40000] animate-pulse" />
             <span className="font-mono text-[10px]">Evaluating DAG constraints...</span>
@@ -425,7 +425,7 @@ export const AdvisorChat: React.FC<AdvisorChatProps> = ({ onProfileUpdated }) =>
       {/* Archetype Quick-Triggers */}
       <div className="px-3 py-2 bg-[#050709] border-t border-[rgba(235,229,217,0.04)] overflow-x-auto no-scrollbar">
         <div className="flex items-center space-x-1.5 text-xs">
-          <span className="text-[9px] font-mono tracking-wider text-[#B39D82]/50 uppercase shrink-0">
+          <span className="text-[9px] font-mono tracking-wider text-slate-300/50 uppercase shrink-0">
             Presets:
           </span>
           {archetypes.map((arch, idx) => (
@@ -434,10 +434,10 @@ export const AdvisorChat: React.FC<AdvisorChatProps> = ({ onProfileUpdated }) =>
               whileHover={{ scale: 1.03 }}
               whileTap={{ scale: 0.97 }}
               onClick={() => handleSend(arch.query)}
-              className="bg-[#0b0e12] hover:bg-[#12161c] border border-[rgba(235,229,217,0.06)] hover:border-[rgba(235,229,217,0.14)] px-2.5 py-1 rounded-xl whitespace-nowrap transition-all text-xs flex items-center space-x-1.5 shrink-0 cursor-pointer"
+              className="bg-[#0b0e12] hover:bg-[#12161c] border border-slate-800 hover:border-[rgba(235,229,217,0.14)] px-2.5 py-1 rounded-xl whitespace-nowrap transition-all text-xs flex items-center space-x-1.5 shrink-0 cursor-pointer"
             >
-              <span className="text-[#EBE5D9] font-medium text-[11px]">{arch.title}</span>
-              <span className="text-[9px] font-mono text-[#B39D82] bg-white/[0.04] px-1 py-0.2 rounded">
+              <span className="text-white font-medium text-[11px]">{arch.title}</span>
+              <span className="text-[9px] font-mono text-slate-300 bg-white/[0.04] px-1 py-0.2 rounded">
                 {arch.badge}
               </span>
             </motion.button>
@@ -446,7 +446,7 @@ export const AdvisorChat: React.FC<AdvisorChatProps> = ({ onProfileUpdated }) =>
       </div>
 
       {/* Input Bar */}
-      <div className="p-3 bg-[#080a0d] border-t border-[rgba(235,229,217,0.06)] flex items-center space-x-2">
+      <div className="p-3 bg-slate-900/80 border-t border-slate-800 flex items-center space-x-2">
         <motion.button
           whileHover={{ scale: 1.05 }}
           whileTap={{ scale: 0.95 }}
@@ -454,7 +454,7 @@ export const AdvisorChat: React.FC<AdvisorChatProps> = ({ onProfileUpdated }) =>
           className={`p-2 rounded-xl border transition-all cursor-pointer ${
             isListening
               ? "bg-[#e40000] text-white border-red-500 animate-pulse shadow-[0_0_16px_rgba(228,0,0,0.6)]"
-              : "bg-white/[0.04] text-[#B39D82] border-white/[0.06] hover:bg-white/[0.08] hover:text-[#EBE5D9]"
+              : "bg-white/[0.04] text-slate-300 border-white/[0.06] hover:bg-white/[0.08] hover:text-white"
           }`}
           title="Voice input"
         >
@@ -467,7 +467,7 @@ export const AdvisorChat: React.FC<AdvisorChatProps> = ({ onProfileUpdated }) =>
           onChange={(e) => setInput(e.target.value)}
           onKeyDown={(e) => e.key === "Enter" && handleSend()}
           placeholder="Speak or type in Telugu, Tamil, Bengali, Hindi, English..."
-          className="flex-1 bg-[#030405] border border-[rgba(235,229,217,0.08)] rounded-xl px-3.5 py-2 text-xs text-[#EBE5D9] placeholder-[#B39D82]/40 focus:outline-none focus:border-[#e40000] transition-colors"
+          className="flex-1 bg-slate-900/90 border border-slate-700/70 rounded-xl px-3.5 py-2 text-xs text-white placeholder-[#B39D82]/40 focus:outline-none focus:border-[#e40000] transition-colors"
         />
 
         <motion.button

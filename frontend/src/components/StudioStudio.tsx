@@ -151,7 +151,7 @@ function FormattedChatText({ text }: { text: string }) {
           return (
             <h4
               key={idx}
-              className="font-serif text-sm sm:text-base font-normal text-[#EBE5D9] mt-1 mb-0.5 tracking-tight"
+              className="font-serif text-sm sm:text-base font-normal text-white mt-1 mb-0.5 tracking-tight"
             >
               {trimmed.slice(4)}
             </h4>
@@ -177,7 +177,7 @@ function parseInlineMarkdown(content: string) {
   return parts.map((part, i) => {
     if (part.startsWith("**") && part.endsWith("**")) {
       return (
-        <strong key={i} className="font-semibold text-[#EBE5D9]">
+        <strong key={i} className="font-semibold text-white">
           {part.slice(2, -2)}
         </strong>
       );
@@ -469,7 +469,7 @@ export const StudioStudio: React.FC<StudioStudioProps> = ({
   };
 
   return (
-    <div className="space-y-8 max-w-6xl mx-auto">
+    <div className="space-y-8 w-full">
       {/* Archetype Quick Select Ribbon */}
       <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
         {archetypes.map((arch) => {
@@ -479,30 +479,30 @@ export const StudioStudio: React.FC<StudioStudioProps> = ({
               key={arch.id}
               whileHover={{ y: -2 }}
               onClick={() => handleSelectArchetype(arch)}
-              className={`p-4 rounded-2xl cursor-pointer transition-all border ${
+              className={`p-5 rounded-2xl cursor-pointer transition-all border ${
                 isSelected
-                  ? "bg-white/[0.05] border-[#e40000]/60 shadow-[0_0_20px_rgba(228,0,0,0.15)]"
-                  : "bg-[#030405] border-white/[0.06] hover:border-white/[0.12]"
+                  ? "bg-slate-800/95 border-[#e40000] ring-1 ring-[#e40000] shadow-[0_0_24px_rgba(228,0,0,0.25)]"
+                  : "bg-slate-900/80 border-slate-700/60 hover:border-slate-500 hover:bg-slate-800/50"
               }`}
             >
               <div className="flex items-center justify-between mb-1.5">
-                <span className="font-serif text-sm font-normal text-[#EBE5D9] truncate">
+                <span className="text-base font-bold text-white tracking-tight truncate">
                   {arch.title}
                 </span>
                 <span
-                  className={`text-[9px] font-mono px-2 py-0.5 rounded-full border ${
+                  className={`text-xs font-mono font-semibold px-2.5 py-0.5 rounded-full border ${
                     isSelected
                       ? "bg-[#e40000]/20 text-[#ff4d4d] border-[#e40000]/30"
-                      : "bg-white/[0.04] text-[#B39D82] border-white/[0.06]"
+                      : "bg-slate-800 text-slate-300 border-slate-700"
                   }`}
                 >
                   {arch.badge}
                 </span>
               </div>
-              <div className="font-serif text-3xl font-normal text-[#EBE5D9] tracking-tight my-1">
-                {arch.price} <span className="text-xs font-sans text-[#B39D82]">/mo</span>
+              <div className="text-2xl sm:text-3xl font-extrabold text-white tracking-tight my-1.5">
+                {arch.price} <span className="text-sm font-medium text-slate-400">/mo</span>
               </div>
-              <p className="text-[11px] text-[#B39D82] leading-relaxed mt-2 line-clamp-2">{arch.desc}</p>
+              <p className="text-xs text-slate-300 font-medium leading-relaxed mt-2 line-clamp-2">{arch.desc}</p>
             </motion.div>
           );
         })}
@@ -518,12 +518,12 @@ export const StudioStudio: React.FC<StudioStudioProps> = ({
             </div>
             <div>
               <div className="flex items-center space-x-2">
-                <h3 className="font-serif text-base font-normal text-[#EBE5D9]">
+                <h3 className="text-base sm:text-lg font-bold text-white tracking-tight">
                   Airtel Enterprise Advisor
                 </h3>
                 <span className="live-pulse-dot" />
               </div>
-              <p className="text-[10px] text-[#B39D82] font-mono">
+              <p className="text-xs text-slate-400 font-mono">
                 Universal AI Engine · Auto-Detects Any Global & Indian Language
               </p>
             </div>
@@ -537,7 +537,7 @@ export const StudioStudio: React.FC<StudioStudioProps> = ({
                 className={`px-3 py-1 rounded-lg text-xs font-medium transition-all cursor-pointer flex items-center space-x-1.5 ${
                   scriptMode === "latin"
                     ? "bg-[#e40000] text-white shadow-[0_0_12px_rgba(228,0,0,0.4)]"
-                    : "text-[#B39D82] hover:text-[#EBE5D9]"
+                    : "text-slate-300 hover:text-white"
                 }`}
                 title="Speak in regional language using English alphabet (e.g. bagunnara ela unnaru)"
               >
@@ -548,7 +548,7 @@ export const StudioStudio: React.FC<StudioStudioProps> = ({
                 className={`px-3 py-1 rounded-lg text-xs font-medium transition-all cursor-pointer flex items-center space-x-1.5 ${
                   scriptMode === "native"
                     ? "bg-[#e40000] text-white shadow-[0_0_12px_rgba(228,0,0,0.4)]"
-                    : "text-[#B39D82] hover:text-[#EBE5D9]"
+                    : "text-slate-300 hover:text-white"
                 }`}
                 title="Speak in traditional native regional scripts (e.g. బాగున్నారా)"
               >
@@ -559,7 +559,7 @@ export const StudioStudio: React.FC<StudioStudioProps> = ({
             {/* Clear History Button */}
             <button
               onClick={handleClearChat}
-              className="p-1.5 rounded-xl bg-white/[0.03] hover:bg-white/[0.08] text-[#B39D82] hover:text-[#EBE5D9] border border-white/[0.06] transition-colors cursor-pointer"
+              className="p-1.5 rounded-xl bg-white/[0.03] hover:bg-white/[0.08] text-slate-300 hover:text-white border border-white/[0.06] transition-colors cursor-pointer"
               title="Reset conversation"
             >
               <RotateCcw className="w-3.5 h-3.5" />
@@ -567,15 +567,7 @@ export const StudioStudio: React.FC<StudioStudioProps> = ({
           </div>
         </div>
 
-        {/* Ambient AI Multilingual Auto-Detect Badge (Unconstrained to all 22 Indian Languages) */}
-        <div className="flex items-center justify-between pb-1">
-          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white/[0.04] border border-white/[0.08] text-[#B39D82]">
-            <Globe className="w-3.5 h-3.5 text-[#e40000] animate-pulse" />
-            <span className="text-[11px] font-medium text-[#EBE5D9]">
-              AI Multilingual Auto-Detect <span className="text-[#B39D82]/60">·</span> <span className="text-[#B39D82]/90">Speaks Any Language Worldwide (Auto-Detects 100+ Languages)</span>
-            </span>
-          </div>
-        </div>
+
 
         {/* Scrollable Preserved Message Thread Container (Empty on initial load) */}
         {(messages.length > 0 || loading) && (
@@ -614,10 +606,10 @@ export const StudioStudio: React.FC<StudioStudioProps> = ({
                   className={`flex flex-col ${isUser ? "items-end" : "items-start"}`}
                 >
                   <div
-                    className={`rounded-2xl p-4 text-xs sm:text-sm leading-relaxed max-w-[90%] sm:max-w-[80%] shadow-sm ${
+                    className={`rounded-2xl p-4 text-sm sm:text-base leading-relaxed max-w-[90%] sm:max-w-[80%] shadow-sm ${
                       isUser
-                        ? "bg-gradient-to-r from-[#e40000]/25 to-[#e40000]/15 border border-[#e40000]/40 text-[#EBE5D9] rounded-tr-sm"
-                        : "bg-[#030405] border border-[rgba(235,229,217,0.08)] text-[#EBE5D9] rounded-tl-sm space-y-2"
+                        ? "bg-gradient-to-r from-[#e40000]/30 to-[#e40000]/15 border border-[#e40000]/50 text-white rounded-tr-sm shadow-sm"
+                        : "bg-slate-900/95 border border-slate-700/70 text-slate-100 rounded-tl-sm space-y-2.5 shadow-sm"
                     }`}
                   >
                     <FormattedChatText text={displayedText} />
@@ -631,10 +623,10 @@ export const StudioStudio: React.FC<StudioStudioProps> = ({
                               <Sparkles className="w-3 h-3 text-[#d9ad63]" />
                               <span>Configured Plan Confirmed</span>
                             </div>
-                            <div className="text-xs font-semibold text-[#EBE5D9]">
+                            <div className="text-xs font-semibold text-white">
                               {(m.quote || quote)?.items.map((i) => i.product_name).join(" + ") || "Enterprise Connectivity Pack"} · ₹{(m.quote || quote)?.net_mrc_inr.toLocaleString()}/mo
                             </div>
-                            <div className="text-[10px] text-[#B39D82]">
+                            <div className="text-[10px] text-slate-300">
                               {(m.quote || quote)?.net_otc_inr === 0 ? "₹0 Setup Fee Waived (12-Mo Agreement)" : "Fast Track Setup"} · {(m.quote || quote)?.guaranteed_sla_days || 3}d SLA
                             </div>
                           </div>
@@ -651,19 +643,19 @@ export const StudioStudio: React.FC<StudioStudioProps> = ({
 
                     {/* Audio Listen Button for Advisor */}
                     {!isUser && m.spokenTts && (
-                      <div className="pt-1.5 flex items-center justify-between text-[11px] text-[#B39D82] border-t border-white/[0.04]">
+                      <div className="pt-1.5 flex items-center justify-between text-[11px] text-slate-300 border-t border-white/[0.04]">
                         <button
                           onClick={() => speakText(m.spokenTts || "")}
-                          className="text-xs text-[#d9ad63] hover:text-[#EBE5D9] flex items-center space-x-1.5 cursor-pointer font-mono"
+                          className="text-xs text-[#d9ad63] hover:text-white flex items-center space-x-1.5 cursor-pointer font-mono"
                         >
                           <Volume2 className="w-3.5 h-3.5" />
                           <span>Listen Audio</span>
                         </button>
-                        <span className="font-mono text-[10px] text-[#B39D82]/50">{m.timestamp}</span>
+                        <span className="font-mono text-[10px] text-slate-300/50">{m.timestamp}</span>
                       </div>
                     )}
                     {isUser && (
-                      <div className="text-right text-[10px] font-mono text-[#EBE5D9]/50 mt-1">
+                      <div className="text-right text-[10px] font-mono text-white/50 mt-1">
                         {m.timestamp}
                       </div>
                     )}
@@ -677,7 +669,7 @@ export const StudioStudio: React.FC<StudioStudioProps> = ({
             <motion.div
               initial={{ opacity: 0, y: 6 }}
               animate={{ opacity: 1, y: 0 }}
-              className="flex items-center space-x-2 text-xs text-[#B39D82] bg-[#030405] p-3 rounded-2xl rounded-tl-sm w-fit border border-[rgba(235,229,217,0.06)]"
+              className="flex items-center space-x-2 text-xs text-slate-300 bg-[#030405] p-3 rounded-2xl rounded-tl-sm w-fit border border-[rgba(235,229,217,0.06)]"
             >
               <div className="flex space-x-1 items-center">
                 <span className="w-1.5 h-1.5 bg-[#e40000] rounded-full animate-bounce [animation-delay:-0.3s]" />
@@ -691,7 +683,7 @@ export const StudioStudio: React.FC<StudioStudioProps> = ({
         )}
 
         {/* Input Bar */}
-        <div className="flex items-center space-x-3 bg-[#030405] rounded-2xl p-2 border border-[rgba(235,229,217,0.08)] focus-within:border-[#e40000]/60 transition-colors">
+        <div className="flex items-center space-x-3 bg-slate-900/90 rounded-2xl p-2.5 border border-slate-700/80 focus-within:border-[#e40000] transition-colors shadow-inner">
           <input
             type="text"
             value={input}
@@ -702,7 +694,7 @@ export const StudioStudio: React.FC<StudioStudioProps> = ({
                 ? "Type a message..."
                 : "Type or speak in any language worldwide (English, Hindi, Telugu, Spanish, French, etc.)..."
             }
-            className="flex-1 bg-transparent px-4 py-2 text-xs sm:text-sm text-[#EBE5D9] placeholder-[#B39D82]/40 focus:outline-none"
+            className="flex-1 bg-transparent px-4 py-2 text-sm text-white placeholder-slate-500 focus:outline-none font-medium"
           />
           <motion.button
             whileHover={{ scale: 1.05 }}
@@ -729,10 +721,10 @@ export const StudioStudio: React.FC<StudioStudioProps> = ({
               <span className="text-[10px] font-mono text-[#d9ad63] uppercase tracking-widest block mb-1">
                 Configured Solution Architecture
               </span>
-              <h3 className="font-serif text-2xl font-normal text-[#EBE5D9]">
+              <h3 className="text-2xl sm:text-3xl font-extrabold text-white tracking-tight">
                 Smart Enterprise Connectivity Pack
               </h3>
-              <div className="flex items-center space-x-3 text-xs text-[#B39D82] mt-1">
+              <div className="flex items-center space-x-3 text-xs text-slate-300 mt-1">
                 <span className="flex items-center space-x-1">
                   <Clock className="w-3.5 h-3.5 text-[#e40000]" />
                   <span>{quote.guaranteed_sla_days} Days SLA Guarantee</span>
@@ -750,12 +742,12 @@ export const StudioStudio: React.FC<StudioStudioProps> = ({
             </div>
 
             <div className="text-right">
-              <span className="text-[10px] font-mono text-[#B39D82] uppercase tracking-widest block">
+              <span className="text-[10px] font-mono text-slate-300 uppercase tracking-widest block">
                 Net Monthly Investment
               </span>
-              <div className="font-serif text-3xl font-normal text-[#EBE5D9] tracking-tight">
+              <div className="text-3xl sm:text-4xl font-extrabold text-white tracking-tight">
                 ₹{quote.net_mrc_inr.toLocaleString()}{" "}
-                <span className="text-xs font-sans text-[#B39D82]">/month</span>
+                <span className="text-sm font-medium text-slate-400">/month</span>
               </div>
               <p className="text-[10px] text-emerald-400 font-mono mt-0.5">
                 {quote.net_otc_inr === 0 ? "100% One-Time Setup Fee (OTC) Waived" : `OTC: ₹${quote.net_otc_inr}`}
@@ -765,27 +757,27 @@ export const StudioStudio: React.FC<StudioStudioProps> = ({
 
           {/* Bundled SKUs */}
           <div>
-            <h4 className="text-[10px] font-mono text-[#B39D82] uppercase tracking-widest mb-3">
+            <h4 className="text-[10px] font-mono text-slate-300 uppercase tracking-widest mb-3">
               Bundled Enterprise SKUs:
             </h4>
             <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-2.5">
               {quote.items.map((item) => (
                 <div
                   key={item.product_id}
-                  className="flex items-center justify-between p-3 rounded-xl bg-white/[0.02] border border-white/[0.06]"
+                  className="flex items-center justify-between p-3 rounded-xl bg-slate-900/80 border border-slate-700/60"
                 >
                   <div className="flex items-center space-x-2.5 min-w-0">
                     <CheckCircle2 className="w-4 h-4 text-[#e40000] shrink-0" />
                     <div className="truncate">
-                      <div className="text-xs font-medium text-[#EBE5D9] truncate">
+                      <div className="text-xs font-medium text-white truncate">
                         {item.product_name}
                       </div>
-                      <div className="text-[10px] text-[#B39D82] font-mono">
+                      <div className="text-[10px] text-slate-300 font-mono">
                         {item.product_id} · SLA {item.install_days}d
                       </div>
                     </div>
                   </div>
-                  <span className="text-xs font-mono text-[#EBE5D9] shrink-0 ml-2">
+                  <span className="text-xs font-mono text-white shrink-0 ml-2">
                     ₹{item.total_mrc_inr}/mo
                   </span>
                 </div>
@@ -794,15 +786,15 @@ export const StudioStudio: React.FC<StudioStudioProps> = ({
           </div>
 
           {/* Interactive Budget Reverse Optimization Slider */}
-          <div className="p-4 sm:p-5 rounded-2xl bg-[#030405] border border-white/[0.06] space-y-3">
+          <div className="p-4 sm:p-5 rounded-2xl bg-slate-900/90 border border-slate-700/60 space-y-3">
             <div className="flex items-center justify-between">
-              <span className="text-xs font-medium text-[#EBE5D9] flex items-center space-x-2">
+              <span className="text-xs font-medium text-white flex items-center space-x-2">
                 <Sliders className="w-3.5 h-3.5 text-[#e40000]" />
                 <span>Reverse Budget Optimization Slider</span>
               </span>
-              <span className="font-serif text-lg text-[#d9ad63]">
+              <span className="text-xl font-bold text-amber-400 tracking-tight">
                 ₹{budgetSlider.toLocaleString()}{" "}
-                <span className="text-xs font-sans text-[#B39D82]">/mo target</span>
+                <span className="text-xs font-medium text-slate-400">/mo target</span>
               </span>
             </div>
             <input
@@ -814,11 +806,11 @@ export const StudioStudio: React.FC<StudioStudioProps> = ({
               onChange={(e) => setBudgetSlider(Number(e.target.value))}
               className="w-full h-1.5 bg-white/10 rounded-lg appearance-none cursor-pointer accent-[#e40000]"
             />
-            <div className="flex justify-between items-center text-[10px] font-mono text-[#B39D82]">
+            <div className="flex justify-between items-center text-[10px] font-mono text-slate-300">
               <span>₹999 (Kirana Entry)</span>
               <button
                 onClick={handleRunOptimizer}
-                className="text-[#d9ad63] hover:text-[#EBE5D9] font-medium underline cursor-pointer"
+                className="text-[#d9ad63] hover:text-white font-medium underline cursor-pointer"
               >
                 Re-optimize bundle for ₹{budgetSlider.toLocaleString()} →
               </button>
@@ -828,7 +820,7 @@ export const StudioStudio: React.FC<StudioStudioProps> = ({
 
           {/* CTA Proceed to Instant KYC */}
           <div className="pt-2 flex flex-col sm:flex-row items-center justify-between gap-4">
-            <div className="text-xs text-[#B39D82] leading-relaxed">
+            <div className="text-xs text-slate-300 leading-relaxed">
               <span>Zero field verification required · </span>
               <span className="text-emerald-400">DPDP Act 2023 Compliant In-Memory Redaction</span>
             </div>
@@ -836,7 +828,7 @@ export const StudioStudio: React.FC<StudioStudioProps> = ({
               whileHover={{ scale: 1.02 }}
               whileTap={{ scale: 0.98 }}
               onClick={() => onProceedToKYC(quote)}
-              className="w-full sm:w-auto px-7 py-3.5 rounded-xl bg-[#e40000] hover:bg-[#b30000] text-white font-serif text-sm tracking-wide transition-all shadow-[0_0_25px_rgba(228,0,0,0.5)] flex items-center justify-center space-x-2 cursor-pointer"
+              className="w-full sm:w-auto px-7 py-3.5 rounded-xl bg-[#e40000] hover:bg-[#b30000] text-white font-bold text-sm tracking-wide transition-all shadow-[0_0_25px_rgba(228,0,0,0.5)] flex items-center justify-center space-x-2 cursor-pointer"
             >
               <span>Proceed to Instant KYC</span>
               <ArrowRight className="w-4 h-4" />

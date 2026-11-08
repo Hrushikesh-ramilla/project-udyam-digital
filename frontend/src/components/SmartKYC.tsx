@@ -415,25 +415,25 @@ export const SmartKYC: React.FC<SmartKYCProps> = ({ quote, onKYCApproved, onSwit
   const currentScenario = SPECIMEN_SCENARIOS.find((s) => s.id === selectedPreset);
 
   return (
-    <div className="max-w-4xl mx-auto space-y-7">
+    <div className="w-full space-y-7">
       {/* Editorial Header */}
-      <div className="luxury-glass rounded-3xl p-6 flex flex-col sm:flex-row sm:items-center justify-between gap-5 border border-[rgba(235,229,217,0.08)] shadow-[0_20px_50px_rgba(0,0,0,0.7)]">
+      <div className="luxury-glass rounded-3xl p-6 flex flex-col sm:flex-row sm:items-center justify-between gap-5 border border-slate-700/70 shadow-[0_20px_50px_rgba(0,0,0,0.7)]">
         <div className="flex items-center space-x-3.5">
           <div className="w-10 h-10 rounded-2xl bg-emerald-500/15 border border-emerald-500/30 flex items-center justify-center text-emerald-400 shrink-0">
             <ShieldCheck className="w-5 h-5" />
           </div>
           <div>
-            <h2 className="font-serif text-xl sm:text-2xl font-normal text-[#EBE5D9]">
+            <h2 className="text-2xl sm:text-3xl font-extrabold text-white tracking-tight">
               Smart KYC &amp; DPDP Anomaly Gate
             </h2>
-            <p className="text-xs text-[#B39D82] mt-0.5">
+            <p className="text-xs text-slate-300 mt-0.5">
               In-memory 12-digit UID masking · RapidFuzz cross-checks under 200ms
             </p>
           </div>
         </div>
 
         {/* DPDP Consent Switch */}
-        <div className="flex items-center space-x-3 bg-[#030405] px-4 py-2.5 rounded-2xl border border-[rgba(235,229,217,0.08)] text-xs text-[#B39D82] shrink-0">
+        <div className="flex items-center space-x-3 bg-slate-900/90 px-4 py-2.5 rounded-2xl border border-slate-700/70 text-xs text-slate-300 shrink-0">
           <label className="relative inline-flex items-center cursor-pointer">
             <input
               type="checkbox"
@@ -444,12 +444,12 @@ export const SmartKYC: React.FC<SmartKYCProps> = ({ quote, onKYCApproved, onSwit
             />
             <div className="w-8 h-4 bg-gray-800 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-[#EBE5D9] after:border-gray-300 after:border after:rounded-full after:h-3 after:w-3 after:transition-all peer-checked:bg-[#e40000]"></div>
           </label>
-          <label htmlFor="dpdp-consent" className="cursor-pointer font-medium text-[#EBE5D9]">
+          <label htmlFor="dpdp-consent" className="cursor-pointer font-medium text-white">
             DPDP 2023 Consent
           </label>
           <button
             onClick={() => setShowConsentModal(true)}
-            className="text-[10px] text-[#d9ad63] hover:underline font-mono"
+            className="text-[10px] text-amber-400 hover:underline font-mono"
           >
             [Audit]
           </button>
@@ -468,7 +468,7 @@ export const SmartKYC: React.FC<SmartKYCProps> = ({ quote, onKYCApproved, onSwit
       )}
 
       {/* Mode Switcher Tabs */}
-      <div className="flex flex-wrap gap-2 border-b border-[rgba(235,229,217,0.06)] pb-3">
+      <div className="flex flex-wrap gap-2 border-b border-slate-800 pb-3">
         <button
           onClick={() => {
             setActiveTab("staging");
@@ -477,7 +477,7 @@ export const SmartKYC: React.FC<SmartKYCProps> = ({ quote, onKYCApproved, onSwit
           className={`px-4 py-2 rounded-full text-xs font-medium transition-all cursor-pointer flex items-center space-x-1.5 ${
             activeTab === "staging"
               ? "bg-[#e40000] text-white shadow-[0_0_16px_rgba(228,0,0,0.4)]"
-              : "text-[#B39D82] hover:text-[#EBE5D9] hover:bg-white/[0.03]"
+              : "text-slate-300 hover:text-white hover:bg-white/[0.03]"
           }`}
         >
           <FileCheck className="w-3.5 h-3.5" />
@@ -492,10 +492,10 @@ export const SmartKYC: React.FC<SmartKYCProps> = ({ quote, onKYCApproved, onSwit
           className={`px-4 py-2 rounded-full text-xs font-medium transition-all cursor-pointer flex items-center space-x-1.5 ${
             activeTab === "digilocker"
               ? "bg-[#e40000] text-white shadow-[0_0_16px_rgba(228,0,0,0.4)]"
-              : "text-[#d9ad63] hover:text-[#EBE5D9] hover:bg-white/[0.03] border border-[#d9ad63]/30"
+              : "text-amber-400 hover:text-white hover:bg-white/[0.03] border border-[#d9ad63]/30"
           }`}
         >
-          <Zap className="w-3.5 h-3.5 text-[#d9ad63]" />
+          <Zap className="w-3.5 h-3.5 text-amber-400" />
           <span>⚡ DigiLocker Fast-Track (10s)</span>
         </button>
       </div>
@@ -504,20 +504,20 @@ export const SmartKYC: React.FC<SmartKYCProps> = ({ quote, onKYCApproved, onSwit
         /* Unified Document Staging & Specimen Auto-Fill View */
         <div className="space-y-6">
           {/* ⚡ Specimen Auto-Fill Bench Toolbar */}
-          <div className="luxury-glass rounded-3xl p-5 border border-[rgba(235,229,217,0.08)] shadow-[0_15px_40px_rgba(0,0,0,0.6)] space-y-3.5">
-            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 pb-2.5 border-b border-[rgba(235,229,217,0.06)]">
+          <div className="luxury-glass rounded-3xl p-5 border border-slate-700/70 shadow-[0_15px_40px_rgba(0,0,0,0.6)] space-y-3.5">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 pb-2.5 border-b border-slate-800">
               <div className="flex items-center space-x-2">
-                <Sparkles className="w-3.5 h-3.5 text-[#d9ad63]" />
-                <span className="text-xs font-semibold text-[#EBE5D9]">
+                <Sparkles className="w-3.5 h-3.5 text-amber-400" />
+                <span className="text-xs font-semibold text-white">
                   Auto-Fill Test Specimen (Simulated Dataset)
                 </span>
-                <span className="text-[9px] font-mono text-[#d9ad63] bg-[#d9ad63]/10 border border-[#d9ad63]/20 px-2 py-0.5 rounded-full">
+                <span className="text-[9px] font-mono text-amber-400 bg-[#d9ad63]/10 border border-[#d9ad63]/20 px-2 py-0.5 rounded-full">
                   Click to Stage Slots
                 </span>
               </div>
               <button
                 onClick={handleClearSlots}
-                className="text-[11px] font-mono text-[#B39D82] hover:text-white flex items-center space-x-1 cursor-pointer self-start sm:self-auto"
+                className="text-[11px] font-mono text-slate-300 hover:text-white flex items-center space-x-1 cursor-pointer self-start sm:self-auto"
               >
                 <RotateCcw className="w-3 h-3" />
                 <span>Reset to Empty Slots</span>
@@ -535,11 +535,11 @@ export const SmartKYC: React.FC<SmartKYCProps> = ({ quote, onKYCApproved, onSwit
                     className={`p-2.5 rounded-xl border text-left transition-all cursor-pointer ${
                       isSelected
                         ? "border-[#e40000] bg-gradient-to-b from-[#e40000]/20 to-transparent shadow-[0_0_15px_rgba(228,0,0,0.3)] ring-1 ring-[#e40000]"
-                        : "border-white/[0.06] bg-[#030405] hover:border-white/[0.15]"
+                        : "border-slate-700 bg-slate-900/90 hover:border-white/[0.15]"
                     }`}
                   >
                     <div className="flex items-center justify-between mb-1">
-                      <span className="text-[10px] font-mono font-bold text-[#EBE5D9]">
+                      <span className="text-[10px] font-mono font-bold text-white">
                         {scenario.id}
                       </span>
                       <span
@@ -547,14 +547,14 @@ export const SmartKYC: React.FC<SmartKYCProps> = ({ quote, onKYCApproved, onSwit
                           scenario.type === "CLEAN"
                             ? "bg-emerald-500/20 text-emerald-400 border-emerald-500/30"
                             : scenario.type === "EXEMPT"
-                            ? "bg-[#d9ad63]/20 text-[#d9ad63] border-[#d9ad63]/30"
+                            ? "bg-[#d9ad63]/20 text-amber-400 border-[#d9ad63]/30"
                             : "bg-red-500/20 text-red-400 border-red-500/30"
                         }`}
                       >
                         {scenario.type}
                       </span>
                     </div>
-                    <div className="text-[10px] font-medium text-[#EBE5D9] truncate">
+                    <div className="text-[10px] font-medium text-white truncate">
                       {scenario.label.split("(")[1]?.replace(")", "") || scenario.label}
                     </div>
                   </button>
@@ -563,20 +563,20 @@ export const SmartKYC: React.FC<SmartKYCProps> = ({ quote, onKYCApproved, onSwit
             </div>
 
             {currentScenario && (
-              <p className="text-[11px] text-[#B39D82] bg-white/[0.02] p-2 rounded-xl border border-white/[0.04]">
-                ↳ <strong className="text-[#EBE5D9]">{currentScenario.label}:</strong> {currentScenario.desc}
+              <p className="text-[11px] text-slate-300 bg-white/[0.02] p-2 rounded-xl border border-white/[0.04]">
+                ↳ <strong className="text-white">{currentScenario.label}:</strong> {currentScenario.desc}
               </p>
             )}
           </div>
 
           {/* 4 Staging Slots (Visible and Hydrated) */}
-          <div className="luxury-glass rounded-3xl p-6 sm:p-7 space-y-6 border border-[rgba(235,229,217,0.08)] shadow-[0_20px_50px_rgba(0,0,0,0.7)]">
-            <div className="flex items-center justify-between pb-3 border-b border-[rgba(235,229,217,0.06)]">
+          <div className="luxury-glass rounded-3xl p-6 sm:p-7 space-y-6 border border-slate-700/70 shadow-[0_20px_50px_rgba(0,0,0,0.7)]">
+            <div className="flex items-center justify-between pb-3 border-b border-slate-800">
               <div>
-                <h3 className="text-xs font-semibold text-[#EBE5D9]">
+                <h3 className="text-xs font-semibold text-white">
                   Staged Document Package (4 Statutory Checklist Slots)
                 </h3>
-                <p className="text-[11px] text-[#B39D82] mt-0.5">
+                <p className="text-[11px] text-slate-300 mt-0.5">
                   Inspect staged documents below before executing the Smart KYC Anomaly Gate.
                 </p>
               </div>
@@ -602,15 +602,15 @@ export const SmartKYC: React.FC<SmartKYCProps> = ({ quote, onKYCApproved, onSwit
                         ? staged.isStale
                           ? "border-red-500/40 bg-red-950/15"
                           : "border-emerald-500/40 bg-emerald-950/15"
-                        : "border-dashed border-[rgba(235,229,217,0.12)] bg-[#030405]"
+                        : "border-dashed border-slate-700 bg-slate-900/90"
                     }`}
                   >
                     <div className="flex items-center justify-between mb-2.5">
                       <div className="flex items-center space-x-2.5">
-                        <div className="w-7 h-7 rounded-lg bg-white/[0.04] flex items-center justify-center text-[#B39D82]">
+                        <div className="w-7 h-7 rounded-lg bg-white/[0.04] flex items-center justify-center text-slate-300">
                           <SlotIcon className="w-3.5 h-3.5" />
                         </div>
-                        <span className="text-xs font-semibold text-[#EBE5D9]">{slot.label}</span>
+                        <span className="text-xs font-semibold text-white">{slot.label}</span>
                       </div>
                       <span
                         className={`text-[9px] font-mono px-2 py-0.5 rounded-full uppercase border ${
@@ -626,19 +626,19 @@ export const SmartKYC: React.FC<SmartKYCProps> = ({ quote, onKYCApproved, onSwit
                     </div>
 
                     {staged && !staged.isMissing ? (
-                      <div className="space-y-1.5 mb-3 bg-[#030405] p-3 rounded-xl border border-white/[0.04]">
-                        <div className="text-xs font-medium text-[#EBE5D9] truncate">
+                      <div className="space-y-1.5 mb-3 bg-slate-900/90 p-3 rounded-xl border border-white/[0.04]">
+                        <div className="text-xs font-medium text-white truncate">
                           📄 {staged.extractedTitle}
                         </div>
-                        <div className="text-[10px] font-mono text-[#B39D82] truncate">
+                        <div className="text-[10px] font-mono text-slate-300 truncate">
                           {staged.extractedDetail}
                         </div>
-                        <div className="text-[9px] font-mono text-[#d9ad63]">
+                        <div className="text-[9px] font-mono text-amber-400">
                           File: {staged.filename}
                         </div>
                       </div>
                     ) : (
-                      <p className="text-[11px] text-[#B39D82] mb-3">{slot.desc}</p>
+                      <p className="text-[11px] text-slate-300 mb-3">{slot.desc}</p>
                     )}
 
                     <div className="flex items-center justify-between pt-1">
@@ -654,9 +654,9 @@ export const SmartKYC: React.FC<SmartKYCProps> = ({ quote, onKYCApproved, onSwit
                       />
                       <label
                         htmlFor={`custom-file-${slot.id}`}
-                        className="cursor-pointer inline-flex items-center space-x-1.5 px-3 py-1.5 rounded-xl bg-white/[0.05] hover:bg-white/[0.1] text-xs font-medium text-[#EBE5D9] border border-white/[0.08] transition-colors"
+                        className="cursor-pointer inline-flex items-center space-x-1.5 px-3 py-1.5 rounded-xl bg-white/[0.05] hover:bg-white/[0.1] text-xs font-medium text-white border border-slate-700/80 transition-colors"
                       >
-                        <Upload className="w-3 h-3 text-[#B39D82]" />
+                        <Upload className="w-3 h-3 text-slate-300" />
                         <span>{staged ? "Replace File" : "Upload File"}</span>
                       </label>
                       {staged && (
@@ -671,9 +671,9 @@ export const SmartKYC: React.FC<SmartKYCProps> = ({ quote, onKYCApproved, onSwit
             </div>
 
             {/* Explicit Submission Action Bar */}
-            <div className="flex flex-col sm:flex-row items-center justify-between gap-4 pt-3 border-t border-[rgba(235,229,217,0.06)]">
-              <div className="text-xs text-[#B39D82]">
-                Ready to verify: <strong className="text-[#EBE5D9]">{currentScenario?.label || "Custom Staged Package"}</strong>
+            <div className="flex flex-col sm:flex-row items-center justify-between gap-4 pt-3 border-t border-slate-800">
+              <div className="text-xs text-slate-300">
+                Ready to verify: <strong className="text-white">{currentScenario?.label || "Custom Staged Package"}</strong>
               </div>
 
               <motion.button
@@ -695,17 +695,17 @@ export const SmartKYC: React.FC<SmartKYCProps> = ({ quote, onKYCApproved, onSwit
         </div>
       ) : (
         /* DigiLocker Fast-Track Gateway */
-        <div className="luxury-glass rounded-3xl p-6 sm:p-7 space-y-6 border border-[rgba(235,229,217,0.08)] shadow-[0_20px_50px_rgba(0,0,0,0.7)]">
-          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-4 border-b border-[rgba(235,229,217,0.06)]">
+        <div className="luxury-glass rounded-3xl p-6 sm:p-7 space-y-6 border border-slate-700/70 shadow-[0_20px_50px_rgba(0,0,0,0.7)]">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-4 border-b border-slate-800">
             <div className="flex items-center space-x-3">
               <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-amber-500/20 to-red-500/20 border border-amber-500/30 flex items-center justify-center text-amber-400">
                 <Zap className="w-5 h-5" />
               </div>
               <div>
-                <h3 className="font-serif text-lg font-normal text-[#EBE5D9]">
+                <h3 className="font-serif text-lg font-normal text-white">
                   Aadhaar DigiLocker Gateway
                 </h3>
-                <p className="text-xs text-[#B39D82] mt-0.5">
+                <p className="text-xs text-slate-300 mt-0.5">
                   UIDAI Verhoeff $D_5$ Checksum · OTP Authentication · Registry Pull
                 </p>
               </div>
@@ -714,8 +714,8 @@ export const SmartKYC: React.FC<SmartKYCProps> = ({ quote, onKYCApproved, onSwit
           {/* UIDAI Sandbox Simulation Architecture Callout (Issue #27) */}
           <div className="p-3.5 bg-blue-950/20 border border-blue-500/25 rounded-2xl flex items-start space-x-2.5 text-xs">
             <Info className="w-4 h-4 text-blue-400 shrink-0 mt-0.5" />
-            <p className="text-[11px] leading-relaxed text-[#B39D82]">
-              <strong className="text-blue-300">UIDAI Sandbox Simulation:</strong> Telecom operators connect to UIDAI CIDR via DigiLocker e-KYC API. In this offline evaluation suite, OTP <code className="text-emerald-400 font-mono bg-white/5 px-1 py-0.5 rounded border border-white/10">1234</code> authenticates the session while in-memory redaction preserves <strong className="text-[#EBE5D9]">DPDP Act 2023 zero-persistence privacy</strong>.
+            <p className="text-[11px] leading-relaxed text-slate-300">
+              <strong className="text-blue-300">UIDAI Sandbox Simulation:</strong> Telecom operators connect to UIDAI CIDR via DigiLocker e-KYC API. In this offline evaluation suite, OTP <code className="text-emerald-400 font-mono bg-white/5 px-1 py-0.5 rounded border border-white/10">1234</code> authenticates the session while in-memory redaction preserves <strong className="text-white">DPDP Act 2023 zero-persistence privacy</strong>.
             </p>
           </div>
 
@@ -751,10 +751,10 @@ export const SmartKYC: React.FC<SmartKYCProps> = ({ quote, onKYCApproved, onSwit
           {/* Form Fields */}
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div className="space-y-1.5">
-              <label className="text-xs font-medium text-[#EBE5D9] flex items-center justify-between">
+              <label className="text-xs font-medium text-white flex items-center justify-between">
                 <span>Signatory 12-digit Aadhaar UID</span>
                 {cleanAadhaar.length < 12 ? (
-                  <span className="text-[10px] text-[#B39D82] font-mono">
+                  <span className="text-[10px] text-slate-300 font-mono">
                     12 digits required ({cleanAadhaar.length}/12)
                   </span>
                 ) : isAadhaarValidVerhoeff ? (
@@ -773,23 +773,23 @@ export const SmartKYC: React.FC<SmartKYCProps> = ({ quote, onKYCApproved, onSwit
                   value={digiAadhaar}
                   onChange={(e) => setDigiAadhaar(e.target.value)}
                   placeholder="2345 6789 0124"
-                  className={`w-full bg-[#030405] border rounded-2xl px-4 py-2.5 text-xs text-[#EBE5D9] font-mono focus:outline-none transition-colors ${
+                  className={`w-full bg-slate-900/90 border rounded-2xl px-4 py-2.5 text-xs text-white font-mono focus:outline-none transition-colors ${
                     cleanAadhaar.length === 12
                       ? isAadhaarValidVerhoeff
                         ? "border-emerald-500/50 focus:border-emerald-400"
                         : "border-red-500/50 focus:border-red-400"
-                      : "border-[rgba(235,229,217,0.12)] focus:border-[#e40000]"
+                      : "border-slate-700 focus:border-[#e40000]"
                   }`}
                 />
               </div>
-              <div className="flex items-center justify-between text-[10px] text-[#B39D82] font-mono">
+              <div className="flex items-center justify-between text-[10px] text-slate-300 font-mono">
                 <span>DPDP Mask:</span>
                 <span className="text-emerald-400">{aadhaarRedactionPreview}</span>
               </div>
             </div>
 
             <div className="space-y-1.5">
-              <label className="text-xs font-medium text-[#EBE5D9] flex items-center justify-between">
+              <label className="text-xs font-medium text-white flex items-center justify-between">
                 <span>Authentication OTP</span>
                 <span className="text-[10px] text-emerald-400 font-mono">Demo: 1234</span>
               </label>
@@ -798,16 +798,16 @@ export const SmartKYC: React.FC<SmartKYCProps> = ({ quote, onKYCApproved, onSwit
                 value={digiOtp}
                 onChange={(e) => setDigiOtp(e.target.value)}
                 placeholder="1234"
-                className="w-full bg-[#030405] border border-[rgba(235,229,217,0.12)] rounded-2xl px-4 py-2.5 text-xs text-[#EBE5D9] font-mono focus:outline-none focus:border-[#e40000]"
+                className="w-full bg-slate-900/90 border border-slate-700 rounded-2xl px-4 py-2.5 text-xs text-white font-mono focus:outline-none focus:border-[#e40000]"
               />
-              <p className="text-[10px] text-[#B39D82]">Simulated DigiLocker mobile OTP authorization.</p>
+              <p className="text-[10px] text-slate-300">Simulated DigiLocker mobile OTP authorization.</p>
             </div>
 
             <div className="space-y-1.5">
-              <label className="text-xs font-medium text-[#EBE5D9] flex items-center justify-between">
+              <label className="text-xs font-medium text-white flex items-center justify-between">
                 <span>Declared GSTIN (Optional / Bundle Dependent)</span>
                 {gstinDecoded && (
-                  <span className="text-[10px] font-mono text-[#d9ad63]">
+                  <span className="text-[10px] font-mono text-amber-400">
                     {gstinDecoded.stateName}
                   </span>
                 )}
@@ -817,18 +817,18 @@ export const SmartKYC: React.FC<SmartKYCProps> = ({ quote, onKYCApproved, onSwit
                 value={digiGstin}
                 onChange={(e) => setDigiGstin(e.target.value)}
                 placeholder="32TTNXB7384T1ZW"
-                className="w-full bg-[#030405] border border-[rgba(235,229,217,0.12)] rounded-2xl px-4 py-2.5 text-xs text-[#EBE5D9] font-mono focus:outline-none focus:border-[#e40000]"
+                className="w-full bg-slate-900/90 border border-slate-700 rounded-2xl px-4 py-2.5 text-xs text-white font-mono focus:outline-none focus:border-[#e40000]"
               />
               {gstinDecoded && (
-                <div className="flex items-center justify-between text-[10px] font-mono text-[#B39D82]">
-                  <span>Entity Type: <strong className="text-[#EBE5D9]">{gstinDecoded.entityType}</strong></span>
+                <div className="flex items-center justify-between text-[10px] font-mono text-slate-300">
+                  <span>Entity Type: <strong className="text-white">{gstinDecoded.entityType}</strong></span>
                   {gstinDecoded.isValidFormat && <span className="text-emerald-400">✓ Valid Structure</span>}
                 </div>
               )}
             </div>
 
             <div className="space-y-1.5">
-              <label className="text-xs font-medium text-[#EBE5D9]">
+              <label className="text-xs font-medium text-white">
                 Declared Udyam Number (Optional)
               </label>
               <input
@@ -836,13 +836,13 @@ export const SmartKYC: React.FC<SmartKYCProps> = ({ quote, onKYCApproved, onSwit
                 value={digiUdyam}
                 onChange={(e) => setDigiUdyam(e.target.value)}
                 placeholder="UDYAM-KL-00-1234567"
-                className="w-full bg-[#030405] border border-[rgba(235,229,217,0.12)] rounded-2xl px-4 py-2.5 text-xs text-[#EBE5D9] font-mono focus:outline-none focus:border-[#e40000]"
+                className="w-full bg-slate-900/90 border border-slate-700 rounded-2xl px-4 py-2.5 text-xs text-white font-mono focus:outline-none focus:border-[#e40000]"
               />
             </div>
           </div>
 
-          <div className="flex flex-col sm:flex-row items-center justify-between gap-4 pt-2 border-t border-[rgba(235,229,217,0.06)]">
-            <div className="text-[11px] text-[#B39D82]">
+          <div className="flex flex-col sm:flex-row items-center justify-between gap-4 pt-2 border-t border-slate-800">
+            <div className="text-[11px] text-slate-300">
               ⚡ Fast-tracks onboarding from 17.6 days to <strong className="text-emerald-400">&lt; 10 seconds</strong>.
             </div>
             <motion.button
@@ -889,16 +889,16 @@ export const SmartKYC: React.FC<SmartKYCProps> = ({ quote, onKYCApproved, onSwit
               )}
               <div>
                 <div className="flex items-center space-x-2.5">
-                  <h3 className="font-serif text-xl sm:text-2xl font-normal text-[#EBE5D9]">
+                  <h3 className="text-2xl sm:text-3xl font-extrabold text-white tracking-tight">
                     Status: {kycResult.status}
                   </h3>
-                  <span className="text-[10px] font-mono text-[#d9ad63] bg-white/[0.04] border border-white/[0.06] px-2 py-0.5 rounded-full">
+                  <span className="text-[10px] font-mono text-amber-400 bg-white/[0.04] border border-slate-700 px-2 py-0.5 rounded-full">
                     {kycResult.execution_latency_ms}ms
                   </span>
                 </div>
-                <div className="text-[11px] font-mono text-[#d9ad63] mt-1 flex flex-wrap items-center gap-1.5">
+                <div className="text-[11px] font-mono text-amber-400 mt-1 flex flex-wrap items-center gap-1.5">
                   <span>Verified Subject:</span>
-                  <span className="text-[#EBE5D9] font-sans font-medium">
+                  <span className="text-white font-sans font-medium">
                     {kycResult.applicant_id && APPLICANT_DISPLAY_NAMES[kycResult.applicant_id]
                       ? APPLICANT_DISPLAY_NAMES[kycResult.applicant_id]
                       : activeTab === "digilocker"
@@ -906,7 +906,7 @@ export const SmartKYC: React.FC<SmartKYCProps> = ({ quote, onKYCApproved, onSwit
                       : "Staged Document Package"}
                   </span>
                 </div>
-                <p className="text-xs text-[#B39D82] mt-0.5">
+                <p className="text-xs text-slate-300 mt-0.5">
                   {kycResult.status === "APPROVED"
                     ? "All cryptographic and RapidFuzz registry checks passed."
                     : "Remediation required for statutory compliance pass."}
@@ -929,21 +929,21 @@ export const SmartKYC: React.FC<SmartKYCProps> = ({ quote, onKYCApproved, onSwit
 
           {/* Details & Fuzzy Scores */}
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-3.5">
-            <div className="luxury-glass p-4 rounded-2xl border border-[rgba(235,229,217,0.06)] space-y-1">
-              <span className="text-[10px] font-mono uppercase tracking-wider text-[#B39D82] block">DPDP Mask</span>
-              <span className="font-mono text-xs text-[#EBE5D9] block truncate font-medium">
+            <div className="luxury-glass p-4 rounded-2xl border border-slate-800 space-y-1">
+              <span className="text-[10px] font-mono uppercase tracking-wider text-slate-300 block">DPDP Mask</span>
+              <span className="font-mono text-xs text-white block truncate font-medium">
                 {kycResult.redacted_signatory_id || "[Aadhaar Masked]"}
               </span>
             </div>
-            <div className="luxury-glass p-4 rounded-2xl border border-[rgba(235,229,217,0.06)] space-y-1">
-              <span className="text-[10px] font-mono uppercase tracking-wider text-[#B39D82] block">GST Status</span>
-              <span className="font-mono text-xs text-[#EBE5D9] block font-medium">
+            <div className="luxury-glass p-4 rounded-2xl border border-slate-800 space-y-1">
+              <span className="text-[10px] font-mono uppercase tracking-wider text-slate-300 block">GST Status</span>
+              <span className="font-mono text-xs text-white block font-medium">
                 {kycResult.gst_status || "N/A (Exempt)"}
               </span>
             </div>
-            <div className="luxury-glass p-4 rounded-2xl border border-[rgba(235,229,217,0.06)] space-y-1">
-              <span className="text-[10px] font-mono uppercase tracking-wider text-[#B39D82] block">Utility Bill Age</span>
-              <span className="font-mono text-xs text-[#EBE5D9] block font-medium">
+            <div className="luxury-glass p-4 rounded-2xl border border-slate-800 space-y-1">
+              <span className="text-[10px] font-mono uppercase tracking-wider text-slate-300 block">Utility Bill Age</span>
+              <span className="font-mono text-xs text-white block font-medium">
                 {kycResult.address_bill_age_days ?? "N/A"} days
               </span>
             </div>
@@ -958,15 +958,15 @@ export const SmartKYC: React.FC<SmartKYCProps> = ({ quote, onKYCApproved, onSwit
               </h4>
               <div className="space-y-3">
                 {kycResult.anomalies.map((anom, idx) => (
-                  <div key={idx} className="p-4 rounded-2xl bg-[#030405] border border-white/[0.06] space-y-2">
+                  <div key={idx} className="p-4 rounded-2xl bg-slate-900/90 border border-slate-700 space-y-2">
                     <div className="flex items-center space-x-2.5">
                       <span className="text-[9px] px-2 py-0.5 rounded-full font-mono bg-red-500/20 text-red-400 border border-red-500/30">
                         {anom.code}
                       </span>
-                      <span className="text-xs font-medium text-[#EBE5D9]">{anom.message}</span>
+                      <span className="text-xs font-medium text-white">{anom.message}</span>
                     </div>
                     {anom.remediation && (
-                      <p className="text-[11px] text-[#B39D82]">
+                      <p className="text-[11px] text-slate-300">
                         ↳ <span className="text-emerald-400">Action:</span> {anom.remediation}
                       </p>
                     )}
