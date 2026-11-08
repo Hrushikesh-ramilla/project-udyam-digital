@@ -118,3 +118,19 @@ def test_calibrated_propensity_distribution_and_factor_chips(ml_engine: LeadResc
             assert l.priority_tier == "MEDIUM"
         else:
             assert l.priority_tier == "NURTURE"
+
+
+def test_lead_recovery_nba_tailored_pitch_and_bundle_mapping(ml_engine: LeadRescueMLEngine):
+    """Verifies Issue #23: Lead rescue ML accurately outputs context-aware NBA actions
+    and risk factors without broken external redirects.
+    """
+    leads = get_registry().get_all_leads()
+    fiber_unfeasible = [l for l in leads if "feasible" in (l.drop_reason or "").lower()]
+    assert len(fiber_unfeasible) > 0
+
+    lead = fiber_unfeasible[0]
+    scored = ml_engine.score_lead(lead)
+
+    assert "AirFiber" in scored.next_best_action or "Wireless" in scored.next_best_action
+    assert any("fiber" in r.lower() or "trenching" in r.lower() for r in scored.top_risk_factors)
+    assert scored.propensity_score > 0
