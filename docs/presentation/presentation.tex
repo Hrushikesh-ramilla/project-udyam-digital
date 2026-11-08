@@ -23,6 +23,8 @@
 \definecolor{airtelred}{HTML}{C8102E}
 \definecolor{softgray}{HTML}{F4F2EC}
 \definecolor{successgreen}{HTML}{1E6B38}
+\definecolor{barfillgray}{HTML}{4A4B4E}
+\definecolor{barfilllight}{HTML}{D8D4CC}
 
 \hypersetup{
   colorlinks=true,
@@ -131,41 +133,36 @@
   \begin{columns}[T]
     \begin{column}{0.48\textwidth}
       \begin{tcolorbox}[academicbox, title={\fontsize{7pt}{8.5pt}\selectfont\textbf{\textcolor{charcoal}{Team \& Institutional Registration}}}, coltitle=charcoal]
-        {\fontsize{6.2pt}{7.5pt}\selectfont
-        \begin{itemize}\setlength{\itemsep}{1.5pt}
-          \item \textbf{Team Name:} Neural Nexus
-          \item \textbf{Institution:} ABV-Indian Institute of Information Technology and Management (ABV-IIITM), Gwalior
-          \item \textbf{Track:} Airtel Sync 2026 -- Digital Track (Enterprise Track A)
-          \item \textbf{Team Members:}
-            \begin{itemize}\setlength{\itemsep}{1pt}
-              \item \textbf{Hrushikesh Ramilla (HR)} -- Lead Systems \& ML Architect
-              \item \textbf{YK} -- Product Engineering \& Applied Research
-            \end{itemize}
-          \item \textbf{Evaluation Anchor Date:} Strictly invariant to \texttt{2026-07-15}
-        \end{itemize}
+        {\fontsize{5.8pt}{7.2pt}\selectfont
+        \begin{tabularx}{\linewidth}{p{1.8cm}X}
+          \textbf{Team Name:} & Neural Nexus \\
+          \textbf{Institution:} & ABV-IIITM Gwalior \\
+          \textbf{Track:} & Airtel Sync 2026 -- Digital Track (Track A) \\
+          \textbf{Team Lead:} & Hrushikesh Ramilla (Systems \& ML Lead) \\
+          \textbf{Team Member:} & YK (Product Engineering \& Applied Research) \\
+          \textbf{Anchor Date:} & Strictly invariant to \texttt{2026-07-15} \\
+        \end{tabularx}
         }
       \end{tcolorbox}
     \end{column}
 
     \begin{column}{0.48\textwidth}
       \begin{tcolorbox}[accentbox, title={\fontsize{7pt}{8.5pt}\selectfont\textbf{\textcolor{charcoal}{Live Production Deliverables \& Video Walkthrough}}}, coltitle=charcoal]
-        {\fontsize{6.2pt}{7.5pt}\selectfont
-        \begin{itemize}\setlength{\itemsep}{1.5pt}
-          \item \textbf{Prototype Demo Video Walkthrough:} \\
-            \href{http://65.1.112.251/audit/audit_dashboard.html}{\textcolor{airtelred}{\textbf{Click to Open: Live 100-Case Video/Audit Proof}}} \\
-            \href{https://github.com/Hrushikesh-ramilla/project-udyam-digital}{\textcolor{airtelred}{\texttt{github.com/Hrushikesh-ramilla/project-udyam-digital}}}
-          \item \textbf{Live Production Cloud Monolith (AWS EC2):} \\
-            \href{http://65.1.112.251}{\textcolor{airtelred}{\textbf{\texttt{http://65.1.112.251}}}} (Port 80 Caddy Reverse Proxy)
-          \item \textbf{Interactive Swagger API Documentation:} \\
-            \href{http://65.1.112.251/docs}{\textcolor{airtelred}{\texttt{http://65.1.112.251/docs}}} (37/37 Automated Pytest Verification)
-          \item \textbf{Production Technology Stack:} FastAPI, React 18, TypeScript, LightGBM, RapidFuzz, DPDP SHA-256 Engine.
-        \end{itemize}
+        {\fontsize{5.8pt}{7.2pt}\selectfont
+        \begin{tabularx}{\linewidth}{p{2.2cm}X}
+          \textbf{Prototype Video:} & \href{http://65.1.112.251/audit/audit_dashboard.html}{\textcolor{airtelred}{\textbf{Live 100-Case Video Proof Link}}} \\
+          \textbf{GitHub Repo:} & \href{https://github.com/Hrushikesh-ramilla/project-udyam-digital}{\textcolor{airtelred}{\textbf{project-udyam-digital (Main)}}} \\
+          \textbf{Live AWS Cloud:} & \href{http://65.1.112.251}{\textcolor{airtelred}{\textbf{\texttt{http://65.1.112.251}}}} (Port 80 Caddy) \\
+          \textbf{Swagger Specs:} & \href{http://65.1.112.251/docs}{\textcolor{airtelred}{\texttt{http://65.1.112.251/docs}}} \\
+          \textbf{Test Suite:} & \textcolor{successgreen}{\textbf{37 / 37 Pytest Passing (100\%)}} \\
+          \textbf{Tech Stack:} & FastAPI, React 18, TypeScript, LightGBM \\
+        \end{tabularx}
         }
       \end{tcolorbox}
     \end{column}
   \end{columns}
 
-  \vspace{0.2cm}
+  \vspace{0.25cm}
   \begin{center}
     {\fontsize{6.2pt}{7.5pt}\selectfont
     \textbf{Submission Note:} This slide is the mandatory Introduction Slide (excluded from formal 7-slide evaluation count). \\
@@ -177,49 +174,90 @@
 % =============================================================
 % SLIDE 1 OF 7: PROBLEM STATEMENT & FUNNEL BLEED DISSECTION
 % =============================================================
-\begin{frame}{Problem Statement \& Funnel Bleed Dissection}{Empirical Analysis of 5,000 SMB Leads (smb\_leads.csv, Apr--Jun 2026)}
+\begin{frame}{Problem Statement \& Funnel Bleed Dissection}{Empirical Telemetry from 5,000 SMB Leads (smb\_leads.csv, Apr--Jun 2026)}
   \begin{columns}[T]
     \begin{column}{0.51\textwidth}
-      \begin{tcolorbox}[academicbox, title={\fontsize{6.5pt}{7.8pt}\selectfont\textbf{SMB Acquisition Funnel Degradation ($N = 5{,}000$)}}, coltitle=charcoal]
+      \begin{tcolorbox}[academicbox, title={\fontsize{6.5pt}{7.8pt}\selectfont\textbf{SMB Acquisition Funnel Telemetry ($N = 5{,}000$)}}, coltitle=charcoal]
         \centering
         {\fontsize{5.2pt}{6.4pt}\selectfont
-        \setlength{\tabcolsep}{3pt}
-        \begin{tabularx}{\linewidth}{lrrr}
+        \setlength{\tabcolsep}{2.5pt}
+        \begin{tabularx}{\linewidth}{p{2.6cm}rr>{\raggedleft\arraybackslash}X}
           \toprule
-          \textbf{Funnel Stage} & \textbf{Leads} & \textbf{Stage \%} & \textbf{Cumulative \%} \\
+          \textbf{Funnel Stage} & \textbf{Leads} & \textbf{Stage \%} & \textbf{Drop / Status} \\
           \midrule
-          Leads Generated & 5,000 & 100.0\% & 100.0\% \\
-          Contacted Outreach & 3,406 & 68.1\% & 68.1\% \\
-          Needs Assessed (Field Visit) & 1,974 & 58.0\% & 39.5\% \\
-          \textbf{Quote Accepted (Steepest Drop)} & \textbf{861} & \textbf{43.6\%} & \textbf{17.2\%} \\
-          KYC Completed & 588 & 68.3\% & 11.8\% \\
-          \textbf{Activated Customers} & \textbf{368} & \textbf{62.6\%} & \textbf{7.36\%} \\
+          1. Leads Generated & 5,000 & 100.0\% & Baseline \\
+          2. Contacted Outreach & 3,406 & 68.1\% & $-$31.9\% \\
+          3. Needs Assessed (Field) & 1,974 & 58.0\% & $-$42.0\% \\
+          \textbf{4. Quote Accepted} & \textbf{861} & \textbf{43.6\%} & \textcolor{airtelred}{\textbf{$-$56.4\% Cliff}} \\
+          5. KYC Completed & 588 & 68.3\% & $-$31.7\% \\
+          \textbf{6. Activated Customers} & \textbf{368} & \textbf{62.6\%} & \textcolor{airtelred}{\textbf{7.36\% Net}} \\
           \bottomrule
         \end{tabularx}
         }
+        
         \vspace{0.04cm}
-        \begin{center}
-          \includegraphics[width=0.96\linewidth,height=1.15cm,keepaspectratio]{assets/udyam-funnel-economics.png}
-        \end{center}
+        % High-Resolution Vector Horizontal Bar Funnel
+        \begin{tikzpicture}[x=1cm,y=0.25cm]
+          % Stage 1: 100%
+          \node[anchor=east,font=\fontsize{4.5pt}{5.5pt}\selectfont] at (1.80,5.15) {1. Leads (5,000)};
+          \fill[barfilllight] (1.85,5.0) rectangle +(3.0,0.24);
+          \fill[barfillgray] (1.85,5.0) rectangle +(3.0,0.24);
+          \node[anchor=west,font=\fontsize{4.5pt}{5.5pt}\selectfont] at (4.95,5.15) {100.0\%};
+
+          % Stage 2: 68.1%
+          \node[anchor=east,font=\fontsize{4.5pt}{5.5pt}\selectfont] at (1.80,4.15) {2. Contacted (3,406)};
+          \fill[barfilllight] (1.85,4.0) rectangle +(3.0,0.24);
+          \fill[barfillgray] (1.85,4.0) rectangle +(2.04,0.24);
+          \node[anchor=west,font=\fontsize{4.5pt}{5.5pt}\selectfont] at (4.95,4.15) {68.1\%};
+
+          % Stage 3: 39.5%
+          \node[anchor=east,font=\fontsize{4.5pt}{5.5pt}\selectfont] at (1.80,3.15) {3. Assessed (1,974)};
+          \fill[barfilllight] (1.85,3.0) rectangle +(3.0,0.24);
+          \fill[barfillgray] (1.85,3.0) rectangle +(1.19,0.24);
+          \node[anchor=west,font=\fontsize{4.5pt}{5.5pt}\selectfont] at (4.95,3.15) {39.5\%};
+
+          % Stage 4: 17.2% (The Cliff)
+          \node[anchor=east,font=\fontsize{4.5pt}{5.5pt}\selectfont\bfseries] at (1.80,2.15) {\textcolor{airtelred}{4. Quoted (861)}};
+          \fill[barfilllight] (1.85,2.0) rectangle +(3.0,0.24);
+          \fill[airtelred] (1.85,2.0) rectangle +(0.52,0.24);
+          \node[anchor=west,font=\fontsize{4.5pt}{5.5pt}\selectfont\bfseries] at (4.95,2.15) {\textcolor{airtelred}{17.2\% ($-$56.4\% Drop)}};
+
+          % Stage 5: 11.8%
+          \node[anchor=east,font=\fontsize{4.5pt}{5.5pt}\selectfont] at (1.80,1.15) {5. KYC (588)};
+          \fill[barfilllight] (1.85,1.0) rectangle +(3.0,0.24);
+          \fill[barfillgray] (1.85,1.0) rectangle +(0.35,0.24);
+          \node[anchor=west,font=\fontsize{4.5pt}{5.5pt}\selectfont] at (4.95,1.15) {11.8\%};
+
+          % Stage 6: 7.36% (Activated)
+          \node[anchor=east,font=\fontsize{4.5pt}{5.5pt}\selectfont\bfseries] at (1.80,0.15) {\textcolor{airtelred}{6. Activated (368)}};
+          \fill[barfilllight] (1.85,0.0) rectangle +(3.0,0.24);
+          \fill[airtelred] (1.85,0.0) rectangle +(0.22,0.24);
+          \node[anchor=west,font=\fontsize{4.5pt}{5.5pt}\selectfont\bfseries] at (4.95,0.15) {\textcolor{airtelred}{7.36\% Net (92.6\% Bleed)}};
+        \end{tikzpicture}
+
+        \vspace{0.03cm}
+        {\fontsize{4.7pt}{5.7pt}\selectfont
+        \textbf{Non-GST Penalty Factor:} Active GSTIN activates at \textbf{9.6\%}; non-GST drops to \textbf{2.0\%} (\textbf{4.8x conversion penalty} caused by rigid corporate GST requirements).
+        }
       \end{tcolorbox}
     \end{column}
 
     \begin{column}{0.46\textwidth}
       \begin{tcolorbox}[academicbox, title={\fontsize{6.5pt}{7.8pt}\selectfont\textbf{The Three Structural Failure Modes}}, coltitle=charcoal]
-        {\fontsize{5.5pt}{6.6pt}\selectfont
-        \textbf{1. The 3--5 Day Quoting Abyss (56.4\% Drop)} \\
-        Manual pricing and complex product codes create an intolerable latency gap. 1,113 of 1,974 assessed prospects abandon the pipeline while awaiting quotes. \\[0.06cm]
-        \textbf{2. The Non-GST Regulatory Wall (4.8x Penalty)} \\
-        Leads with active GSTIN activate at \textbf{9.6\%}; leads without GSTIN drop to \textbf{2.0\%}. 55\% of India's micro-enterprises operate below GST thresholds and are discarded by legacy KYC. \\[0.06cm]
-        \textbf{3. Crippling Unit Economics (\inr 15k CAC)} \\
-        A 17.6-day lead-to-activation cycle and 3.2 manual follow-up calls consume \inr 15,000 in direct sales acquisition costs against an \inr 6,900 median monthly revenue.
+        {\fontsize{5.2pt}{6.4pt}\selectfont
+        \textbf{1. The 3--5 Day Quoting Abyss (56.4\% Abandonment)} \\
+        Manual pricing spreadsheets, non-standard discount approvals, and complex SKU configurations create an intolerable 3--5 day latency gap. 1,113 of 1,974 assessed prospects go cold and abandon the pipeline while waiting for quotes. \\[0.06cm]
+        \textbf{2. The Non-GST Regulatory Wall (4.8x Conversion Penalty)} \\
+        55\% of India's 6.3 Crore micro-enterprises operate below the statutory \inr 40L GST threshold. Legacy enterprise onboarding mandates GSTINs, artificially excluding the vast majority of credit-worthy Bharat merchants. \\[0.06cm]
+        \textbf{3. Crippling CAC Unit Economics (\inr 15,000 Direct CAC)} \\
+        A 17.6-day average lead-to-activation cycle and 3.2 manual follow-up calls consume \inr 15,000 in direct sales acquisition costs against an \inr 6,900 median monthly recurring revenue (MRR).
         }
       \end{tcolorbox}
 
       \vspace{0.04cm}
       \begin{tcolorbox}[accentbox]
-        {\fontsize{5.4pt}{6.5pt}\selectfont
-        \textbf{\textcolor{airtelred}{Target Mandate:}} Compress quote time from 5 days to $<60$ seconds, eliminate the non-GST drop-off via Udyam lookup, and automate status tracking.
+        {\fontsize{5.4pt}{6.6pt}\selectfont
+        \textbf{\textcolor{airtelred}{The Accel Target Mandate:}} Compress quote generation from 5 days to $<60$ seconds, eliminate the non-GST drop-off via automated Udyam / Composite PAN verification, and provide zero-chase transparent self-serve order tracking.
         }
       \end{tcolorbox}
     \end{column}
@@ -391,21 +429,14 @@
   \end{columns}
 
   \vspace{0.02cm}
-  \begin{tcolorbox}[accentbox,top=0.6mm,bottom=0.6mm]
-    \begin{columns}[c]
-      \begin{column}{0.76\textwidth}
-        {\fontsize{5.0pt}{6.0pt}\selectfont
-        \textbf{Symbolic Reverse Budget Solver (``Mera Budget \inr X Hai''):} \\
-        Branch-and-Bound DAG solver calculates:
-        $\max \sum_{i} v_i x_i \quad \text{s.t.} \sum_{i} p_i x_i \le B_{\text{target}}, \, \text{Prerequisites}(x) = 1$.
-        Guarantees optimal, compliant bundles in \textbf{$<0.5$\,ms} with zero LLM hallucination.
-        }
-      \end{column}
-      \begin{column}{0.21\textwidth}
-        \centering
-        \includegraphics[width=\linewidth,height=0.45cm,keepaspectratio]{assets/udyam-cpq-dag.png}
-      \end{column}
-    \end{columns}
+  \begin{tcolorbox}[accentbox,top=0.4mm,bottom=0.4mm]
+    {\fontsize{4.8pt}{5.9pt}\selectfont
+    \textbf{Symbolic Reverse Budget Solver (``Mera Budget \inr X Hai'') \& Commercial Discount Engine:} \\
+    Branch-and-Bound Integer Linear Programming (ILP) solver optimizes:
+    $\max \sum_{i} v_i x_i \quad \text{s.t.} \sum_{i} p_i x_i \le B_{\text{cap}}, \quad \text{Prerequisites}(x) = 1, \quad \text{GST\_Allowed}(x) = 1$. \\
+    Guarantees mathematically optimal, compliant bundles in \textbf{$<0.5$\,ms} with zero LLM hallucination. \\
+    \textbf{Commercial Discount Policy:} 5\% multi-tier bundle discount (2 categories), 10\% (3 categories), 15\% ($\ge 4$ categories). 100\% OTC setup fee waiver on $\ge 12$-month contracts (\inr 0 upfront).
+    }
   \end{tcolorbox}
 \end{frame}
 
@@ -414,51 +445,15 @@
 % =============================================================
 \begin{frame}{System Architecture: 4-Stage Neuro-Symbolic Pipeline}{Autonomous Acquisition Topology: From Ambient Natural Language to Fulfilled Order}
   \begin{center}
-    \includegraphics[width=0.98\linewidth,height=1.85cm,keepaspectratio]{assets/udyam-architecture.png}
+    \includegraphics[width=0.98\linewidth,height=4.65cm,keepaspectratio]{assets/udyam-architecture-clean.png}
   \end{center}
-  \vspace{-0.15cm}
-
-  \begin{columns}[T]
-    \begin{column}{0.24\textwidth}
-      \begin{tcolorbox}[academicbox, title={\fontsize{5.8pt}{7pt}\selectfont\textbf{Stage 1: Advisor}}, coltitle=charcoal]
-        {\fontsize{5.0pt}{6.0pt}\selectfont
-        \textbf{Dual-Engine:} Gemini 2.5 Flash + deterministic Pydantic v2 extraction. \\
-        \textbf{10 Indic Languages:} In-place script toggle (Hindi, Tamil, etc.). \\
-        \textbf{Zero Hallucination:} Strictly maps needs to verified catalogue IDs.
-        }
-      \end{tcolorbox}
-    \end{column}
-
-    \begin{column}{0.24\textwidth}
-      \begin{tcolorbox}[academicbox, title={\fontsize{5.8pt}{7pt}\selectfont\textbf{Stage 2: CPQ DAG}}, coltitle=charcoal]
-        {\fontsize{5.0pt}{6.0pt}\selectfont
-        \textbf{Prerequisite Engine:} Enforces topological validity (e.g. Static IP). \\
-        \textbf{GSTIN Hard Firewall:} Traps illegal SKU requests by non-GST users. \\
-        \textbf{Dynamic Knapsack:} Instantaneous bundle recalculation with discounts.
-        }
-      \end{tcolorbox}
-    \end{column}
-
-    \begin{column}{0.24\textwidth}
-      \begin{tcolorbox}[academicbox, title={\fontsize{5.8pt}{7pt}\selectfont\textbf{Stage 3: DPDP KYC}}, coltitle=charcoal]
-        {\fontsize{5.0pt}{6.0pt}\selectfont
-        \textbf{Zero-Persistence:} 12-digit IDs masked in-memory (\texttt{[ID Redacted]}). \\
-        \textbf{Cryptographic SHA-256:} File hashing prevents replay attacks. \\
-        \textbf{RapidFuzz Matching:} Robust entity matching ($>85\%$ confidence).
-        }
-      \end{tcolorbox}
-    \end{column}
-
-    \begin{column}{0.24\textwidth}
-      \begin{tcolorbox}[academicbox, title={\fontsize{5.8pt}{7pt}\selectfont\textbf{Stage 4: Tracker \& Rescue}}, coltitle=charcoal]
-        {\fontsize{5.0pt}{6.0pt}\selectfont
-        \textbf{6-Stage Tracker:} Self-serve view eliminates 3.2 chase calls. \\
-        \textbf{LightGBM Model:} Decision tree (AUC 0.84) scores lead drop risk. \\
-        \textbf{Automated Rescue:} Sends WhatsApp links with tokens to revive leads.
-        }
-      \end{tcolorbox}
-    \end{column}
-  \end{columns}
+  \vspace{-0.18cm}
+  \begin{tcolorbox}[accentbox,top=0.6mm,bottom=0.6mm]
+    \centering
+    {\fontsize{5.2pt}{6.4pt}\selectfont
+    \textbf{Architectural Flow:} \textbf{Stage 1 Discovery} (Dual-Engine Gemini 2.5 + Pydantic v2) $\longrightarrow$ \textbf{Stage 2 CPQ DAG} ($<0.5$ms Solver \& GST Firewall) $\longrightarrow$ \textbf{Stage 3 Smart KYC} (In-Memory DPDP Redaction) $\longrightarrow$ \textbf{Stage 4 Fulfillment} (LightGBM Rescue AUC 0.84).
+    }
+  \end{tcolorbox}
 \end{frame}
 
 % =============================================================
@@ -501,7 +496,7 @@
 % =============================================================
 \begin{frame}{Empirical Verification: Trapping Planted KYC Defects \& Edge Cases}{Hostile Validation Against Benchmark Anomaly Suite (kyc\_documents/ K01--K12)}
   \begin{columns}[T]
-    \begin{column}{0.48\textwidth}
+    \begin{column}{0.50\textwidth}
       \begin{tcolorbox}[academicbox, title={\fontsize{6.5pt}{7.8pt}\selectfont\textbf{Benchmark Anomaly Trapping Matrix}}, coltitle=charcoal]
         {\fontsize{5.2pt}{6.4pt}\selectfont
         \begin{tabularx}{\linewidth}{p{1.0cm}p{1.9cm}X}
@@ -532,19 +527,24 @@
     \end{column}
 
     \begin{column}{0.48\textwidth}
-      \begin{tcolorbox}[academicbox, title={\fontsize{6.5pt}{7.8pt}\selectfont\textbf{Smart KYC Verification Architecture}}, coltitle=charcoal]
-        \centering
-        \includegraphics[width=\linewidth,height=1.75cm,keepaspectratio]{assets/udyam-kyc-gate.png}
-        \vspace{0.04cm}
-        {\fontsize{5.0pt}{6.0pt}\selectfont
-        \textbf{Zero-Persistence DPDP Guarantee:} Signatory IDs are stripped of 12-digit numbers in-memory prior to logging, caching, or database storage.
+      \begin{tcolorbox}[academicbox, title={\fontsize{6.5pt}{7.8pt}\selectfont\textbf{DPDP Act 2023 Smart KYC Gate Architecture}}, coltitle=charcoal]
+        {\fontsize{5.2pt}{6.4pt}\selectfont
+        \textbf{Zero-Persistence In-Memory Pipeline:}
+        \begin{itemize}\setlength{\itemsep}{2pt}
+          \item \textbf{1. Informed Consent:} Section 6 explicit consent screen with purpose tag and SHA-256 IP client hash.
+          \item \textbf{2. Volatile RAM Ingestion:} Multipart bytes streamed directly to volatile memory. Unredacted IDs never touch disk, cache, or SQLite.
+          \item \textbf{3. In-Memory Redaction:} 12-digit Signatory National ID numbers are stripped in-memory prior to logging, caching, or database storage.
+          \item \textbf{4. Replay-Proof Caching:} Cryptographic SHA-256 byte fingerprint resolves repeat documents in $<2$ms without reprocessing.
+        \end{itemize}
         }
       \end{tcolorbox}
 
       \vspace{0.06cm}
-      \begin{tcolorbox}[academicbox]
-        {\fontsize{5.5pt}{6.8pt}\selectfont
-        \textbf{Automated Test Suite Status:} \textcolor{successgreen}{\textbf{37 / 37 Pytest Tests Passing}} (100\% pass rate on CI/CD runner across DAG solver, KYC gate, and CPQ logic).
+      \begin{tcolorbox}[accentbox, title={\fontsize{6.5pt}{7.8pt}\selectfont\textbf{Automated Test Suite Status}}, coltitle=charcoal]
+        {\fontsize{5.4pt}{6.6pt}\selectfont
+        \textbf{CI/CD \& Monolith Test Pass Rate:} \textcolor{successgreen}{\textbf{37 / 37 Pytest Tests Passing (100\%)}} \\
+        Zero mocks in CPQ DAG, KYC Gate, RapidFuzz matcher, or LightGBM model. \\
+        \textbf{Anchor Date Invariant:} Strictly pinned to \texttt{datetime.date(2026, 7, 15)}.
         }
       \end{tcolorbox}
     \end{column}
@@ -614,28 +614,24 @@
 % =============================================================
 \begin{frame}{Annexure A: CPQ Directed Acyclic Graph Specification}{Reference Only -- Mathematical Dependency Structure Across 25 Catalogue Products}
   \begin{columns}[T]
-    \begin{column}{0.54\textwidth}
+    \begin{column}{0.44\textwidth}
       \begin{tcolorbox}[academicbox, title={\fontsize{6.5pt}{7.8pt}\selectfont\textbf{CPQ Topological Prerequisite Constraints}}, coltitle=charcoal]
-        {\fontsize{4.8pt}{5.8pt}\selectfont
+        {\fontsize{5.0pt}{6.0pt}\selectfont
         \textbf{Layer 0 (Connectivity):} Fixed Fiber (100M/300M/1G), Leased Line (100M/1G). \\
         \textbf{Layer 1 (Add-Ons):} Static IP (requires Fiber/LL), 4G Failover (requires Fiber), Wi-Fi 6. \\
-        \textbf{Layer 2 (Security \& IoT):} Cloud CCTV 4-Cam (requires $\ge$ 100M Fiber), IoT Gateway (requires LL), Cloud Backup (requires Workspace). \\
+        \textbf{Layer 2 (Security \& IoT):} Cloud CCTV 4-Cam (requires at least 100M Fiber), IoT Gateway (requires LL), Cloud Backup (requires Workspace). \\
         \textbf{Layer 3 (Mobility \& SaaS):} Business SIMs (2x/5x 100GB Pool), Google Workspace (Starter/Enterprise). \\[0.05cm]
         \textcolor{bordergray}{\rule{\linewidth}{0.25pt}} \\[0.04cm]
-        \textbf{GSTIN Hard Firewall:} Non-GST applicants cannot select enterprise Leased Line or Static IP; CPQ automatically diverts to compliant Udyam Composite alternatives.
+        \textbf{GSTIN Hard Firewall:} Non-GST applicants cannot select enterprise Leased Line or Static IP; CPQ automatically diverts to compliant Udyam Composite alternatives. \\
+        \textbf{Execution Speed:} Branch-and-bound solver executes in \textbf{$<0.5\text{ms}$} with zero network latency.
         }
       \end{tcolorbox}
     \end{column}
 
-    \begin{column}{0.44\textwidth}
-      \begin{tcolorbox}[academicbox, title={\fontsize{6.5pt}{7.8pt}\selectfont\textbf{Symbolic DAG Solver Topology}}, coltitle=charcoal]
-        \centering
-        \includegraphics[width=\linewidth,height=1.8cm,keepaspectratio]{assets/udyam-cpq-dag.png}
-        \vspace{0.04cm}
-        {\fontsize{4.8pt}{5.8pt}\selectfont
-        \textbf{Performance:} The symbolic DAG evaluator executes in \textbf{$<0.5\text{ms}$}, validating edge compatibility, contract discounting, and reverse budget limits with zero network latency.
-        }
-      \end{tcolorbox}
+    \begin{column}{0.54\textwidth}
+      \begin{center}
+        \includegraphics[width=\linewidth,height=5.0cm,keepaspectratio]{assets/udyam-cpq-dag-tight.png}
+      \end{center}
     \end{column}
   \end{columns}
 \end{frame}
