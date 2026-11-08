@@ -5,6 +5,7 @@ import {
   MicOff,
   Send,
   Volume2,
+  ArrowDown,
   Sparkles,
   User,
   Bot,
@@ -135,6 +136,21 @@ export const AdvisorChat: React.FC<AdvisorChatProps> = ({ onProfileUpdated }) =>
   const [loading, setLoading] = useState(false);
 
   const messagesEndRef = useRef<HTMLDivElement>(null);
+  const scrollToCartSection = () => {
+    const el = document.getElementById("cpq-cart-section");
+    if ((window as unknown as { __lenis?: { scrollTo: (target: string, opts?: { offset?: number }) => void } }).__lenis) {
+      (window as unknown as { __lenis: { scrollTo: (target: string, opts?: { offset?: number }) => void } }).__lenis.scrollTo("#cpq-cart-section", { offset: -30 });
+    } else if (el) {
+      el.scrollIntoView({ behavior: "smooth" });
+    }
+    if (el) {
+      el.classList.add("ring-2", "ring-[#e40000]", "transition-all", "duration-500");
+      setTimeout(() => {
+        el.classList.remove("ring-2", "ring-[#e40000]");
+      }, 2000);
+    }
+  };
+
 
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
@@ -362,6 +378,19 @@ export const AdvisorChat: React.FC<AdvisorChatProps> = ({ onProfileUpdated }) =>
                 }`}
               >
                 {renderFormattedMessage(m.text)}
+
+                {/* Issue #14: In-Chat Action Button */}
+                {m.sender === "advisor" && (m.recommendedSkus?.length || 0) > 0 && (
+                  <div className="mt-2.5 pt-2.5 border-t border-white/[0.08]">
+                    <button
+                      onClick={scrollToCartSection}
+                      className="w-full inline-flex items-center justify-center space-x-1.5 px-3 py-1.5 rounded-lg bg-[#e40000] hover:bg-[#b30000] text-white text-xs font-medium shadow-[0_0_12px_rgba(228,0,0,0.4)] transition-all cursor-pointer"
+                    >
+                      <span>Review in Cart & Start KYC</span>
+                      <ArrowDown className="w-3 h-3 animate-bounce" />
+                    </button>
+                  </div>
+                )}
 
                 {m.spokenTts && (
                   <div className="mt-2.5 pt-2 border-t border-[rgba(235,229,217,0.06)] flex items-center justify-between text-xs text-[#B39D82]">

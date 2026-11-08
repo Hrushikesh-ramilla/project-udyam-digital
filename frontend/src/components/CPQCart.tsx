@@ -35,6 +35,13 @@ export const CPQCart: React.FC<CPQCartProps> = ({
 
   const initializedRef = React.useRef(false);
 
+  // Real-time synchronization with Advisor recommendations (Issue #15)
+  useEffect(() => {
+    if (recommendedSkus && recommendedSkus.length > 0) {
+      setSelectedProductIds(recommendedSkus);
+    }
+  }, [recommendedSkus]);
+
   useEffect(() => {
     async function load() {
       const prods = await fetchProducts();
