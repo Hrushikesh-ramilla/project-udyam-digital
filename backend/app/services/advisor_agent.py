@@ -118,6 +118,13 @@ class AdvisorAgent:
                 f"Needs: {existing_slots.detected_needs}\n\n"
             )
 
+        lang_names = {
+            "en": "English", "hi": "Hindi (or Hinglish if conversational)",
+            "te": "Telugu", "ta": "Tamil", "kn": "Kannada", "ml": "Malayalam",
+            "bn": "Bengali", "gu": "Gujarati", "mr": "Marathi", "or": "Odia"
+        }
+        active_lang_name = lang_names.get(language_code or "en", language_code or "English")
+
         prompt = f"""You are the principal Multilingual AI Enterprise Telecom Advisor for Project Udyam Digital (Accel Telecom / Airtel Business).
 You are a warm, witty, highly knowledgeable human consultant—NOT an automated form or robotic IVR!
 
@@ -144,15 +151,17 @@ OUR ENTERPRISE PRODUCT CATALOGUE & KNOWLEDGE BASE:
    - DPDP Act 2023: 12-digit national IDs are masked in-memory immediately upon ingestion.
 
 {history_context}{current_profile_str}CURRENT USER MESSAGE: "{text}"
-Language code: {language_code or 'auto'}
+Active Conversation Language: {active_lang_name} ({language_code or 'en'})
 Script mode: {script_mode or 'auto'}
 
 INSTRUCTIONS FOR YOUR CONVERSATIONAL RESPONSE:
 1. Chat NATURALLY like Gemini: warm, sharp, conversational, empathetic, and insightful.
 2. NEVER regurgitate a generic, rigid, canned questionnaire or bullet-point form letter.
-3. UNCONSTRAINED GLOBAL MULTILINGUAL SUPPORT & LANGUAGE FIDELITY:
-   - You natively converse in ANY language worldwide (all 22 official Indian languages, international languages like Spanish, French, German, Arabic, Japanese, Mandarin, etc.) as well as colloquial Romanized dialects (Hinglish, Tenglish, Tanglish, Banglish, etc.) and Indian English.
-   - Automatically detect the user's language, dialect, and script dynamically without restricting to any predefined list.
+3. CONVERSATION LANGUAGE CONTINUITY & LANGUAGE INERTIA:
+   - You must strictly maintain conversation language inertia across turns. The ongoing conversation language is: {active_lang_name}.
+   - GEOGRAPHIC & ENTITY ISOLATION: NEVER switch languages merely because an Indian city, state, or region is mentioned (e.g. Gwalior, Patna, Varanasi, Jaipur, Lucknow, Kochi, Hyderabad, Bengaluru, etc.) or because of business entity terms like "kirana", "dukan", or "shop".
+   - If the ongoing conversation language is English, and the user provides order details, entity names, addresses, or phone numbers (e.g. "hhh shop gwalior 1234567890 number"), you MUST continue responding in ENGLISH in both "display_latin" and "display_native".
+   - ONLY switch languages if the user explicitly switches the conversation by writing substantial sentences in Hindi, Telugu, or another language.
    - If the user writes in Romanized Indic (e.g. Tenglish, Hinglish, Tanglish, etc.):
      * Respond in the SAME Romanized Indic dialect in "display_latin" using English/Latin alphabet.
      * Provide the corresponding authentic native script transliteration in "display_native" (e.g. Telugu, Hindi, Tamil, Punjabi, Bengali, etc.).
@@ -472,9 +481,6 @@ Return STRICTLY valid JSON:
         has_indic = bool(re.search(r"[ऀ-ൿ]", user_message))
         effective_script = script_mode or ("native" if has_indic else "latin")
 
-        # Detect active language
-        active_lang = language_code if (language_code and language_code != "auto") else "en"
-
         te_romanized = r"\b(ekkuva|takkuva|karchu\w*|entha\w*|cheppan\w*|ayipotha\w*|ayipotu\w*|avuthu\w*|kavali|kavala|chudan\w*|dabbul\w*|kosam|bagunn\w*|ela\s*unna\w*|namaskar\w*|namasthe|meeru|unnam\w*|undi|ledu|enti|eppudu|chala|inka|mari|nenu|memu|maaku|meeku|artham\w*|telusuko\w*|vaddhu|chesuko\w*|dukanam|vyaparam)\b"
         hi_romanized = r"\b(kaise|kya|kyun|kyu|kaun|kab|kaha|kahan|kitna|kitne|kitni|chahiye|bhai|bhaiya|dukan|dukaan|paise|kharch\w*|sasta|mehanga|batao|bataiye|hoga|hogi|honge|karo|karein|karna|karne|chahte|chahta|chahti|madad|theek|achha|accha|hum|mera|meri|mere|aapka|aapki|aapke|kuch|nahi|nhi|bilkul|namaste)\b"
         ta_romanized = r"\b(vanakkam|eppadi|iruk\w*|nalama|sollu\w*|irukku|illa|illai|venum|ungal\w*|kaasu|panam|evvalavu|romba|nalla|kadai|theriyum)\b"
@@ -485,24 +491,69 @@ Return STRICTLY valid JSON:
         mr_romanized = r"\b(kase\s*ahat|pahije|aahe|ahe|tumhi|tumche|kiti|sangnyasathi|sanga|kasa|kashi|kashe|aamhi)\b"
         or_romanized = r"\b(kemiti|ach\w*|bhalare|darkar|nahin|apana|apnanka|kete|paisa|dokana)\b"
 
+        # Determine session baseline language from conversation history (Session Language Inertia)
+        session_lang = "en"
+        if history:
+            for turn in reversed(history[-4:]):
+                txt = (turn.get("content") or "").lower()
+                if re.search(r"[ఀ-౿]", txt) or re.search(te_romanized, txt):
+                    session_lang = "te"
+                    break
+                elif re.search(r"[ऀ-ॿ]", txt) or re.search(hi_romanized, txt):
+                    session_lang = "hi"
+                    break
+                elif re.search(r"[஀-௿]", txt) or re.search(ta_romanized, txt):
+                    session_lang = "ta"
+                    break
+                elif re.search(r"[ঀ-৿]", txt) or re.search(bn_romanized, txt):
+                    session_lang = "bn"
+                    break
+                elif re.search(r"[઀-૿]", txt) or re.search(gu_romanized, txt):
+                    session_lang = "gu"
+                    break
+                elif re.search(r"[ಀ-೿]", txt) or re.search(kn_romanized, txt):
+                    session_lang = "kn"
+                    break
+                elif re.search(r"[ഀ-ൿ]", txt) or re.search(ml_romanized, txt):
+                    session_lang = "ml"
+                    break
+                elif re.search(mr_romanized, txt):
+                    session_lang = "mr"
+                    break
+                elif re.search(r"[଀-୿]", txt) or re.search(or_romanized, txt):
+                    session_lang = "or"
+                    break
+
+        detected_in_msg = None
         if re.search(r"[ఀ-౿]", user_message) or re.search(te_romanized, clean_msg):
-            active_lang = "te"
+            detected_in_msg = "te"
         elif re.search(r"[ऀ-ॿ]", user_message) or re.search(hi_romanized, clean_msg):
-            active_lang = "hi"
+            detected_in_msg = "hi"
         elif re.search(r"[஀-௿]", user_message) or re.search(ta_romanized, clean_msg):
-            active_lang = "ta"
+            detected_in_msg = "ta"
         elif re.search(r"[ঀ-৿]", user_message) or re.search(bn_romanized, clean_msg):
-            active_lang = "bn"
+            detected_in_msg = "bn"
         elif re.search(r"[઀-૿]", user_message) or re.search(gu_romanized, clean_msg):
-            active_lang = "gu"
+            detected_in_msg = "gu"
         elif re.search(r"[ಀ-೿]", user_message) or re.search(kn_romanized, clean_msg):
-            active_lang = "kn"
+            detected_in_msg = "kn"
         elif re.search(r"[ഀ-ൿ]", user_message) or re.search(ml_romanized, clean_msg):
-            active_lang = "ml"
+            detected_in_msg = "ml"
         elif re.search(mr_romanized, clean_msg):
-            active_lang = "mr"
+            detected_in_msg = "mr"
         elif re.search(r"[଀-୿]", user_message) or re.search(or_romanized, clean_msg):
-            active_lang = "or"
+            detected_in_msg = "or"
+
+        if language_code and language_code != "auto":
+            active_lang = language_code
+        elif detected_in_msg:
+            # User explicitly switched to or used this language in the current turn
+            active_lang = detected_in_msg
+        elif history:
+            # Strictly maintain conversation language inertia across turns
+            active_lang = session_lang
+        else:
+            active_lang = "en"
 
         # Intent detection
         is_comparison = bool(re.search(
@@ -589,6 +640,20 @@ Return STRICTLY valid JSON:
             disp_nat = gemini_data.get("display_native") or disp_lat
             spoken = gemini_data.get("spoken_tts") or ""
             spoken = re.sub(r"[\*#\[\]]", "", spoken).replace("₹", "rupaye ").strip()
+
+            # Strict guard against accidental Hindi/Hinglish language leak when active conversation is in English
+            if active_lang == "en":
+                hi_leak_markers = r"\b(aapka|aapke|aapki|hoga|hogi|hain|hai|mein|zaroorat|karna|karke|badiya|shandar|chinta|dukaan|matlab|saste|liye|bilkul|kya)\b"
+                if len(re.findall(hi_leak_markers, disp_lat.lower())) >= 3:
+                    b_name = slots.business_name or "your store"
+                    loc = slots.city or "your location"
+                    disp_lat = (
+                        f"Got it! I have noted **{b_name}** in **{loc}** with your contact number. "
+                        f"Your order for the recommended plan is ready to be locked in with zero upfront setup fees! "
+                        f"Shall I confirm this and forward to our installation dispatch team?"
+                    )
+                    disp_nat = disp_lat
+                    spoken = re.sub(r"[\*#\[\]]", "", disp_lat)
 
             gem_skus = gemini_data.get("recommended_skus") or []
             valid_skus = [s for s in gem_skus if self.db.get_product(s)]

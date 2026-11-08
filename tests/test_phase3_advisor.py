@@ -233,3 +233,48 @@ def test_turn2_only_udyam_resolves_and_calculates_bundle(advisor: AdvisorAgent):
     assert len(res.recommended_skus) > 0
     assert res.quote is not None
     assert "Recommended Bundle" in res.display_markdown or "Optimal" in res.display_markdown or len(res.display_markdown) > 50
+
+
+def test_session_language_inertia_preserves_english_on_entity_tokens(advisor: AdvisorAgent):
+    """Verifies that entity data (shop name, city like Gwalior, phone number) in an ongoing
+    English session strictly preserves English and does not over-localize to Hindi.
+    """
+    import re
+    from backend.app.models.schemas import MSMEProfileSlots
+
+    history = [
+        {"role": "user", "content": "suggest me cheapest one for my kirana shop its just me who runs the shop"},
+        {"role": "assistant", "content": "Hey there! Running a kirana shop all by yourself means you need something super reliable..."},
+        {"role": "user", "content": "yeah place an order for me"},
+        {"role": "assistant", "content": "Awesome! Could you please confirm your shop name, installation address, and mobile number?"}
+    ]
+    slots = MSMEProfileSlots(segment="micro", city_tier=2, employee_count=1, has_gstin=False)
+
+    res = advisor.process_turn("hhh shop gwalior 1234567890 number", previous_slots=slots, history=history)
+
+    assert res.display_latin is not None
+    # Must NOT have switched to Hindi / Hinglish
+    hi_leak = re.findall(r"\b(aapka|aapke|aapki|hoga|hogi|hain|hai|mein|zaroorat|karna|karke|badiya|shandar|chinta|dukaan|matlab|saste|liye)\b", res.display_latin.lower())
+    assert len(hi_leak) == 0, f"Leaked Hindi words in English session: {hi_leak} - full text: {res.display_latin}"
+    # Must not contain Devanagari Hindi characters
+    assert not re.search(r"[\u0900-\u097F]", res.display_native)
+
+
+def test_session_language_switches_when_user_explicitly_speaks_hindi(advisor: AdvisorAgent):
+    """Verifies that if the user explicitly switches language (e.g. typing Hindi/Hinglish),
+    the advisor transitions to that language properly.
+    """
+    from backend.app.models.schemas import MSMEProfileSlots
+
+    history = [
+        {"role": "user", "content": "suggest me cheapest one for my kirana shop"},
+        {"role": "assistant", "content": "Hey there! We have Biz 5G AirFiber 100 for you."},
+    ]
+    slots = MSMEProfileSlots(segment="micro", city_tier=2, employee_count=1, has_gstin=False)
+
+    res = advisor.process_turn("bhai ab mujhe hindi me samjhao kya sasta plan hai dukan ke liye", previous_slots=slots, history=history)
+
+    assert res.display_latin is not None
+    # Should contain Hindi/Hinglish words acknowledging the request
+    hi_text = res.display_latin.lower()
+    assert any(w in hi_text for w in ["bhai", "aapki", "dukan", "plan", "airfiber", "sasta", "hoga", "hai"])
