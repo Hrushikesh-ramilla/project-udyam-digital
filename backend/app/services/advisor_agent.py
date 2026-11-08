@@ -176,7 +176,17 @@ INSTRUCTIONS FOR YOUR CONVERSATIONAL RESPONSE:
 5. If the user asks ANY question, answer it directly and conversationally with accurate telecom advice.
 6. If the user greets or jokes, respond with warmth and natural wit, then smoothly connect back to their business connectivity.
 7. Never use LaTeX math delimiters ($...$ or $$...$$). Write formulas and complexities in clean Unicode text (e.g., O(n log n) or 99.9% uptime).
-8. Provide:
+8. UI TOPOLOGY & SYSTEM NAVIGATION GUIDANCE:
+   Project Udyam Digital has a 4-stage end-to-end interface:
+   - STAGE 1 (Advisor Chat): Current interactive chat window at the top of the Studio tab.
+   - STAGE 2 (Dynamic CPQ Cart): "Configured Solution Architecture" rendered directly below this chat window on the same page. Displays live pricing, bundle discounts, SLA, waived OTC, and the "Accept Quote & Start Smart KYC" button.
+   - STAGE 3 (Smart KYC Gate): Top navigation bar "Smart KYC" tab (or accessed by clicking "Accept Quote & Start Smart KYC" in the Cart) for DPDP Act 2023 zero-persistence identity verification.
+   - STAGE 4 (Fulfillment & Tracking): Top navigation bar "Order Tracker" tab (or /track?order_id=...) showing live 6-stage delivery milestones, BlueDart AWB, and technician OTP.
+   - NAVIGATION INSTRUCTIONS:
+     * If the user asks where to find or see their order before KYC: Guide them to scroll down directly below this chat to find the Dynamic Cart ("Configured Solution Architecture") and click "Accept Quote & Start Smart KYC".
+     * If the user asks how to navigate or track an existing order: Direct them to the "Order Tracker" tab in the top navigation bar.
+     * NEVER claim the portal or dashboard is "booting up", "under construction", or "coming soon". The portal and order tracker are fully active right now.
+9. Provide:
    - "display_latin": Conversational markdown in matching Romanized Indic dialect (English alphabet) or English.
    - "display_native": Conversational markdown in authentic native Indic script (Telugu/Hindi/Tamil etc.).
    - "spoken_tts": Plain-text conversational audio summary (1-2 sentences, zero markdown symbols like *, #, []).
@@ -694,8 +704,9 @@ Return STRICTLY valid JSON:
         # -------------------------------------------------------------
         # TIER 2: DETERMINISTIC SYMBOLIC / HUMAN FALLBACK (offline / pytest)
         # -------------------------------------------------------------
-        # 1. Comparison & Multiple Options request
-        if is_comparison:
+        # 1. Comparison & Navigation request
+        is_navigation_query = bool(re.search(r"\b(where\s*(?:can\s*i\s*)?(?:see|find|look|track|view)\s*(?:my\s*)?order|how\s*to\s*navigate|where\s*is\s*(?:the\s*)?(?:cart|tracker|dashboard|app|orders?)|navigate\s*me|look\s*it\s*up\s*in\s*my\s*orders)\b", clean_msg))
+        if is_comparison or is_navigation_query:
             f_latin, f_native, f_tts = self._generate_human_fallback(
                 user_message, clean_msg, active_lang, effective_script, slots,
                 is_foreign=False, is_unrelated=False, is_terse=False, is_greeting=False
@@ -885,6 +896,28 @@ Return STRICTLY valid JSON:
         is_greeting: bool = False,
     ) -> tuple[str, str, str]:
         """Generates a warm, witty, context-attuned human response across all edge categories."""
+        # 0.1 Navigation & App Layout Inquiry (Issue #13)
+        if re.search(r"\b(where\s*(?:can\s*i\s*)?(?:see|find|look|track|view)\s*(?:my\s*)?order|how\s*to\s*navigate|where\s*is\s*(?:the\s*)?(?:cart|tracker|dashboard|app|orders?)|navigate\s*me|look\s*it\s*up\s*in\s*my\s*orders)\b", clean_msg):
+            lat = (
+                "### 🗺️ Navigating Your Airtel Enterprise Pipeline\n\n"
+                "Here is exactly where to find everything on your screen:\n\n"
+                "1. **Configured Bundle & Cart:** Scroll **directly below this chat window** to view your **Dynamic Cart** (*Configured Solution Architecture*). You'll see your exact itemized SKUs, waived ₹0 setup fee, and monthly charges.\n"
+                "2. **Finalize & Start Smart KYC:** In the Cart below (or via the button in this chat), click **'Accept Quote & Start Smart KYC'** to complete DPDP-compliant verification.\n"
+                "3. **Live Order Tracking:** Once KYC passes, your official Order ID is generated and you can monitor real-time 6-stage delivery under the **Order Tracker** tab in the top navigation bar (or at `/track`)."
+            )
+            nat = (
+                "### 🗺️ ఎయిర్‌టెల్ ఎంటర్‌ప్రైజ్ యాప్ నావిగేషన్\n\n"
+                "మీ స్క్రీన్‌పై ప్రతి విభాగం ఎక్కడ ఉందో ఇక్కడ చూడండి:\n\n"
+                "1. **కాన్ఫిగర్ చేసిన ప్లాన్ & కార్ట్:** ఈ చాట్ విండో కిందకు స్క్రోల్ చేస్తే **డైనమిక్ కార్ట్** (*కాన్ఫిగర్డ్ సొల్యూషన్ ఆర్కిటెక్చర్*) కనిపిస్తుంది.\n"
+                "2. **స్మార్ట్ కేవైసీ:** కార్ట్ కింద **'Accept Quote & Start Smart KYC'** బటన్‌ను క్లిక్ చేసి ధృవీకరణ పూర్తి చేయండి.\n"
+                "3. **లైవ్ ఆర్డర్ ట్రాకింగ్:** కేవైసీ పూర్తయ్యాక, పై నావిగేషన్ బార్‌లోని **Order Tracker** ట్యాబ్‌లో మీ ఆర్డర్ డెలివరీని ప్రత్యక్షంగా ట్రాక్ చేయవచ్చు."
+            )
+            tts = (
+                "Aapki screen par chat ke theek neeche Dynamic Cart hai jahan aapka plan configured hai. "
+                "KYC complete hone ke baad aap top navigation bar mein Order Tracker tab se live tracking dekh sakte hain."
+            )
+            return lat, nat, tts
+
         # 0. Plan Comparison & Alternative Options Query
         if re.search(r"\b(compare|comparison|multiple|options|alternatives|vs|other plans?|not only one|only one|another plan|different plan|kore option|aur option)\b", clean_msg):
             budget = slots.monthly_budget_cap or 1500
