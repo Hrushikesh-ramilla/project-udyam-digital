@@ -298,8 +298,9 @@ class LeadRescueItem(StrictBaseModel):
     stage_reached: str
     drop_reason: Optional[str] = None
     propensity_score: float
-    priority_tier: str  # HIGH, MEDIUM, LOW
+    priority_tier: str  # HIGH, MEDIUM, NURTURE
     top_risk_factors: list[str]
+    factor_chips: list[str] = Field(default_factory=list)
     next_best_action: str
     whatsapp_rescue_link: str
 

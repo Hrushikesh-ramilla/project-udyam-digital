@@ -1,17 +1,12 @@
 import React, { useState } from "react";
 import { motion, AnimatePresence } from "motion/react";
 import {
-  Shield,
   ShieldCheck,
-  ShieldAlert,
   FileText,
-  Lock,
-  CheckCircle2,
   AlertCircle,
   RefreshCw,
   ArrowRight,
   Upload,
-  FileUp,
   Sparkles,
   Zap,
   Check,
@@ -19,12 +14,245 @@ import {
   Building,
   CreditCard,
   FileCheck,
-  Smartphone,
-  KeyRound,
+  RotateCcw,
+  CheckCircle2,
+  XCircle,
 } from "lucide-react";
 import { KYCVerificationResult, CommercialBreakdown } from "../types";
 import { verifyKYC, uploadKYCDocument, verifyDigiLocker, KYCUploadResponse } from "../api";
 import { validateVerhoeff, redactAadhaarInPlace, decodeGSTIN } from "../utils/verhoeff";
+
+export interface StagedDocInfo {
+  filename: string;
+  badge: string;
+  extractedTitle: string;
+  extractedDetail: string;
+  isMissing?: boolean;
+  isStale?: boolean;
+}
+
+export interface SpecimenScenario {
+  id: string;
+  label: string;
+  type: "CLEAN" | "ANOMALY" | "EXEMPT";
+  desc: string;
+  docs: {
+    gst_certificate?: StagedDocInfo;
+    udyam_certificate?: StagedDocInfo;
+    signatory_id?: StagedDocInfo;
+    address_proof?: StagedDocInfo;
+  };
+}
+
+export const SPECIMEN_SCENARIOS: SpecimenScenario[] = [
+  {
+    id: "K03",
+    label: "Applicant K03 (Clean Golden Path)",
+    type: "CLEAN",
+    desc: "Valid GSTIN + valid Udyam + fresh 46-day bill. 100% RapidFuzz score.",
+    docs: {
+      gst_certificate: {
+        filename: "K03_gst_reg06.png",
+        badge: "Valid Active",
+        extractedTitle: "Ganesh Woodcraft",
+        extractedDetail: "GSTIN: 27XUIXG0767D1ZP · Joseph Singh (Proprietor) · Active in Registry",
+      },
+      udyam_certificate: {
+        filename: "K03_udyam_cert.png",
+        badge: "Verified MSME",
+        extractedTitle: "Ganesh Woodcraft",
+        extractedDetail: "UDYAM-MH-00-9516696 · Nagpur, Maharashtra",
+      },
+      signatory_id: {
+        filename: "K03_signatory_id.png",
+        badge: "DPDP Masked",
+        extractedTitle: "Joseph Singh",
+        extractedDetail: "Designation: Owner · National ID Redacted: SYN-XXXX-889",
+      },
+      address_proof: {
+        filename: "K03_electricity_bill.png",
+        badge: "Fresh (46d)",
+        extractedTitle: "Ganesh Woodcraft",
+        extractedDetail: "Bill Date: 2026-05-30 · 46 days old (<90-day statutory limit)",
+      },
+    },
+  },
+  {
+    id: "K01",
+    label: "Applicant K01 (Cancelled GSTIN)",
+    type: "ANOMALY",
+    desc: "Planted defect: GSTIN cancelled in registry 2026-06-01 + Blank Udyam certificate.",
+    docs: {
+      gst_certificate: {
+        filename: "K01_gst_reg06.png",
+        badge: "CANCELLED",
+        extractedTitle: "Vindhya Tours & Travels",
+        extractedDetail: "GSTIN: 37IHKXV5167L1ZS · Cancelled in GST Registry on 2026-06-01",
+        isStale: true,
+      },
+      udyam_certificate: {
+        filename: "K01_udyam_cert.png",
+        badge: "BLANK REGEX",
+        extractedTitle: "Blank Udyam Certificate",
+        extractedDetail: "Udyam registration number is blank string / unformatted",
+        isMissing: true,
+      },
+      signatory_id: {
+        filename: "K01_signatory_id.png",
+        badge: "DPDP Masked",
+        extractedTitle: "Ramesh Varma",
+        extractedDetail: "Managing Partner · National ID Redacted: SYN-XXXX-190",
+      },
+      address_proof: {
+        filename: "K01_electricity_bill.png",
+        badge: "Fresh (35d)",
+        extractedTitle: "Vindhya Tours & Travels",
+        extractedDetail: "Bill Date: 2026-06-10 · 35 days old (<90d limit)",
+      },
+    },
+  },
+  {
+    id: "K05",
+    label: "Applicant K05 (Missing Udyam)",
+    type: "ANOMALY",
+    desc: "Planted defect: Mandatory Udyam physical certificate missing from upload folder.",
+    docs: {
+      gst_certificate: {
+        filename: "K05_gst_reg06.png",
+        badge: "Valid Active",
+        extractedTitle: "Balaji Realty LLP",
+        extractedDetail: "GSTIN: 29AABCB1234F1Z5 · Active in Registry",
+      },
+      // Udyam is intentionally undefined to show empty missing slot!
+      signatory_id: {
+        filename: "K05_signatory_id.png",
+        badge: "DPDP Masked",
+        extractedTitle: "Kiran Kumar",
+        extractedDetail: "Designated Partner · National ID Redacted: SYN-XXXX-234",
+      },
+      address_proof: {
+        filename: "K05_electricity_bill.png",
+        badge: "Fresh (61d)",
+        extractedTitle: "Balaji Realty LLP",
+        extractedDetail: "Bill Date: 2026-05-15 · 61 days old (<90d limit)",
+      },
+    },
+  },
+  {
+    id: "K07",
+    label: "Applicant K07 (Name Mismatch)",
+    type: "ANOMALY",
+    desc: "Planted defect: Legal proprietor trade name differs from invoice (<70% RapidFuzz score).",
+    docs: {
+      gst_certificate: {
+        filename: "K07_gst_reg06.png",
+        badge: "Valid Active",
+        extractedTitle: "(Prop. Shri Physio Clinic)",
+        extractedDetail: "GSTIN: 36AAACB1234F1Z6 · Legal name in Registry",
+      },
+      udyam_certificate: {
+        filename: "K07_udyam_cert.png",
+        badge: "MISMATCH",
+        extractedTitle: "Neelgiri Physio Clinic",
+        extractedDetail: "UDYAM-TS-00-1234567 · Conflicts with legal proprietor registration",
+        isStale: true,
+      },
+      signatory_id: {
+        filename: "K07_signatory_id.png",
+        badge: "DPDP Masked",
+        extractedTitle: "Dr. S. Sharma",
+        extractedDetail: "Proprietor · National ID Redacted: SYN-XXXX-396",
+      },
+      address_proof: {
+        filename: "K07_electricity_bill.png",
+        badge: "Fresh (44d)",
+        extractedTitle: "Neelgiri Physio Clinic",
+        extractedDetail: "Bill Date: 2026-06-01 · 44 days old",
+      },
+    },
+  },
+  {
+    id: "K11",
+    label: "Applicant K11 (Stale Utility Bill)",
+    type: "ANOMALY",
+    desc: "Planted defect: Utility bill dated 2025-10-31 is 257 days old (>90-day statutory limit).",
+    docs: {
+      gst_certificate: {
+        filename: "K11_gst_reg06.png",
+        badge: "Valid Active",
+        extractedTitle: "Trinity Bake House Pvt Ltd",
+        extractedDetail: "GSTIN: 27AAACB1234F1Z7 · Active in Registry",
+      },
+      udyam_certificate: {
+        filename: "K11_udyam_cert.png",
+        badge: "Verified MSME",
+        extractedTitle: "Trinity Bake House",
+        extractedDetail: "UDYAM-MH-00-7654321 · Pune, Maharashtra",
+      },
+      signatory_id: {
+        filename: "K11_signatory_id.png",
+        badge: "DPDP Masked",
+        extractedTitle: "Anil Kapoor",
+        extractedDetail: "Director · National ID Redacted: SYN-XXXX-312",
+      },
+      address_proof: {
+        filename: "K11_electricity_bill.png",
+        badge: "STALE 257d",
+        extractedTitle: "Trinity Bake House",
+        extractedDetail: "Bill Date: 2025-10-31 · 257 days old (>90-day statutory limit!)",
+        isStale: true,
+      },
+    },
+  },
+  {
+    id: "KIRANA_NON_GST",
+    label: "Kirana Store (Non-GST Micro-Bundle)",
+    type: "EXEMPT",
+    desc: "Micro-bundle pathway: Valid Udyam + Bill, completely bypassing GSTIN demand.",
+    docs: {
+      gst_certificate: {
+        filename: "Statutory_GST_Exempt_Policy.pdf",
+        badge: "GST Exempt",
+        extractedTitle: "Non-GST Micro Enterprise",
+        extractedDetail: "Statutory exemption under ₹40L turnover threshold (Rule 4 CPQ DAG)",
+      },
+      udyam_certificate: {
+        filename: "KIRANA_udyam_cert.png",
+        badge: "Verified MSME",
+        extractedTitle: "Ganesh Kirana & General Store",
+        extractedDetail: "UDYAM-KL-00-1234567 · Micro-Retailer Onboarding",
+      },
+      signatory_id: {
+        filename: "KIRANA_signatory_id.png",
+        badge: "DPDP Masked",
+        extractedTitle: "Ganesh Prasad",
+        extractedDetail: "Proprietor · National ID Redacted: SYN-XXXX-567",
+      },
+      address_proof: {
+        filename: "KIRANA_electricity_bill.png",
+        badge: "Fresh (25d)",
+        extractedTitle: "Ganesh Kirana Store",
+        extractedDetail: "Bill Date: 2026-06-20 · 25 days old (<90d limit)",
+      },
+    },
+  },
+];
+
+const APPLICANT_DISPLAY_NAMES: Record<string, string> = {
+  K01: "Applicant K01 (Cancelled GSTIN) · Vindhya Tours & Travels",
+  K02: "Applicant K02 · Royal Mart Supermarket",
+  K03: "Applicant K03 (Clean) · Balaji Timber Traders / Ganesh Woodcraft",
+  K04: "Applicant K04 · Saffron Dental Care LLP",
+  K05: "Applicant K05 (Missing Udyam) · Balaji Realty LLP",
+  K06: "Applicant K06 · Meenakshi Cotton Traders",
+  K07: "Applicant K07 (Name Mismatch) · Neelgiri Physio",
+  K08: "Applicant K08 · Green Leaf Legal Associates",
+  K09: "Applicant K09 · Kaveri Insurance Advisors",
+  K10: "Applicant K10 · Kaveri Stays LLP",
+  K11: "Applicant K11 (Stale Utility Bill) · Trinity Bake House",
+  K12: "Applicant K12 · Star Electronics",
+  KIRANA_NON_GST: "Kirana Store (Non-GST Micro-Bundle) · Ganesh Kirana Store",
+};
 
 interface SmartKYCProps {
   quote: CommercialBreakdown | null;
@@ -35,13 +263,14 @@ interface SmartKYCProps {
 export const SmartKYC: React.FC<SmartKYCProps> = ({ quote, onKYCApproved, onSwitchToUdyamExempt }) => {
   const [consentGranted, setConsentGranted] = useState<boolean>(true);
   const [selectedPreset, setSelectedPreset] = useState<string>("K03");
+  const [stagedDocs, setStagedDocs] = useState<Record<string, StagedDocInfo | undefined>>(
+    SPECIMEN_SCENARIOS[0].docs
+  );
   const [isVerifying, setIsVerifying] = useState<boolean>(false);
   const [kycResult, setKycResult] = useState<KYCVerificationResult | null>(null);
   const [showConsentModal, setShowConsentModal] = useState<boolean>(false);
-  const [activeTab, setActiveTab] = useState<"preset" | "upload" | "digilocker">("preset");
-  const [uploadDocType, setUploadDocType] = useState<string>("gst_certificate");
-  const [uploadResponse, setUploadResponse] = useState<KYCUploadResponse | null>(null);
-  const [uploadedSlots, setUploadedSlots] = useState<Record<string, { file: File; res: KYCUploadResponse }>>({});
+  const [activeTab, setActiveTab] = useState<"staging" | "digilocker">("staging");
+  const [uploadedCustomFiles, setUploadedCustomFiles] = useState<Record<string, { file: File; res: KYCUploadResponse }>>({});
   const [remediationNotice, setRemediationNotice] = useState<string | null>(null);
 
   // DigiLocker Fast-Track State
@@ -55,6 +284,24 @@ export const SmartKYC: React.FC<SmartKYCProps> = ({ quote, onKYCApproved, onSwit
   const isAadhaarValidVerhoeff = cleanAadhaar.length === 12 && validateVerhoeff(cleanAadhaar);
   const aadhaarRedactionPreview = redactAadhaarInPlace(digiAadhaar);
   const gstinDecoded = decodeGSTIN(digiGstin);
+
+  // Handle Specimen Auto-Fill (Populates slots without auto-verifying!)
+  const handleSelectSpecimen = (specimenId: string) => {
+    setSelectedPreset(specimenId);
+    setKycResult(null); // Clear previous result so user must explicitly verify!
+    const scenario = SPECIMEN_SCENARIOS.find((s) => s.id === specimenId);
+    if (scenario) {
+      setStagedDocs(scenario.docs);
+    }
+  };
+
+  // Clear slots back to empty for custom drag-and-drop
+  const handleClearSlots = () => {
+    setSelectedPreset("CUSTOM");
+    setStagedDocs({});
+    setUploadedCustomFiles({});
+    setKycResult(null);
+  };
 
   const handleDigiLockerVerify = async () => {
     if (!consentGranted) {
@@ -83,36 +330,71 @@ export const SmartKYC: React.FC<SmartKYCProps> = ({ quote, onKYCApproved, onSwit
     }
   };
 
-  const handleFileUpload = async (file: File, docTypeOverride?: string) => {
+  const handleCustomFileUpload = async (file: File, docType: string) => {
     if (!consentGranted) {
       alert("DPDP Act 2023 requires explicit digital consent before document processing.");
       return;
     }
-    const targetType = docTypeOverride || uploadDocType;
     setIsVerifying(true);
     try {
       const cartRequiresGstin = quote ? !quote.gst_exempt_eligible : true;
-      const res = await uploadKYCDocument(file, targetType, cartRequiresGstin);
-      setUploadResponse(res);
-      setUploadedSlots((prev) => ({
+      const res = await uploadKYCDocument(file, docType, cartRequiresGstin);
+      setUploadedCustomFiles((prev) => ({
         ...prev,
-        [targetType]: { file, res },
+        [docType]: { file, res },
       }));
-      setKycResult(res.single_doc_result || res.verification_result);
+      // Auto-fill this slot with real extracted file data
+      setStagedDocs((prev) => ({
+        ...prev,
+        [docType]: {
+          filename: file.name,
+          badge: "Uploaded File",
+          extractedTitle: res.extracted_fields?.trade_name || res.extracted_fields?.consumer_name || res.extracted_fields?.signatory_name || "Extracted Document",
+          extractedDetail: `SHA-256: ${res.file_sha256.slice(0, 16)}... · ${Math.round(file.size / 1024)} KB`,
+        },
+      }));
+      setKycResult(null); // Keep result null until user hits verify package!
     } catch (err: unknown) {
-      alert(err instanceof Error ? err.message : "File OCR failed.");
+      alert(err instanceof Error ? err.message : "File OCR extraction failed.");
     } finally {
       setIsVerifying(false);
     }
   };
 
-  const handleVerifyCompletePackage = () => {
-    if (Object.keys(uploadedSlots).length === 0) {
-      alert("Please upload at least one document first.");
+  const handleVerifyStagedPackage = async () => {
+    if (!consentGranted) {
+      alert("DPDP Act 2023 requires explicit digital consent before verification.");
       return;
     }
-    if (uploadResponse?.verification_result) {
-      setKycResult(uploadResponse.verification_result);
+
+    const stagedKeys = Object.keys(stagedDocs).filter((k) => stagedDocs[k] !== undefined);
+    if (stagedKeys.length === 0) {
+      alert("Please auto-fill a test specimen or upload documents before verifying.");
+      return;
+    }
+
+    setIsVerifying(true);
+    try {
+      const cartRequiresGstin = quote ? !quote.gst_exempt_eligible : true;
+      let res: KYCVerificationResult;
+
+      // If user uploaded custom files, use package upload verification
+      if (Object.keys(uploadedCustomFiles).length > 0) {
+        const lastUpload = Object.values(uploadedCustomFiles)[0].res;
+        res = lastUpload.verification_result;
+      } else {
+        // Run verification on the staged specimen (e.g. K03, K01, K11)
+        res = await verifyKYC(selectedPreset, cartRequiresGstin);
+      }
+
+      setKycResult(res);
+      if (res.status === "APPROVED") {
+        onKYCApproved(res);
+      }
+    } catch (err: unknown) {
+      alert(err instanceof Error ? err.message : "KYC verification failed.");
+    } finally {
+      setIsVerifying(false);
     }
   };
 
@@ -120,8 +402,8 @@ export const SmartKYC: React.FC<SmartKYCProps> = ({ quote, onKYCApproved, onSwit
     if (onSwitchToUdyamExempt) {
       onSwitchToUdyamExempt();
     }
-    setSelectedPreset("KIRANA_NON_GST");
-    setRemediationNotice("Switched to Udyam Micro Bundle (GST-Free). All GST-only SKUs removed.");
+    handleSelectSpecimen("KIRANA_NON_GST");
+    setRemediationNotice("Switched to Udyam Micro-Bundle (GST-Free). All GST-only SKUs removed.");
     try {
       const res = await verifyKYC("KIRANA_NON_GST", false);
       setKycResult(res);
@@ -130,61 +412,7 @@ export const SmartKYC: React.FC<SmartKYCProps> = ({ quote, onKYCApproved, onSwit
     }
   };
 
-  const presets = [
-    {
-      id: "K03",
-      label: "Applicant K03 (Clean)",
-      type: "CLEAN",
-      desc: "Valid GST + Udyam + Utility Bill. 100% RapidFuzz score.",
-    },
-    {
-      id: "K01",
-      label: "Applicant K01 (Cancelled GSTIN)",
-      type: "ANOMALY",
-      desc: "GSTIN cancelled on 2026-06-01 + Blank Udyam certificate.",
-    },
-    {
-      id: "K05",
-      label: "Applicant K05 (Missing Udyam)",
-      type: "ANOMALY",
-      desc: "Udyam physical certificate missing from package.",
-    },
-    {
-      id: "K07",
-      label: "Applicant K07 (Name Mismatch)",
-      type: "ANOMALY",
-      desc: "Legal trade name differs from invoice (<70% similarity).",
-    },
-    {
-      id: "K11",
-      label: "Applicant K11 (Stale Utility Bill)",
-      type: "ANOMALY",
-      desc: "Bill dated 2025-10-31 is 257 days old (>90-day statutory limit).",
-    },
-    {
-      id: "KIRANA_NON_GST",
-      label: "Kirana Store (Non-GST)",
-      type: "EXEMPT",
-      desc: "Valid Udyam + Bill, bypassing GSTIN requirement.",
-    },
-  ];
-
-  const handleVerify = async () => {
-    if (!consentGranted) {
-      alert("DPDP Act 2023 requires consent.");
-      return;
-    }
-    setIsVerifying(true);
-    try {
-      const cartRequiresGstin = quote ? !quote.gst_exempt_eligible : true;
-      const res = await verifyKYC(selectedPreset, cartRequiresGstin);
-      setKycResult(res);
-    } catch (err: unknown) {
-      alert(err instanceof Error ? err.message : "KYC failed.");
-    } finally {
-      setIsVerifying(false);
-    }
-  };
+  const currentScenario = SPECIMEN_SCENARIOS.find((s) => s.id === selectedPreset);
 
   return (
     <div className="max-w-4xl mx-auto space-y-7">
@@ -239,39 +467,27 @@ export const SmartKYC: React.FC<SmartKYCProps> = ({ quote, onKYCApproved, onSwit
         </motion.div>
       )}
 
-      {/* Mode Switcher */}
+      {/* Mode Switcher Tabs */}
       <div className="flex flex-wrap gap-2 border-b border-[rgba(235,229,217,0.06)] pb-3">
         <button
           onClick={() => {
-            setActiveTab("preset");
-            setUploadResponse(null);
-          }}
-          className={`px-4 py-2 rounded-full text-xs font-medium transition-all cursor-pointer ${
-            activeTab === "preset"
-              ? "bg-[#e40000] text-white shadow-[0_0_16px_rgba(228,0,0,0.4)]"
-              : "text-[#B39D82] hover:text-[#EBE5D9] hover:bg-white/[0.03]"
-          }`}
-        >
-          Preset Specimens (K01–K12)
-        </button>
-        <button
-          onClick={() => {
-            setActiveTab("upload");
+            setActiveTab("staging");
             setKycResult(null);
           }}
-          className={`px-4 py-2 rounded-full text-xs font-medium transition-all cursor-pointer ${
-            activeTab === "upload"
+          className={`px-4 py-2 rounded-full text-xs font-medium transition-all cursor-pointer flex items-center space-x-1.5 ${
+            activeTab === "staging"
               ? "bg-[#e40000] text-white shadow-[0_0_16px_rgba(228,0,0,0.4)]"
               : "text-[#B39D82] hover:text-[#EBE5D9] hover:bg-white/[0.03]"
           }`}
         >
-          Live Document Staging (4 Slots)
+          <FileCheck className="w-3.5 h-3.5" />
+          <span>Live Document Staging (4 Slots)</span>
         </button>
+
         <button
           onClick={() => {
             setActiveTab("digilocker");
             setKycResult(null);
-            setUploadResponse(null);
           }}
           className={`px-4 py-2 rounded-full text-xs font-medium transition-all cursor-pointer flex items-center space-x-1.5 ${
             activeTab === "digilocker"
@@ -284,138 +500,197 @@ export const SmartKYC: React.FC<SmartKYCProps> = ({ quote, onKYCApproved, onSwit
         </button>
       </div>
 
-      {activeTab === "preset" ? (
-        /* Presets Grid */
-        <div className="luxury-glass rounded-3xl p-6 sm:p-7 space-y-5 border border-[rgba(235,229,217,0.08)] shadow-[0_20px_50px_rgba(0,0,0,0.7)]">
-          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3.5">
-            {presets.map((preset) => {
-              const isSelected = selectedPreset === preset.id;
-              return (
-                <motion.div
-                  key={preset.id}
-                  whileHover={{ scale: 1.02 }}
-                  whileTap={{ scale: 0.98 }}
-                  onClick={() => {
-                    setSelectedPreset(preset.id);
-                    setKycResult(null);
-                  }}
-                  className={`p-4 rounded-2xl border transition-all cursor-pointer ${
-                    isSelected
-                      ? "border-[#e40000] bg-gradient-to-b from-[#e40000]/15 to-transparent shadow-[0_0_20px_rgba(228,0,0,0.25)]"
-                      : "border-[rgba(235,229,217,0.06)] bg-[#030405] hover:border-[rgba(235,229,217,0.16)]"
-                  }`}
-                >
-                  <div className="flex items-center justify-between mb-2">
-                    <span className="text-xs font-semibold text-[#EBE5D9]">{preset.label}</span>
-                    <span
-                      className={`text-[9px] px-2 py-0.5 rounded-full font-mono uppercase border ${
-                        preset.type === "CLEAN"
-                          ? "bg-emerald-500/15 text-emerald-400 border-emerald-500/30"
-                          : preset.type === "EXEMPT"
-                          ? "bg-[#d9ad63]/15 text-[#d9ad63] border-[#d9ad63]/30"
-                          : "bg-red-500/15 text-red-400 border-red-500/30"
-                      }`}
-                    >
-                      {preset.type}
-                    </span>
-                  </div>
-                  <p className="text-[11px] text-[#B39D82] leading-relaxed">{preset.desc}</p>
-                </motion.div>
-              );
-            })}
-          </div>
+      {activeTab === "staging" ? (
+        /* Unified Document Staging & Specimen Auto-Fill View */
+        <div className="space-y-6">
+          {/* ⚡ Specimen Auto-Fill Bench Toolbar */}
+          <div className="luxury-glass rounded-3xl p-5 border border-[rgba(235,229,217,0.08)] shadow-[0_15px_40px_rgba(0,0,0,0.6)] space-y-3.5">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 pb-2.5 border-b border-[rgba(235,229,217,0.06)]">
+              <div className="flex items-center space-x-2">
+                <Sparkles className="w-3.5 h-3.5 text-[#d9ad63]" />
+                <span className="text-xs font-semibold text-[#EBE5D9]">
+                  Auto-Fill Test Specimen (Simulated Dataset)
+                </span>
+                <span className="text-[9px] font-mono text-[#d9ad63] bg-[#d9ad63]/10 border border-[#d9ad63]/20 px-2 py-0.5 rounded-full">
+                  Click to Stage Slots
+                </span>
+              </div>
+              <button
+                onClick={handleClearSlots}
+                className="text-[11px] font-mono text-[#B39D82] hover:text-white flex items-center space-x-1 cursor-pointer self-start sm:self-auto"
+              >
+                <RotateCcw className="w-3 h-3" />
+                <span>Reset to Empty Slots</span>
+              </button>
+            </div>
 
-          <div className="flex justify-end pt-2">
-            <motion.button
-              whileHover={{ scale: 1.02 }}
-              whileTap={{ scale: 0.98 }}
-              onClick={handleVerify}
-              disabled={isVerifying || !consentGranted}
-              className="flex items-center space-x-2 bg-[#e40000] hover:bg-[#b30000] text-white font-medium py-3 px-6 rounded-2xl text-xs sm:text-sm shadow-[0_0_20px_rgba(228,0,0,0.4)] disabled:opacity-40 cursor-pointer animate-shimmer"
-            >
-              <RefreshCw className={`w-4 h-4 ${isVerifying ? "animate-spin" : ""}`} />
-              <span>{isVerifying ? "Verifying Registry..." : "Run KYC Gate"}</span>
-            </motion.button>
-          </div>
-        </div>
-      ) : activeTab === "upload" ? (
-        /* 4 Upload Slots */
-        <div className="luxury-glass rounded-3xl p-6 sm:p-7 space-y-6 border border-[rgba(235,229,217,0.08)] shadow-[0_20px_50px_rgba(0,0,0,0.7)]">
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-            {[
-              { id: "gst_certificate", label: "GST Certificate (REG-06)", icon: Building, desc: "Form GST REG-06 Certificate" },
-              { id: "udyam_certificate", label: "Udyam Certificate", icon: FileCheck, desc: "MSME Registration Certificate" },
-              { id: "signatory_id", label: "Signatory ID (Masked)", icon: CreditCard, desc: "DPDP Zero-Numeric In-Memory ID" },
-              { id: "address_proof", label: "Utility Bill (<90 Days)", icon: FileText, desc: "Electricity or Municipal Bill" },
-            ].map((slot) => {
-              const staged = uploadedSlots[slot.id];
-              const SlotIcon = slot.icon;
-              return (
-                <div
-                  key={slot.id}
-                  className={`p-5 rounded-2xl border transition-all ${
-                    staged
-                      ? "border-emerald-500/40 bg-emerald-950/20"
-                      : "border-dashed border-[rgba(235,229,217,0.12)] bg-[#030405] hover:border-[rgba(235,229,217,0.25)]"
-                  }`}
-                >
-                  <div className="flex items-center justify-between mb-3">
-                    <div className="flex items-center space-x-2.5">
-                      <div className="w-7 h-7 rounded-lg bg-white/[0.04] flex items-center justify-center text-[#B39D82]">
-                        <SlotIcon className="w-3.5 h-3.5" />
-                      </div>
-                      <span className="text-xs font-semibold text-[#EBE5D9]">{slot.label}</span>
-                    </div>
-                    <span className={`text-[9px] font-mono px-2 py-0.5 rounded-full uppercase border ${
-                      staged 
-                        ? "bg-emerald-500/20 text-emerald-400 border-emerald-500/30" 
-                        : "bg-white/[0.04] text-[#B39D82]/60 border-white/[0.06]"
-                    }`}>
-                      {staged ? "STAGED" : "EMPTY"}
-                    </span>
-                  </div>
-
-                  <p className="text-[11px] text-[#B39D82] mb-3">{slot.desc}</p>
-
-                  <input
-                    type="file"
-                    id={`file-${slot.id}`}
-                    accept=".pdf,.png,.jpg,.jpeg"
-                    onChange={(e) => {
-                      const f = e.target.files?.[0];
-                      if (f) handleFileUpload(f, slot.id);
-                    }}
-                    className="hidden"
-                  />
-                  <div className="flex items-center space-x-2">
-                    <label
-                      htmlFor={`file-${slot.id}`}
-                      className="cursor-pointer inline-flex items-center space-x-1.5 px-3.5 py-1.5 rounded-xl bg-white/[0.05] hover:bg-white/[0.1] text-xs font-medium text-[#EBE5D9] border border-white/[0.08] transition-colors"
-                    >
-                      <Upload className="w-3 h-3 text-[#B39D82]" />
-                      <span>{staged ? "Replace File" : "Upload Document"}</span>
-                    </label>
-                    {staged && (
-                      <span className="text-[11px] font-mono text-emerald-400 truncate">
-                        ✓ {staged.file.name}
+            {/* Specimen Buttons Row */}
+            <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-2">
+              {SPECIMEN_SCENARIOS.map((scenario) => {
+                const isSelected = selectedPreset === scenario.id;
+                return (
+                  <button
+                    key={scenario.id}
+                    onClick={() => handleSelectSpecimen(scenario.id)}
+                    className={`p-2.5 rounded-xl border text-left transition-all cursor-pointer ${
+                      isSelected
+                        ? "border-[#e40000] bg-gradient-to-b from-[#e40000]/20 to-transparent shadow-[0_0_15px_rgba(228,0,0,0.3)] ring-1 ring-[#e40000]"
+                        : "border-white/[0.06] bg-[#030405] hover:border-white/[0.15]"
+                    }`}
+                  >
+                    <div className="flex items-center justify-between mb-1">
+                      <span className="text-[10px] font-mono font-bold text-[#EBE5D9]">
+                        {scenario.id}
                       </span>
-                    )}
-                  </div>
-                </div>
-              );
-            })}
+                      <span
+                        className={`text-[8px] font-mono px-1.5 py-0.5 rounded-full uppercase border ${
+                          scenario.type === "CLEAN"
+                            ? "bg-emerald-500/20 text-emerald-400 border-emerald-500/30"
+                            : scenario.type === "EXEMPT"
+                            ? "bg-[#d9ad63]/20 text-[#d9ad63] border-[#d9ad63]/30"
+                            : "bg-red-500/20 text-red-400 border-red-500/30"
+                        }`}
+                      >
+                        {scenario.type}
+                      </span>
+                    </div>
+                    <div className="text-[10px] font-medium text-[#EBE5D9] truncate">
+                      {scenario.label.split("(")[1]?.replace(")", "") || scenario.label}
+                    </div>
+                  </button>
+                );
+              })}
+            </div>
+
+            {currentScenario && (
+              <p className="text-[11px] text-[#B39D82] bg-white/[0.02] p-2 rounded-xl border border-white/[0.04]">
+                ↳ <strong className="text-[#EBE5D9]">{currentScenario.label}:</strong> {currentScenario.desc}
+              </p>
+            )}
           </div>
 
-          <div className="flex justify-end pt-2">
-            <motion.button
-              whileHover={{ scale: 1.02 }}
-              whileTap={{ scale: 0.98 }}
-              onClick={handleVerifyCompletePackage}
-              disabled={Object.keys(uploadedSlots).length === 0}
-              className="bg-emerald-600 hover:bg-emerald-500 text-white font-medium py-2.5 px-6 rounded-2xl text-xs sm:text-sm disabled:opacity-40 cursor-pointer shadow-lg transition-all"
-            >
-              Verify Staged Package
-            </motion.button>
+          {/* 4 Staging Slots (Visible and Hydrated) */}
+          <div className="luxury-glass rounded-3xl p-6 sm:p-7 space-y-6 border border-[rgba(235,229,217,0.08)] shadow-[0_20px_50px_rgba(0,0,0,0.7)]">
+            <div className="flex items-center justify-between pb-3 border-b border-[rgba(235,229,217,0.06)]">
+              <div>
+                <h3 className="text-xs font-semibold text-[#EBE5D9]">
+                  Staged Document Package (4 Statutory Checklist Slots)
+                </h3>
+                <p className="text-[11px] text-[#B39D82] mt-0.5">
+                  Inspect staged documents below before executing the Smart KYC Anomaly Gate.
+                </p>
+              </div>
+              <span className="text-[10px] font-mono text-emerald-400 bg-emerald-500/10 border border-emerald-500/20 px-2.5 py-1 rounded-full">
+                {Object.keys(stagedDocs).filter((k) => stagedDocs[k] !== undefined).length}/4 Slots Ready
+              </span>
+            </div>
+
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              {[
+                { id: "gst_certificate", label: "1. GST Certificate (REG-06)", icon: Building, desc: "Form GST REG-06 Registration" },
+                { id: "udyam_certificate", label: "2. Udyam Certificate", icon: FileCheck, desc: "MSME Registration Certificate" },
+                { id: "signatory_id", label: "3. Signatory National ID", icon: CreditCard, desc: "DPDP In-Memory Masked ID" },
+                { id: "address_proof", label: "4. Utility Bill (<90 Days)", icon: FileText, desc: "Electricity or Municipal Bill" },
+              ].map((slot) => {
+                const staged = stagedDocs[slot.id];
+                const SlotIcon = slot.icon;
+                return (
+                  <div
+                    key={slot.id}
+                    className={`p-5 rounded-2xl border transition-all ${
+                      staged && !staged.isMissing
+                        ? staged.isStale
+                          ? "border-red-500/40 bg-red-950/15"
+                          : "border-emerald-500/40 bg-emerald-950/15"
+                        : "border-dashed border-[rgba(235,229,217,0.12)] bg-[#030405]"
+                    }`}
+                  >
+                    <div className="flex items-center justify-between mb-2.5">
+                      <div className="flex items-center space-x-2.5">
+                        <div className="w-7 h-7 rounded-lg bg-white/[0.04] flex items-center justify-center text-[#B39D82]">
+                          <SlotIcon className="w-3.5 h-3.5" />
+                        </div>
+                        <span className="text-xs font-semibold text-[#EBE5D9]">{slot.label}</span>
+                      </div>
+                      <span
+                        className={`text-[9px] font-mono px-2 py-0.5 rounded-full uppercase border ${
+                          staged && !staged.isMissing
+                            ? staged.isStale
+                              ? "bg-red-500/20 text-red-400 border-red-500/30"
+                              : "bg-emerald-500/20 text-emerald-400 border-emerald-500/30"
+                            : "bg-red-500/20 text-red-400 border-red-500/30"
+                        }`}
+                      >
+                        {staged && !staged.isMissing ? staged.badge : "EMPTY (MISSING)"}
+                      </span>
+                    </div>
+
+                    {staged && !staged.isMissing ? (
+                      <div className="space-y-1.5 mb-3 bg-[#030405] p-3 rounded-xl border border-white/[0.04]">
+                        <div className="text-xs font-medium text-[#EBE5D9] truncate">
+                          📄 {staged.extractedTitle}
+                        </div>
+                        <div className="text-[10px] font-mono text-[#B39D82] truncate">
+                          {staged.extractedDetail}
+                        </div>
+                        <div className="text-[9px] font-mono text-[#d9ad63]">
+                          File: {staged.filename}
+                        </div>
+                      </div>
+                    ) : (
+                      <p className="text-[11px] text-[#B39D82] mb-3">{slot.desc}</p>
+                    )}
+
+                    <div className="flex items-center justify-between pt-1">
+                      <input
+                        type="file"
+                        id={`custom-file-${slot.id}`}
+                        accept=".pdf,.png,.jpg,.jpeg"
+                        onChange={(e) => {
+                          const f = e.target.files?.[0];
+                          if (f) handleCustomFileUpload(f, slot.id);
+                        }}
+                        className="hidden"
+                      />
+                      <label
+                        htmlFor={`custom-file-${slot.id}`}
+                        className="cursor-pointer inline-flex items-center space-x-1.5 px-3 py-1.5 rounded-xl bg-white/[0.05] hover:bg-white/[0.1] text-xs font-medium text-[#EBE5D9] border border-white/[0.08] transition-colors"
+                      >
+                        <Upload className="w-3 h-3 text-[#B39D82]" />
+                        <span>{staged ? "Replace File" : "Upload File"}</span>
+                      </label>
+                      {staged && (
+                        <span className="text-[10px] font-mono text-emerald-400">
+                          ✓ Staged in-memory
+                        </span>
+                      )}
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+
+            {/* Explicit Submission Action Bar */}
+            <div className="flex flex-col sm:flex-row items-center justify-between gap-4 pt-3 border-t border-[rgba(235,229,217,0.06)]">
+              <div className="text-xs text-[#B39D82]">
+                Ready to verify: <strong className="text-[#EBE5D9]">{currentScenario?.label || "Custom Staged Package"}</strong>
+              </div>
+
+              <motion.button
+                whileHover={{ scale: 1.02 }}
+                whileTap={{ scale: 0.98 }}
+                onClick={handleVerifyStagedPackage}
+                disabled={isVerifying || !consentGranted}
+                className="w-full sm:w-auto flex items-center justify-center space-x-2 bg-[#e40000] hover:bg-[#b30000] text-white font-medium py-3 px-8 rounded-2xl text-xs sm:text-sm shadow-[0_0_20px_rgba(228,0,0,0.4)] disabled:opacity-40 cursor-pointer animate-shimmer"
+              >
+                <RefreshCw className={`w-4 h-4 ${isVerifying ? "animate-spin" : ""}`} />
+                <span>
+                  {isVerifying
+                    ? "Verifying Cryptographic Hashes & Registries..."
+                    : `Run KYC Verification on Staged Package`}
+                </span>
+              </motion.button>
+            </div>
           </div>
         </div>
       ) : (
@@ -427,20 +702,14 @@ export const SmartKYC: React.FC<SmartKYCProps> = ({ quote, onKYCApproved, onSwit
                 <Zap className="w-5 h-5" />
               </div>
               <div>
-                <h3 className="text-sm font-semibold text-[#EBE5D9]">
-                  DigiLocker 1-Tap Fast-Track (National e-KYC Gateway)
+                <h3 className="font-serif text-lg font-normal text-[#EBE5D9]">
+                  Aadhaar DigiLocker Gateway
                 </h3>
-                <p className="text-[11px] text-[#B39D82]">
-                  Pulls verified GSTIN &amp; Udyam directly from issuer registries · Verhoeff D₅ dihedral checksum validation
+                <p className="text-xs text-[#B39D82] mt-0.5">
+                  UIDAI Verhoeff $D_5$ Checksum · OTP Authentication · Registry Pull
                 </p>
               </div>
             </div>
-            <div className="flex items-center space-x-2">
-              <span className="text-[10px] px-2.5 py-1 rounded-full bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 font-mono">
-                DPDP Zero-Persistence Active
-              </span>
-            </div>
-          </div>
 
           {/* UIDAI Sandbox Simulation Architecture Callout (Issue #27) */}
           <div className="p-3.5 bg-blue-950/20 border border-blue-500/25 rounded-2xl flex items-start space-x-2.5 text-xs">
@@ -450,12 +719,8 @@ export const SmartKYC: React.FC<SmartKYCProps> = ({ quote, onKYCApproved, onSwit
             </p>
           </div>
 
-          {/* Quick Demo Preset Chips */}
-          <div className="space-y-2">
-            <label className="text-[11px] font-mono uppercase tracking-wider text-[#B39D82]">
-              Jury Test Bench · 1-Click Simulation Presets
-            </label>
-            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-2">
+          {/* Quick-fill Scenario Buttons for DigiLocker */}
+          <div className="flex flex-wrap gap-2">
               <button
                 type="button"
                 onClick={() => {
@@ -465,55 +730,20 @@ export const SmartKYC: React.FC<SmartKYCProps> = ({ quote, onKYCApproved, onSwit
                   setDigiUdyam("UDYAM-KL-00-1234567");
                   setKycResult(null);
                 }}
-                className="text-left p-2.5 rounded-xl border border-emerald-500/30 bg-emerald-950/10 hover:bg-emerald-950/20 transition-all cursor-pointer"
+                className="px-2.5 py-1 rounded-xl bg-emerald-500/10 hover:bg-emerald-500/20 text-emerald-300 border border-emerald-500/30 text-[10px] font-mono cursor-pointer"
               >
-                <div className="text-[11px] font-semibold text-emerald-300">🌟 Golden Merchant</div>
-                <div className="text-[9px] text-[#B39D82] font-mono mt-0.5">Valid UID + Active GST</div>
+                Auto-fill Clean Merchant
               </button>
-
               <button
                 type="button"
                 onClick={() => {
                   setDigiAadhaar("2345 6789 0120");
                   setDigiOtp("1234");
-                  setDigiGstin("32TTNXB7384T1ZW");
-                  setDigiUdyam("UDYAM-KL-00-1234567");
                   setKycResult(null);
                 }}
-                className="text-left p-2.5 rounded-xl border border-red-500/30 bg-red-950/10 hover:bg-red-950/20 transition-all cursor-pointer"
+                className="px-2.5 py-1 rounded-xl bg-red-500/10 hover:bg-red-500/20 text-red-300 border border-red-500/30 text-[10px] font-mono cursor-pointer"
               >
-                <div className="text-[11px] font-semibold text-red-300">❌ Verhoeff UID Trap</div>
-                <div className="text-[9px] text-[#B39D82] font-mono mt-0.5">Invalid Checksum (0120)</div>
-              </button>
-
-              <button
-                type="button"
-                onClick={() => {
-                  setDigiAadhaar("2345 6789 0124");
-                  setDigiOtp("9999");
-                  setDigiGstin("32TTNXB7384T1ZW");
-                  setDigiUdyam("UDYAM-KL-00-1234567");
-                  setKycResult(null);
-                }}
-                className="text-left p-2.5 rounded-xl border border-red-500/30 bg-red-950/10 hover:bg-red-950/20 transition-all cursor-pointer"
-              >
-                <div className="text-[11px] font-semibold text-red-300">❌ Invalid OTP Trap</div>
-                <div className="text-[9px] text-[#B39D82] font-mono mt-0.5">OTP &quot;9999&quot; Rejected</div>
-              </button>
-
-              <button
-                type="button"
-                onClick={() => {
-                  setDigiAadhaar("2345 6789 0124");
-                  setDigiOtp("1234");
-                  setDigiGstin("37IHKXV5167L1ZS");
-                  setDigiUdyam("UDYAM-AP-00-1234567");
-                  setKycResult(null);
-                }}
-                className="text-left p-2.5 rounded-xl border border-amber-500/30 bg-amber-950/10 hover:bg-amber-950/20 transition-all cursor-pointer"
-              >
-                <div className="text-[11px] font-semibold text-amber-300">❌ Inactive GSTIN</div>
-                <div className="text-[9px] text-[#B39D82] font-mono mt-0.5">Cancelled in Registry</div>
+                Invalid UID (0120)
               </button>
             </div>
           </div>
@@ -622,23 +852,14 @@ export const SmartKYC: React.FC<SmartKYCProps> = ({ quote, onKYCApproved, onSwit
               disabled={isVerifying || !consentGranted}
               className="w-full sm:w-auto bg-[#e40000] hover:bg-[#b80000] text-white font-medium py-2.5 px-6 rounded-2xl text-xs sm:text-sm disabled:opacity-40 cursor-pointer shadow-[0_0_20px_rgba(228,0,0,0.3)] transition-all flex items-center justify-center space-x-2"
             >
-              {isVerifying ? (
-                <>
-                  <RefreshCw className="w-4 h-4 animate-spin" />
-                  <span>Connecting DigiLocker...</span>
-                </>
-              ) : (
-                <>
-                  <Zap className="w-4 h-4" />
-                  <span>Authenticate &amp; Pull from DigiLocker</span>
-                </>
-              )}
+              <Zap className="w-4 h-4" />
+              <span>{isVerifying ? "Connecting DigiLocker..." : "Authenticate & Pull from DigiLocker"}</span>
             </motion.button>
           </div>
         </div>
       )}
 
-      {/* Verification Result Card */}
+      {/* Verification Result Card (Only rendered after user clicks Verify!) */}
       {kycResult && (
         <motion.div
           initial={{ opacity: 0, y: 12 }}
@@ -673,6 +894,16 @@ export const SmartKYC: React.FC<SmartKYCProps> = ({ quote, onKYCApproved, onSwit
                   </h3>
                   <span className="text-[10px] font-mono text-[#d9ad63] bg-white/[0.04] border border-white/[0.06] px-2 py-0.5 rounded-full">
                     {kycResult.execution_latency_ms}ms
+                  </span>
+                </div>
+                <div className="text-[11px] font-mono text-[#d9ad63] mt-1 flex flex-wrap items-center gap-1.5">
+                  <span>Verified Subject:</span>
+                  <span className="text-[#EBE5D9] font-sans font-medium">
+                    {kycResult.applicant_id && APPLICANT_DISPLAY_NAMES[kycResult.applicant_id]
+                      ? APPLICANT_DISPLAY_NAMES[kycResult.applicant_id]
+                      : activeTab === "digilocker"
+                      ? "DigiLocker Authenticated Signatory"
+                      : "Staged Document Package"}
                   </span>
                 </div>
                 <p className="text-xs text-[#B39D82] mt-0.5">
@@ -718,7 +949,7 @@ export const SmartKYC: React.FC<SmartKYCProps> = ({ quote, onKYCApproved, onSwit
             </div>
           </div>
 
-          {/* Anomalies List */}
+          {/* Anomalies List with 1-click Remediation */}
           {kycResult.anomalies.length > 0 && (
             <div className="luxury-glass rounded-3xl p-5 sm:p-6 space-y-3 border border-red-500/25">
               <h4 className="text-xs font-semibold text-amber-300 uppercase tracking-wider flex items-center space-x-2">
@@ -747,7 +978,7 @@ export const SmartKYC: React.FC<SmartKYCProps> = ({ quote, onKYCApproved, onSwit
                           onClick={handleSwitchToUdyam}
                           className="text-xs bg-[#d9ad63] hover:bg-[#b8914d] text-[#030405] font-semibold px-3.5 py-1.5 rounded-xl cursor-pointer shadow-[0_0_12px_rgba(217,173,99,0.3)] transition-all"
                         >
-                          1-Click Switch to Udyam Micro Bundle
+                          Switch to Udyam Micro-Bundle (GST-Free)
                         </motion.button>
                       </div>
                     )}
@@ -757,36 +988,6 @@ export const SmartKYC: React.FC<SmartKYCProps> = ({ quote, onKYCApproved, onSwit
             </div>
           )}
         </motion.div>
-      )}
-
-      {/* Consent Modal */}
-      {showConsentModal && (
-        <div className="fixed inset-0 z-50 bg-black/85 backdrop-blur-xl flex items-center justify-center p-4">
-          <motion.div
-            initial={{ opacity: 0, scale: 0.95 }}
-            animate={{ opacity: 1, scale: 1 }}
-            className="luxury-glass-elevated rounded-3xl max-w-md w-full p-6 space-y-4 border border-white/[0.12] shadow-2xl"
-          >
-            <div className="flex items-center justify-between pb-3 border-b border-white/[0.06]">
-              <div className="flex items-center space-x-2">
-                <ShieldCheck className="w-4 h-4 text-[#d9ad63]" />
-                <h3 className="font-serif text-lg font-normal text-[#EBE5D9]">DPDP Act 2023 Consent Audit</h3>
-              </div>
-              <button
-                onClick={() => setShowConsentModal(false)}
-                className="text-xs text-[#B39D82] hover:text-[#EBE5D9] px-2 py-1 rounded-lg bg-white/[0.04]"
-              >
-                Close
-              </button>
-            </div>
-            <div className="space-y-2 text-xs text-[#B39D82] font-mono bg-[#030405] p-4 rounded-2xl border border-white/[0.06]">
-              <p className="text-white">Consent ID: CONSENT_20260715_884920</p>
-              <p>Section 6 Notice: Telecom KYC Verification</p>
-              <p>In-Memory Hashing: SHA-256 + Immediate ID Masking</p>
-              <p className="text-emerald-400">Zero Numeric ID Plaintext Stored on Disk</p>
-            </div>
-          </motion.div>
-        </div>
       )}
     </div>
   );
