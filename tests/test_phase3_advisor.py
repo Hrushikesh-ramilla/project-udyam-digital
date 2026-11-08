@@ -278,3 +278,21 @@ def test_session_language_switches_when_user_explicitly_speaks_hindi(advisor: Ad
     # Should contain Hindi/Hinglish words acknowledging the request
     hi_text = res.display_latin.lower()
     assert any(w in hi_text for w in ["bhai", "aapki", "dukan", "plan", "airfiber", "sasta", "hoga", "hai"])
+
+
+def test_order_intent_strictly_guides_to_cart_and_forbids_ghost_booking_codes(advisor: AdvisorAgent):
+    """Verifies Issue #12: when user requests order placement, advisor must NEVER
+    hallucinate fake booking IDs (e.g. AUDYAM-*) and must guide user to Dynamic Cart & Smart KYC.
+    """
+    import re
+    from backend.app.models.schemas import MSMEProfileSlots
+
+    slots = MSMEProfileSlots(segment="mfg", city_tier=1, employee_count=50, has_gstin=True)
+    res = advisor.process_turn("YEAH PLEASE PLACE THE ORDER", previous_slots=slots)
+
+    # Must not contain synthetic AUDYAM booking code
+    assert not re.search(r"AUDYAM-\d{4}-[A-Z0-9]+", res.display_markdown, re.IGNORECASE)
+    assert not re.search(r"AUDYAM-[A-Z0-9-]+", res.display_markdown, re.IGNORECASE)
+    # Must explicitly direct user to the Dynamic Cart and Smart KYC
+    combined_text = (res.display_markdown + " " + res.spoken_tts_text).lower()
+    assert "cart" in combined_text or "kyc" in combined_text or "staged" in combined_text
