@@ -12,6 +12,7 @@ import {
   CommercialBreakdown,
   KYCVerificationResult,
   ProvisioningOrder,
+  AppPersona,
   LeadRescueItem,
 } from "./types";
 import { createProvisioningOrder, calculateQuote } from "./api";
@@ -24,6 +25,7 @@ declare global {
 }
 
 export const App: React.FC = () => {
+  const [persona, setPersona] = useState<AppPersona>("CUSTOMER");
   const [currentTab, setTab] = useState<"studio" | "kyc" | "tracker" | "partner" | "judge">("studio");
 
   // Global Session State
@@ -318,7 +320,7 @@ export const App: React.FC = () => {
 
   return (
     <div className="min-h-screen bg-[#030405] text-[#EBE5D9] flex flex-col font-sans selection:bg-[#e40000]/30 selection:text-white relative">
-      <Navbar currentTab={currentTab} setTab={setTab} />
+      <Navbar currentTab={currentTab} setTab={setTab} persona={persona} setPersona={setPersona} />
 
       <main className="flex-1 max-w-5xl w-full mx-auto px-4 sm:px-6 py-10 sm:py-14">
         {/* Pre-Hydrate Rescue Winback Toast/Banner */}
