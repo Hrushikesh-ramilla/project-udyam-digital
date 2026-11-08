@@ -297,7 +297,7 @@ def generate_slides_html():
             </tr>
             <tr style="border-bottom: 1px solid #F4F0E8;">
               <td style="padding: 7px 0; color: #7A7B7E; font-weight: 600;">Technical Stack</td>
-              <td style="padding: 7px 0; color: #121316;">Python 3.11+, FastAPI, React 18, Vite, Pydantic v2, LightGBM, RapidFuzz, Playwright</td>
+              <td style="padding: 7px 0; color: #121316;">Python 3.11+, FastAPI, React 18, Vite, Pydantic v2, LightGBM, RapidFuzz, SQLite WAL, Playwright</td>
             </tr>
             <tr>
               <td style="padding: 7px 0; color: #7A7B7E; font-weight: 600;">Evaluation Date</td>
@@ -313,7 +313,7 @@ def generate_slides_html():
           <table style="width: 100%; font-size: 13.5px; border-collapse: collapse;">
             <tr style="border-bottom: 1px solid #DDD8CE;">
               <td style="padding: 7px 0; color: #5A5A5D; width: 145px; font-weight: 700;">Live Cloud Monolith</td>
-              <td style="padding: 7px 0; font-weight: 800;"><a href="http://65.1.112.251" style="color: #121316; text-decoration: underline;">http://65.1.112.251</a> (Deployed on AWS EC2, Port 80)</td>
+              <td style="padding: 7px 0; font-weight: 800;"><a href="https://udyam.hrushikeshramilla.in" style="color: #121316; text-decoration: underline;">udyam.hrushikeshramilla.in</a> (HTTPS / 65.1.112.251:80)</td>
             </tr>
             <tr style="border-bottom: 1px solid #DDD8CE;">
               <td style="padding: 7px 0; color: #5A5A5D; font-weight: 700;">Interactive API Docs</td>
@@ -329,7 +329,7 @@ def generate_slides_html():
             </tr>
             <tr style="border-bottom: 1px solid #DDD8CE;">
               <td style="padding: 7px 0; color: #5A5A5D; font-weight: 700;">Visual Verification</td>
-              <td style="padding: 7px 0; font-weight: 700; color: #121316;">100 End-to-End Visual Proof Cases Documented & Audited</td>
+              <td style="padding: 7px 0; font-weight: 700; color: #121316;"><strong>56 Pytest Tests (100% Passed)</strong> + 100 Visual Adversarial Cases Audited</td>
             </tr>
             <tr>
               <td style="padding: 7px 0; color: #5A5A5D; font-weight: 700;">Compliance Invariant</td>
@@ -355,7 +355,7 @@ def generate_slides_html():
           </div>
           <div style="background: #FFFFFF; border: 1px solid #DDD8CE; border-radius: 6px; padding: 10px 12px;">
             <div style="font-weight: 800; color: #121316; margin-bottom: 3px;">3. The Udyam Solution</div>
-            Self-serve conversational AI in 10 languages, &lt;0.5ms CPQ DAG bundling, zero-persistence DPDP KYC, and 1-click LightGBM WhatsApp retargeting.
+            Universal Multilingual AI (100+ languages, Session Language Inertia), &lt;0.5ms CPQ DAG, zero-persistence DPDP KYC, NPCI/Razorpay payments, BlueDart carrier bus, and SQLite WAL.
           </div>
         </div>
       </div>
@@ -1062,10 +1062,10 @@ def generate_slides_html():
         <!-- Architectural Highlights Banner -->
         <div class="card-beige" style="width: 100%; padding: 12px 20px; display: flex; justify-content: space-between; align-items: center;">
           <div style="display: flex; gap: 24px; font-size: 12px; width: 100%; justify-content: space-between;">
-            <div><strong>Stage 1 Discovery:</strong> Gemini 2.5 Flash + Pydantic v2 + 10 Indic languages with audio readout</div>
+            <div><strong>Stage 1 Discovery:</strong> Universal Multilingual AI + Session Language Inertia + sub-50ms greeting fast-path</div>
             <div><strong>Stage 2 CPQ DAG:</strong> &lt;0.5ms solver + Hard GSTIN firewall blocks ineligible SKUs</div>
-            <div><strong>Stage 3 Smart KYC:</strong> In-memory redaction (12-digit IDs never saved to disk) + RapidFuzz</div>
-            <div><strong>Stage 4 Fulfillment:</strong> 6-stage tracker + LightGBM rescue model (AUC 0.84)</div>
+            <div><strong>Stage 3 Smart KYC:</strong> In-memory DPDP redaction + RapidFuzz entity matching + anchor date 2026-07-15</div>
+            <div><strong>Stage 4 Payments & Fulfillment:</strong> NPCI Dynamic UPI / Razorpay HMAC + BlueDart AWB Logistics + SQLite WAL persistence</div>
           </div>
         </div>
 
@@ -1100,13 +1100,13 @@ def generate_slides_html():
           <div class="card" style="padding: 10px 12px; display: flex; flex-direction: column; gap: 6px;">
             <div style="display: flex; justify-content: space-between; align-items: center;">
               <span style="font-size: 13px; font-weight: 800; color: #121316;">1. Multilingual Natural Language Advisor</span>
-              <span class="badge-pill">10 Indian Languages</span>
+              <span class="badge-pill">Universal Multilingual AI (100+ Langs)</span>
             </div>
             <div style="height: 250px; border: 1px solid #DDD8CE; border-radius: 6px; overflow: hidden; background: #000; display: flex; justify-content: center; align-items: center;">
               <img src="{img_screen_advisor_b64}" style="width: 100%; height: 100%; object-fit: cover;">
             </div>
             <div style="font-size: 11px; color: #5A5A5D; line-height: 1.3;">
-              Shop owners chat or speak in Hindi, Tamil, Telugu, etc. The assistant understands business needs and explains bundle recommendations in plain language with voice audio.
+              Shop owners converse in any language (Telugu, Malayalam, Hindi, Tamil, English, etc.). Session Language Inertia & Geographic Isolation preserve conversation continuity without false language flipping.
             </div>
           </div>
 
@@ -1209,7 +1209,7 @@ def generate_slides_html():
             </div>
 
             <div style="font-size: 11px; color: #5A5A5D; line-height: 1.3;">
-              Self-serve view shows progress from payment to technician dispatch with OTP. If a user pauses, an automated WhatsApp rescue message with a token brings them back.
+              Self-serve view tracks from instant NPCI UPI/Razorpay payment to BlueDart carrier dispatch with real AWB tracking (BD-AIRTEL-XXXXXX), technician OTP (4892), and direct WhatsApp webhooks.
             </div>
           </div>
 

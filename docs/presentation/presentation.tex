@@ -152,10 +152,10 @@
         \begin{tabularx}{\linewidth}{p{2.2cm}X}
           \textbf{Prototype Video:} & \href{http://65.1.112.251/audit/audit_dashboard.html}{\textcolor{airtelred}{\textbf{Live 100-Case Video Proof Link}}} \\
           \textbf{GitHub Repo:} & \href{https://github.com/Hrushikesh-ramilla/project-udyam-digital}{\textcolor{airtelred}{\textbf{project-udyam-digital (Main)}}} \\
-          \textbf{Live AWS Cloud:} & \href{http://65.1.112.251}{\textcolor{airtelred}{\textbf{\texttt{http://65.1.112.251}}}} (Port 80 Caddy) \\
+          \textbf{Live AWS Cloud:} & \href{https://udyam.hrushikeshramilla.in}{\textcolor{airtelred}{\textbf{\texttt{udyam.hrushikeshramilla.in}}}} (HTTPS / 65.1.112.251) \\
           \textbf{Swagger Specs:} & \href{http://65.1.112.251/docs}{\textcolor{airtelred}{\texttt{http://65.1.112.251/docs}}} \\
-          \textbf{Test Suite:} & \textcolor{successgreen}{\textbf{37 / 37 Pytest Passing (100\%)}} \\
-          \textbf{Tech Stack:} & FastAPI, React 18, TypeScript, LightGBM \\
+          \textbf{Test Suite:} & \textcolor{successgreen}{\textbf{56 / 56 Pytest Passing (100\%)}} \\
+          \textbf{Tech Stack:} & FastAPI, React 18, Vite, TypeScript, SQLite WAL, LightGBM \\
         \end{tabularx}
         }
       \end{tcolorbox}
@@ -671,25 +671,27 @@
 \end{frame}
 
 % =============================================================
-% ANNEXURE C: 37/37 PYTEST TEST BENCH & AUDIT PROOF
+% ANNEXURE C: 56/56 PYTEST TEST BENCH & AUDIT PROOF
 % =============================================================
-\begin{frame}{Annexure C: Complete 37/37 Pytest Verification Suite}{Reference Only -- Deterministic Test Matrix Running on CI/CD and Production EC2}
+\begin{frame}{Annexure C: Complete 56/56 Pytest Verification Suite}{Reference Only -- Deterministic Test Matrix Running on CI/CD and Production EC2}
   \begin{tcolorbox}[academicbox]
     \centering
-    {\fontsize{5.0pt}{6.2pt}\selectfont
-    \begin{tabularx}{\linewidth}{p{2.8cm}p{1.4cm}X}
+    {\fontsize{4.6pt}{5.8pt}\selectfont
+    \begin{tabularx}{\linewidth}{p{3.0cm}p{1.4cm}X}
       \toprule
       \textbf{Test Module} & \textbf{Pass Count} & \textbf{Edge Cases \& Boundary Invariants Verified} \\
       \midrule
       \texttt{test\_phase1\_data\_ingestion.py} & \textbf{7 / 7 Passed} & 25 products loaded, 3,534 GSTINs indexed, 2,723 Udyam records, 5,000 lead telemetry rows. \\
       \texttt{test\_phase2\_cpq\_dag.py} & \textbf{5 / 5 Passed} & DAG topological sort, prerequisite violations, reverse knapsack budget solver under 0.5ms. \\
-      \texttt{test\_phase3\_advisor.py} & \textbf{4 / 4 Passed} & Multi-turn state retention, 10 Indic language parsing, budget constraint extraction. \\
-      \texttt{test\_phase4\_kyc\_anomalies.py} & \textbf{9 / 9 Passed} & Trapping cancelled GSTIN (K01), missing POA (K05), entity mismatch (K07), stale utility bill (K11). \\
+      \texttt{test\_phase3\_advisor.py} & \textbf{12 / 12 Passed} & Multi-turn state, session language inertia, universal multilingual auto-detect, greeting fast-path. \\
+      \texttt{test\_phase4\_kyc\_anomalies.py} & \textbf{13 / 13 Passed} & Trapping cancelled GSTIN (K01), missing POA (K05), entity mismatch (K07), stale bill (K11). \\
       \texttt{test\_phase5\_partner\_ml.py} & \textbf{4 / 4 Passed} & LightGBM GBDT model training, AUC 0.84 inference, high-risk lead WhatsApp rescue dispatch. \\
+      \texttt{test\_payments\_and\_logistics.py} & \textbf{5 / 5 Passed} & Razorpay HMAC-SHA256 signature verification, NPCI dynamic UPI QR, BlueDart carrier AWB. \\
+      \texttt{test\_sqlite\_persistence.py} & \textbf{2 / 2 Passed} & Disk-backed SQLite WAL mode, relational integrity, zero-loss persistence across restarts. \\
       \texttt{test\_api\_endpoints.py} & \textbf{7 / 7 Passed} & REST contracts: \texttt{/api/advisor/chat}, \texttt{/api/cpq/quote}, \texttt{/api/kyc/verify}, \texttt{/api/order/create}. \\
       \texttt{test\_e2e\_journey.py} & \textbf{1 / 1 Passed} & Full end-to-end journey from Hindi discovery to activated order with zero manual intervention. \\
       \midrule
-      \textbf{Total Verification Suite} & \textbf{37 / 37 Passed} & \textcolor{successgreen}{\textbf{100\% Pass Rate | Zero Mocks in Core Business Logic | Exit Code 0}} \\
+      \textbf{Total Verification Suite} & \textbf{56 / 56 Passed} & \textcolor{successgreen}{\textbf{100\% Pass Rate | Zero Mocks in Core Business Logic | Exit Code 0}} \\
       \bottomrule
     \end{tabularx}
     }
