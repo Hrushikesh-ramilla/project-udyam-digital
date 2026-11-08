@@ -150,21 +150,28 @@ Script mode: {script_mode or 'auto'}
 INSTRUCTIONS FOR YOUR CONVERSATIONAL RESPONSE:
 1. Chat NATURALLY like Gemini: warm, sharp, conversational, empathetic, and insightful.
 2. NEVER regurgitate a generic, rigid, canned questionnaire or bullet-point form letter.
-3. If the user asks for COMPARISON (e.g. "compare multiple", "is it only one?", "what are other options?", "vs"):
+3. LANGUAGE FIDELITY (MANDATORY):
+   - If user writes in Romanized Indic (e.g. Tenglish, Hinglish, Tanglish) or if language code is Indic ({language_code or 'auto'}):
+     * Respond in the SAME Romanized Indic dialect in "display_latin" using English/Latin alphabet (e.g. natural Tenglish: "Arthamaindi! 5-members team kosam budget takkuvalo kavali ante, Biz 5G AirFiber 100 net Rs 1,199/month lo best option...").
+     * Provide the corresponding authentic native script transliteration in "display_native" (e.g. Telugu script "తెలుగు" or Hindi "हिन्दी").
+     * NEVER reply in standard English in "display_latin" when the user query is in Romanized Indic or when an Indic language is selected!
+   - If the user writes in English, provide natural English in "display_latin" and corresponding authentic native script in "display_native".
+4. If the user asks for COMPARISON (e.g. "compare multiple", "is it only one?", "what are other options?", "vs"):
    - Enthusiastically acknowledge that there are multiple great options!
    - Compare 2 to 3 distinct practical configurations (e.g. Wireless AirFiber vs Fixed Fiber vs Added Failover/Wi-Fi), clearly explaining prices, setup times, and real-world advantages.
-4. If the user asks ANY question, answer it directly and conversationally with accurate telecom advice.
-5. If the user greets or jokes, respond with warmth and natural wit, then smoothly connect back to their business connectivity.
-6. Provide:
-   - "display_latin": Natural conversational markdown reply in English alphabet.
-   - "display_native": Corresponding natural response in authentic native Indic script (Telugu/Hindi/Tamil etc.).
+5. If the user asks ANY question, answer it directly and conversationally with accurate telecom advice.
+6. If the user greets or jokes, respond with warmth and natural wit, then smoothly connect back to their business connectivity.
+7. Never use LaTeX math delimiters ($...$ or $$...$$). Write formulas and complexities in clean Unicode text (e.g., O(n log n) or 99.9% uptime).
+8. Provide:
+   - "display_latin": Conversational markdown in matching Romanized Indic dialect (English alphabet) or English.
+   - "display_native": Conversational markdown in authentic native Indic script (Telugu/Hindi/Tamil etc.).
    - "spoken_tts": Plain-text conversational audio summary (1-2 sentences, zero markdown symbols like *, #, []).
    - "recommended_skus": list of 1 to 4 product IDs matching the best plan discussed (e.g. ["P04", "P22"] or ["P01", "P09"]).
    - Extract business profile slots if mentioned or implied.
 
 Return STRICTLY valid JSON:
 {{
-  "display_latin": "Conversational markdown in English",
+  "display_latin": "Conversational markdown in matching Romanized Indic dialect or English",
   "display_native": "Conversational markdown in native Indic script",
   "spoken_tts": "Conversational plain text voice readout",
   "recommended_skus": ["P04", "P22"],
@@ -444,25 +451,36 @@ Return STRICTLY valid JSON:
         effective_script = script_mode or ("native" if has_indic else "latin")
 
         # Detect active language
-        active_lang = language_code or "en"
-        if re.search(r"[ఀ-౿]", user_message) or re.search(r"\b(bagunnara|bagunara|ela\s*unnaru|ela\s*unnav|namaskaram|namasthe|kavali|kavala|enti|eppudu|undi|ledu|meeru)\b", clean_msg):
+        active_lang = language_code if (language_code and language_code != "auto") else "en"
+
+        te_romanized = r"\b(ekkuva|takkuva|karchu\w*|entha\w*|cheppan\w*|ayipotha\w*|ayipotu\w*|avuthu\w*|kavali|kavala|chudan\w*|dabbul\w*|kosam|bagunn\w*|ela\s*unna\w*|namaskar\w*|namasthe|meeru|unnam\w*|undi|ledu|enti|eppudu|chala|inka|mari|nenu|memu|maaku|meeku|artham\w*|telusuko\w*|vaddhu|chesuko\w*|dukanam|vyaparam)\b"
+        hi_romanized = r"\b(kaise|kya|kyun|kyu|kaun|kab|kaha|kahan|kitna|kitne|kitni|chahiye|bhai|bhaiya|dukan|dukaan|paise|kharch\w*|sasta|mehanga|batao|bataiye|hoga|hogi|honge|karo|karein|karna|karne|chahte|chahta|chahti|madad|theek|achha|accha|hum|mera|meri|mere|aapka|aapki|aapke|kuch|nahi|nhi|bilkul|namaste)\b"
+        ta_romanized = r"\b(vanakkam|eppadi|iruk\w*|nalama|sollu\w*|irukku|illa|illai|venum|ungal\w*|kaasu|panam|evvalavu|romba|nalla|kadai|theriyum)\b"
+        bn_romanized = r"\b(nomoshkar|kemon|ach\w*|bhalo|lagbe|nei|apnar|dokan|koto|taka|shundor)\b"
+        gu_romanized = r"\b(kem\s*cho|majama|tamare|tamaro|tamari|joie|nathi|ketla|paisa|dukan)\b"
+        kn_romanized = r"\b(namaskara|hegidd\w*|beku|illa|nimma|yaava|estu|duddu|angadi)\b"
+        ml_romanized = r"\b(namaskaram|sukham\w*|venam|illa|ningal\w*|ethra|paisa|kada)\b"
+        mr_romanized = r"\b(kase\s*ahat|pahije|aahe|ahe|tumhi|tumche|kiti|sangnyasathi|sanga|kasa|kashi|kashe|aamhi)\b"
+        or_romanized = r"\b(kemiti|ach\w*|bhalare|darkar|nahin|apana|apnanka|kete|paisa|dokana)\b"
+
+        if re.search(r"[ఀ-౿]", user_message) or re.search(te_romanized, clean_msg):
             active_lang = "te"
-        elif re.search(r"[஀-௿]", user_message) or re.search(r"\b(vanakkam|eppadi\s*iruk|nalama|sollunga|irukku|illa|venum|ungalukku)\b", clean_msg):
-            active_lang = "ta"
-        elif re.search(r"[ঀ-৿]", user_message) or re.search(r"\b(nomoshkar|kemon\s*ac|bhalo|lagbe|nei|apnar)\b", clean_msg):
-            active_lang = "bn"
-        elif re.search(r"[઀-૿]", user_message) or re.search(r"\b(kem\s*cho|majama|tamare|joie|nathi)\b", clean_msg):
-            active_lang = "gu"
-        elif re.search(r"\b(kase\s*ahat|pahije|ahe|nahi|tumhi)\b", clean_msg):
-            active_lang = "mr"
-        elif re.search(r"[ಀ-೿]", user_message) or re.search(r"\b(namaskara|hegidd|hegiddira|beku|illa|nimma)\b", clean_msg):
-            active_lang = "kn"
-        elif re.search(r"[ഀ-ൿ]", user_message) or re.search(r"\b(namaskaram|sukhamano|sukham\s*anu|venam|illa|ningal)\b", clean_msg):
-            active_lang = "ml"
-        elif re.search(r"[଀-୿]", user_message) or re.search(r"\b(kemiti\s*ach|bhalare|darkar|nahin|apana)\b", clean_msg):
-            active_lang = "or"
-        elif re.search(r"[ऀ-ॿ]", user_message) or re.search(r"\b(kaise\s*ho|kya\s*haal|sab\s*theek|bhai|bhaiya|chahiye|aapka)\b", clean_msg):
+        elif re.search(r"[ऀ-ॿ]", user_message) or re.search(hi_romanized, clean_msg):
             active_lang = "hi"
+        elif re.search(r"[஀-௿]", user_message) or re.search(ta_romanized, clean_msg):
+            active_lang = "ta"
+        elif re.search(r"[ঀ-৿]", user_message) or re.search(bn_romanized, clean_msg):
+            active_lang = "bn"
+        elif re.search(r"[઀-૿]", user_message) or re.search(gu_romanized, clean_msg):
+            active_lang = "gu"
+        elif re.search(r"[ಀ-೿]", user_message) or re.search(kn_romanized, clean_msg):
+            active_lang = "kn"
+        elif re.search(r"[ഀ-ൿ]", user_message) or re.search(ml_romanized, clean_msg):
+            active_lang = "ml"
+        elif re.search(mr_romanized, clean_msg):
+            active_lang = "mr"
+        elif re.search(r"[଀-୿]", user_message) or re.search(or_romanized, clean_msg):
+            active_lang = "or"
 
         # Intent detection
         is_comparison = bool(re.search(
@@ -798,6 +816,60 @@ Return STRICTLY valid JSON:
             )
             return lat, nat, tts
 
+        # 0.5 Minimum Budget / Thrift / Savings Inquiry
+        is_budget_query = bool(re.search(
+            r"\b(minimum|low\s*cost|sasta|takkuva|kam\s*kharch|kam\s*se\s*kam|enthalo|kitne\s*me|lowest\s*price|budget\s*friendly|karchu\w*|kharch\w*|least\s*price|money\s*karchu|paise\s*kharch)\b",
+            clean_msg
+        ))
+        if is_budget_query and not slots.is_complete:
+            if active_lang == "te":
+                lat = (
+                    "Arthamaindi! 5-members team kosam budget takkuvalo kavali ante, Biz 5G AirFiber 100 net Rs 1,199/month "
+                    "(100 Mbps, 3-day SLA, zero setup fee) lo best option! "
+                    "Mee business type (dukanam, clinic, office) mariyu city details chepthe, inka saraina plan suggest chesthanu."
+                )
+                nat = (
+                    "అర్థమైంది! బడ్జెట్ తక్కువలో కావాలంటే, బిజ్ 5G ఎయిర్‌ఫైబర్ 100 నెలకు ₹1,199 "
+                    "(100 Mbps, 3 రోజుల ఎస్‌ఎల్‌ఏ, ₹0 సెటప్ రుసుము) బెస్ట్ ఆప్షన్! "
+                    "మీ వ్యాపార రకం మరియు నగరం వివరాలు చెబితే, ఇంకా సరైన ప్లాన్ అందిస్తాము."
+                )
+                tts = (
+                    "Arthamaindi! Budget takkuvalo Biz 5G AirFiber 100 net 1,199 rupaye lo best option. "
+                    "Mee business type mariyu city details cheppandi."
+                )
+                return lat, nat, tts
+            elif active_lang == "hi":
+                lat = (
+                    "Samajh gaya! Agar aap kam budget mein best option chahte hain, toh Biz 5G AirFiber 100 net Rs 1,199/month "
+                    "(100 Mbps, zero setup fee) sabse badhiya option hai! "
+                    "Apni dukan ya office ka type aur city bataiye taaki sahi plan recommend kar sakein."
+                )
+                nat = (
+                    "समझ गया! अगर आप कम बजट में सबसे अच्छा विकल्प चाहते हैं, तो एयरटेल బిజ్ 5G AirFiber 100 केवल ₹1,199/माह "
+                    "(100 Mbps, शून्य सेटअप शुल्क) सबसे बढ़िया विकल्प है! "
+                    "अपने व्यवसाय का प्रकार और शहर बताएं ताकि सही प्लान दे सकें।"
+                )
+                tts = (
+                    "Samajh gaya! Kam budget mein Biz 5G AirFiber 100 net 1199 rupaye mein sabse badhiya option hai. "
+                    "Apna business type aur city bataiye."
+                )
+                return lat, nat, tts
+            elif active_lang == "ta":
+                lat = (
+                    "Purindhadhu! Kuraivana budget-il thevai endraal, Biz 5G AirFiber 100 net Rs 1,199/month "
+                    "(100 Mbps, zero setup fee) migavum sirandhadhu! "
+                    "Ungal business type matrum ooru sollunga."
+                )
+                nat = (
+                    "புரிந்தது! குறைந்த பட்ஜெட்டில் வேண்டுமென்றால், பிஸ் 5G ஏர்ஃபைபர் 100 மாதம் ₹1,199 "
+                    "(100 Mbps, ₹0 கட்டணம்) சிறந்த தேர்வு! உங்கள் வணிக வகை மற்றும் ஊர் விவரங்களை தெரிவிக்கவும்."
+                )
+                tts = (
+                    "Purindhadhu! Kuraivana budget-il Biz 5G AirFiber 100 Rs 1,199-il sirandhadhu. "
+                    "Ungal business type matrum ooru sollunga."
+                )
+                return lat, nat, tts
+
         # 1. Foreign Greetings
         if is_foreign:
             if re.search(r"\bhola\b", clean_msg):
@@ -975,7 +1047,44 @@ Return STRICTLY valid JSON:
             missing_text.append("whether you have a registered GST number or only Udyam")
 
         details_str = ", ".join(missing_text) if missing_text else "your business type and city"
-        lat = f"Namaste! I'd love to help you configure the ideal business connectivity plan. Could you please clarify {details_str}?"
-        nat = "నమస్కారం! మీ వ్యాపారానికి తగిన ఖచ్చితమైన ప్లాన్ అందించడానికి దయచేసి మీ వ్యాపార రకం, నగరం మరియు జీఎస్టీ వివరాలు తెలపండి."
-        tts = "Namaste! I'd love to help you configure the ideal business plan. Could you please clarify your business type and city?"
+        if active_lang == "te":
+            lat = "Namaskaram! Mee business kosam saraina connectivity plan chudalante, mee business type (retail shop, clinic, CA office, factory), city mariyu GST undo ledo cheppandi."
+            nat = "నమస్కారం! మీ వ్యాపారానికి తగిన ఖచ్చితమైన ప్లాన్ అందించడానికి దయచేసి మీ వ్యాపార రకం, నగరం మరియు జీఎస్టీ వివరాలు తెలపండి."
+            tts = "Namaskaram! Mee business kosam saraina connectivity plan chudalante, mee business type mariyu city cheppandi."
+        elif active_lang == "hi":
+            lat = "Namaste! Aapke business ke liye best internet plan configure karne ke liye, kripya apna business type (kirana shop, clinic, CA office, factory), city aur GST status bataiye."
+            nat = "नमस्ते! आपके व्यवसाय के लिए सही इंटरनेट प्लान चुनने के लिए, कृपया अपना व्यवसाय प्रकार, शहर और जीएसटी विवरण बताएं।"
+            tts = "Namaste! Aapke business ke liye sahi internet plan suggest karne ke liye apna business type aur city bataiye."
+        elif active_lang == "ta":
+            lat = "Vanakkam! Ungal business-ku sariyana connectivity plan kidaikka, ungal business type (kadai, clinic, office), ooru matrum GST irukka nu sollunga."
+            nat = "வணக்கம்! உங்கள் வணிகத்திற்கு சரியான திட்டத்தை வழங்க, உங்கள் வணிக வகை, நகரம் மற்றும் ஜிஎஸ்டி விவரங்களை தெரிவிக்கவும்."
+            tts = "Vanakkam! Ungal business-ku sariyana plan solla, ungal business type matrum ooru sollunga."
+        elif active_lang == "kn":
+            lat = "Namaskara! Nimma business-ge sarihondova internet plan thilisalu, nimma business type (angadi, clinic, office), ooru mathu GST idiya antha thilisi."
+            nat = "ನಮಸ್ಕಾರ! ನಿಮ್ಮ ವ್ಯಾಪಾರಕ್ಕೆ ಸೂಕ್ತವಾದ ಯೋಜನೆಯನ್ನು ಒದಗಿಸಲು, ದಯವಿಟ್ಟು ನಿಮ್ಮ ವ್ಯಾಪಾರದ ಪ್ರಕಾರ, ನಗರ ಮತ್ತು ಜಿಎಸ್‌ಟಿ ವಿವರಗಳನ್ನು ತಿಳಿಸಿ."
+            tts = "Namaskara! Nimma business-ge sarihondova plan thilisalu, nimma business type mathu ooru thilisi."
+        elif active_lang == "bn":
+            lat = "Nomoshkar! Apnar business-er jonyo shothik internet plan suggest korte, apnar business type (dokan, clinic, office), shohor ebong GST ache kina janan."
+            nat = "নমস্কার! আপনার ব্যবসার জন্য সঠিক ইন্টারনেট প্ল্যান বেছে নিতে, আপনার ব্যবসার ধরন, শহর এবং জিএসটি বিবরণ জানান।"
+            tts = "Nomoshkar! Apnar business-er jonyo shothik internet plan suggest korte, apnar business type ebong shohor janan."
+        elif active_lang == "gu":
+            lat = "Namaste! Tamara business mate yogya plan suggest karva, tamaro business type (dukan, clinic, office), sheher ane GST chhe ke nahi te janavo."
+            nat = "નમસ્તે! તમારા વ્યવસાય માટે યોગ્ય પ્લાન સૂચવવા, તમારો વ્યવસાય પ્રકાર, શહેર અને જીએસટી વિગતો જણાવો."
+            tts = "Namaste! Tamara business mate yogya plan suggest karva, tamaro business type ane sheher janavo."
+        elif active_lang == "mr":
+            lat = "Namaskar! Aplya business sathi yogya internet plan sangnyasathi, aplya business cha prakar (dukan, clinic, office), shahar ani GST status sanga."
+            nat = "नमस्कार! आपल्या व्यवसायासाठी योग्य इंटरनेट प्लॅन निवडण्यासाठी, कृपया आपल्या व्यवसायाचा प्रकार, शहर आणि जीएसटी स्थिती सांगा."
+            tts = "Namaskar! Aplya business sathi yogya plan sangnyasathi aplya business cha prakar ani shahar sanga."
+        elif active_lang == "ml":
+            lat = "Namaskaram! Ningalude business-nu aniyojyamaya plan thiranjedukkan, business type (kada, clinic, office), sthalam, GST undo ennu parayuka."
+            nat = "നമസ്കാരം! നിങ്ങളുടെ ബിസിനസ്സിന് അനുയോജ്യമായ പ്ലാൻ തിരഞ്ഞെടുക്കാൻ, ബിസിനస్സ് തരം, സ്ഥലം, ജിഎസ്ടി വിവരങ്ങൾ പറയുക."
+            tts = "Namaskaram! Ningalude business-nu aniyojyamaya plan thiranjedukkan business type parayuka."
+        elif active_lang == "or":
+            lat = "Namaskar! Apnanka business pain thik internet plan suggest kariba pain, business type (dokana, clinic, office), sahar o GST status janantu."
+            nat = "ନମସ୍କାର! ଆପଣଙ୍କ ବ୍ୟବସାୟ ପାଇଁ ଉପଯୁକ୍ତ ପ୍ଲାନ ଜଣାଇବା ପାଇଁ, ଦୟାକରି ବ୍ୟବସାୟ ପ୍ରକାର, ସହର ଏବଂ ଜିଏସଟି ବିବରଣୀ ଦିଅନ୍ତୁ।"
+            tts = "Namaskar! Apnanka business pain thik plan suggest kariba pain business type janantu."
+        else:
+            lat = f"Namaste! I'd love to help you configure the ideal business connectivity plan. Could you please clarify {details_str}?"
+            nat = "నమస్కారం! మీ వ్యాపారానికి తగిన ఖచ్చితమైన ప్లాన్ అందించడానికి దయచేసి మీ వ్యాపార రకం, నగరం మరియు జీఎస్టీ వివరాలు తెలపండి."
+            tts = "Namaste! I'd love to help you configure the ideal business plan. Could you please clarify your business type and city?"
         return lat, nat, tts

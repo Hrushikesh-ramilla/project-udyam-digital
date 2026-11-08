@@ -16,6 +16,12 @@ import {
 import { createProvisioningOrder, calculateQuote } from "./api";
 import { ShieldCheck, Sparkles, ArrowRight } from "lucide-react";
 
+declare global {
+  interface Window {
+    __lenis?: Lenis;
+  }
+}
+
 export const App: React.FC = () => {
   const [currentTab, setTab] = useState<"studio" | "kyc" | "tracker" | "partner" | "judge">("studio");
 
@@ -31,6 +37,7 @@ export const App: React.FC = () => {
     const lenis = new Lenis({
       duration: 1.0,
       easing: (t) => Math.min(1, 1.001 - Math.pow(2, -10 * t)),
+      autoResize: true,
       allowNestedScroll: true,
       prevent: (node) => {
         return (
@@ -45,6 +52,21 @@ export const App: React.FC = () => {
         );
       },
     });
+
+    // Dynamically recalculate document bounds on DOM mutations and container expansions
+    const resizeObserver = new ResizeObserver(() => {
+      lenis.resize();
+    });
+    if (document.body) {
+      resizeObserver.observe(document.body);
+    }
+    const rootEl = document.getElementById("root");
+    if (rootEl) {
+      resizeObserver.observe(rootEl);
+    }
+
+    window.__lenis = lenis;
+
     function raf(time: number) {
       lenis.raf(time);
       requestAnimationFrame(raf);
@@ -52,7 +74,9 @@ export const App: React.FC = () => {
     const reqId = requestAnimationFrame(raf);
     return () => {
       cancelAnimationFrame(reqId);
+      resizeObserver.disconnect();
       lenis.destroy();
+      delete window.__lenis;
     };
   }, []);
 
