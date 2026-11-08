@@ -1088,15 +1088,15 @@ def generate_slides_html():
         <div class="grid-2" style="flex: 1; gap: 16px;">
           
           <!-- Screen 1: Multilingual Advisor -->
-          <div class="card" style="padding: 12px 14px; display: flex; flex-direction: column; gap: 8px;">
+          <div class="card" style="padding: 10px 12px; display: flex; flex-direction: column; gap: 6px;">
             <div style="display: flex; justify-content: space-between; align-items: center;">
-              <span style="font-size: 13.5px; font-weight: 800; color: #121316;">1. Multilingual Natural Language Advisor</span>
+              <span style="font-size: 13px; font-weight: 800; color: #121316;">1. Multilingual Natural Language Advisor</span>
               <span class="badge-pill">10 Indian Languages</span>
             </div>
-            <div style="flex: 1; border: 1px solid #DDD8CE; border-radius: 6px; overflow: hidden; background: #000; display: flex; justify-content: center; align-items: center;">
+            <div style="height: 250px; border: 1px solid #DDD8CE; border-radius: 6px; overflow: hidden; background: #000; display: flex; justify-content: center; align-items: center;">
               <img src="{img_screen_advisor_b64}" style="width: 100%; height: 100%; object-fit: cover;">
             </div>
-            <div style="font-size: 11.5px; color: #5A5A5D; line-height: 1.35;">
+            <div style="font-size: 11px; color: #5A5A5D; line-height: 1.3;">
               Shop owners chat or speak in Hindi, Tamil, Telugu, etc. The assistant understands business needs and explains bundle recommendations in plain language with voice audio.
             </div>
           </div>
@@ -1199,7 +1199,7 @@ def generate_slides_html():
 
             </div>
 
-            <div style="font-size: 11.5px; color: #5A5A5D; line-height: 1.35;">
+            <div style="font-size: 11px; color: #5A5A5D; line-height: 1.3;">
               Self-serve view shows progress from payment to technician dispatch with OTP. If a user pauses, an automated WhatsApp rescue message with a token brings them back.
             </div>
           </div>
