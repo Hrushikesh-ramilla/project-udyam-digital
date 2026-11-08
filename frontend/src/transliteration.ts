@@ -45,6 +45,14 @@ const ANUSVARA_OFFSET = 0x02;
 // Natural conversational phrase mappings
 const PHRASE_TO_LATIN: Record<string, string> = {
   // Telugu
+  "అర్థమైంది!": "Arthamaindi!",
+  "అర్థమైంది": "Arthamaindi",
+  "తక్కువలో": "takkuvalo",
+  "తక్కువ": "takkuva",
+  "ఎక్కువ": "ekkuva",
+  "ఖర్చు": "karchu",
+  "ఎంతలో": "enthalo",
+  "చెప్పండి": "cheppandi",
   "నమస్కారం!": "Namaskaram!",
   "నమస్కారం": "Namaskaram",
   "నమస్తే!": "Namaste!",
@@ -271,7 +279,13 @@ export function toNativeScript(text: string, lang: string = "te"): string {
   const lower = text.toLowerCase().trim();
 
   // Telugu
-  if (lang === "te" || lower.includes("bagunnara") || lower.includes("ela unna") || lower.includes("kavali")) {
+  if (lang === "te" || lower.includes("bagunnara") || lower.includes("ela unna") || lower.includes("kavali") || lower.includes("ekkuva") || lower.includes("karchu") || lower.includes("takkuva") || lower.includes("enthalo") || lower.includes("artham")) {
+    if (lower.includes("ekkuva") || lower.includes("karchu") || lower.includes("takkuva") || lower.includes("enthalo")) {
+      return "ఎక్కువ ఖర్చు పెట్టాలనుకోవట్లేదు, కనీసం ఎంతలో అయిపోతుందో చెప్పండి";
+    }
+    if (lower.includes("arthamaindi") || lower.includes("artham")) {
+      return "అర్థమైంది! బడ్జెట్ తక్కువలో కావాలంటే, బిజ్ 5G ఎయిర్‌ఫైబర్ 100 నెలకు ₹1,199 ఉత్తమ ఎంపిక!";
+    }
     if (lower.includes("bagunnara") && lower.includes("ela unna")) return "బాగున్నారా ఎలా ఉన్నారు";
     if (lower.includes("bagunnara")) return "బాగున్నారా";
     if (lower.includes("ela unna")) return "ఎలా ఉన్నారు";

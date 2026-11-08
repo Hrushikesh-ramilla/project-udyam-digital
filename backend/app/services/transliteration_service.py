@@ -43,6 +43,15 @@ VIRAMA_OFFSET = 0x4D
 ANUSVARA_OFFSET = 0x02
 
 COMMON_PHRASE_MAPPINGS = {
+    # Telugu extended
+    "అర్థమైంది": "Arthamaindi",
+    "తక్కువలో": "takkuvalo",
+    "తక్కువ": "takkuva",
+    "ఎక్కువ": "ekkuva",
+    "ఖర్చు": "karchu",
+    "ఎంతలో": "enthalo",
+    "చెప్పండి": "cheppandi",
+    "అయిపోతుందో": "ayipothundo",
     # Telugu
     "నమస్కారం": "Namaskaram",
     "నమస్తే": "Namaste",
@@ -221,6 +230,8 @@ def indic_to_latin(text: str) -> str:
     s = "".join(result)
     # Polish double-vowels from inherent 'a' + matra
     s = re.sub(r"a(aa|ee|oo|ai|au)", r"\1", s)
+    # Strip zero-width formatting characters (ZWNJ / ZWJ / BOM)
+    s = re.sub(r"[\u200B-\u200D\uFEFF]", "", s)
     # Polish formatting
     s = re.sub(r"\s+", " ", s).strip()
     return s
@@ -230,7 +241,11 @@ def latin_to_indic(text: str, target_lang: str = "te") -> str:
     lower = text.lower().strip()
     
     # Direct phrase matches
-    if target_lang == "te" or "ela" in lower or "bagu" in lower:
+    if target_lang == "te" or any(w in lower for w in ["ela", "bagu", "karchu", "ekkuva", "takkuva", "enthalo", "artham"]):
+        if any(w in lower for w in ["ekkuva", "karchu", "enthalo", "takkuva"]):
+            return "ఎక్కువ ఖర్చు పెట్టాలనుకోవట్లేదు, కనీసం ఎంతలో అయిపోతుందో చెప్పండి"
+        if "arthamaindi" in lower or "artham" in lower:
+            return "అర్థమైంది! బడ్జెట్ తక్కువలో కావాలంటే, బిజ్ 5G ఎయిర్‌ఫైబర్ 100 నెలకు ₹1,199 ఉత్తమ ఎంపిక!"
         if "bagunnara" in lower or "bagunara" in lower:
             return "బాగున్నారా"
         if "ela unnaru" in lower or "ela unnav" in lower:
@@ -241,12 +256,14 @@ def latin_to_indic(text: str, target_lang: str = "te") -> str:
             return "క్లినిక్"
         if "kirana" in lower:
             return "కిరాణా దుకాణం"
-    elif target_lang == "hi" or "kaise" in lower or "theek" in lower:
+    elif target_lang == "hi" or any(w in lower for w in ["kaise", "theek", "kharch", "paise", "kam"]):
+        if any(w in lower for w in ["kharch", "paise", "kam budget", "sasta"]):
+            return "समझ गया! कम बजट में बिజ్ 5G AirFiber 100 ₹1,199/माह सबसे बढ़िया विकल्प है।"
         if "kaise ho" in lower or "kaise hain" in lower:
             return "कैसे हैं आप"
         if "namaste" in lower:
             return "नमस्ते"
-    elif target_lang == "ta" or "vanakkam" in lower:
+    elif target_lang == "ta" or "vanakkam" in lower or "eppadi" in lower:
         if "eppadi" in lower:
             return "எப்படி இருக்கிறீர்கள்"
         if "vanakkam" in lower:

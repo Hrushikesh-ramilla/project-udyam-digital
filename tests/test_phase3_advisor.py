@@ -129,3 +129,38 @@ def test_advisor_comparison_query(advisor: AdvisorAgent):
     assert response.spoken_tts_text is not None
     assert "*" not in response.spoken_tts_text
     assert "#" not in response.spoken_tts_text
+
+
+def test_romanized_telugu_query_preserves_language(advisor: AdvisorAgent):
+    """Verifies that Romanized Telugu queries (Tenglish) trigger natural Romanized Telugu
+    in 'display_latin' (English Words mode) and authentic Telugu script in 'display_native'.
+    """
+    import re
+
+    query = "ekkuva money karchupettalanukovatle minimum enthalo ayipothado cheppandi"
+
+    # 1. Romanized / English Words mode (script_mode='latin')
+    res_latin = advisor.process_turn(query, script_mode="latin")
+    assert res_latin.display_latin is not None
+    assert res_latin.display_native is not None
+    assert res_latin.display_markdown == res_latin.display_latin
+
+    # Verify response is in Romanized Telugu (not standard English)
+    lat_lower = res_latin.display_latin.lower()
+    assert any(term in lat_lower for term in ["arthamaindi", "takkuva", "takkuvalo", "kavali", "cheppandi", "airfiber"])
+    # Verify zero non-Latin Indic characters in Latin mode
+    assert not re.search(r"[\u0900-\u0D7F]", res_latin.display_latin)
+
+    # 2. Native Script mode (script_mode='native')
+    res_native = advisor.process_turn(query, script_mode="native")
+    assert res_native.display_markdown == res_native.display_native
+    # Verify proper Telugu script characters are present in native output
+    assert re.search(r"[\u0C00-\u0C7F]", res_native.display_native)
+
+    # 3. Test Romanized Hindi (Hinglish) preservation
+    query_hi = "zyada paise kharch nahi karna chahte minimum kitne me ho jayega bataiye"
+    res_hi = advisor.process_turn(query_hi, script_mode="latin")
+    assert res_hi.display_latin is not None
+    hi_lower = res_hi.display_latin.lower()
+    assert any(term in hi_lower for term in ["samajh", "kam", "budget", "airfiber", "bataiye"])
+    assert not re.search(r"[\u0900-\u0D7F]", res_hi.display_latin)
