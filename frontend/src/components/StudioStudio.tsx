@@ -544,7 +544,7 @@ export const StudioStudio: React.FC<StudioStudioProps> = ({
           <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white/[0.04] border border-white/[0.08] text-[#B39D82]">
             <Globe className="w-3.5 h-3.5 text-[#e40000] animate-pulse" />
             <span className="text-[11px] font-medium text-[#EBE5D9]">
-              AI Multilingual Auto-Detect <span className="text-[#B39D82]/60">·</span> <span className="text-[#B39D82]/90">Speaks all 22 Indian Languages & Dialects</span>
+              AI Multilingual Auto-Detect <span className="text-[#B39D82]/60">·</span> <span className="text-[#B39D82]/90">Speaks Any Language Worldwide (Auto-Detects 100+ Languages)</span>
             </span>
           </div>
         </div>
@@ -638,7 +638,7 @@ export const StudioStudio: React.FC<StudioStudioProps> = ({
             placeholder={
               scriptMode === "latin"
                 ? "Type a message..."
-                : "Type or speak in any Indian language (22 languages supported)..."
+                : "Type or speak in any language worldwide (English, Hindi, Telugu, Spanish, French, etc.)..."
             }
             className="flex-1 bg-transparent px-4 py-2 text-xs sm:text-sm text-[#EBE5D9] placeholder-[#B39D82]/40 focus:outline-none"
           />
