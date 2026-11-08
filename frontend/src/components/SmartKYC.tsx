@@ -15,6 +15,7 @@ import {
   Sparkles,
   Zap,
   Check,
+  Info,
   Building,
   CreditCard,
   FileCheck,
@@ -23,6 +24,7 @@ import {
 } from "lucide-react";
 import { KYCVerificationResult, CommercialBreakdown } from "../types";
 import { verifyKYC, uploadKYCDocument, verifyDigiLocker, KYCUploadResponse } from "../api";
+import { validateVerhoeff, redactAadhaarInPlace, decodeGSTIN } from "../utils/verhoeff";
 
 interface SmartKYCProps {
   quote: CommercialBreakdown | null;
@@ -47,6 +49,12 @@ export const SmartKYC: React.FC<SmartKYCProps> = ({ quote, onKYCApproved, onSwit
   const [digiOtp, setDigiOtp] = useState<string>("1234");
   const [digiGstin, setDigiGstin] = useState<string>("32TTNXB7384T1ZW");
   const [digiUdyam, setDigiUdyam] = useState<string>("UDYAM-KL-00-1234567");
+
+  // Live Verhoeff & GSTIN decoding (Issue #27)
+  const cleanAadhaar = digiAadhaar.replace(/\D/g, "");
+  const isAadhaarValidVerhoeff = cleanAadhaar.length === 12 && validateVerhoeff(cleanAadhaar);
+  const aadhaarRedactionPreview = redactAadhaarInPlace(digiAadhaar);
+  const gstinDecoded = decodeGSTIN(digiGstin);
 
   const handleDigiLockerVerify = async () => {
     if (!consentGranted) {
@@ -434,6 +442,14 @@ export const SmartKYC: React.FC<SmartKYCProps> = ({ quote, onKYCApproved, onSwit
             </div>
           </div>
 
+          {/* UIDAI Sandbox Simulation Architecture Callout (Issue #27) */}
+          <div className="p-3.5 bg-blue-950/20 border border-blue-500/25 rounded-2xl flex items-start space-x-2.5 text-xs">
+            <Info className="w-4 h-4 text-blue-400 shrink-0 mt-0.5" />
+            <p className="text-[11px] leading-relaxed text-[#B39D82]">
+              <strong className="text-blue-300">UIDAI Sandbox Simulation:</strong> Telecom operators connect to UIDAI CIDR via DigiLocker e-KYC API. In this offline evaluation suite, OTP <code className="text-emerald-400 font-mono bg-white/5 px-1 py-0.5 rounded border border-white/10">1234</code> authenticates the session while in-memory redaction preserves <strong className="text-[#EBE5D9]">DPDP Act 2023 zero-persistence privacy</strong>.
+            </p>
+          </div>
+
           {/* Quick Demo Preset Chips */}
           <div className="space-y-2">
             <label className="text-[11px] font-mono uppercase tracking-wider text-[#B39D82]">
@@ -507,7 +523,19 @@ export const SmartKYC: React.FC<SmartKYCProps> = ({ quote, onKYCApproved, onSwit
             <div className="space-y-1.5">
               <label className="text-xs font-medium text-[#EBE5D9] flex items-center justify-between">
                 <span>Signatory 12-digit Aadhaar UID</span>
-                <span className="text-[10px] text-[#d9ad63] font-mono">Verhoeff D₅</span>
+                {cleanAadhaar.length < 12 ? (
+                  <span className="text-[10px] text-[#B39D82] font-mono">
+                    12 digits required ({cleanAadhaar.length}/12)
+                  </span>
+                ) : isAadhaarValidVerhoeff ? (
+                  <span className="text-[10px] text-emerald-400 font-mono flex items-center space-x-1">
+                    <span>✓ Valid Verhoeff D₅ (UIDAI Standard)</span>
+                  </span>
+                ) : (
+                  <span className="text-[10px] text-red-400 font-mono flex items-center space-x-1">
+                    <span>✗ Invalid Checksum (Failed Dihedral D₅)</span>
+                  </span>
+                )}
               </label>
               <div className="relative">
                 <input
@@ -515,10 +543,19 @@ export const SmartKYC: React.FC<SmartKYCProps> = ({ quote, onKYCApproved, onSwit
                   value={digiAadhaar}
                   onChange={(e) => setDigiAadhaar(e.target.value)}
                   placeholder="2345 6789 0124"
-                  className="w-full bg-[#030405] border border-[rgba(235,229,217,0.12)] rounded-2xl px-4 py-2.5 text-xs text-[#EBE5D9] font-mono focus:outline-none focus:border-[#e40000]"
+                  className={`w-full bg-[#030405] border rounded-2xl px-4 py-2.5 text-xs text-[#EBE5D9] font-mono focus:outline-none transition-colors ${
+                    cleanAadhaar.length === 12
+                      ? isAadhaarValidVerhoeff
+                        ? "border-emerald-500/50 focus:border-emerald-400"
+                        : "border-red-500/50 focus:border-red-400"
+                      : "border-[rgba(235,229,217,0.12)] focus:border-[#e40000]"
+                  }`}
                 />
               </div>
-              <p className="text-[10px] text-[#B39D82]">Masked to [Aadhaar Redacted-XXXX] in-memory.</p>
+              <div className="flex items-center justify-between text-[10px] text-[#B39D82] font-mono">
+                <span>DPDP Mask:</span>
+                <span className="text-emerald-400">{aadhaarRedactionPreview}</span>
+              </div>
             </div>
 
             <div className="space-y-1.5">
@@ -537,8 +574,13 @@ export const SmartKYC: React.FC<SmartKYCProps> = ({ quote, onKYCApproved, onSwit
             </div>
 
             <div className="space-y-1.5">
-              <label className="text-xs font-medium text-[#EBE5D9]">
-                Declared GSTIN (Optional / Bundle Dependent)
+              <label className="text-xs font-medium text-[#EBE5D9] flex items-center justify-between">
+                <span>Declared GSTIN (Optional / Bundle Dependent)</span>
+                {gstinDecoded && (
+                  <span className="text-[10px] font-mono text-[#d9ad63]">
+                    {gstinDecoded.stateName}
+                  </span>
+                )}
               </label>
               <input
                 type="text"
@@ -547,6 +589,12 @@ export const SmartKYC: React.FC<SmartKYCProps> = ({ quote, onKYCApproved, onSwit
                 placeholder="32TTNXB7384T1ZW"
                 className="w-full bg-[#030405] border border-[rgba(235,229,217,0.12)] rounded-2xl px-4 py-2.5 text-xs text-[#EBE5D9] font-mono focus:outline-none focus:border-[#e40000]"
               />
+              {gstinDecoded && (
+                <div className="flex items-center justify-between text-[10px] font-mono text-[#B39D82]">
+                  <span>Entity Type: <strong className="text-[#EBE5D9]">{gstinDecoded.entityType}</strong></span>
+                  {gstinDecoded.isValidFormat && <span className="text-emerald-400">✓ Valid Structure</span>}
+                </div>
+              )}
             </div>
 
             <div className="space-y-1.5">
