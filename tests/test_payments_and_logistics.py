@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import hashlib
 import hmac
+import uuid
 import pytest
 from fastapi.testclient import TestClient
 
@@ -187,3 +188,26 @@ def test_telecom_logistics_event_bus_and_whatsapp_dispatch():
     get_disp = client.get(f"/api/logistics/{order_id}")
     assert get_disp.status_code == 200
     assert get_disp.json()["awb_number"] == data["awb_number"]
+
+
+def test_sqlite_wal_foreign_key_auto_provisioning_on_specimen_order():
+    """Verifies that an ad-hoc or specimen order ID (e.g. from frontend demo mode)
+    never triggers a SQLite foreign key crash when creating payment intents or dispatches."""
+    specimen_id = f"SPECIMEN_ADHOC_{uuid.uuid4().hex[:6]}"
+
+    # 1. Create payment intent directly for unseeded order
+    intent_resp = client.post(
+        "/api/payments/create-intent",
+        json={"order_id": specimen_id, "amount_inr": 2499.0, "payment_method": "UPI_INTENT"},
+    )
+    assert intent_resp.status_code == 200
+    intent_data = intent_resp.json()
+    assert intent_data["order_id"] == specimen_id
+    assert "PAY-AIRTEL-" in intent_data["payment_id"]
+
+    # 2. Trigger dispatch directly for unseeded order
+    disp_resp = client.post(f"/api/logistics/{specimen_id}/dispatch")
+    assert disp_resp.status_code == 200
+    disp_data = disp_resp.json()
+    assert disp_data["order_id"] == specimen_id
+    assert "BD-AIRTEL-" in disp_data["awb_number"]

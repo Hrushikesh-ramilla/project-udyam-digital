@@ -262,6 +262,33 @@ class ProductionDatabase:
         """Records a new payment intent into the persistent payments table."""
         now_iso = time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime())
         with self.get_connection() as conn:
+            # Ensure foreign key consistency: auto-provision stub order if order_id is ad-hoc or specimen
+            existing = conn.execute("SELECT 1 FROM orders WHERE order_id = ?", (order_id,)).fetchone()
+            if not existing:
+                conn.execute(
+                    """
+                    INSERT INTO orders (
+                        order_id, business_name, bundle_name, monthly_charge_inr,
+                        total_sla_days, current_stage_idx, partner_id, partner_commission_inr,
+                        is_activated, created_at, updated_at
+                    ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                    ON CONFLICT(order_id) DO NOTHING;
+                    """,
+                    (
+                        order_id,
+                        "Apex Diagnostics Center",
+                        "Smart Office Fiber 200M (P01 + P11 + P16 + P22)",
+                        int(amount_inr),
+                        4,
+                        1,
+                        "PARTNER_BLR_9812",
+                        4498,
+                        0,
+                        now_iso,
+                        now_iso,
+                    ),
+                )
+
             conn.execute(
                 """
                 INSERT INTO payments (
@@ -347,6 +374,33 @@ class ProductionDatabase:
         """Records hardware courier dispatch & field engineer assignment."""
         now_iso = time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime())
         with self.get_connection() as conn:
+            # Ensure foreign key consistency: auto-provision stub order if order_id is ad-hoc or specimen
+            existing = conn.execute("SELECT 1 FROM orders WHERE order_id = ?", (order_id,)).fetchone()
+            if not existing:
+                conn.execute(
+                    """
+                    INSERT INTO orders (
+                        order_id, business_name, bundle_name, monthly_charge_inr,
+                        total_sla_days, current_stage_idx, partner_id, partner_commission_inr,
+                        is_activated, created_at, updated_at
+                    ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                    ON CONFLICT(order_id) DO NOTHING;
+                    """,
+                    (
+                        order_id,
+                        "Apex Diagnostics Center",
+                        "Smart Office Fiber 200M (P01 + P11 + P16 + P22)",
+                        2499,
+                        4,
+                        1,
+                        "PARTNER_BLR_9812",
+                        4498,
+                        0,
+                        now_iso,
+                        now_iso,
+                    ),
+                )
+
             conn.execute(
                 """
                 INSERT INTO logistics_dispatches (
