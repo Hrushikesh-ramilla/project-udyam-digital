@@ -40,16 +40,21 @@ export const App: React.FC = () => {
       autoResize: true,
       allowNestedScroll: true,
       prevent: (node) => {
-        return (
-          node instanceof HTMLElement && (
-            node.hasAttribute("data-lenis-prevent") ||
-            Boolean(node.closest("[data-lenis-prevent]")) ||
-            node.classList.contains("overflow-y-auto") ||
-            Boolean(node.closest(".overflow-y-auto")) ||
-            node.classList.contains("overflow-x-auto") ||
-            Boolean(node.closest(".overflow-x-auto"))
-          )
-        );
+        if (!(node instanceof HTMLElement)) return false;
+        if (node.hasAttribute("data-lenis-prevent") || Boolean(node.closest("[data-lenis-prevent]"))) {
+          return true;
+        }
+        // Seamless nested scroll chaining: only prevent while container has scroll room
+        const scrollable = node.closest(".overflow-y-auto") as HTMLElement | null;
+        if (scrollable && scrollable.scrollHeight > scrollable.clientHeight) {
+          const atTop = scrollable.scrollTop <= 2;
+          const atBottom = scrollable.scrollTop + scrollable.clientHeight >= scrollable.scrollHeight - 2;
+          if (atTop || atBottom) {
+            return false;
+          }
+          return true;
+        }
+        return false;
       },
     });
 

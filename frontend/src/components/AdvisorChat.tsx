@@ -321,12 +321,19 @@ export const AdvisorChat: React.FC<AdvisorChatProps> = ({ onProfileUpdated }) =>
 
       {/* Messages Feed */}
       <div
-        data-lenis-prevent="true"
-        data-lenis-prevent-wheel="true"
-        data-lenis-prevent-touch="true"
-        className="flex-1 p-4 overflow-y-auto overscroll-contain space-y-3 scrollbar-thin"
-        style={{ overscrollBehavior: "contain" }}
-        onWheel={(e) => e.stopPropagation()}
+        className="flex-1 p-4 overflow-y-auto overscroll-y-auto space-y-3 scrollbar-thin"
+        onWheel={(e) => {
+          const el = e.currentTarget;
+          const { scrollTop, scrollHeight, clientHeight } = el;
+          const isDown = e.deltaY > 0;
+          const isUp = e.deltaY < 0;
+          const atBottom = scrollTop + clientHeight >= scrollHeight - 2;
+          const atTop = scrollTop <= 2;
+          if ((isDown && atBottom) || (isUp && atTop)) {
+            return;
+          }
+          e.stopPropagation();
+        }}
       >
         <AnimatePresence initial={false}>
           {messages.map((m) => (

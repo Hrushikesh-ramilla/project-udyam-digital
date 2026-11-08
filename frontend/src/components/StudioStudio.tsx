@@ -487,7 +487,7 @@ export const StudioStudio: React.FC<StudioStudioProps> = ({
       </div>
 
       {/* WhatsApp / ChatGPT Preserved Chat Thread Box */}
-      <div data-lenis-prevent="true" className="luxury-glass rounded-3xl p-5 sm:p-7 border border-[rgba(235,229,217,0.08)] shadow-[0_20px_50px_rgba(0,0,0,0.7)] space-y-4">
+      <div className="luxury-glass rounded-3xl p-5 sm:p-7 border border-[rgba(235,229,217,0.08)] shadow-[0_20px_50px_rgba(0,0,0,0.7)] space-y-4">
         {/* Chat Header & Dual-Script Mode Switch */}
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-3 border-b border-[rgba(235,229,217,0.06)]">
           <div className="flex items-center space-x-3">
@@ -559,12 +559,19 @@ export const StudioStudio: React.FC<StudioStudioProps> = ({
         {(messages.length > 0 || loading) && (
           <div
             ref={chatScrollRef}
-            data-lenis-prevent="true"
-            data-lenis-prevent-wheel="true"
-            data-lenis-prevent-touch="true"
-            className="max-h-[420px] overflow-y-auto overscroll-contain space-y-3 pr-2 scrollbar-thin"
-            style={{ overscrollBehavior: "contain" }}
+            className="max-h-[420px] overflow-y-auto overscroll-y-auto space-y-3 pr-2 scrollbar-thin"
             onWheel={(e) => {
+              const el = chatScrollRef.current;
+              if (!el) return;
+              const { scrollTop, scrollHeight, clientHeight } = el;
+              const isDown = e.deltaY > 0;
+              const isUp = e.deltaY < 0;
+              const atBottom = scrollTop + clientHeight >= scrollHeight - 2;
+              const atTop = scrollTop <= 2;
+              // Seamless scroll chaining: bubble to parent page when at scroll boundaries
+              if ((isDown && atBottom) || (isUp && atTop)) {
+                return;
+              }
               e.stopPropagation();
             }}
           >
