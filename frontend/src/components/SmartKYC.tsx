@@ -24,6 +24,22 @@ import {
 import { KYCVerificationResult, CommercialBreakdown } from "../types";
 import { verifyKYC, uploadKYCDocument, verifyDigiLocker, KYCUploadResponse } from "../api";
 
+const APPLICANT_DISPLAY_NAMES: Record<string, string> = {
+  K01: "Applicant K01 (Cancelled GSTIN) · Vindhya Tours & Travels",
+  K02: "Applicant K02 · Royal Mart Supermarket",
+  K03: "Applicant K03 (Clean) · Balaji Timber Traders / Ganesh Woodcraft",
+  K04: "Applicant K04 · Saffron Dental Care LLP",
+  K05: "Applicant K05 (Missing Udyam) · Balaji Realty LLP",
+  K06: "Applicant K06 · Meenakshi Cotton Traders",
+  K07: "Applicant K07 (Name Mismatch) · Neelgiri Physio",
+  K08: "Applicant K08 · Green Leaf Legal Associates",
+  K09: "Applicant K09 · Kaveri Insurance Advisors",
+  K10: "Applicant K10 · Kaveri Stays LLP",
+  K11: "Applicant K11 (Stale Utility Bill) · Trinity Bake House",
+  K12: "Applicant K12 · Star Electronics",
+  KIRANA_NON_GST: "Kirana Store (Non-GST Micro-Bundle) · Ganesh Kirana Store",
+};
+
 interface SmartKYCProps {
   quote: CommercialBreakdown | null;
   onKYCApproved: (result: KYCVerificationResult) => void;
@@ -279,6 +295,21 @@ export const SmartKYC: React.FC<SmartKYCProps> = ({ quote, onKYCApproved, onSwit
       {activeTab === "preset" ? (
         /* Presets Grid */
         <div className="luxury-glass rounded-3xl p-6 sm:p-7 space-y-5 border border-[rgba(235,229,217,0.08)] shadow-[0_20px_50px_rgba(0,0,0,0.7)]">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 pb-3 border-b border-[rgba(235,229,217,0.06)]">
+            <div>
+              <h3 className="text-xs font-semibold text-[#EBE5D9] flex items-center space-x-2">
+                <Sparkles className="w-3.5 h-3.5 text-[#d9ad63]" />
+                <span>Hackathon Benchmark Testbench</span>
+              </h3>
+              <p className="text-[11px] text-[#B39D82] mt-0.5">
+                Pre-staged test cases for instant jury verification. To upload your own real documents, switch to &quot;Live Document Staging&quot; above.
+              </p>
+            </div>
+            <span className="text-[10px] font-mono text-[#d9ad63] px-2.5 py-1 rounded-full bg-[#d9ad63]/10 border border-[#d9ad63]/25 shrink-0 self-start sm:self-auto">
+              Simulated Dataset
+            </span>
+          </div>
+
           <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3.5">
             {presets.map((preset) => {
               const isSelected = selectedPreset === preset.id;
@@ -317,16 +348,19 @@ export const SmartKYC: React.FC<SmartKYCProps> = ({ quote, onKYCApproved, onSwit
             })}
           </div>
 
-          <div className="flex justify-end pt-2">
+          <div className="flex flex-col sm:flex-row items-center justify-between gap-3 pt-2">
+            <span className="text-[11px] text-[#B39D82]">
+              Selected Specimen: <strong className="text-[#EBE5D9]">{presets.find((p) => p.id === selectedPreset)?.label}</strong>
+            </span>
             <motion.button
               whileHover={{ scale: 1.02 }}
               whileTap={{ scale: 0.98 }}
               onClick={handleVerify}
               disabled={isVerifying || !consentGranted}
-              className="flex items-center space-x-2 bg-[#e40000] hover:bg-[#b30000] text-white font-medium py-3 px-6 rounded-2xl text-xs sm:text-sm shadow-[0_0_20px_rgba(228,0,0,0.4)] disabled:opacity-40 cursor-pointer animate-shimmer"
+              className="w-full sm:w-auto flex items-center justify-center space-x-2 bg-[#e40000] hover:bg-[#b30000] text-white font-medium py-3 px-6 rounded-2xl text-xs sm:text-sm shadow-[0_0_20px_rgba(228,0,0,0.4)] disabled:opacity-40 cursor-pointer animate-shimmer"
             >
               <RefreshCw className={`w-4 h-4 ${isVerifying ? "animate-spin" : ""}`} />
-              <span>{isVerifying ? "Verifying Registry..." : "Run KYC Gate"}</span>
+              <span>{isVerifying ? "Verifying Registry..." : `Verify ${presets.find((p) => p.id === selectedPreset)?.label || "Selected Specimen"}`}</span>
             </motion.button>
           </div>
         </div>
@@ -625,6 +659,18 @@ export const SmartKYC: React.FC<SmartKYCProps> = ({ quote, onKYCApproved, onSwit
                   </h3>
                   <span className="text-[10px] font-mono text-[#d9ad63] bg-white/[0.04] border border-white/[0.06] px-2 py-0.5 rounded-full">
                     {kycResult.execution_latency_ms}ms
+                  </span>
+                </div>
+                <div className="text-[11px] font-mono text-[#d9ad63] mt-1 flex flex-wrap items-center gap-1.5">
+                  <span>Verified Subject:</span>
+                  <span className="text-[#EBE5D9] font-sans font-medium">
+                    {kycResult.applicant_id && APPLICANT_DISPLAY_NAMES[kycResult.applicant_id]
+                      ? APPLICANT_DISPLAY_NAMES[kycResult.applicant_id]
+                      : activeTab === "upload"
+                      ? "Custom Staged Document Package (4 Slots)"
+                      : activeTab === "digilocker"
+                      ? "DigiLocker Authenticated Signatory"
+                      : "Benchmark Test Specimen"}
                   </span>
                 </div>
                 <p className="text-xs text-[#B39D82] mt-0.5">
