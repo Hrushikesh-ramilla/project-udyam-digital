@@ -14,6 +14,7 @@ export const Navbar: React.FC<NavbarProps> = ({ currentTab, setTab, persona, set
   const customerNavItems = [
     { id: "studio" as const, label: "Studio", icon: Sparkles },
     { id: "kyc" as const, label: "Smart KYC", icon: ShieldCheck },
+    { id: "tracker" as const, label: "Fulfillment", icon: Truck },
   ];
 
   const partnerNavItems = [

@@ -1,0 +1,5 @@
+Namaste doctor sahab! Aapki Lucknow wali polyclinic ke liye ekdum mast solution taiyar hai. Patient ki heavy MRI reports, digital billing aur UPI ke liye 100 Mbps symmetric **Biz Fibre 100** (₹1,099/mo) ekdum perfect rahegi — ismein koi speed drop nahi hota! Aapke requirements ke mutabiq, iske saath **Static IPv4** (₹299/mo) aapke EMR server ke liye, **Secure Guest Wi-Fi** (₹199/mo) patients ke liye taaki unka network billing se alag rahe, aur **Google Workspace** (₹125/user/mo) 4 doctors ke liye professional email IDs ke liye add kar dete hain.
+
+Total monthly cost sirf **₹2,020/month** aa rahi hai, jo aapke ₹2500 budget ke andar hai! Aur suniye, 12-month agreement lene par pura setup fee (OTC) bilkul **₹0 (WAIVED)** hai. GST ki chinta mat kijiye, Udyam Registration hi kaafi hai.
+
+Aap niche **Configured Solution Architecture** cart mein saari details dekh sakte hain. Wahan **'Accept Quote & Start Smart KYC'** button par click karke aage badhiye!
