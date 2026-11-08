@@ -212,12 +212,41 @@ export const PartnerRescueConsole: React.FC<PartnerRescueConsoleProps> = ({ onPr
                           ₹{lead.monthly_spend_inr.toLocaleString()} / mo
                         </div>
                       </td>
-                      <td className="py-3.5 px-4">
-                        <span className="text-[#EBE5D9]">{lead.drop_reason || "Pending"}</span>
+                      <td className="py-3.5 px-4 space-y-1">
+                        <div className="text-[#EBE5D9]">{lead.drop_reason || "Pending"}</div>
+                        {lead.factor_chips && lead.factor_chips.length > 0 && (
+                          <div className="flex flex-wrap gap-1 pt-0.5">
+                            {lead.factor_chips.map((chip, idx) => (
+                              <span
+                                key={idx}
+                                className={`text-[9px] font-mono px-1.5 py-0.5 rounded-md border ${
+                                  chip.startsWith("+")
+                                    ? "bg-emerald-500/10 border-emerald-500/25 text-emerald-300"
+                                    : "bg-red-500/10 border-red-500/25 text-red-300"
+                                }`}
+                              >
+                                {chip}
+                              </span>
+                            ))}
+                          </div>
+                        )}
                       </td>
                       <td className="py-3.5 px-4">
-                        <div className="inline-flex items-center space-x-1.5 px-2.5 py-0.5 rounded-full bg-emerald-500/15 border border-emerald-500/30 font-mono text-emerald-400 font-medium">
-                          <span>{scoreVal.toFixed(1)}%</span>
+                        <div className="space-y-1">
+                          <div
+                            className={`inline-flex items-center space-x-1.5 px-2.5 py-0.5 rounded-full font-mono font-medium text-xs border ${
+                              lead.priority_tier === "HIGH"
+                                ? "bg-emerald-500/15 border-emerald-500/30 text-emerald-400"
+                                : lead.priority_tier === "MEDIUM"
+                                ? "bg-amber-500/15 border-amber-500/30 text-amber-400"
+                                : "bg-zinc-500/15 border-zinc-500/30 text-zinc-400"
+                            }`}
+                          >
+                            <span>{scoreVal.toFixed(1)}%</span>
+                          </div>
+                          <div className="text-[10px] font-mono text-[#B39D82]/70 uppercase tracking-wider">
+                            {lead.priority_tier}
+                          </div>
                         </div>
                       </td>
                       <td className="py-3.5 px-4 text-right">

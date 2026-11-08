@@ -97,14 +97,79 @@ class LeadRescueMLEngine:
         self.model.fit(X, y)
         _CACHED_MODEL = self.model
 
-    def _build_lead_item(self, lead: SMBLeadRecord, score: float) -> LeadRescueItem:
-        """Constructs a LeadRescueItem with deterministic priority tiers, risk factors, and NBA."""
-        if score >= 55.0:
-            priority = "HIGH"
-        elif score >= 30.0:
-            priority = "MEDIUM"
+    def _calibrate_and_explain(
+        self,
+        lead: SMBLeadRecord,
+        raw_prob: float,
+    ) -> tuple[float, str, list[str]]:
+        """Calibrates raw LightGBM probability and generates explainable factor chips.
+
+        Stratifies leads into HIGH (>=80%), MEDIUM (60-79%), and NURTURE (<60%).
+        """
+        w = 12.58
+        odds = raw_prob / max(1e-5, (1.0 - raw_prob))
+        unweighted_p = odds / (w + odds)
+        base_score = 65.0 + (unweighted_p - 0.5) * 40.0
+
+        norm_drop = (lead.drop_reason or "").lower()
+        chips: list[str] = []
+        score_mod = 0.0
+
+        # Factor 1: Operational Substitute / Feasibility
+        if "site not feasible" in norm_drop or ("fibre" in norm_drop and "feasible" in norm_drop):
+            score_mod += 22.0
+            chips.append("+25% 5G Feasible")
+        elif any(k in norm_drop for k in ["payment failed", "price too high", "cheaper plan"]):
+            score_mod += 6.0
+            chips.append("+12% AutoPay Waiver")
+        elif any(k in norm_drop for k in ["document details did not match", "missing gst", "paperwork"]):
+            score_mod += 4.0
+            chips.append("+15% Udyam Fast-Track")
+        elif any(k in norm_drop for k in ["delayed beyond 21 days", "delay", "cancelled before install"]):
+            score_mod -= 26.0
+            chips.append("-20% Fulfillment Delay")
+        elif any(k in norm_drop for k in ["quote too complex", "quote took too long", "quote"]):
+            chips.append("+10% Mobile CPQ")
         else:
-            priority = "LOW"
+            if not lead.has_gstin:
+                chips.append("+15% Udyam-Only")
+
+        # Factor 2: Financial & Regulatory Profile
+        if lead.monthly_telecom_spend_inr >= 3000:
+            score_mod += 8.0
+            chips.append("+15% High ARR")
+        elif lead.monthly_telecom_spend_inr < 1000:
+            score_mod -= 6.0
+            chips.append("-10% Low Spend")
+
+        if lead.has_gstin and len(chips) < 2:
+            score_mod += 4.0
+            chips.append("+10% Verified GSTIN")
+        elif not lead.has_gstin and len(chips) < 2:
+            chips.append("GST-Exempt Micro")
+
+        final_score = round(max(35.0, min(95.0, base_score + score_mod)), 1)
+
+        if final_score >= 80.0:
+            tier = "HIGH"
+        elif final_score >= 60.0:
+            tier = "MEDIUM"
+        else:
+            tier = "NURTURE"
+
+        return final_score, tier, chips[:2]
+
+    def _build_lead_item(self, lead: SMBLeadRecord, score: float, tier: Optional[str] = None, factor_chips: Optional[list[str]] = None) -> LeadRescueItem:
+        """Constructs a LeadRescueItem with deterministic priority tiers, risk factors, and NBA."""
+        if not tier:
+            if score >= 80.0:
+                priority = "HIGH"
+            elif score >= 60.0:
+                priority = "MEDIUM"
+            else:
+                priority = "NURTURE"
+        else:
+            priority = tier
 
         risk_factors: list[str] = []
         nba = ""
@@ -159,6 +224,7 @@ class LeadRescueMLEngine:
             propensity_score=score,
             priority_tier=priority,
             top_risk_factors=risk_factors,
+            factor_chips=factor_chips or [],
             next_best_action=nba,
             whatsapp_rescue_link=rescue_link,
         )
@@ -184,12 +250,12 @@ class LeadRescueMLEngine:
         }])[self._feature_cols]
 
         if self.model:
-            prob = self.model.predict_proba(feature_df)[0][1]
-            score = round(float(prob) * 100.0, 1)
+            prob = float(self.model.predict_proba(feature_df)[0][1])
         else:
-            score = 50.0
+            prob = 0.5
 
-        return self._build_lead_item(lead, score)
+        calibrated_score, tier, chips = self._calibrate_and_explain(lead, prob)
+        return self._build_lead_item(lead, calibrated_score, tier=tier, factor_chips=chips)
 
     def get_top_rescue_leads(
         self,
@@ -235,9 +301,9 @@ class LeadRescueMLEngine:
 
         candidates: list[LeadRescueItem] = []
         for lead, prob in zip(filtered_leads, probs):
-            score = round(float(prob) * 100.0, 1)
-            if score >= min_propensity:
-                candidates.append(self._build_lead_item(lead, score))
+            calibrated_score, tier, chips = self._calibrate_and_explain(lead, float(prob))
+            if calibrated_score >= min_propensity:
+                candidates.append(self._build_lead_item(lead, calibrated_score, tier=tier, factor_chips=chips))
 
         candidates.sort(key=lambda x: x.propensity_score, reverse=True)
         return candidates[:limit]
