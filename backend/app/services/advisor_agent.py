@@ -351,9 +351,9 @@ Return STRICTLY valid JSON:
             "ജിഎസ്ടി ഉണ്ട്", "ଜିଏସଟି ଅଛି"
         ]
 
-        if re.search(r"\b(no\s*gst(?:in)?|without\s*gst(?:in)?|bina\s*gst|gst(?:in)?\s*(?:nahi|nhi|nai|ni)\b|dont\s*have\s*gst(?:in)?|don't\s*have\s*gst(?:in)?|gst\s*number\s*(?:nahi|nhi|nai|ni)|gst\s*vst\s*(?:kuch\s*)?(?:nahi|nhi|nai|ni)|zero\s*gst|sirf\s*udyam|udyam\s*only)\b", norm_text) or any(w in norm_text for w in no_gst_regional):
+        if re.search(r"\b(no\s*gst(?:in)?|without\s*gst(?:in)?|bina\s*gst|gst(?:in)?\s*(?:nahi|nhi|nai|ni|ledu|ledhu|illa|illai|nei|nathi)\b|dont\s*have\s*gst(?:in)?|don't\s*have\s*gst(?:in)?|gst\s*number\s*(?:nahi|nhi|nai|ni)|gst\s*vst\s*(?:kuch\s*)?(?:nahi|nhi|nai|ni)|zero\s*gst|sirf\s*udyam|udyam\s*only)\b", norm_text) or any(w in norm_text for w in no_gst_regional):
             slots.has_gstin = False
-        elif re.search(r"\b(have\s*gst(?:in)?|has\s*gst(?:in)?|with\s*gst(?:in)?|gst\s*registered|gst\s*(?:hai|h\b)|gstin\s*(?:hai|h\b)|gst\s*number\s*(?:hai|h\b)|gstin\s*available|active\s*gst(?:in)?|gst\s*(?:number\s*)?mil\s*gaya|mil\s*gaya\s*gst)\b", norm_text) or any(w in norm_text for w in has_gst_regional):
+        elif re.search(r"\b(have\s*gst(?:in)?|has\s*gst(?:in)?|with\s*gst(?:in)?|gst\s*registered|gst\s*(?:hai|h\b|undi|undhi|irukku|ache|che|ahe|ide)|gstin\s*(?:hai|h\b)|gst\s*number\s*(?:hai|h\b)|gstin\s*available|active\s*gst(?:in)?|gst\s*(?:number\s*)?mil\s*gaya|mil\s*gaya\s*gst)\b", norm_text) or any(w in norm_text for w in has_gst_regional):
             slots.has_gstin = True
         elif slots.segment in {"mfg", "multi"} and slots.has_gstin is None:
             # Factories and multi-site enterprise chains in India require statutory GST registration
