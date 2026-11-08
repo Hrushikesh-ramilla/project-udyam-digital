@@ -55,7 +55,7 @@ class AdvisorAgent:
                 logging.warning("Could not initialize google.genai Client: %s", e)
 
 
-    def _call_gemini_api(self, prompt: str, timeout: float = 6.0) -> Optional[dict]:
+    def _call_gemini_api(self, prompt: str, timeout: float = 12.0) -> Optional[dict]:
         """Direct HTTP REST call to Google Gemini API (bypassing SDK packaging issues)."""
         if not self.api_key or os.environ.get("PYTEST_CURRENT_TEST"):
             return None

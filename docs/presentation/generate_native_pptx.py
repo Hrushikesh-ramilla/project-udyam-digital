@@ -162,7 +162,7 @@ def build_editable_presentation():
         ("Team Name: ", "Neural Nexus"),
         ("Campus / Institute: ", "ABV-Indian Institute of Information Technology and Management (ABV-IIITM), Gwalior"),
         ("Competition Track: ", "Airtel Sync 2026 – Digital Track (Enterprise Track A)"),
-        ("Team Members: ", "Hrushikesh Ramilla (HR - Systems & ML Lead), YK (Product & Applied Research)"),
+        ("Team Members: ", "Hrushikesh Ramilla (HR - Systems & ML Lead), G Yaswanth Kumar (YK - Co-Author, Product & Research)"),
         ("Evaluation Anchor Invariant: ", "Strictly pinned to datetime.date(2026, 7, 15) for KYC freshness.")
     ]
     for b_bold, b_text in team_points:
@@ -193,7 +193,7 @@ def build_editable_presentation():
     links = [
         ("Prototype Demo Video / Audit Proof: ", "http://65.1.112.251/audit/audit_dashboard.html (100-Case Visual Audit Proof)"),
         ("Live Production Cloud Monolith: ", "http://65.1.112.251 (FastAPI + React 18 on AWS EC2 Ubuntu 26.04)"),
-        ("Interactive Swagger API Documentation: ", "http://65.1.112.251/docs (37/37 Automated Pytest Verification)"),
+        ("Interactive Swagger API Documentation: ", "http://65.1.112.251/docs (FastAPI Production OpenAPI)"),
         ("Open-Source GitHub Repository: ", "https://github.com/Hrushikesh-ramilla/project-udyam-digital (Branch: main)"),
         ("Production Technology Stack: ", "FastAPI, React 18, TypeScript, LightGBM, RapidFuzz, DPDP SHA-256 Engine.")
     ]

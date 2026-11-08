@@ -293,7 +293,7 @@ def generate_slides_html():
             </tr>
             <tr style="border-bottom: 1px solid #F4F0E8;">
               <td style="padding: 7px 0; color: #7A7B7E; font-weight: 600;">Team Members</td>
-              <td style="padding: 7px 0; color: #121316;"><strong>Hrushikesh Ramilla (HR)</strong> — Lead Systems & ML Architect<br><strong>YK</strong> — Product Engineering & Applied Research</td>
+              <td style="padding: 7px 0; color: #121316;"><strong>Hrushikesh Ramilla (HR)</strong> — Lead Systems & ML Architect<br><strong>G Yaswanth Kumar (YK)</strong> — Product Engineering & Applied Research (Co-Author)</td>
             </tr>
             <tr style="border-bottom: 1px solid #F4F0E8;">
               <td style="padding: 7px 0; color: #7A7B7E; font-weight: 600;">Technical Stack</td>
@@ -324,8 +324,8 @@ def generate_slides_html():
               <td style="padding: 7px 0; font-family: monospace; font-weight: 700; color: #121316;">github.com/Hrushikesh-ramilla/project-udyam-digital</td>
             </tr>
             <tr style="border-bottom: 1px solid #DDD8CE;">
-              <td style="padding: 7px 0; color: #5A5A5D; font-weight: 700;">Automated Tests</td>
-              <td style="padding: 7px 0; color: #121316;"><span class="badge-pill" style="font-size: 11px;">37 / 37 Pytest Tests Passing</span> (100% Pass Rate | Zero Mocks)</td>
+              <td style="padding: 7px 0; color: #5A5A5D; font-weight: 700;">Demo Video Link</td>
+              <td style="padding: 7px 0; font-weight: 800;"><a href="http://65.1.112.251/audit/audit_dashboard.html" style="color: #121316; text-decoration: underline;">Interactive 100-Case Video Proof & Walkthrough</a></td>
             </tr>
             <tr style="border-bottom: 1px solid #DDD8CE;">
               <td style="padding: 7px 0; color: #5A5A5D; font-weight: 700;">Visual Verification</td>
