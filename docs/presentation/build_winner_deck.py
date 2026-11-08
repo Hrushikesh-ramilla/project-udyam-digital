@@ -28,6 +28,8 @@ def to_base64(path):
     return ""
 
 # Encode necessary assets
+img_template_cover_b64 = to_base64("docs/presentation/template_extracted/slide_1_img_0.jpg")
+img_template_slide_b64 = to_base64("docs/presentation/template_extracted/slide_2_img_0.jpg")
 img_arch_b64 = to_base64("docs/presentation/assets/udyam-architecture-clean.png")
 img_dag_b64 = to_base64("docs/presentation/assets/udyam-cpq-dag-tight.png")
 img_screen_advisor_b64 = to_base64("docs/presentation/assets/clean_advisor.png")
@@ -46,62 +48,80 @@ body {
 .slide {
   width: 1920px;
   height: 1080px;
-  padding: 44px 72px 36px 72px;
   position: relative;
-  background-color: #FAF8F5;
+  background-size: 1920px 1080px;
+  background-position: center;
+  background-repeat: no-repeat;
   overflow: hidden;
   display: flex;
   flex-direction: column;
 }
-/* Slide Header */
+.slide-cover-bg {
+  background-color: #0A0B0E;
+  padding: 0 64px 20px 64px;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+}
+.slide-template-bg {
+  background-color: #FFFFFF;
+  padding: 20px 56px 14px 56px;
+}
+/* Slide Header tailored for official Airtel SYNC template */
 .slide-header {
   display: flex;
   justify-content: space-between;
-  align-items: flex-end;
-  border-bottom: 1.5px solid #DDD8CE;
-  padding-bottom: 10px;
-  margin-bottom: 14px;
+  align-items: center;
+  margin-left: 210px; /* clears top-left Airtel logo (x=15..223) */
+  margin-right: 210px; /* clears top-right SYNC logo (x=1695..1907) */
+  border-bottom: 1.5px solid #EFECE6;
+  margin-bottom: 10px;
+  min-height: 80px;
+  padding-bottom: 6px;
 }
 .slide-title-group h1 {
-  font-size: 31px;
+  font-size: 26px;
   font-weight: 800;
   color: #121316;
   letter-spacing: -0.5px;
   line-height: 1.15;
 }
 .slide-title-group p {
-  font-size: 14px;
+  font-size: 13px;
   color: #5A5A5D;
-  margin-top: 3px;
+  margin-top: 2px;
   font-weight: 500;
 }
 .slide-category-badge {
-  font-size: 12px;
+  font-size: 11px;
   font-weight: 700;
   text-transform: uppercase;
-  letter-spacing: 1px;
+  letter-spacing: 0.8px;
   background-color: #EFECE6;
   color: #121316;
-  padding: 6px 14px;
+  padding: 5px 12px;
   border-radius: 6px;
   border: 1px solid #DDD8CE;
+  white-space: nowrap;
 }
 /* Slide Content Area */
 .slide-content {
-  flex: 1;
+  height: 840px;
+  max-height: 840px;
   display: flex;
   flex-direction: column;
-  gap: 12px;
+  justify-content: space-between;
 }
-/* Footline */
+/* Footline tailored to avoid pre-printed Unstop logo (x=1600..1903, y=1008..1049) */
 .slide-footer {
   margin-top: auto;
-  padding-top: 10px;
-  border-top: 1px solid #DDD8CE;
+  padding-top: 8px;
+  margin-right: 340px; /* leaves room for Unstop logo on bottom right */
+  border-top: 1px solid #EFECE6;
   display: flex;
   justify-content: space-between;
   align-items: center;
-  font-size: 12px;
+  font-size: 11px;
   color: #7A7B7E;
   font-weight: 500;
 }
@@ -223,11 +243,11 @@ body {
   color: #121316;
   font-weight: 800;
   text-align: left;
-  padding: 12px 14px;
+  padding: 8px 12px;
   border-bottom: 2px solid #DDD8CE;
 }
 .comp-table td {
-  padding: 11px 14px;
+  padding: 7px 12px;
   border-bottom: 1px solid #EFECE6;
   color: #333336;
   line-height: 1.35;
@@ -254,115 +274,116 @@ def generate_slides_html():
     # SLIDE 0: MANDATORY INTRODUCTION SLIDE (UNCOUNTED)
     # =============================================================
     s0 = f"""
-    <div class="slide" style="display: flex; flex-direction: column; justify-content: space-between; padding: 40px 72px 28px 72px;">
+    <div class="slide slide-cover-bg" style="background-image: url('{img_template_cover_b64}');">
       
-      <!-- Top Title Area -->
-      <div style="text-align: center; padding-top: 4px;">
-        <div style="display: inline-block; margin-bottom: 10px;">
-          <span style="font-size: 12px; font-weight: 800; letter-spacing: 2px; text-transform: uppercase; background: #EFECE6; color: #121316; padding: 6px 18px; border-radius: 30px; border: 1px solid #DDD8CE;">
-            BHARTI AIRTEL · AIRTEL SYNC 2026 · DIGITAL TRACK (ENTERPRISE TRACK A)
-          </span>
-        </div>
-        <h1 style="font-size: 52px; font-weight: 900; color: #121316; letter-spacing: -1.5px; line-height: 1.1; margin-bottom: 8px;">
-          Project Udyam Digital
-        </h1>
-        <p style="font-size: 18px; color: #4A4B4E; max-width: 980px; margin: 0 auto; font-weight: 500; line-height: 1.35;">
-          Making 6 Crore+ Indian Small Businesses Go Digital in One Sitting<br>
-          <span style="font-size: 15px; color: #6E7075;">Instant Self-Serve Mobile Onboarding, Fast Legal KYC & Multi-Site Telecommunications</span>
-        </p>
-      </div>
-
-      <!-- Center 2-Column Registration & Working Prototype Cards -->
-      <div class="grid-2" style="text-align: left; gap: 22px; margin: 4px 0;">
-        <div class="card" style="padding: 20px 24px;">
-          <div class="card-title" style="border-bottom: 1.5px solid #EFECE6; padding-bottom: 10px; margin-bottom: 12px; font-size: 16px;">
-            Team & Institutional Registration
+      <!-- Content Container strictly positioned below official SYNC logo (y >= 490) and left of digital globe (x <= 910) -->
+      <div style="max-width: 890px; display: flex; flex-direction: column; gap: 8px; margin-bottom: 4px;">
+        
+        <!-- Project Title & Track Badge -->
+        <div>
+          <div style="display: inline-block; margin-bottom: 5px;">
+            <span style="font-size: 11px; font-weight: 800; letter-spacing: 1.5px; text-transform: uppercase; background: rgba(228, 0, 0, 0.25); color: #FF4D4D; padding: 4px 14px; border-radius: 20px; border: 1px solid rgba(228, 0, 0, 0.4); backdrop-filter: blur(8px);">
+              BHARTI AIRTEL · AIRTEL SYNC 2026 · DIGITAL TRACK (ENTERPRISE TRACK A)
+            </span>
           </div>
-          <table style="width: 100%; font-size: 13.5px; border-collapse: collapse;">
-            <tr style="border-bottom: 1px solid #F4F0E8;">
-              <td style="padding: 7px 0; color: #7A7B7E; width: 140px; font-weight: 600;">Team Name</td>
-              <td style="padding: 7px 0; font-weight: 800; color: #121316;">{TEAM_NAME}</td>
-            </tr>
-            <tr style="border-bottom: 1px solid #F4F0E8;">
-              <td style="padding: 7px 0; color: #7A7B7E; font-weight: 600;">Institution</td>
-              <td style="padding: 7px 0; font-weight: 600; color: #121316;">ABV-Indian Institute of Information Technology and Management (ABV-IIITM), Gwalior</td>
-            </tr>
-            <tr style="border-bottom: 1px solid #F4F0E8;">
-              <td style="padding: 7px 0; color: #7A7B7E; font-weight: 600;">Competition Track</td>
-              <td style="padding: 7px 0; color: #121316;">Airtel Sync 2026 — Digital Track (Enterprise Track A: Accel Business)</td>
-            </tr>
-            <tr style="border-bottom: 1px solid #F4F0E8;">
-              <td style="padding: 7px 0; color: #7A7B7E; font-weight: 600;">Team Members</td>
-              <td style="padding: 7px 0; color: #121316;"><strong>Hrushikesh Ramilla (HR)</strong> — Lead Systems & ML Architect<br><strong>G Yaswanth Kumar (YK)</strong> — Product Engineering & Applied Research (Co-Author)</td>
-            </tr>
-            <tr style="border-bottom: 1px solid #F4F0E8;">
-              <td style="padding: 7px 0; color: #7A7B7E; font-weight: 600;">Technical Stack</td>
-              <td style="padding: 7px 0; color: #121316;">Python 3.11+, FastAPI, React 18, Vite, Pydantic v2, LightGBM, RapidFuzz, SQLite WAL, Playwright</td>
-            </tr>
-            <tr>
-              <td style="padding: 7px 0; color: #7A7B7E; font-weight: 600;">Evaluation Date</td>
-              <td style="padding: 7px 0; color: #121316;"><code style="font-family: monospace; font-weight: 700;">2026-07-15</code> (Evaluation invariant strictly enforced)</td>
-            </tr>
-          </table>
+          <h1 style="font-size: 40px; font-weight: 900; color: #FFFFFF; letter-spacing: -1px; line-height: 1.05; margin: 0 0 4px 0; text-shadow: 0 4px 20px rgba(0,0,0,0.85);">
+            Project Udyam Digital
+          </h1>
+          <p style="font-size: 15px; color: #E4E5EB; font-weight: 500; line-height: 1.3; margin: 0; text-shadow: 0 2px 10px rgba(0,0,0,0.85);">
+            Instant Self-Serve Mobile Onboarding, Fast Legal KYC & Multi-Site Connectivity for 6 Cr+ MSMEs
+          </p>
         </div>
 
-        <div class="card-beige" style="padding: 20px 24px;">
-          <div class="card-title" style="border-bottom: 1.5px solid #DDD8CE; padding-bottom: 10px; margin-bottom: 12px; font-size: 16px;">
-            Live Working Prototype & Direct Audit Links
+        <!-- Center 2-Column Registration & Working Prototype Cards -->
+        <div class="grid-2" style="text-align: left; gap: 14px; margin: 0;">
+          <div style="background: rgba(12, 13, 16, 0.92); border: 1px solid rgba(235, 229, 217, 0.15); border-radius: 8px; padding: 12px 15px; backdrop-filter: blur(12px); box-shadow: 0 10px 28px rgba(0,0,0,0.7);">
+            <div style="border-bottom: 1.5px solid rgba(235, 229, 217, 0.15); padding-bottom: 4px; margin-bottom: 6px; font-size: 13px; font-weight: 800; color: #FFFFFF;">
+              Team & Institutional Registration
+            </div>
+            <table style="width: 100%; font-size: 11.5px; border-collapse: collapse; color: #DCDDE2;">
+              <tr style="border-bottom: 1px solid rgba(255,255,255,0.06);">
+                <td style="padding: 3px 0; color: #A0A3AB; width: 105px; font-weight: 600;">Team Name</td>
+                <td style="padding: 3px 0; font-weight: 800; color: #FFFFFF;">{TEAM_NAME}</td>
+              </tr>
+              <tr style="border-bottom: 1px solid rgba(255,255,255,0.06);">
+                <td style="padding: 3px 0; color: #A0A3AB; font-weight: 600;">Institution</td>
+                <td style="padding: 3px 0; font-weight: 600; color: #FFFFFF;">ABV-IIITM Gwalior</td>
+              </tr>
+              <tr style="border-bottom: 1px solid rgba(255,255,255,0.06);">
+                <td style="padding: 3px 0; color: #A0A3AB; font-weight: 600;">Track</td>
+                <td style="padding: 3px 0; color: #FFFFFF;">Digital Track (Enterprise Track A: Accel Business)</td>
+              </tr>
+              <tr style="border-bottom: 1px solid rgba(255,255,255,0.06);">
+                <td style="padding: 3px 0; color: #A0A3AB; font-weight: 600;">Team Members</td>
+                <td style="padding: 3px 0; color: #FFFFFF;"><strong>Hrushikesh Ramilla (HR)</strong> (Lead Architect)<br><strong>G Yaswanth Kumar (YK)</strong> (Co-Author)</td>
+              </tr>
+              <tr style="border-bottom: 1px solid rgba(255,255,255,0.06);">
+                <td style="padding: 3px 0; color: #A0A3AB; font-weight: 600;">Technical Stack</td>
+                <td style="padding: 3px 0; color: #FFFFFF;">Python 3.11+, FastAPI, React 18, Vite, LightGBM, RapidFuzz, SQLite WAL</td>
+              </tr>
+              <tr>
+                <td style="padding: 3px 0; color: #A0A3AB; font-weight: 600;">Evaluation Date</td>
+                <td style="padding: 3px 0; color: #FFFFFF;"><code style="font-family: monospace; font-weight: 700; color: #FF4D4D;">2026-07-15</code> (Evaluation anchor strictly enforced)</td>
+              </tr>
+            </table>
           </div>
-          <table style="width: 100%; font-size: 13.5px; border-collapse: collapse;">
-            <tr style="border-bottom: 1px solid #DDD8CE;">
-              <td style="padding: 7px 0; color: #5A5A5D; width: 145px; font-weight: 700;">Live Cloud Monolith</td>
-              <td style="padding: 7px 0; font-weight: 800;"><a href="https://udyam.hrushikeshramilla.in" style="color: #121316; text-decoration: underline;">udyam.hrushikeshramilla.in</a> (HTTPS / 65.1.112.251:80)</td>
-            </tr>
-            <tr style="border-bottom: 1px solid #DDD8CE;">
-              <td style="padding: 7px 0; color: #5A5A5D; font-weight: 700;">Interactive API Docs</td>
-              <td style="padding: 7px 0; font-weight: 700;"><a href="http://65.1.112.251/docs" style="color: #121316; text-decoration: underline;">http://65.1.112.251/docs</a> (FastAPI Swagger UI)</td>
-            </tr>
-            <tr style="border-bottom: 1px solid #DDD8CE;">
-              <td style="padding: 7px 0; color: #5A5A5D; font-weight: 700;">Code Repository</td>
-              <td style="padding: 7px 0; font-family: monospace; font-weight: 700; color: #121316;">github.com/Hrushikesh-ramilla/project-udyam-digital</td>
-            </tr>
-            <tr style="border-bottom: 1px solid #DDD8CE;">
-              <td style="padding: 7px 0; color: #5A5A5D; font-weight: 700;">Demo Video Link</td>
-              <td style="padding: 7px 0; font-weight: 800;"><a href="http://65.1.112.251/audit/audit_dashboard.html" style="color: #121316; text-decoration: underline;">Interactive 100-Case Video Proof & Walkthrough</a></td>
-            </tr>
-            <tr style="border-bottom: 1px solid #DDD8CE;">
-              <td style="padding: 7px 0; color: #5A5A5D; font-weight: 700;">Visual Verification</td>
-              <td style="padding: 7px 0; font-weight: 700; color: #121316;"><strong>56 Pytest Tests (100% Passed)</strong> + 100 Visual Adversarial Cases Audited</td>
-            </tr>
-            <tr>
-              <td style="padding: 7px 0; color: #5A5A5D; font-weight: 700;">Compliance Invariant</td>
-              <td style="padding: 7px 0; color: #121316;"><span class="badge-pill" style="font-size: 11px;">DPDP Act 2023 Shield</span> Zero Persistence RAM Masking</td>
-            </tr>
-          </table>
-        </div>
-      </div>
 
-      <!-- Bottom Executive Scope Card -->
-      <div class="card-beige" style="padding: 16px 24px; border-left: 4px solid #121316;">
-        <div style="font-size: 13.5px; font-weight: 800; color: #121316; margin-bottom: 8px;">
-          The Executive Scope at a Glance (Airtel Enterprise Track A Mandate):
+          <div style="background: rgba(12, 13, 16, 0.92); border: 1px solid rgba(235, 229, 217, 0.15); border-radius: 8px; padding: 12px 15px; backdrop-filter: blur(12px); box-shadow: 0 10px 28px rgba(0,0,0,0.7);">
+            <div style="border-bottom: 1.5px solid rgba(235, 229, 217, 0.15); padding-bottom: 4px; margin-bottom: 6px; font-size: 13px; font-weight: 800; color: #FFFFFF;">
+              Live Working Prototype & Direct Audit Links
+            </div>
+            <table style="width: 100%; font-size: 11.5px; border-collapse: collapse; color: #DCDDE2;">
+              <tr style="border-bottom: 1px solid rgba(255,255,255,0.06);">
+                <td style="padding: 3px 0; color: #A0A3AB; width: 115px; font-weight: 700;">Live Monolith</td>
+                <td style="padding: 3px 0; font-weight: 800;"><a href="https://udyam.hrushikeshramilla.in" style="color: #FF6666; text-decoration: underline;">udyam.hrushikeshramilla.in</a> (65.1.112.251)</td>
+              </tr>
+              <tr style="border-bottom: 1px solid rgba(255,255,255,0.06);">
+                <td style="padding: 3px 0; color: #A0A3AB; font-weight: 700;">API Docs</td>
+                <td style="padding: 3px 0; font-weight: 700;"><a href="http://65.1.112.251/docs" style="color: #FF6666; text-decoration: underline;">http://65.1.112.251/docs</a> (FastAPI Swagger UI)</td>
+              </tr>
+              <tr style="border-bottom: 1px solid rgba(255,255,255,0.06);">
+                <td style="padding: 3px 0; color: #A0A3AB; font-weight: 700;">Repository</td>
+                <td style="padding: 3px 0; font-family: monospace; font-weight: 700; color: #FFFFFF;">github.com/Hrushikesh-ramilla/project-udyam-digital</td>
+              </tr>
+              <tr style="border-bottom: 1px solid rgba(255,255,255,0.06);">
+                <td style="padding: 3px 0; color: #A0A3AB; font-weight: 700;">Demo Video</td>
+                <td style="padding: 3px 0; font-weight: 800;"><a href="http://65.1.112.251/audit/audit_dashboard.html" style="color: #FF6666; text-decoration: underline;">Interactive 100-Case Video Proof & Walkthrough</a></td>
+              </tr>
+              <tr style="border-bottom: 1px solid rgba(255,255,255,0.06);">
+                <td style="padding: 3px 0; color: #A0A3AB; font-weight: 700;">Verification</td>
+                <td style="padding: 3px 0; font-weight: 800; color: #4ADE80;">56 Pytest Tests (100% Passed) + 100 Visual Proofs</td>
+              </tr>
+              <tr>
+                <td style="padding: 3px 0; color: #A0A3AB; font-weight: 700;">Compliance</td>
+                <td style="padding: 3px 0; color: #FFFFFF;"><span class="badge-pill" style="font-size: 10px; background: rgba(59,130,246,0.2); color: #60A5FA; border: 1px solid rgba(59,130,246,0.4);">DPDP Act 2023</span> Zero Persistence RAM Masking</td>
+              </tr>
+            </table>
+          </div>
         </div>
-        <div class="grid-3" style="font-size: 12px; color: #4A4B4E; line-height: 1.45; gap: 16px;">
-          <div style="background: #FFFFFF; border: 1px solid #DDD8CE; border-radius: 6px; padding: 10px 12px;">
-            <div style="font-weight: 800; color: #121316; margin-bottom: 3px;">1. The Market Opportunity</div>
-            India is home to 6.3 Crore MSMEs, but 55% operate under GST thresholds. Discarding non-GST applicants cuts Airtel off from 3.5 Crore viable retail merchants.
-          </div>
-          <div style="background: #FFFFFF; border: 1px solid #DDD8CE; border-radius: 6px; padding: 10px 12px;">
-            <div style="font-weight: 800; color: #121316; margin-bottom: 3px;">2. The Enterprise Bottleneck</div>
-            Current manual quote delivery takes 3 to 5 days, causing 56.4% of interested leads to abandon the pipeline while burning ₹15,000 in CAC per customer.
-          </div>
-          <div style="background: #FFFFFF; border: 1px solid #DDD8CE; border-radius: 6px; padding: 10px 12px;">
-            <div style="font-weight: 800; color: #121316; margin-bottom: 3px;">3. The Udyam Solution</div>
-            Universal Multilingual AI (100+ languages, Session Language Inertia), &lt;0.5ms CPQ DAG, zero-persistence DPDP KYC, NPCI/Razorpay payments, BlueDart carrier bus, and SQLite WAL.
-          </div>
-        </div>
-      </div>
 
-      <!-- Submission Footnote -->
-      <div style="font-size: 12px; color: #7A7B7E; text-align: center; padding-top: 2px;">
-        <strong>Submission Note:</strong> Mandatory Introduction Slide (excluded from 7-slide evaluation count). Slides 1 to 7 showcase the technical solution, competitive moat, and quantified business impact.
+        <!-- Bottom Executive Scope Card -->
+        <div style="background: rgba(12, 13, 16, 0.92); border: 1px solid rgba(235, 229, 217, 0.15); border-left: 4px solid #E40000; border-radius: 6px; padding: 8px 14px;">
+          <div style="font-size: 12px; font-weight: 800; color: #FFFFFF; margin-bottom: 4px;">
+            The Executive Scope at a Glance (Airtel Enterprise Track A Mandate):
+          </div>
+          <div class="grid-3" style="font-size: 11px; color: #C2C4CC; line-height: 1.35; gap: 10px;">
+            <div style="background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.08); border-radius: 4px; padding: 6px 8px;">
+              <strong style="color: #FFFFFF;">1. Market:</strong> 6.3 Cr MSMEs; 55% under GST threshold. Discarding non-GST loses 3.5 Cr merchants.
+            </div>
+            <div style="background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.08); border-radius: 4px; padding: 6px 8px;">
+              <strong style="color: #FFFFFF;">2. Bottleneck:</strong> 3-5 day manual quotes cause 56.4% abandonment and ₹15,000 CAC bleed.
+            </div>
+            <div style="background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.08); border-radius: 4px; padding: 6px 8px;">
+              <strong style="color: #FFFFFF;">3. Udyam:</strong> Multilingual AI (100+ langs, Session Inertia), &lt;0.5ms CPQ DAG, zero-persistence KYC, NPCI UPI.
+            </div>
+          </div>
+        </div>
+
+        <!-- Submission Footnote -->
+        <div style="font-size: 10.5px; color: #8A8D96; text-align: left; padding-top: 2px;">
+          <strong>Submission Note:</strong> Mandatory Introduction Slide (excluded from 7-slide evaluation count). Slides 1 to 7 showcase the technical solution, competitive moat, and quantified business impact.
+        </div>
+
       </div>
 
     </div>
@@ -373,7 +394,7 @@ def generate_slides_html():
     # SLIDE 1 OF 7: PROBLEM STATEMENT & FUNNEL BLEED DISSECTION
     # =============================================================
     s1 = f"""
-    <div class="slide">
+    <div class="slide slide-template-bg" style="background-image: url('{img_template_slide_b64}');">
       <div class="slide-header">
         <div class="slide-title-group">
           <h1>Problem Statement: The 5,000-Lead Sales Drop-Off</h1>
@@ -611,7 +632,7 @@ def generate_slides_html():
     # SLIDE 2 OF 7: TARGET CUSTOMER SEGMENTATION & PERSONA MATRIX
     # =============================================================
     s2 = f"""
-    <div class="slide">
+    <div class="slide slide-template-bg" style="background-image: url('{img_template_slide_b64}');">
       <div class="slide-header">
         <div class="slide-title-group">
           <h1>Target Customer Segments: Four Core Business Types</h1>
@@ -624,7 +645,7 @@ def generate_slides_html():
         <div class="grid-4" style="flex: 1;">
           
           <!-- Segment 1: Kirana & Retail -->
-          <div class="card" style="display: flex; flex-direction: column; justify-content: space-between; padding: 15px 15px;">
+          <div class="card" style="display: flex; flex-direction: column; justify-content: space-between; padding: 10px 12px;">
             <div style="border-bottom: 1.5px solid #EFECE6; padding-bottom: 8px;">
               <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 4px;">
                 <span class="badge-pill">Segment 1</span>
@@ -672,7 +693,7 @@ def generate_slides_html():
           </div>
 
           <!-- Segment 2: Clinics & Healthcare -->
-          <div class="card" style="display: flex; flex-direction: column; justify-content: space-between; padding: 15px 15px;">
+          <div class="card" style="display: flex; flex-direction: column; justify-content: space-between; padding: 10px 12px;">
             <div style="border-bottom: 1.5px solid #EFECE6; padding-bottom: 8px;">
               <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 4px;">
                 <span class="badge-pill">Segment 2</span>
@@ -720,7 +741,7 @@ def generate_slides_html():
           </div>
 
           <!-- Segment 3: Multi-Site Chains -->
-          <div class="card" style="display: flex; flex-direction: column; justify-content: space-between; padding: 15px 15px;">
+          <div class="card" style="display: flex; flex-direction: column; justify-content: space-between; padding: 10px 12px;">
             <div style="border-bottom: 1.5px solid #EFECE6; padding-bottom: 8px;">
               <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 4px;">
                 <span class="badge-pill">Segment 3</span>
@@ -768,7 +789,7 @@ def generate_slides_html():
           </div>
 
           <!-- Segment 4: Small Manufacturing -->
-          <div class="card" style="display: flex; flex-direction: column; justify-content: space-between; padding: 15px 15px;">
+          <div class="card" style="display: flex; flex-direction: column; justify-content: space-between; padding: 10px 12px;">
             <div style="border-bottom: 1.5px solid #EFECE6; padding-bottom: 8px;">
               <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 4px;">
                 <span class="badge-pill">Segment 4</span>
@@ -838,7 +859,7 @@ def generate_slides_html():
     # SLIDE 3 OF 7: PROPOSED SOLUTION & CPQ BUNDLE MATRIX
     # =============================================================
     s3 = f"""
-    <div class="slide">
+    <div class="slide slide-template-bg" style="background-image: url('{img_template_slide_b64}');">
       <div class="slide-header">
         <div class="slide-title-group">
           <h1>The Solution: 4 Ready Packs & Smart Budget Matching</h1>
@@ -851,7 +872,7 @@ def generate_slides_html():
         <!-- 4 Bundles -->
         <div class="grid-4" style="flex: 1;">
           
-          <div class="card" style="display: flex; flex-direction: column; justify-content: space-between; padding: 15px 15px;">
+          <div class="card" style="display: flex; flex-direction: column; justify-content: space-between; padding: 10px 12px;">
             <div>
               <div class="badge-pill" style="margin-bottom: 4px;">Kirana & Retail</div>
               <div style="font-size: 17px; font-weight: 900; color: #121316;">Udyam Vyapar</div>
@@ -859,25 +880,25 @@ def generate_slides_html():
               <div style="font-size: 10.5px; color: #7A7B7E; margin-bottom: 8px;">₹0 setup fee on 12-mo plan (Save ₹1,400)</div>
             </div>
 
-            <div style="background: #FAF8F5; border: 1px solid #EFECE6; padding: 10px 11px; border-radius: 6px;">
+            <div style="background: #FAF8F5; border: 1px solid #EFECE6; padding: 6px 8px; border-radius: 6px;">
               <div style="font-size: 9.5px; font-weight: 800; color: #5A5A5D; text-transform: uppercase;">Connectivity & Hardware</div>
-              <ul class="bullet-list" style="font-size: 11.5px; gap: 4px; margin-top: 3px;">
+              <ul class="bullet-list" style="font-size: 10px; gap: 2px; margin-top: 2px;">
                 <li><strong>100 Mbps Fixed Fiber:</strong> Unlimited symmetric pipe.</li>
                 <li><strong>Wi-Fi 6 Router:</strong> Supports 50+ concurrent devices.</li>
                 <li><strong>Airtel Soundbox:</strong> Instant voice audio checkouts.</li>
               </ul>
             </div>
 
-            <div style="background: #FAF8F5; border: 1px solid #EFECE6; padding: 10px 11px; border-radius: 6px;">
+            <div style="background: #FAF8F5; border: 1px solid #EFECE6; padding: 6px 8px; border-radius: 6px;">
               <div style="font-size: 9.5px; font-weight: 800; color: #5A5A5D; text-transform: uppercase;">Mobility & SLA Terms</div>
-              <ul class="bullet-list" style="font-size: 11.5px; gap: 4px; margin-top: 3px;">
+              <ul class="bullet-list" style="font-size: 10px; gap: 2px; margin-top: 2px;">
                 <li><strong>2x Business SIMs:</strong> 100GB pooled CUG data.</li>
                 <li><strong>Merchant UPI Priority:</strong> QoS priority packet queuing.</li>
                 <li><strong>4-Hour MTTR:</strong> Rapid local field restoration.</li>
               </ul>
             </div>
 
-            <div style="background: #FAF8F5; border: 1px solid #EFECE6; padding: 8px 11px; border-radius: 6px;">
+            <div style="background: #FAF8F5; border: 1px solid #EFECE6; padding: 5px 8px; border-radius: 6px;">
               <div style="font-size: 9.5px; font-weight: 800; color: #5A5A5D; text-transform: uppercase;">Value Proposition</div>
               <div style="font-size: 11px; color: #222225; margin-top: 2px;">
                 Replaces costly consumer hotspot with business-grade reliable connectivity at consumer pricing.
@@ -889,7 +910,7 @@ def generate_slides_html():
             </div>
           </div>
 
-          <div class="card" style="display: flex; flex-direction: column; justify-content: space-between; padding: 15px 15px;">
+          <div class="card" style="display: flex; flex-direction: column; justify-content: space-between; padding: 10px 12px;">
             <div>
               <div class="badge-pill" style="margin-bottom: 4px;">Clinics & Labs</div>
               <div style="font-size: 17px; font-weight: 900; color: #121316;">Udyam Professional</div>
@@ -897,25 +918,25 @@ def generate_slides_html():
               <div style="font-size: 10.5px; color: #7A7B7E; margin-bottom: 8px;">12-month commercial agreement</div>
             </div>
 
-            <div style="background: #FAF8F5; border: 1px solid #EFECE6; padding: 10px 11px; border-radius: 6px;">
+            <div style="background: #FAF8F5; border: 1px solid #EFECE6; padding: 6px 8px; border-radius: 6px;">
               <div style="font-size: 9.5px; font-weight: 800; color: #5A5A5D; text-transform: uppercase;">Connectivity & Hardware</div>
-              <ul class="bullet-list" style="font-size: 11.5px; gap: 4px; margin-top: 3px;">
+              <ul class="bullet-list" style="font-size: 10px; gap: 2px; margin-top: 2px;">
                 <li><strong>300 Mbps Dedicated Fiber:</strong> Zero-jitter consultations.</li>
                 <li><strong>Static IPv4 Address:</strong> EMR server & ABHA compliant.</li>
                 <li><strong>Wi-Fi 6 Gateway:</strong> Patient waiting room guest isolation.</li>
               </ul>
             </div>
 
-            <div style="background: #FAF8F5; border: 1px solid #EFECE6; padding: 10px 11px; border-radius: 6px;">
+            <div style="background: #FAF8F5; border: 1px solid #EFECE6; padding: 6px 8px; border-radius: 6px;">
               <div style="font-size: 9.5px; font-weight: 800; color: #5A5A5D; text-transform: uppercase;">Productivity & SLA Terms</div>
-              <ul class="bullet-list" style="font-size: 11.5px; gap: 4px; margin-top: 3px;">
+              <ul class="bullet-list" style="font-size: 10px; gap: 2px; margin-top: 2px;">
                 <li><strong>5x Google Workspace:</strong> Branded clinic emails.</li>
                 <li><strong>500GB Airtel Cloud:</strong> Automated daily backups.</li>
                 <li><strong>Guaranteed 99.9% SLA:</strong> Priority medical support desk.</li>
               </ul>
             </div>
 
-            <div style="background: #FAF8F5; border: 1px solid #EFECE6; padding: 8px 11px; border-radius: 6px;">
+            <div style="background: #FAF8F5; border: 1px solid #EFECE6; padding: 5px 8px; border-radius: 6px;">
               <div style="font-size: 9.5px; font-weight: 800; color: #5A5A5D; text-transform: uppercase;">Value Proposition</div>
               <div style="font-size: 11px; color: #222225; margin-top: 2px;">
                 Zero-liability health data compliance and 100% video telemedicine uptime guaranteed.
@@ -927,7 +948,7 @@ def generate_slides_html():
             </div>
           </div>
 
-          <div class="card" style="display: flex; flex-direction: column; justify-content: space-between; padding: 15px 15px;">
+          <div class="card" style="display: flex; flex-direction: column; justify-content: space-between; padding: 10px 12px;">
             <div>
               <div class="badge-pill" style="margin-bottom: 4px;">Multi-Store Chains</div>
               <div style="font-size: 17px; font-weight: 900; color: #121316;">Udyam Multi-Site</div>
@@ -935,25 +956,25 @@ def generate_slides_html():
               <div style="font-size: 10.5px; color: #7A7B7E; margin-bottom: 8px;">Multi-location single consolidated invoice</div>
             </div>
 
-            <div style="background: #FAF8F5; border: 1px solid #EFECE6; padding: 10px 11px; border-radius: 6px;">
+            <div style="background: #FAF8F5; border: 1px solid #EFECE6; padding: 6px 8px; border-radius: 6px;">
               <div style="font-size: 9.5px; font-weight: 800; color: #5A5A5D; text-transform: uppercase;">Connectivity & Hardware</div>
-              <ul class="bullet-list" style="font-size: 11.5px; gap: 4px; margin-top: 3px;">
+              <ul class="bullet-list" style="font-size: 10px; gap: 2px; margin-top: 2px;">
                 <li><strong>500 Mbps Fixed Fiber:</strong> Unlimited high-speed pipe.</li>
                 <li><strong>4G LTE Auto-Failover:</strong> &lt;2 second cutover gateway.</li>
                 <li><strong>Central SD-WAN:</strong> Unified routing across stores.</li>
               </ul>
             </div>
 
-            <div style="background: #FAF8F5; border: 1px solid #EFECE6; padding: 10px 11px; border-radius: 6px;">
+            <div style="background: #FAF8F5; border: 1px solid #EFECE6; padding: 6px 8px; border-radius: 6px;">
               <div style="font-size: 9.5px; font-weight: 800; color: #5A5A5D; text-transform: uppercase;">Security & Multi-Site SLA</div>
-              <ul class="bullet-list" style="font-size: 11.5px; gap: 4px; margin-top: 3px;">
+              <ul class="bullet-list" style="font-size: 10px; gap: 2px; margin-top: 2px;">
                 <li><strong>4-Cam Cloud AI CCTV:</strong> 30-day offsite recording.</li>
                 <li><strong>Central Cloud Portal:</strong> Live view of all branches.</li>
                 <li><strong>Single Monthly Bill:</strong> Zero vendor fragmentation.</li>
               </ul>
             </div>
 
-            <div style="background: #FAF8F5; border: 1px solid #EFECE6; padding: 8px 11px; border-radius: 6px;">
+            <div style="background: #FAF8F5; border: 1px solid #EFECE6; padding: 5px 8px; border-radius: 6px;">
               <div style="font-size: 9.5px; font-weight: 800; color: #5A5A5D; text-transform: uppercase;">Value Proposition</div>
               <div style="font-size: 11px; color: #222225; margin-top: 2px;">
                 Single pane of glass replaces 5+ fragmented local cable vendors with full POS failover protection.
@@ -965,7 +986,7 @@ def generate_slides_html():
             </div>
           </div>
 
-          <div class="card" style="display: flex; flex-direction: column; justify-content: space-between; padding: 15px 15px;">
+          <div class="card" style="display: flex; flex-direction: column; justify-content: space-between; padding: 10px 12px;">
             <div>
               <div class="badge-pill" style="margin-bottom: 4px;">Manufacturing</div>
               <div style="font-size: 17px; font-weight: 900; color: #121316;">Udyam Industrial</div>
@@ -973,25 +994,25 @@ def generate_slides_html():
               <div style="font-size: 10.5px; color: #7A7B7E; margin-bottom: 8px;">Enterprise SLA contract with dedicated RM</div>
             </div>
 
-            <div style="background: #FAF8F5; border: 1px solid #EFECE6; padding: 10px 11px; border-radius: 6px;">
+            <div style="background: #FAF8F5; border: 1px solid #EFECE6; padding: 6px 8px; border-radius: 6px;">
               <div style="font-size: 9.5px; font-weight: 800; color: #5A5A5D; text-transform: uppercase;">Connectivity & Hardware</div>
-              <ul class="bullet-list" style="font-size: 11.5px; gap: 4px; margin-top: 3px;">
+              <ul class="bullet-list" style="font-size: 10px; gap: 2px; margin-top: 2px;">
                 <li><strong>1 Gbps 1:1 Leased Line:</strong> Symmetric low-jitter pipe.</li>
                 <li><strong>Industrial IoT Box:</strong> Modbus/PLC telemetry bridge.</li>
                 <li><strong>Perimeter Cloud Firewall:</strong> Layer-7 cyber defense.</li>
               </ul>
             </div>
 
-            <div style="background: #FAF8F5; border: 1px solid #EFECE6; padding: 10px 11px; border-radius: 6px;">
+            <div style="background: #FAF8F5; border: 1px solid #EFECE6; padding: 6px 8px; border-radius: 6px;">
               <div style="font-size: 9.5px; font-weight: 800; color: #5A5A5D; text-transform: uppercase;">Security & Mission-Critical SLA</div>
-              <ul class="bullet-list" style="font-size: 11.5px; gap: 4px; margin-top: 3px;">
+              <ul class="bullet-list" style="font-size: 10px; gap: 2px; margin-top: 2px;">
                 <li><strong>99.95% Availability SLA:</strong> 2-Hour on-site MTTR.</li>
                 <li><strong>Dedicated RM:</strong> Direct line to NOC engineers.</li>
                 <li><strong>Zero CNC Stoppages:</strong> Hardware-level packet priority.</li>
               </ul>
             </div>
 
-            <div style="background: #FAF8F5; border: 1px solid #EFECE6; padding: 8px 11px; border-radius: 6px;">
+            <div style="background: #FAF8F5; border: 1px solid #EFECE6; padding: 5px 8px; border-radius: 6px;">
               <div style="font-size: 9.5px; font-weight: 800; color: #5A5A5D; text-transform: uppercase;">Value Proposition</div>
               <div style="font-size: 11px; color: #222225; margin-top: 2px;">
                 Protects heavy CNC and automated machinery from micro-stoppages and expensive factory tooling damage.
@@ -1006,7 +1027,7 @@ def generate_slides_html():
         </div>
 
         <!-- Reverse Budget Optimizer Card -->
-        <div class="card-beige" style="display: flex; gap: 28px; align-items: center; padding: 16px 22px;">
+        <div class="card-beige" style="display: flex; gap: 28px; align-items: center; padding: 12px 18px; margin-right: 280px;">
           <div style="flex: 1.2;">
             <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 4px;">
               <span class="badge-pill" style="background: #121316;">Reverse Budget Solver</span>
@@ -1043,7 +1064,7 @@ def generate_slides_html():
     # SLIDE 4 OF 7: TECHNICAL SYSTEM ARCHITECTURE
     # =============================================================
     s4 = f"""
-    <div class="slide">
+    <div class="slide slide-template-bg" style="background-image: url('{img_template_slide_b64}');">
       <div class="slide-header">
         <div class="slide-title-group">
           <h1>System Architecture: The 4-Step Acquisition Pipeline</h1>
@@ -1055,17 +1076,17 @@ def generate_slides_html():
       <div class="slide-content" style="align-items: center; justify-content: space-between;">
         
         <!-- Large High-Resolution Architecture Diagram -->
-        <div style="width: 100%; display: flex; justify-content: center; background: #FFFFFF; border: 1.5px solid #DDD8CE; border-radius: 12px; padding: 12px; box-shadow: 0 4px 16px rgba(0,0,0,0.02);">
-          <img src="{img_arch_b64}" style="max-height: 640px; width: 100%; object-fit: contain;">
+        <div style="width: 100%; height: 620px; display: flex; justify-content: center; align-items: center; background: #FFFFFF; border: 1.5px solid #DDD8CE; border-radius: 12px; padding: 10px; box-shadow: 0 4px 16px rgba(0,0,0,0.02);">
+          <img src="{img_arch_b64}" style="max-height: 600px; width: 100%; object-fit: contain;">
         </div>
 
         <!-- Architectural Highlights Banner -->
-        <div class="card-beige" style="width: 100%; padding: 12px 20px; display: flex; justify-content: space-between; align-items: center;">
-          <div style="display: flex; gap: 24px; font-size: 12px; width: 100%; justify-content: space-between;">
-            <div><strong>Stage 1 Discovery:</strong> Universal Multilingual AI + Session Language Inertia + sub-50ms greeting fast-path</div>
+        <div class="card-beige" style="width: 100%; padding: 10px 18px; box-sizing: border-box;">
+          <div style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; font-size: 11px; line-height: 1.35;">
+            <div><strong>Stage 1 Discovery:</strong> Universal Multilingual AI + Session Language Inertia + sub-50ms greeting</div>
             <div><strong>Stage 2 CPQ DAG:</strong> &lt;0.5ms solver + Hard GSTIN firewall blocks ineligible SKUs</div>
-            <div><strong>Stage 3 Smart KYC:</strong> In-memory DPDP redaction + RapidFuzz entity matching + anchor date 2026-07-15</div>
-            <div><strong>Stage 4 Payments & Fulfillment:</strong> NPCI Dynamic UPI / Razorpay HMAC + BlueDart AWB Logistics + SQLite WAL persistence</div>
+            <div><strong>Stage 3 Smart KYC:</strong> In-memory DPDP redaction + RapidFuzz matching + anchor date 2026-07-15</div>
+            <div><strong>Stage 4 Fulfillment:</strong> NPCI Dynamic UPI / Razorpay HMAC + BlueDart AWB + SQLite WAL</div>
           </div>
         </div>
 
@@ -1084,7 +1105,7 @@ def generate_slides_html():
     # SLIDE 5 OF 7: WORKING PROTOTYPE IN ACTION (LIVE SCREENSHOTS)
     # =============================================================
     s5 = f"""
-    <div class="slide">
+    <div class="slide slide-template-bg" style="background-image: url('{img_template_slide_b64}');">
       <div class="slide-header">
         <div class="slide-title-group">
           <h1>Working Prototype: Live Software Walkthrough</h1>
@@ -1229,7 +1250,7 @@ def generate_slides_html():
     # SLIDE 6 OF 7: DETAILED COMPETITIVE ANALYSIS & ACCEL MOAT
     # =============================================================
     s6 = f"""
-    <div class="slide">
+    <div class="slide slide-template-bg" style="background-image: url('{img_template_slide_b64}');">
       <div class="slide-header">
         <div class="slide-title-group">
           <h1>Competitive Advantage: Why Accel Business Wins</h1>
@@ -1360,7 +1381,7 @@ def generate_slides_html():
     # SLIDE 7 OF 7: QUANTIFIED BUSINESS IMPACT & 12-MONTH ROLLOUT
     # =============================================================
     s7 = f"""
-    <div class="slide">
+    <div class="slide slide-template-bg" style="background-image: url('{img_template_slide_b64}');">
       <div class="slide-header">
         <div class="slide-title-group">
           <h1>Quantified Business Impact & 12-Month Rollout</h1>
