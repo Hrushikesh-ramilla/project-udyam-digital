@@ -72,3 +72,8 @@ problem.zip
 visual_audit/
 
 official_demo_recording/
+test_video/
+temp_*.txt
+ui_*.txt
+*.webm
+
