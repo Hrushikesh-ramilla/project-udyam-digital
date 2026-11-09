@@ -2,7 +2,7 @@ from __future__ import annotations
 
 from pathlib import Path
 from typing import Optional
-from fastapi import FastAPI, File, Form, HTTPException, UploadFile
+from fastapi import FastAPI, File, Form, HTTPException, UploadFile, Header
 from fastapi.responses import FileResponse
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
@@ -85,7 +85,7 @@ def get_products():
 
 
 @app.post("/api/advisor/chat", response_model=AdvisorResponse)
-def advisor_chat(req: ChatRequest):
+def advisor_chat(req: ChatRequest, x_session_id: Optional[str] = Header(None, alias="X-Session-ID")):
     return advisor.process_turn(
         req.user_message,
         req.previous_slots,
@@ -96,7 +96,7 @@ def advisor_chat(req: ChatRequest):
 
 
 @app.post("/api/cpq/calculate", response_model=CommercialBreakdown)
-def calculate_quote(req: CalculateQuoteRequest):
+def calculate_quote(req: CalculateQuoteRequest, x_session_id: Optional[str] = Header(None, alias="X-Session-ID")):
     try:
         return cpq.calculate_commercials(req.cart, contract_months=req.contract_months, strict_dag=True)
     except Exception as e:
@@ -109,7 +109,7 @@ def optimize_budget(req: OptimizeBudgetRequest):
 
 
 @app.post("/api/kyc/verify", response_model=KYCVerificationResult)
-def verify_kyc(req: KYCVerifyAPIRequest):
+def verify_kyc(req: KYCVerifyAPIRequest, x_session_id: Optional[str] = Header(None, alias="X-Session-ID")):
     data_dir = Path("data/kyc_documents")
     docs: dict[str, bytes] = {}
 
@@ -194,14 +194,27 @@ def get_partner_rescue_leads(limit: int = 30, stage: Optional[str] = None):
 
 @app.post("/api/orders", response_model=ProvisioningOrder)
 @app.post("/api/order/create", response_model=ProvisioningOrder)
-def create_order(req: CreateOrderRequest):
+def create_order(
+    req: CreateOrderRequest,
+    x_session_id: Optional[str] = Header(None, alias="X-Session-ID"),
+):
     return tracker.create_order(
         business_name=req.business_name,
         bundle_name=req.bundle_name,
         monthly_charge_inr=req.monthly_charge_inr,
         total_sla_days=req.total_sla_days,
         partner_id=req.partner_id,
+        session_id=x_session_id,
     )
+
+
+@app.get("/api/orders", response_model=list[ProvisioningOrder])
+@app.get("/api/order/list", response_model=list[ProvisioningOrder])
+def list_orders(
+    limit: int = 50,
+    x_session_id: Optional[str] = Header(None, alias="X-Session-ID"),
+):
+    return tracker.list_orders(limit=limit, session_id=x_session_id)
 
 
 @app.post("/api/orders/{order_id}/advance", response_model=ProvisioningOrder)
@@ -215,8 +228,11 @@ def advance_order_stage(order_id: str):
 
 @app.get("/api/orders/{order_id}", response_model=ProvisioningOrder)
 @app.get("/api/order/{order_id}", response_model=ProvisioningOrder)
-def get_order_status(order_id: str):
-    order = tracker.get_order(order_id)
+def get_order_status(
+    order_id: str,
+    x_session_id: Optional[str] = Header(None, alias="X-Session-ID"),
+):
+    order = tracker.get_order(order_id, session_id=x_session_id)
     if not order:
         raise HTTPException(status_code=404, detail="Order not found")
     return order
