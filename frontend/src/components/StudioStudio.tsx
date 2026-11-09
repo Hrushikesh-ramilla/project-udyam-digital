@@ -693,13 +693,13 @@ export const StudioStudio: React.FC<StudioStudioProps> = ({
                     <FormattedChatText text={displayedText} />
 
                     {/* Issue #14: Interactive In-Chat CTA Card */}
-                    {!isUser && (m.quote || (quote && (m.recommendedSkus?.length || 0) > 0)) && (
+                    {!isUser && ((m.quote && (m.recommendedSkus?.length || 0) > 0) || (quote && (m.recommendedSkus?.length || 0) > 0)) && (
                       <div className="mt-2.5 pt-2.5 border-t border-white/[0.08] space-y-2">
                         <div className="p-3 rounded-xl bg-gradient-to-r from-white/[0.04] to-white/[0.02] border border-white/[0.08] flex flex-col sm:flex-row sm:items-center justify-between gap-3">
                           <div className="space-y-0.5">
                             <div className="flex items-center space-x-1.5 text-[10px] font-mono text-[#d9ad63] uppercase tracking-wider">
                               <Sparkles className="w-3 h-3 text-[#d9ad63]" />
-                              <span>Configured Plan Confirmed</span>
+                              <span>Recommended Enterprise Solution</span>
                             </div>
                             <div className="text-xs font-semibold text-white">
                               {(m.quote || quote)?.items.map((i) => i.product_name).join(" + ") || "Enterprise Connectivity Pack"} · ₹{(m.quote || quote)?.net_mrc_inr.toLocaleString()}/mo

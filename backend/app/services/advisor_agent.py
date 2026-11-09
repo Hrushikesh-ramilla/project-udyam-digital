@@ -70,7 +70,6 @@ class AdvisorAgent:
         data_bytes = json.dumps(payload).encode("utf-8")
         models = [
             "gemini-flash-lite-latest",
-            "gemini-2.5-flash-lite",
             "gemini-flash-latest",
         ]
 
@@ -194,11 +193,15 @@ INSTRUCTIONS FOR YOUR CONVERSATIONAL RESPONSE:
      * Inform them with excitement that their selected bundle has been locked in and pre-hydrated into the Dynamic Cart ("Configured Solution Architecture") right below this chat window.
      * Explain clearly: To finalize the order and generate their official database Order ID with dispatch tracking, they must scroll down to the Cart and click "Accept Quote & Start Smart KYC" (or click the button in this chat).
      * Once Smart KYC is verified, their real order is created in SQLite and live engineer dispatch tracking begins!
-9. Provide:
-   - "display_latin": Conversational markdown in matching Romanized Indic dialect (English alphabet) or English.
-   - "display_native": Conversational markdown in authentic native Indic script (Telugu/Hindi/Tamil etc.).
-   - "spoken_tts": Plain-text conversational audio summary (1-2 sentences, zero markdown symbols like *, #, []).
-   - "recommended_skus": list of 1 to 4 product IDs matching the best plan discussed (e.g. ["P04", "P22"] or ["P01", "P09"]).
+10. PLAN RECOMMENDATION & SKU DISCIPLINE:
+    - "recommended_skus": List of 1 to 4 product IDs ONLY when actively recommending a tailored solution because:
+      (a) The user provided their business context and you are recommending a specific package, OR
+      (b) The user explicitly requested plan recommendations, comparisons, or specific product pricing.
+    - CRITICAL ZERO-PREMATURE RECOMMENDATION RULE:
+      If the user is just saying hello ("hi", "hiii", "hello", "namaste", "good morning"), making casual small talk, asking general questions (e.g. "what is airfiber", "how does failover work"), or if slots are still being discovered without an explicit recommendation request:
+      YOU MUST SET "recommended_skus": [].
+      NEVER attach products or plans on a greeting or informational discovery turn!
+
    - Extract business profile slots if mentioned or implied.
 
 Return STRICTLY valid JSON:
@@ -206,7 +209,7 @@ Return STRICTLY valid JSON:
   "display_latin": "Conversational markdown in matching Romanized Indic dialect or English",
   "display_native": "Conversational markdown in native Indic script",
   "spoken_tts": "Conversational plain text voice readout",
-  "recommended_skus": ["P04", "P22"],
+  "recommended_skus": [],
   "segment": "micro" | "prof" | "multi" | "mfg" | null,
   "city_tier": 1 | 2 | 3 | null,
   "employee_count": integer or null,
@@ -674,10 +677,23 @@ Return STRICTLY valid JSON:
         is_foreign = bool(re.search(r"^(hola|bonjour|ciao|aloha|hallo|salut|wie\s*gehts|que\s*tal|konnichiwa|privet|merhaba|sawasdee)\b", clean_msg))
         is_unrelated = bool(re.search(r"\b(recipe|biryani|butter\s*chicken|cook|weather|monsoon|rain|poem|movie|sci-fi|python|binary\s*search|code|joke|capital\s*of|capital\s*city|who\s*won)\b", clean_msg))
         is_terse = clean_msg in {"internet", "broadband", "plans", "price", "how much", "speed", "enterprise", "connection", "quote", "airtel"}
-        is_greeting = bool(re.search(r"^(hey|hi|hello|whats\s*up|what\'s\s*up|good\s*(morning|evening|afternoon)|yo|sup|bhai|bhaiya)\b", clean_msg)) or bool(re.search(r"\b(bagunnara|bagunara|ela\s*unnaru|ela\s*unnav|namaskaram|namasthe|vanakkam|eppadi\s*iruk|kemon\s*ac|kem\s*cho|kase\s*ahat|hegidd|sukhamano|kemiti\s*ach|kaise\s*ho|kya\s*haal|namaste|నమస్కారం|నమస్తే|బాగున్నారా|வணக்கம்|நமஸ்கார்|নমস্কার|નમસ્તે|नमस्कार|ನಮಸ್ಕಾರ|നമസ്കാരം|ନମସ୍କାର)\b", clean_msg))
+        is_greeting = bool(re.search(
+            r"^(h+e+y+|h+i+|h+e+l+o+|h+o+l+a+|whats\s*up|what\'s\s*up|good\s*(morning|evening|afternoon)|yo+|sup|bhai|bhaiya|namaste|namaskar|namasthe|pranam)\b",
+            clean_msg
+        )) or bool(re.search(
+            r"\b(bagunnara|bagunara|ela\s*unnaru|ela\s*unnav|namaskaram|namasthe|vanakkam|eppadi\s*iruk|kemon\s*ac|kem\s*cho|kase\s*ahat|hegidd|sukhamano|kemiti\s*ach|kaise\s*ho|kya\s*haal|namaste|నమస్కారం|నమస్తే|బాగున్నారా|வணக்கம்|நமஸ்கார்|নমস্কার|નમસ્તે|नमस्कार|ನಮಸ್ಕಾರ|നമസ്കാരം|ନମସ୍କାର)\b",
+            clean_msg
+        ))
 
-        # Fast-path for simple 1-4 word conversational greetings (instant <50ms handshake)
-        is_simple_greeting = is_greeting and not is_question and not is_comparison and not slots.segment and not slots.city_tier and not slots.employee_count and len(clean_msg.split()) <= 4
+        # Check if question is merely conversational courtesy ("how are you", "kaise ho", etc.)
+        is_casual_courtesy = bool(re.search(
+            r"\b(how\s*(?:are|r)\s*(?:you|u)|how\s*do\s*you\s*do|how\s*is\s*it\s*going|kaise\s*ho|kya\s*haal|ela\s*unnaru|eppadi\s*iruk)\b",
+            clean_msg
+        ))
+        is_telecom_question = is_question and not is_casual_courtesy
+
+        # Fast-path for simple 1-6 word conversational greetings (instant <50ms handshake)
+        is_simple_greeting = is_greeting and not is_telecom_question and not is_comparison and not slots.segment and not slots.city_tier and not slots.employee_count and len(clean_msg.split()) <= 6
         if is_simple_greeting:
             f_latin, f_native, f_tts = self._generate_human_fallback(
                 user_message, clean_msg, active_lang, effective_script, slots,
@@ -774,25 +790,51 @@ Return STRICTLY valid JSON:
             # Ensure order placement intent guides user to Cart & KYC instead of fake booking
             if re.search(r"\b(order\s*placed\s*and\s*sealed|order\s*is\s*officially\s*in\s*our\s*system)\b", disp_lat, re.IGNORECASE):
                 disp_lat += "\n\nTo officially finalize this order and activate live dispatch tracking, please scroll down to the **Dynamic Cart** below and click **'Accept Quote & Start Smart KYC'**."
+            # Check explicit plan intent
+            # Check informational / educational questions
+            is_info_question = bool(re.search(
+                r"^\s*(what\s*is|what\s*are|explain|tell\s*me\s*about|tell\s*me\s*more|how\s*does|difference\s*between|meaning\s*of|kya\s*hai|enti)\b",
+                clean_msg
+            ))
+            # Check explicit plan intent
+            is_explicit_rec_request = bool(re.search(
+                r"\b(recommend|suggest|show\s*(?:me\s*)?(?:the\s*)?plans?|what\s*(?:plan|package|bundle|option)\s*(?:is|do\s*you|suits?|fits?|best)|quote|pricing\s*for|best\s*plan|give\s*me\s*a\s*plan|which\s*plan|compare)\b",
+                clean_msg
+            ))
+            is_order_intent = bool(re.search(
+                r"\b(place\s*(?:the\s*)?order|book\s*(?:it|now)?|order\s*(?:kardo|cheyandi|pannunga|kora)|lock\s*(?:this\s*)?in|buy\s*now|proceed\s*to\s*order|so\s*u\s*placed\s*order)\b",
+                clean_msg
+            ))
+            is_explicit_selection = bool(re.search(
+                r"\b(i\s*want|i\s*need|give\s*me|setup|configure|choose|select|opt\s*for|go\s*with|install|book|order|take|lock\s*in)\b",
+                clean_msg
+            )) or bool(re.search(r"\b(P0[1-9]|P1[0-9]|P2[0-5])\b", user_message))
+
+            has_explicit_plan_intent = (bool(turn_skus) and is_explicit_selection and not is_info_question) or is_explicit_rec_request or is_order_intent
+
             gem_skus = gemini_data.get("recommended_skus") or []
             valid_skus = [s for s in gem_skus if self.db.get_product(s)]
-            if turn_skus and ("P06" in turn_skus or len(turn_skus) >= len(valid_skus)):
-                valid_skus = [s for s in turn_skus if self.db.get_product(s)]
-            elif not valid_skus:
-                if turn_skus:
+
+            # CRITICAL ENFORCEMENT: Never attach SKUs or quote on greetings, small talk, or unprompted incomplete discovery
+            if is_greeting or is_unrelated or is_foreign or (not slots.is_complete and not has_explicit_plan_intent):
+                valid_skus = []
+            else:
+                if turn_skus and ("P06" in turn_skus or len(turn_skus) >= len(valid_skus)):
                     valid_skus = [s for s in turn_skus if self.db.get_product(s)]
-                else:
-                    valid_skus = self._select_skus_for_slots(slots)
+                elif not valid_skus and (slots.is_complete or has_explicit_plan_intent):
+                    if turn_skus:
+                        valid_skus = [s for s in turn_skus if self.db.get_product(s)]
+                    else:
+                        valid_skus = self._select_skus_for_slots(slots)
 
             # Deterministic CPQ Engine execution for live commercials & cart sync
             quote = None
-            if slots.is_complete or len(valid_skus) > 0:
+            if len(valid_skus) > 0 and (slots.is_complete or has_explicit_plan_intent):
                 try:
                     cart_items = [CartItem(product_id=s) for s in valid_skus]
                     quote = self.cpq.calculate_commercials(cart_items, contract_months=12, strict_dag=True)
                 except Exception as e:
                     logging.warning("CPQ calculation on Gemini SKUs failed: %s", e)
-
             disp_lat = self._enforce_price_guardrails(disp_lat, quote)
             disp_nat = self._enforce_price_guardrails(disp_nat, quote)
             pure_latin, pure_native = ensure_dual_scripts(disp_lat, disp_nat, active_lang)

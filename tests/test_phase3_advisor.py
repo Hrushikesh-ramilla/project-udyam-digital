@@ -379,3 +379,41 @@ def test_cpq_explainability_reason_codes():
         assert item.reason_code is not None, f"Missing reason_code for {item.product_id}"
         assert item.reason_explanation is not None, f"Missing reason_explanation for {item.product_id}"
         assert len(item.reason_explanation) > 10, f"Explanation too terse for {item.product_id}"
+
+
+def test_greeting_and_discovery_turns_suppress_premature_quotes_and_skus(advisor: AdvisorAgent):
+    """Verifies that greetings (including informal 'HIII', 'heyy'), small talk,
+    educational questions ('what is airfiber?'), and incomplete profile turns
+    NEVER return premature SKU recommendations or CPQ quotes.
+    """
+    greetings = ["HIII", "hi", "heyyyy", "hellooo", "namaste", "good morning", "hello how are you"]
+    for g in greetings:
+        res = advisor.process_turn(g)
+        assert res.slots.is_complete is False, f"Slots should be incomplete on greeting: {g}"
+        assert res.quote is None, f"Quote must be None on greeting: {g}, got: {res.quote}"
+        assert res.recommended_skus == [], f"recommended_skus must be empty on greeting: {g}, got: {res.recommended_skus}"
+        assert len(res.display_markdown) > 10, f"Response too short on greeting: {g}"
+
+    # Educational / Informational question
+    res_info = advisor.process_turn("what is airfiber?")
+    assert res_info.slots.is_complete is False
+    assert res_info.quote is None
+    assert res_info.recommended_skus == []
+
+    # Incomplete slot turn (partial profile)
+    res_partial = advisor.process_turn("I have a medical clinic in Mumbai")
+    assert res_partial.slots.is_complete is False
+    assert res_partial.quote is None
+    assert res_partial.recommended_skus == []
+
+    # Explicit plan recommendation request with complete slots returns skus & quote
+    res_complete = advisor.process_turn("Recommend a plan for retail shop in Tier 2 with no GST")
+    assert res_complete.slots.is_complete is True
+    assert res_complete.quote is not None
+    assert len(res_complete.recommended_skus) > 0
+
+    # Incomplete recommendation request prompts for missing GST status
+    res_incomplete = advisor.process_turn("Recommend a plan for retail shop")
+    assert res_incomplete.slots.is_complete is False
+    assert res_incomplete.quote is None
+    assert res_incomplete.recommended_skus == []
