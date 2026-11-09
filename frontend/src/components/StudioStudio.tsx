@@ -19,6 +19,8 @@ import {
   RotateCcw,
   Bot,
   User,
+  Mic,
+  MicOff,
 } from "lucide-react";
 import { ProductItem, CommercialBreakdown, MSMEProfileSlots } from "../types";
 import { fetchProducts, calculateQuote, optimizeBudget, sendChatMessage } from "../api";
@@ -55,6 +57,20 @@ const INDIC_LANGS = [
   { code: "hi", native: "हिन्दी", latinName: "Hindi" },
   { code: "en", native: "English", latinName: "English" },
 ];
+
+const BCP47_LANG_MAP: Record<string, string> = {
+  auto: "en-IN",
+  hi: "hi-IN",
+  te: "te-IN",
+  ta: "ta-IN",
+  bn: "bn-IN",
+  gu: "gu-IN",
+  mr: "mr-IN",
+  kn: "kn-IN",
+  ml: "ml-IN",
+  or: "or-IN",
+  en: "en-IN",
+};
 
 const GREETINGS: Record<
   string,
@@ -203,6 +219,68 @@ export const StudioStudio: React.FC<StudioStudioProps> = ({
   const [scriptMode, setScriptMode] = useState<"latin" | "native">("latin");
   const [input, setInput] = useState("");
   const [loading, setLoading] = useState(false);
+  const [isListening, setIsListening] = useState(false);
+  const recognitionRef = useRef<any>(null);
+
+  useEffect(() => {
+    return () => {
+      if (recognitionRef.current) {
+        recognitionRef.current.stop();
+      }
+    };
+  }, []);
+
+  const toggleSpeechRecognition = () => {
+    if (isListening) {
+      if (recognitionRef.current) {
+        recognitionRef.current.stop();
+      }
+      setIsListening(false);
+      return;
+    }
+
+    const SpeechRec =
+      (window as any).SpeechRecognition ||
+      (window as any).webkitSpeechRecognition;
+
+    if (!SpeechRec) {
+      alert("Speech recognition is not supported in this browser. Please use Chrome or Edge.");
+      return;
+    }
+
+    try {
+      const recognition = new SpeechRec();
+      recognition.lang = BCP47_LANG_MAP[selectedLang] || "en-IN";
+      recognition.interimResults = true;
+      recognition.continuous = false;
+
+      recognition.onstart = () => {
+        setIsListening(true);
+      };
+
+      recognition.onresult = (event: any) => {
+        const transcript = Array.from(event.results)
+          .map((result: any) => (result as any)[0].transcript)
+          .join("");
+        setInput(transcript);
+      };
+
+      recognition.onerror = (event: any) => {
+        console.warn("Speech recognition error:", event.error);
+        setIsListening(false);
+      };
+
+      recognition.onend = () => {
+        setIsListening(false);
+      };
+
+      recognitionRef.current = recognition;
+      recognition.start();
+    } catch (err) {
+      console.error("Speech recognition start failed:", err);
+      setIsListening(false);
+    }
+  };
 
   // Chat message history (WhatsApp / ChatGPT preserved thread)
   const [messages, setMessages] = useState<ChatMessage[]>([]);
@@ -683,19 +761,35 @@ export const StudioStudio: React.FC<StudioStudioProps> = ({
         )}
 
         {/* Input Bar */}
-        <div className="flex items-center space-x-3 bg-slate-900/90 rounded-2xl p-2.5 border border-slate-700/80 focus-within:border-[#e40000] transition-colors shadow-inner">
+        <div className="flex items-center space-x-2.5 bg-slate-900/90 rounded-2xl p-2.5 border border-slate-700/80 focus-within:border-[#e40000] transition-colors shadow-inner">
           <input
             type="text"
             value={input}
             onChange={(e) => setInput(e.target.value)}
             onKeyDown={(e) => e.key === "Enter" && handleSend()}
             placeholder={
-              scriptMode === "latin"
+              isListening
+                ? "Listening... speak now in your regional language..."
+                : scriptMode === "latin"
                 ? "Type a message..."
                 : "Type or speak in any language worldwide (English, Hindi, Telugu, Spanish, French, etc.)..."
             }
             className="flex-1 bg-transparent px-4 py-2 text-sm text-white placeholder-slate-500 focus:outline-none font-medium"
           />
+          <motion.button
+            whileHover={{ scale: 1.05 }}
+            whileTap={{ scale: 0.95 }}
+            type="button"
+            onClick={toggleSpeechRecognition}
+            title={isListening ? "Listening... click to stop" : `Voice input in ${selectedLang === "auto" ? "English / Indic" : selectedLang}`}
+            className={`p-3 rounded-xl transition-all cursor-pointer ${
+              isListening
+                ? "bg-red-500 text-white animate-pulse shadow-[0_0_16px_rgba(239,68,68,0.6)]"
+                : "bg-slate-800 hover:bg-slate-700 text-slate-300 border border-slate-700"
+            }`}
+          >
+            {isListening ? <MicOff className="w-4 h-4" /> : <Mic className="w-4 h-4" />}
+          </motion.button>
           <motion.button
             whileHover={{ scale: 1.05 }}
             whileTap={{ scale: 0.95 }}
@@ -764,22 +858,30 @@ export const StudioStudio: React.FC<StudioStudioProps> = ({
               {quote.items.map((item) => (
                 <div
                   key={item.product_id}
-                  className="flex items-center justify-between p-3 rounded-xl bg-slate-900/80 border border-slate-700/60"
+                  className="flex flex-col justify-between p-3 rounded-xl bg-slate-900/80 border border-slate-700/60 gap-1.5"
                 >
-                  <div className="flex items-center space-x-2.5 min-w-0">
-                    <CheckCircle2 className="w-4 h-4 text-[#e40000] shrink-0" />
-                    <div className="truncate">
-                      <div className="text-xs font-medium text-white truncate">
-                        {item.product_name}
-                      </div>
-                      <div className="text-[10px] text-slate-300 font-mono">
-                        {item.product_id} · SLA {item.install_days}d
+                  <div className="flex items-start justify-between w-full">
+                    <div className="flex items-center space-x-2.5 min-w-0">
+                      <CheckCircle2 className="w-4 h-4 text-[#e40000] shrink-0 mt-0.5" />
+                      <div className="truncate">
+                        <div className="text-xs font-medium text-white truncate">
+                          {item.product_name}
+                        </div>
+                        <div className="text-[10px] text-slate-300 font-mono">
+                          {item.product_id} · SLA {item.install_days}d
+                        </div>
                       </div>
                     </div>
+                    <span className="text-xs font-mono text-white shrink-0 ml-2">
+                      ₹{item.total_mrc_inr}/mo
+                    </span>
                   </div>
-                  <span className="text-xs font-mono text-white shrink-0 ml-2">
-                    ₹{item.total_mrc_inr}/mo
-                  </span>
+                  {item.reason_explanation && (
+                    <div className="flex items-center gap-1.5 text-[9.5px] text-amber-300/90 font-mono bg-amber-500/10 px-2 py-1 rounded-md border border-amber-500/20">
+                      <Sparkles className="w-2.5 h-2.5 text-amber-400 shrink-0" />
+                      <span className="line-clamp-2 leading-tight">{item.reason_explanation}</span>
+                    </div>
+                  )}
                 </div>
               ))}
             </div>

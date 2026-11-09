@@ -42,6 +42,8 @@ export interface CartItemBreakdown {
   total_otc_inr: number;
   install_days: number;
   requires_gstin: boolean;
+  reason_code?: string;
+  reason_explanation?: string;
 }
 
 export interface DependencyLock {
@@ -151,3 +153,30 @@ export interface JudgeScenarioResult {
   verification_result: KYCVerificationResult;
 }
 
+
+export interface LiveBenchmarkResult {
+  status: string;
+  timestamp: string;
+  benchmarks: {
+    cpq_dag_solver_ms: number;
+    reverse_budget_optimizer_ms: number;
+    kyc_anomaly_engine_ms: number;
+    sqlite_wal_persistence_ms: number;
+    lightgbm_inference_ms: number;
+  };
+  model_card: {
+    model_type: string;
+    test_auc: number;
+    dataset_rows: number;
+    class_imbalance_ratio: number;
+    top_quintile_conversion_rate: string;
+    marginal_cac: string;
+    recovered_arr_potential: string;
+  };
+  system_invariants: {
+    dpdp_act_compliance: string;
+    evaluation_anchor_date: string;
+    gstin_firewall_status: string;
+    session_language_inertia: string;
+  };
+}

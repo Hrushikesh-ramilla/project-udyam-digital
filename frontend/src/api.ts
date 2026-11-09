@@ -324,3 +324,10 @@ export async function triggerHardwareDispatch(orderId: string): Promise<Logistic
   if (!res.ok) throw new Error("Failed to trigger hardware dispatch");
   return await res.json();
 }
+
+
+export async function fetchLiveBenchmarks(): Promise<any> {
+  const res = await fetch(`${API_BASE}/benchmarks/run`);
+  if (!res.ok) throw new Error("Failed to run live system benchmarks");
+  return await res.json();
+}

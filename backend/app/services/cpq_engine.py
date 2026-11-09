@@ -15,6 +15,35 @@ from backend.app.models.schemas import (
 
 BASE_CONNECTIVITY_SKUS = {"P01", "P02", "P03", "P04", "P05", "P06"}
 
+PRODUCT_EXPLANATIONS: dict[str, tuple[str, str]] = {
+    "P01": ("base_fiber_100", "High-speed symmetric 100M enterprise broadband with 99.9% uptime SLA"),
+    "P02": ("base_fiber_300", "Fast 300M fiber connectivity for concurrent multi-terminal business workflows"),
+    "P03": ("gigabit_fiber_1g", "Ultra-fast 1G symmetric pipeline for data-intensive enterprise operations"),
+    "P04": ("airfiber_5g", "Instant wireless 5G AirFiber deployment bypassing physical cable constraints"),
+    "P05": ("leased_line_100", "Dedicated 1:1 CIR leased line with sub-5ms low latency and 99.95% uptime SLA"),
+    "P06": ("leased_line_1g", "Enterprise backbone leased line with guaranteed 1G symmetric dedicated bandwidth"),
+    "P07": ("dual_wan_failover", "Automatic 4G cellular backup preventing revenue loss during cable cuts"),
+    "P08": ("sdwan_branch", "Centrally managed SD-WAN secure tunnel interconnecting distributed branches"),
+    "P09": ("wifi_6_router", "Dual-band Wi-Fi 6 router providing secure guest network isolation"),
+    "P10": ("mesh_extender", "Extended high-density Wi-Fi coverage across multi-floor business premises"),
+    "P11": ("static_ip", "Fixed static IP required for remote CCTV access, billing servers, and biometric attendance"),
+    "P12": ("cloud_firewall", "Cloud firewall actively blocking malware, ransomware, and unauthorized intrusions"),
+    "P13": ("enterprise_dns", "Content-filtering DNS protecting internal workstations against phishing scams"),
+    "P14": ("cloud_office_pro", "Professional cloud productivity suite with corporate email and audit compliance"),
+    "P15": ("enterprise_email", "Custom domain secure business email with 50GB storage and spam protection"),
+    "P16": ("cloud_backup_1tb", "Automated off-site cloud backup protecting financial accounts and GST invoices"),
+    "P17": ("cloud_backup_5tb", "High-capacity automated backup for multi-terabyte ERP and customer archives"),
+    "P18": ("cloud_vps_standard", "Reliable cloud virtual server for hosting local accounting and inventory software"),
+    "P19": ("cloud_vps_pro", "High-compute cloud instance for multi-user database and ERP processing"),
+    "P20": ("cloud_pbx_ivr", "Smart multi-level IVR receptionist routing incoming customer phone calls"),
+    "P21": ("toll_free_1800", "National 1800 toll-free number building corporate credibility across India"),
+    "P22": ("cloud_cctv_ai", "AI camera intelligence detecting counter intrusions and retail theft prevention"),
+    "P23": ("iot_asset_tracker", "Real-time GPS asset telemetry tracking fleet and warehouse shipments"),
+    "P24": ("smart_energy_meter", "Smart telemetry tracking peak power consumption and electrical overload alerts"),
+    "P25": ("dedicated_rm", "Named priority relationship manager with 4-hour on-site resolution commitment"),
+}
+
+
 
 class DependencyLockError(ValueError):
     """Raised when a cart violates directed acyclic graph prerequisite dependencies."""
@@ -169,6 +198,10 @@ class CPQEngine:
             if sku.requires_gstin:
                 all_non_gst = False
 
+            r_code, r_expl = PRODUCT_EXPLANATIONS.get(
+                sku.product_id,
+                ("addon_service", f"Tailored enterprise enhancement for {sku.product_name}")
+            )
             items_breakdown.append(
                 CartItemBreakdown(
                     product_id=sku.product_id,
@@ -181,6 +214,8 @@ class CPQEngine:
                     total_otc_inr=item_otc,
                     install_days=sku.typical_install_days,
                     requires_gstin=sku.requires_gstin,
+                    reason_code=r_code,
+                    reason_explanation=r_expl,
                 )
             )
 

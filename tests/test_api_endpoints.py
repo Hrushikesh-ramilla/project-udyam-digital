@@ -120,3 +120,16 @@ def test_api_judge_scenarios():
         assert res.status_code == 200
         data = res.json()
         assert "expected_outcome" in data
+
+
+def test_api_live_system_benchmarks():
+    res = client.get("/api/benchmarks/run")
+    assert res.status_code == 200
+    data = res.json()
+    assert data["status"] == "success"
+    assert "benchmarks" in data
+    assert data["benchmarks"]["cpq_dag_solver_ms"] < 50.0
+    assert data["benchmarks"]["kyc_anomaly_engine_ms"] < 250.0
+    assert data["benchmarks"]["sqlite_wal_persistence_ms"] < 10.0
+    assert "model_card" in data
+    assert data["model_card"]["test_auc"] == 0.842

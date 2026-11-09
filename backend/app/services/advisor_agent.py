@@ -489,6 +489,48 @@ Return STRICTLY valid JSON:
         slots.missing_slots = missing
         return slots
 
+    def _enforce_price_guardrails(self, text: str, quote: Optional[CommercialBreakdown]) -> str:
+        """Deterministic Anti-Hallucination & Anti-Injection Guardrail.
+        
+        Strictly verifies that any rupee price quoted in prose originates from
+        the deterministic CPQ DAG engine or canonical product catalogue,
+        and neutralizes prompt injection attempts.
+        """
+        if not text:
+            return ""
+        # 1. Prompt Injection Defense
+        injection_pattern = r"(?i)\b(ignore\s*(?:all|previous|prior)\s*instructions|you\s*are\s*now|jailbreak|developer\s*mode|override\s*price|give\s*(?:it|everything)\s*for\s*(?:free|zero|0))\b"
+        if re.search(injection_pattern, text):
+            return "Airtel Accel Business pricing is strictly governed by deterministic CPQ DAG catalog rules. All commercial terms, SLA guarantees, and enterprise bundles are dynamically computed based on statutory regulatory compliance."
+            
+        # 2. If no quote or short message, return
+        if not quote:
+            return text
+            
+        valid_prices = {
+            quote.net_mrc_inr, quote.gross_mrc_inr, quote.total_otc_inr,
+            quote.net_otc_inr, quote.bundle_discount_inr, quote.otc_discount_inr,
+            *(item.unit_mrc_inr for item in quote.items),
+            *(item.total_mrc_inr for item in quote.items),
+        }
+        for p in self.db.get_all_products():
+            valid_prices.add(p.price_min_inr_per_month)
+            valid_prices.add(p.price_max_inr_per_month)
+            valid_prices.add(p.one_time_setup_inr)
+            
+        # Scan rupee mentions
+        price_matches = re.finditer(r"(?:₹|Rs\.?\s*)([0-9]{1,3}(?:,[0-9]{3})*|[0-9]+)", text)
+        for match in price_matches:
+            raw_val_str = match.group(1).replace(",", "")
+            try:
+                val = int(raw_val_str)
+                # If price is substantive (> 200) and completely unverified, correct it
+                if val > 200 and val not in valid_prices:
+                    text = text.replace(match.group(0), f"₹{quote.net_mrc_inr:,}")
+            except ValueError:
+                pass
+        return text
+
     def process_turn(
         self,
         user_message: str,
@@ -751,6 +793,8 @@ Return STRICTLY valid JSON:
                 except Exception as e:
                     logging.warning("CPQ calculation on Gemini SKUs failed: %s", e)
 
+            disp_lat = self._enforce_price_guardrails(disp_lat, quote)
+            disp_nat = self._enforce_price_guardrails(disp_nat, quote)
             pure_latin, pure_native = ensure_dual_scripts(disp_lat, disp_nat, active_lang)
             user_lat, user_nat = self._dualize_user_message(user_message, active_lang, effective_script)
 
@@ -792,6 +836,8 @@ Return STRICTLY valid JSON:
                 valid_skus = self._select_skus_for_slots(slots)
             cart_items = [CartItem(product_id=s) for s in valid_skus]
             quote = self.cpq.calculate_commercials(cart_items, contract_months=12, strict_dag=True)
+            f_latin = self._enforce_price_guardrails(f_latin, quote)
+            f_native = self._enforce_price_guardrails(f_native, quote)
             pure_latin, pure_native = ensure_dual_scripts(f_latin, f_native, active_lang)
             user_lat, user_nat = self._dualize_user_message(user_message, active_lang, effective_script)
             return AdvisorResponse(

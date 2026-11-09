@@ -42,6 +42,8 @@ class ProductItem(StrictBaseModel):
     min_employees: int = Field(ge=0, description="Minimum employee threshold")
     min_sites: int = Field(ge=0, description="Minimum site/branch threshold")
     requires_gstin: bool = Field(description="True if product requires active GSTIN")
+    reason_code: Optional[str] = Field(default=None)
+    reason_explanation: Optional[str] = Field(default=None)
     requires_one_of: list[str] = Field(default_factory=list, description="List of prerequisite parent product IDs")
     typical_install_days: int = Field(ge=0, description="Expected SLA turnaround days for activation")
     target_segments: list[str] = Field(description="Target business segments (micro, prof, multi, mfg)")
@@ -160,6 +162,8 @@ class CartItemBreakdown(StrictBaseModel):
     total_otc_inr: int
     install_days: int
     requires_gstin: bool
+    reason_code: Optional[str] = Field(default=None)
+    reason_explanation: Optional[str] = Field(default=None)
 
 
 class DependencyLock(StrictBaseModel):
@@ -250,6 +254,8 @@ class DigiLockerVerifyRequest(StrictBaseModel):
     declared_udyam: Optional[str] = None
     applicant_id: Optional[str] = None
     cart_requires_gstin: bool = False
+    reason_code: Optional[str] = Field(default=None)
+    reason_explanation: Optional[str] = Field(default=None)
 
 
 class ExtractedDocPayload(StrictBaseModel):
@@ -373,6 +379,8 @@ class KYCVerifyAPIRequest(StrictBaseModel):
     applicant_preset: Optional[str] = None  # K01, K03, K05, K07, K11, K12
     applicant_id: Optional[str] = None  # Alias for applicant_preset
     cart_requires_gstin: bool = True
+    reason_code: Optional[str] = Field(default=None)
+    reason_explanation: Optional[str] = Field(default=None)
     consent: Optional[DPDPConsentPayload] = None
     custom_doc_hashes: Optional[dict[str, str]] = None
 
