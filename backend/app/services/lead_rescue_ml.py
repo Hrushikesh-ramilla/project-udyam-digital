@@ -97,12 +97,25 @@ class LeadRescueMLEngine:
         self.model.fit(X, y)
         _CACHED_MODEL = self.model
 
+    FEATURE_DISPLAY_NAMES = {
+        "has_gstin_int": "GSTIN",
+        "has_udyam_int": "Udyam",
+        "employee_count": "Staff",
+        "monthly_telecom_spend_inr": "Spend",
+        "customer_follow_up_calls": "Follow-ups",
+        "num_sites": "Multi-site",
+        "city_tier": "City Tier",
+        "segment_code": "Segment",
+        "source_code": "Channel",
+    }
+
     def _calibrate_and_explain(
         self,
         lead: SMBLeadRecord,
         raw_prob: float,
-    ) -> tuple[float, str, list[str]]:
-        """Calibrates raw LightGBM probability and generates explainable factor chips.
+        shap_row: Optional[np.ndarray] = None,
+    ) -> tuple[float, str, list[str], dict[str, float]]:
+        """Calibrates raw LightGBM probability and generates explainable TreeSHAP factor chips.
 
         Stratifies leads into HIGH (>=80%), MEDIUM (60-79%), and NURTURE (<60%).
         """
@@ -112,41 +125,26 @@ class LeadRescueMLEngine:
         base_score = 65.0 + (unweighted_p - 0.5) * 40.0
 
         norm_drop = (lead.drop_reason or "").lower()
-        chips: list[str] = []
         score_mod = 0.0
 
         # Factor 1: Operational Substitute / Feasibility
         if "site not feasible" in norm_drop or ("fibre" in norm_drop and "feasible" in norm_drop):
             score_mod += 22.0
-            chips.append("+25% 5G Feasible")
         elif any(k in norm_drop for k in ["payment failed", "price too high", "cheaper plan"]):
             score_mod += 6.0
-            chips.append("+12% AutoPay Waiver")
         elif any(k in norm_drop for k in ["document details did not match", "missing gst", "paperwork"]):
             score_mod += 4.0
-            chips.append("+15% Udyam Fast-Track")
         elif any(k in norm_drop for k in ["delayed beyond 21 days", "delay", "cancelled before install"]):
             score_mod -= 26.0
-            chips.append("-20% Fulfillment Delay")
-        elif any(k in norm_drop for k in ["quote too complex", "quote took too long", "quote"]):
-            chips.append("+10% Mobile CPQ")
-        else:
-            if not lead.has_gstin:
-                chips.append("+15% Udyam-Only")
 
         # Factor 2: Financial & Regulatory Profile
         if lead.monthly_telecom_spend_inr >= 3000:
             score_mod += 8.0
-            chips.append("+15% High ARR")
         elif lead.monthly_telecom_spend_inr < 1000:
             score_mod -= 6.0
-            chips.append("-10% Low Spend")
 
-        if lead.has_gstin and len(chips) < 2:
+        if lead.has_gstin:
             score_mod += 4.0
-            chips.append("+10% Verified GSTIN")
-        elif not lead.has_gstin and len(chips) < 2:
-            chips.append("GST-Exempt Micro")
 
         final_score = round(max(35.0, min(95.0, base_score + score_mod)), 1)
 
@@ -157,9 +155,39 @@ class LeadRescueMLEngine:
         else:
             tier = "NURTURE"
 
-        return final_score, tier, chips[:2]
+        chips: list[str] = []
+        shap_dict: dict[str, float] = {}
 
-    def _build_lead_item(self, lead: SMBLeadRecord, score: float, tier: Optional[str] = None, factor_chips: Optional[list[str]] = None) -> LeadRescueItem:
+        if shap_row is not None:
+            feat_contribs = shap_row[:-1]
+            shap_dict = {
+                self._feature_cols[i]: round(float(feat_contribs[i]), 4)
+                for i in range(len(self._feature_cols))
+            }
+            top_indices = np.argsort(-np.abs(feat_contribs))
+            for idx in top_indices:
+                val = float(feat_contribs[idx])
+                if abs(val) < 0.05:
+                    continue
+                name = self.FEATURE_DISPLAY_NAMES.get(self._feature_cols[idx], self._feature_cols[idx])
+                sign = "+" if val >= 0 else "-"
+                chips.append(f"{sign}{abs(val):.2f} {name}")
+                if len(chips) >= 2:
+                    break
+
+        if not chips:
+            if "site not feasible" in norm_drop:
+                chips.append("+25% 5G Feasible")
+            elif any(k in norm_drop for k in ["payment failed", "price too high"]):
+                chips.append("+12% AutoPay Waiver")
+            if lead.has_gstin and len(chips) < 2:
+                chips.append("+10% Verified GSTIN")
+            elif not lead.has_gstin and len(chips) < 2:
+                chips.append("GST-Exempt Micro")
+
+        return final_score, tier, chips[:2], shap_dict
+
+    def _build_lead_item(self, lead: SMBLeadRecord, score: float, tier: Optional[str] = None, factor_chips: Optional[list[str]] = None, shap_attributions: Optional[dict[str, float]] = None) -> LeadRescueItem:
         """Constructs a LeadRescueItem with deterministic priority tiers, risk factors, and NBA."""
         if not tier:
             if score >= 80.0:
@@ -225,6 +253,7 @@ class LeadRescueMLEngine:
             priority_tier=priority,
             top_risk_factors=risk_factors,
             factor_chips=factor_chips or [],
+            shap_attributions=shap_attributions,
             next_best_action=nba,
             whatsapp_rescue_link=rescue_link,
         )
@@ -251,11 +280,13 @@ class LeadRescueMLEngine:
 
         if self.model:
             prob = float(self.model.predict_proba(feature_df)[0][1])
+            shap_row = self.model.booster_.predict(feature_df, pred_contrib=True)[0]
         else:
             prob = 0.5
+            shap_row = None
 
-        calibrated_score, tier, chips = self._calibrate_and_explain(lead, prob)
-        return self._build_lead_item(lead, calibrated_score, tier=tier, factor_chips=chips)
+        calibrated_score, tier, chips, shap_dict = self._calibrate_and_explain(lead, prob, shap_row=shap_row)
+        return self._build_lead_item(lead, calibrated_score, tier=tier, factor_chips=chips, shap_attributions=shap_dict)
 
     def get_top_rescue_leads(
         self,
@@ -296,14 +327,16 @@ class LeadRescueMLEngine:
         df_batch = pd.DataFrame(batch_records)[self._feature_cols]
         if self.model:
             probs = self.model.predict_proba(df_batch)[:, 1]
+            shap_matrix = self.model.booster_.predict(df_batch, pred_contrib=True)
         else:
             probs = [0.5] * len(filtered_leads)
+            shap_matrix = [None] * len(filtered_leads)
 
         candidates: list[LeadRescueItem] = []
-        for lead, prob in zip(filtered_leads, probs):
-            calibrated_score, tier, chips = self._calibrate_and_explain(lead, float(prob))
+        for lead, prob, shap_row in zip(filtered_leads, probs, shap_matrix):
+            calibrated_score, tier, chips, shap_dict = self._calibrate_and_explain(lead, float(prob), shap_row=shap_row)
             if calibrated_score >= min_propensity:
-                candidates.append(self._build_lead_item(lead, calibrated_score, tier=tier, factor_chips=chips))
+                candidates.append(self._build_lead_item(lead, calibrated_score, tier=tier, factor_chips=chips, shap_attributions=shap_dict))
 
         candidates.sort(key=lambda x: x.propensity_score, reverse=True)
         return candidates[:limit]

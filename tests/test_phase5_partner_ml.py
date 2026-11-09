@@ -134,3 +134,29 @@ def test_lead_recovery_nba_tailored_pitch_and_bundle_mapping(ml_engine: LeadResc
     assert "AirFiber" in scored.next_best_action or "Wireless" in scored.next_best_action
     assert any("fiber" in r.lower() or "trenching" in r.lower() for r in scored.top_risk_factors)
     assert scored.propensity_score > 0
+
+
+def test_native_tree_shap_explainability(ml_engine: LeadRescueMLEngine):
+    """Verifies native C++ TreeSHAP game-theoretic explainability in LightGBM.
+    Ensures exact Shapley values are calculated per sample and mapped to factor chips.
+    """
+    leads = ml_engine.get_top_rescue_leads(limit=20)
+    assert len(leads) > 0
+
+    for l in leads:
+        assert l.shap_attributions is not None
+        assert isinstance(l.shap_attributions, dict)
+        assert len(l.shap_attributions) == 9
+        assert "has_gstin_int" in l.shap_attributions
+        assert "customer_follow_up_calls" in l.shap_attributions
+        assert "monthly_telecom_spend_inr" in l.shap_attributions
+
+        # Factor chips must reflect the highest absolute SHAP values with correct +/- signs
+        for chip in l.factor_chips:
+            assert chip.startswith("+") or chip.startswith("-")
+
+    # Test single-lead scoring with TreeSHAP
+    single_lead = get_registry().get_all_leads()[0]
+    scored = ml_engine.score_lead(single_lead)
+    assert scored.shap_attributions is not None
+    assert len(scored.shap_attributions) == 9

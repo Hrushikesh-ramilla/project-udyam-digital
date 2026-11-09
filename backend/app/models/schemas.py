@@ -307,6 +307,7 @@ class LeadRescueItem(StrictBaseModel):
     priority_tier: str  # HIGH, MEDIUM, NURTURE
     top_risk_factors: list[str]
     factor_chips: list[str] = Field(default_factory=list)
+    shap_attributions: Optional[dict[str, float]] = None
     next_best_action: str
     whatsapp_rescue_link: str
 
