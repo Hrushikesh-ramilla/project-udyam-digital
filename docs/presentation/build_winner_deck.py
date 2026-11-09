@@ -30,6 +30,7 @@ img_arch_b64 = to_base64("docs/presentation/assets/udyam-architecture-tight.png"
 img_screen_advisor_b64 = to_base64("docs/presentation/assets/clean_advisor.png")
 img_screen_cart_b64 = to_base64("docs/presentation/assets/clean_cart.png")
 img_screen_kyc_b64 = to_base64("docs/presentation/assets/clean_kyc.png")
+img_screen_tracker_b64 = to_base64("docs/presentation/assets/screen_tracker.png")
 
 CSS_THEME = """
 * { box-sizing: border-box; margin: 0; padding: 0; }
@@ -256,12 +257,11 @@ def generate_deck():
               Team & Institutional Registration
             </div>
             <table style="width: 100%; font-size: 14px; color: #C5C6C9; border-collapse: collapse;">
-              <tr><td style="padding: 4px 0; width: 34%; font-weight: 600; color: #8F9094;">Team Name</td><td style="font-weight: 800; color: #FFFFFF;">Neural Nexus</td></tr>
-              <tr><td style="padding: 4px 0; font-weight: 600; color: #8F9094;">Institution</td><td style="font-weight: 750; color: #FFFFFF;">ABV-IIITM Gwalior</td></tr>
-              <tr><td style="padding: 4px 0; font-weight: 600; color: #8F9094;">Track</td><td style="font-weight: 700; color: #FFFFFF;">Digital Track (Enterprise Track A: Accel Business)</td></tr>
-              <tr><td style="padding: 4px 0; font-weight: 600; color: #8F9094;">Team Members</td><td style="font-weight: 700; color: #FFFFFF;">Hrushikesh Ramilla &nbsp;&nbsp;|&nbsp;&nbsp; G Yaswanth Kumar</td></tr>
-              <tr><td style="padding: 4px 0; font-weight: 600; color: #8F9094;">Technical Stack</td><td style="font-weight: 600; color: #FFFFFF; font-size: 13px;">Python 3.11+, FastAPI, React 18, Vite, LightGBM, RapidFuzz, SQLite WAL</td></tr>
-              <tr><td style="padding: 4px 0; font-weight: 600; color: #8F9094;">Evaluation Date</td><td style="font-weight: 750; color: #E40000; font-family: monospace;">2026-07-15 (Evaluation anchor strictly enforced)</td></tr>
+              <tr><td style="padding: 5px 0; width: 34%; font-weight: 600; color: #8F9094;">Team Name</td><td style="font-weight: 800; color: #FFFFFF;">Neural Nexus</td></tr>
+              <tr><td style="padding: 5px 0; font-weight: 600; color: #8F9094;">Institution</td><td style="font-weight: 750; color: #FFFFFF;">ABV-IIITM Gwalior</td></tr>
+              <tr><td style="padding: 5px 0; font-weight: 600; color: #8F9094;">Track</td><td style="font-weight: 700; color: #FFFFFF;">Digital Track (Enterprise Track A: Accel Business)</td></tr>
+              <tr><td style="padding: 5px 0; font-weight: 600; color: #8F9094;">Team Members</td><td style="font-weight: 700; color: #FFFFFF;">Hrushikesh Ramilla &nbsp;&nbsp;|&nbsp;&nbsp; G Yaswanth Kumar</td></tr>
+              <tr><td style="padding: 5px 0; font-weight: 600; color: #8F9094;">Technical Stack</td><td style="font-weight: 600; color: #FFFFFF; font-size: 13px;">Python 3.11+, FastAPI, React 18, Vite, LightGBM, RapidFuzz, SQLite WAL</td></tr>
             </table>
           </div>
 
@@ -270,17 +270,15 @@ def generate_deck():
               Live Working Prototype & Direct Audit Links
             </div>
             <table style="width: 100%; font-size: 14px; color: #C5C6C9; border-collapse: collapse;">
-              <tr><td style="padding: 4px 0; width: 34%; font-weight: 600; color: #8F9094;">Live Monolith</td><td><a href="https://airtel.hrushikeshramilla.in" style="color: #FF5252; text-decoration: underline; font-weight: 800;">airtel.hrushikeshramilla.in</a> <span style="font-size: 12px; color: #8F9094;">(65.1.112.251)</span></td></tr>
-              <tr><td style="padding: 4px 0; font-weight: 600; color: #8F9094;">API Docs</td><td><a href="http://65.1.112.251/docs" style="color: #FF5252; text-decoration: underline; font-weight: 750;">http://65.1.112.251/docs</a> <span style="font-size: 12px; color: #8F9094;">(FastAPI Swagger UI)</span></td></tr>
-              <tr><td style="padding: 4px 0; font-weight: 600; color: #8F9094;">Repository</td><td style="font-family: monospace; font-size: 13px; color: #FFFFFF;">github.com/hrushikesh-ramilla/project-udyam-digital</td></tr>
-              <tr><td style="padding: 4px 0; font-weight: 600; color: #8F9094;">Demo Video</td><td><a href="https://airtel.hrushikeshramilla.in/demoVideo" style="color: #FF5252; text-decoration: underline; font-weight: 850;">https://airtel.hrushikeshramilla.in/demoVideo</a> <span style="font-size: 12px; color: #8F9094;">(Full HD Walkthrough)</span></td></tr>
-              <tr><td style="padding: 4px 0; font-weight: 600; color: #8F9094;">Verification</td><td><span style="color: #38ef7d; font-weight: 850;">62 Pytest Tests (100% Passed)</span> + <span style="color: #FFFFFF; font-weight: 700;">100 Visual Proofs</span></td></tr>
-              <tr><td style="padding: 4px 0; font-weight: 600; color: #8F9094;">Compliance</td><td><span style="background: rgba(0, 114, 255, 0.25); color: #64b5f6; font-size: 11.5px; font-weight: 800; padding: 2px 8px; border-radius: 4px; border: 1px solid rgba(0, 114, 255, 0.4);">DPDP ACT 2023</span> <span style="color: #FFFFFF; font-weight: 600; font-size: 13px;">Zero Persistence RAM Masking</span></td></tr>
+              <tr><td style="padding: 6px 0; width: 34%; font-weight: 600; color: #8F9094;">Live Platform</td><td><a href="https://airtel.hrushikeshramilla.in" style="color: #FF5252; text-decoration: underline; font-weight: 800;">airtel.hrushikeshramilla.in</a></td></tr>
+              <tr><td style="padding: 6px 0; font-weight: 600; color: #8F9094;">Demo Video</td><td><a href="https://airtel.hrushikeshramilla.in/demoVideo" style="color: #FF5252; text-decoration: underline; font-weight: 850;">https://airtel.hrushikeshramilla.in/demoVideo</a></td></tr>
+              <tr><td style="padding: 6px 0; font-weight: 600; color: #8F9094;">Repository</td><td style="font-family: monospace; font-size: 13px; color: #FFFFFF;">github.com/hrushikesh-ramilla/project-udyam-digital</td></tr>
+              <tr><td style="padding: 6px 0; font-weight: 600; color: #8F9094;">Compliance</td><td><span style="background: rgba(0, 114, 255, 0.25); color: #64b5f6; font-size: 11.5px; font-weight: 800; padding: 2px 8px; border-radius: 4px; border: 1px solid rgba(0, 114, 255, 0.4);">DPDP ACT 2023</span> <span style="color: #FFFFFF; font-weight: 600; font-size: 13px;">Zero-Persistence Privacy</span></td></tr>
             </table>
           </div>
         </div>
 
-        <div style="background: rgba(18, 19, 22, 0.9); border-left: 4px solid #E40000; border-radius: 6px; padding: 12px 18px; margin-right: 340px;">
+        <div style="background: rgba(18, 19, 22, 0.9); border-left: 4px solid #E40000; border-radius: 6px; padding: 12px 18px; width: 100%;">
           <div style="font-size: 13.5px; font-weight: 800; color: #FFFFFF; margin-bottom: 4px;">
             The Executive Scope at a Glance (Airtel Enterprise Track A Mandate):
           </div>
@@ -291,7 +289,7 @@ def generate_deck():
           </div>
         </div>
 
-        <div style="font-size: 11px; color: #7A7B7E; margin-right: 340px;">
+        <div style="font-size: 11px; color: #7A7B7E; width: 100%;">
           Submission Note: Mandatory Introduction Slide (excluded from 7-slide evaluation count). Slides 1 to 7 showcase the technical solution, competitive moat, and quantified business impact.
         </div>
       </div>
@@ -1055,6 +1053,7 @@ def generate_deck():
     """
 
     # -------------------------------------------------------------
+        # -------------------------------------------------------------
     # SLIDE 4: SYSTEM ARCHITECTURE
     # -------------------------------------------------------------
     s4 = f"""
@@ -1062,44 +1061,183 @@ def generate_deck():
       <div class="slide-header">
         <div class="slide-title-group">
           <h1>System Architecture: The 4-Step Acquisition Pipeline</h1>
-          <p>Autonomous onboarding pipeline: From spoken regional language to activated order</p>
+          <p>Four-stage deterministic acquisition, pricing, verification &amp; fulfillment topology</p>
         </div>
         <div class="slide-category-badge">Slide 4 of 7 · System Architecture</div>
       </div>
 
-      <div class="slide-content" style="justify-content: space-between;">
-        <div class="card" style="padding: 12px; display: flex; flex-direction: column; align-items: center; justify-content: center; background: #FAF8F5; flex: 1; min-height: 590px; border: 1.5px solid #DDD8CE;">
-          <img src="{img_arch_b64}" style="width: 100%; height: 100%; max-height: 610px; object-fit: contain; border-radius: 6px;" alt="System Architecture">
+      <div class="slide-content" style="display: flex; flex-direction: column; justify-content: space-between;">
+        <div class="grid-4" style="gap: 16px; flex: 1; width: 100%; align-items: stretch;">
+          
+          <!-- STAGE 1 -->
+          <div class="card" style="display: flex; flex-direction: column; justify-content: space-between; padding: 20px 18px; border-top: 4px solid #E40000;">
+            <div>
+              <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
+                <span style="background: #E40000; color: #FFFFFF; font-size: 11px; font-weight: 850; padding: 3px 8px; border-radius: 4px; text-transform: uppercase;">STAGE 1</span>
+                <span style="font-size: 11.5px; font-weight: 750; color: #8F9094;">&lt;50ms Fast-Path</span>
+              </div>
+              <div style="font-size: 17px; font-weight: 850; color: #121316; margin-bottom: 3px; line-height: 1.2;">Discovery &amp; Multilingual Advisor</div>
+              <div style="font-size: 12px; color: #6E6F73; margin-bottom: 16px; font-weight: 600;">Natural Indic Ingress &amp; Slot Extraction</div>
+              
+              <div style="display: flex; flex-direction: column; gap: 10px; font-size: 12.5px; color: #2C2D30; line-height: 1.35;">
+                <div style="display: flex; gap: 8px; align-items: flex-start;">
+                  <span style="color: #E40000; font-weight: 900; font-size: 14px; line-height: 1;">•</span>
+                  <div><strong>Mobile PWA &amp; Phygital QR:</strong> Zero-friction entry for non-tech-savvy micro-merchants.</div>
+                </div>
+                <div style="display: flex; gap: 8px; align-items: flex-start;">
+                  <span style="color: #E40000; font-weight: 900; font-size: 14px; line-height: 1;">•</span>
+                  <div><strong>10+ Regional Languages:</strong> Native support for te, ta, bn, gu, mr, kn, ml, or, hi, en.</div>
+                </div>
+                <div style="display: flex; gap: 8px; align-items: flex-start;">
+                  <span style="color: #E40000; font-weight: 900; font-size: 14px; line-height: 1;">•</span>
+                  <div><strong>Session Language Inertia:</strong> Eliminates mid-conversation language hijacking.</div>
+                </div>
+                <div style="display: flex; gap: 8px; align-items: flex-start;">
+                  <span style="color: #E40000; font-weight: 900; font-size: 14px; line-height: 1;">•</span>
+                  <div><strong>Bidirectional Script Toggle:</strong> English Words &lt;-&gt; Native Script instant switch.</div>
+                </div>
+                <div style="display: flex; gap: 8px; align-items: flex-start;">
+                  <span style="color: #E40000; font-weight: 900; font-size: 14px; line-height: 1;">•</span>
+                  <div><strong>Cascaded Slot Extractor:</strong> Isolates business type, headcount, city tier, &amp; budget.</div>
+                </div>
+              </div>
+            </div>
+            
+            <div style="background: #FAF8F5; border: 1px solid #EFECE6; border-radius: 6px; padding: 8px 10px; margin-top: 14px; font-size: 11px; color: #5A5A5D; font-weight: 600;">
+              Zero initial delay · Dual Narration TTS Audio
+            </div>
+          </div>
+
+          <!-- STAGE 2 -->
+          <div class="card" style="display: flex; flex-direction: column; justify-content: space-between; padding: 20px 18px; border-top: 4px solid #121316;">
+            <div>
+              <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
+                <span style="background: #121316; color: #FFFFFF; font-size: 11px; font-weight: 850; padding: 3px 8px; border-radius: 4px; text-transform: uppercase;">STAGE 2</span>
+                <span style="font-size: 11.5px; font-weight: 750; color: #8F9094;">&lt;0.5ms Solver</span>
+              </div>
+              <div style="font-size: 17px; font-weight: 850; color: #121316; margin-bottom: 3px; line-height: 1.2;">Deterministic CPQ DAG Engine</div>
+              <div style="font-size: 12px; color: #6E6F73; margin-bottom: 16px; font-weight: 600;">Constraint Solver &amp; Reverse Optimizer</div>
+              
+              <div style="display: flex; flex-direction: column; gap: 10px; font-size: 12.5px; color: #2C2D30; line-height: 1.35;">
+                <div style="display: flex; gap: 8px; align-items: flex-start;">
+                  <span style="color: #E40000; font-weight: 900; font-size: 14px; line-height: 1;">•</span>
+                  <div><strong>Hard GSTIN Firewall:</strong> Strictly blocks GSTIN-mandated SKUs for unregistered micro-merchants.</div>
+                </div>
+                <div style="display: flex; gap: 8px; align-items: flex-start;">
+                  <span style="color: #E40000; font-weight: 900; font-size: 14px; line-height: 1;">•</span>
+                  <div><strong>Symbolic DAG Solver:</strong> Validates <code>requires_one_of</code> dependency checks in microsecond time.</div>
+                </div>
+                <div style="display: flex; gap: 8px; align-items: flex-start;">
+                  <span style="color: #E40000; font-weight: 900; font-size: 14px; line-height: 1;">•</span>
+                  <div><strong>Multi-Tier Bundling Logic:</strong> 5% (2 cats), 10% (3 cats), 15% (4+ cats) transparent savings.</div>
+                </div>
+                <div style="display: flex; gap: 8px; align-items: flex-start;">
+                  <span style="color: #E40000; font-weight: 900; font-size: 14px; line-height: 1;">•</span>
+                  <div><strong>Setup Fee Waiver Engine:</strong> 100% OTC fee waiver on &gt;= 12mo contract commitment.</div>
+                </div>
+                <div style="display: flex; gap: 8px; align-items: flex-start;">
+                  <span style="color: #E40000; font-weight: 900; font-size: 14px; line-height: 1;">•</span>
+                  <div><strong>"Mera Budget" Optimizer:</strong> Branch-and-bound resolves optimal bundle dynamically.</div>
+                </div>
+              </div>
+            </div>
+            
+            <div style="background: #FAF8F5; border: 1px solid #EFECE6; border-radius: 6px; padding: 8px 10px; margin-top: 14px; font-size: 11px; color: #5A5A5D; font-weight: 600;">
+              Mathematical optimality · Zero manual sales quote latency
+            </div>
+          </div>
+
+          <!-- STAGE 3 -->
+          <div class="card" style="display: flex; flex-direction: column; justify-content: space-between; padding: 20px 18px; border-top: 4px solid #E40000;">
+            <div>
+              <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
+                <span style="background: #E40000; color: #FFFFFF; font-size: 11px; font-weight: 850; padding: 3px 8px; border-radius: 4px; text-transform: uppercase;">STAGE 3</span>
+                <span style="font-size: 11.5px; font-weight: 750; color: #8F9094;">DPDP Compliant</span>
+              </div>
+              <div style="font-size: 17px; font-weight: 850; color: #121316; margin-bottom: 3px; line-height: 1.2;">DPDP Smart KYC Gate</div>
+              <div style="font-size: 12px; color: #6E6F73; margin-bottom: 16px; font-weight: 600;">In-Memory Privacy &amp; Anomaly Trapping</div>
+              
+              <div style="display: flex; flex-direction: column; gap: 10px; font-size: 12.5px; color: #2C2D30; line-height: 1.35;">
+                <div style="display: flex; gap: 8px; align-items: flex-start;">
+                  <span style="color: #E40000; font-weight: 900; font-size: 14px; line-height: 1;">•</span>
+                  <div><strong>DPDP Act 2023 Consent:</strong> Explicit digital consent timestamped with SHA-256 IP hash.</div>
+                </div>
+                <div style="display: flex; gap: 8px; align-items: flex-start;">
+                  <span style="color: #E40000; font-weight: 900; font-size: 14px; line-height: 1;">•</span>
+                  <div><strong>In-Memory Redaction:</strong> 12-digit UID masked to <code>XXXX-XXXX-1234</code> in volatile memory.</div>
+                </div>
+                <div style="display: flex; gap: 8px; align-items: flex-start;">
+                  <span style="color: #E40000; font-weight: 900; font-size: 14px; line-height: 1;">•</span>
+                  <div><strong>Zero-Persistence Guarantee:</strong> Unredacted national IDs never hit disk or database.</div>
+                </div>
+                <div style="display: flex; gap: 8px; align-items: flex-start;">
+                  <span style="color: #E40000; font-weight: 900; font-size: 14px; line-height: 1;">•</span>
+                  <div><strong>Deterministic Registries:</strong> O(1) indexed lookup across 3,534 GSTINs &amp; 2,723 Udyams.</div>
+                </div>
+                <div style="display: flex; gap: 8px; align-items: flex-start;">
+                  <span style="color: #E40000; font-weight: 900; font-size: 14px; line-height: 1;">•</span>
+                  <div><strong>RapidFuzz Entity Resolver:</strong> Traps planted name anomalies and stale electricity bills.</div>
+                </div>
+              </div>
+            </div>
+            
+            <div style="background: #FAF8F5; border: 1px solid #EFECE6; border-radius: 6px; padding: 8px 10px; margin-top: 14px; font-size: 11px; color: #5A5A5D; font-weight: 600;">
+              Anchored freshness · Instant legal verification
+            </div>
+          </div>
+
+          <!-- STAGE 4 -->
+          <div class="card" style="display: flex; flex-direction: column; justify-content: space-between; padding: 20px 18px; border-top: 4px solid #121316;">
+            <div>
+              <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
+                <span style="background: #121316; color: #FFFFFF; font-size: 11px; font-weight: 850; padding: 3px 8px; border-radius: 4px; text-transform: uppercase;">STAGE 4</span>
+                <span style="font-size: 11.5px; font-weight: 750; color: #8F9094;">17.6d -&gt; 3.8d</span>
+              </div>
+              <div style="font-size: 17px; font-weight: 850; color: #121316; margin-bottom: 3px; line-height: 1.2;">Fulfillment &amp; Lead Rescue</div>
+              <div style="font-size: 12px; color: #6E6F73; margin-bottom: 16px; font-weight: 600;">6-Stage Tracker &amp; Machine Learning</div>
+              
+              <div style="display: flex; flex-direction: column; gap: 10px; font-size: 12.5px; color: #2C2D30; line-height: 1.35;">
+                <div style="display: flex; gap: 8px; align-items: flex-start;">
+                  <span style="color: #E40000; font-weight: 900; font-size: 14px; line-height: 1;">•</span>
+                  <div><strong>6-Stage Fulfillment Tracker:</strong> Order -&gt; KYC -&gt; Feasibility -&gt; CPE -&gt; Tech -&gt; Active.</div>
+                </div>
+                <div style="display: flex; gap: 8px; align-items: flex-start;">
+                  <span style="color: #E40000; font-weight: 900; font-size: 14px; line-height: 1;">•</span>
+                  <div><strong>SLA Compression Engine:</strong> Shrinks 17.6-day delay to 3.8-day guaranteed install.</div>
+                </div>
+                <div style="display: flex; gap: 8px; align-items: flex-start;">
+                  <span style="color: #E40000; font-weight: 900; font-size: 14px; line-height: 1;">•</span>
+                  <div><strong>Dynamic NPCI UPI QR:</strong> Instant one-tap checkout with Razorpay webhook sync.</div>
+                </div>
+                <div style="display: flex; gap: 8px; align-items: flex-start;">
+                  <span style="color: #E40000; font-weight: 900; font-size: 14px; line-height: 1;">•</span>
+                  <div><strong>Automated WhatsApp Push:</strong> Proactive router shipment &amp; OTP tracking updates.</div>
+                </div>
+                <div style="display: flex; gap: 8px; align-items: flex-start;">
+                  <span style="color: #E40000; font-weight: 900; font-size: 14px; line-height: 1;">•</span>
+                  <div><strong>Field Tech Dispatch Card:</strong> Real-time technician assignment with secure OTP feed.</div>
+                </div>
+              </div>
+            </div>
+            
+            <div style="background: #FAF8F5; border: 1px solid #EFECE6; border-radius: 6px; padding: 8px 10px; margin-top: 14px; font-size: 11px; color: #5A5A5D; font-weight: 600;">
+              Zero inbound chase calls · BlueDart AWB logistics
+            </div>
+          </div>
+
         </div>
 
-        <div class="grid-4" style="gap: 12px; margin-top: 14px; margin-right: 340px;">
-          <div class="card" style="padding: 12px 14px; border-left: 3.5px solid #E40000;">
-            <div style="font-size: 13.5px; font-weight: 850; color: #121316; margin-bottom: 3px;">Stage 1: Discovery Advisor</div>
-            <div style="font-size: 12.5px; color: #4A4B4E; line-height: 1.35;">
-              Universal Multilingual AI (100+ langs) with <strong>Session Language Inertia</strong>, Geographic Entity Isolation, and &lt;50ms greeting fast-path.
-            </div>
+        <!-- FULL-WIDTH CLOSED-LOOP RECOVERY BANNER -->
+        <div style="background: rgba(228,0,0,0.05); border: 1.5px dashed #E40000; border-radius: 8px; padding: 12px 20px; display: flex; align-items: center; justify-content: space-between; margin-top: 14px; width: 100%;">
+          <div style="display: flex; align-items: center; gap: 14px;">
+            <span style="background: #E40000; color: #FFFFFF; font-size: 11.5px; font-weight: 850; padding: 4px 10px; border-radius: 4px; text-transform: uppercase; letter-spacing: 0.5px; white-space: nowrap;">Closed-Loop ML Recovery</span>
+            <span style="font-size: 13.5px; color: #121316; font-weight: 750; line-height: 1.35;">
+              <strong>LightGBM NBA Rescue Loop:</strong> Automatically identifies the 56.4% quote drop-off cohort and triggers personalized WhatsApp recovery drawers with 1-click pre-hydrated carts.
+            </span>
           </div>
-
-          <div class="card" style="padding: 12px 14px; border-left: 3.5px solid #121316;">
-            <div style="font-size: 13.5px; font-weight: 850; color: #121316; margin-bottom: 3px;">Stage 2: CPQ DAG Engine</div>
-            <div style="font-size: 12.5px; color: #4A4B4E; line-height: 1.35;">
-              Symbolic DAG solver runs in <strong>&lt;0.5ms</strong>. Hard GSTIN firewall blocks ineligible SKUs; branch-and-bound solves "Mera Budget" slider instantly.
-            </div>
-          </div>
-
-          <div class="card" style="padding: 12px 14px; border-left: 3.5px solid #E40000;">
-            <div style="font-size: 13.5px; font-weight: 850; color: #121316; margin-bottom: 3px;">Stage 3: Smart KYC Gate</div>
-            <div style="font-size: 12.5px; color: #4A4B4E; line-height: 1.35;">
-              <strong>In-Memory DPDP Redaction</strong> masks 12-digit national IDs in volatile RAM. RapidFuzz traps planted name anomalies; anchors to 2026-07-15.
-            </div>
-          </div>
-
-          <div class="card" style="padding: 12px 14px; border-left: 3.5px solid #121316;">
-            <div style="font-size: 13.5px; font-weight: 850; color: #121316; margin-bottom: 3px;">Stage 4: Fulfillment & Rescue</div>
-            <div style="font-size: 12.5px; color: #4A4B4E; line-height: 1.35;">
-              Instant NPCI Dynamic UPI QR / Razorpay webhook, 6-stage tracker, BlueDart AWB logistics, and <strong>LightGBM automated WhatsApp rescue loop</strong>.
-            </div>
-          </div>
+          <span style="font-size: 12px; font-weight: 850; color: #E40000; background: #FFFFFF; padding: 5px 12px; border-radius: 4px; border: 1px solid rgba(228,0,0,0.25); white-space: nowrap; margin-left: 14px;">
+            Stops ₹15,000 CAC Bleed
+          </span>
         </div>
       </div>
 
@@ -1119,7 +1257,7 @@ def generate_deck():
       <div class="slide-header">
         <div class="slide-title-group">
           <h1>Working Prototype: Live Software Walkthrough</h1>
-          <p>Verified against 100 real-world test cases and deployed on AWS EC2 (http://65.1.112.251)</p>
+          <p>Live software walkthrough across all 4 production modules on airtel.hrushikeshramilla.in</p>
         </div>
         <div class="slide-category-badge">Slide 5 of 7 · Product Demonstration</div>
       </div>
@@ -1172,65 +1310,27 @@ def generate_deck():
             </div>
           </div>
 
-          <div class="card" style="display: flex; flex-direction: column; justify-content: space-between; padding: 14px 16px;">
+                    <div class="card" style="display: flex; flex-direction: column; justify-content: space-between; padding: 14px 16px;">
             <div>
               <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px;">
-                <span style="font-size: 15px; font-weight: 850; color: #121316;">4. 6-Stage Order Tracker & Lead Rescue</span>
-                <span class="badge-pill">Zero Chase Calls</span>
+                <span style="font-size: 15px; font-weight: 850; color: #121316;">4. Partner Console & Lead Rescue</span>
+                <span class="badge-pill">Autonomous Winback</span>
               </div>
-              <div style="background: #0D0E12; border-radius: 6px; overflow: hidden; height: 285px; display: flex; flex-direction: column; justify-content: center; padding: 18px 22px; border: 1px solid #DDD8CE; color: #FFFFFF;">
-                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
-                  <div>
-                    <span style="background: #E40000; color: #fff; font-size: 11px; font-weight: 800; padding: 3px 8px; border-radius: 4px;">ORDER #ORD-2026-8832</span>
-                    <span style="background: #1B5E20; color: #4CAF50; font-size: 11px; font-weight: 800; padding: 3px 8px; border-radius: 4px; margin-left: 6px;">DAY 1 · IN PROGRESS</span>
-                  </div>
-                  <div style="text-align: right;">
-                    <div style="font-size: 10px; color: #8F9094; font-weight: 700;">PARTNER PAYOUT</div>
-                    <div style="font-size: 18px; font-weight: 900; color: #FFB300;">₹4,498</div>
-                  </div>
-                </div>
-                <div style="font-size: 17px; font-weight: 850;">Apex Diagnostics Center</div>
-                <div style="font-size: 12px; color: #A0A1A5; margin-bottom: 14px;">Smart Office Fiber 300M · SLA: 4 Days Guaranteed</div>
-                
-                <div style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 6px; font-size: 11px; margin-bottom: 12px;">
-                  <div style="background: rgba(255,255,255,0.06); padding: 6px 8px; border-radius: 4px; border-left: 2px solid #4CAF50;">
-                    <div style="color: #4CAF50; font-weight: 800;">✓ STAGE 1</div>
-                    <div style="color: #fff; font-weight: 700;">Order Placed</div>
-                    <div style="color: #8F9094; font-size: 9.5px;">Quote locked in 42s</div>
-                  </div>
-                  <div style="background: rgba(255,255,255,0.06); padding: 6px 8px; border-radius: 4px; border-left: 2px solid #4CAF50;">
-                    <div style="color: #4CAF50; font-weight: 800;">✓ STAGE 2</div>
-                    <div style="color: #fff; font-weight: 700;">Smart KYC</div>
-                    <div style="color: #8F9094; font-size: 9.5px;">Masked SYN-XXXX-889</div>
-                  </div>
-                  <div style="background: rgba(255,255,255,0.06); padding: 6px 8px; border-radius: 4px; border-left: 2px solid #4CAF50;">
-                    <div style="color: #4CAF50; font-weight: 800;">✓ STAGE 3</div>
-                    <div style="color: #fff; font-weight: 700;">Feasibility</div>
-                    <div style="color: #8F9094; font-size: 9.5px;">Splitter Port #4 OK</div>
-                  </div>
-                  <div style="background: rgba(228,0,0,0.15); padding: 6px 8px; border-radius: 4px; border-left: 2px solid #E40000;">
-                    <div style="color: #FF5252; font-weight: 800;">● STAGE 5 (ACTIVE)</div>
-                    <div style="color: #fff; font-weight: 700;">Field Tech</div>
-                    <div style="color: #FFB300; font-size: 9.5px;">Rajesh (OTP: 8492)</div>
-                  </div>
-                </div>
-                <div style="background: rgba(255,255,255,0.04); padding: 6px 10px; border-radius: 4px; font-size: 11px; color: #C5C6C9; display: flex; justify-content: space-between;">
-                  <span><strong>WhatsApp Push (10:14 AM):</strong> "Your router has shipped via BlueDart. Tech OTP is 8492."</span>
-                  <span style="color: #4CAF50; font-weight: 800;">Delivered</span>
-                </div>
+              <div style="background: #0D0E12; border-radius: 6px; overflow: hidden; height: 285px; display: flex; align-items: center; justify-content: center; border: 1px solid #DDD8CE;">
+                <img src="{img_screen_tracker_b64}" style="max-height: 100%; max-width: 100%; object-fit: contain;" alt="Partner Lead Rescue Console">
               </div>
             </div>
             <div style="font-size: 13px; color: #4A4B4E; margin-top: 6px; line-height: 1.35;">
-              End-to-end transparency eliminates inbound chase calls. Dynamic status pages with one-click WhatsApp updates show exactly who is arriving and when.
+              Partner ops console powered by LightGBM. Automatically identifies dropped leads and triggers personalized WhatsApp recovery drawers with 1-click cart pre-hydration.
             </div>
           </div>
 
         </div>
 
-        <div class="card-beige" style="padding: 10px 16px; margin-top: 12px; margin-right: 340px;">
-          <div style="font-size: 13px; color: #121316; font-weight: 700; display: flex; justify-content: space-between; align-items: center;">
-            <span><strong style="color: #E40000;">Live Deployment Guarantee:</strong> Fully deployed on AWS EC2 (65.1.112.251) and domain airtel.hrushikeshramilla.in</span>
-            <span class="badge-pill" style="background: #121316; color: #fff; font-weight: 800;">56 / 62 Pytest Tests Passing</span>
+                <div class="card-beige" style="padding: 10px 18px; margin-top: 12px; width: 100%;">
+          <div style="font-size: 13.5px; color: #121316; font-weight: 750; display: flex; justify-content: space-between; align-items: center;">
+            <span><strong style="color: #E40000;">Live Prototype Access:</strong> Deployed and accessible live at <a href="https://airtel.hrushikeshramilla.in" style="color: #E40000; text-decoration: underline;">airtel.hrushikeshramilla.in</a></span>
+            <span style="color: #5A5A5D; font-weight: 600;">Official Demo Video: <a href="https://airtel.hrushikeshramilla.in/demoVideo" style="color: #121316; text-decoration: underline; font-weight: 800;">airtel.hrushikeshramilla.in/demoVideo</a></span>
           </div>
         </div>
       </div>
@@ -1508,7 +1608,7 @@ def generate_deck():
 
         </div>
 
-        <div style="background: #FFFFFF; border-left: 4px solid #E40000; border-top: 1.5px solid #DDD8CE; border-right: 1.5px solid #DDD8CE; border-bottom: 1.5px solid #DDD8CE; border-radius: 6px; padding: 12px 18px; margin-right: 340px;">
+        <div style="background: #FFFFFF; border-left: 4px solid #E40000; border-top: 1.5px solid #DDD8CE; border-right: 1.5px solid #DDD8CE; border-bottom: 1.5px solid #DDD8CE; border-radius: 6px; padding: 12px 18px; width: 100%;">
           <div style="font-size: 13.5px; font-weight: 750; color: #121316; line-height: 1.4;">
             <strong style="color: #E40000;">Executive Verdict:</strong> Project Udyam Digital transforms Accel Business from a slow, paper-bound corporate carrier into India's default digital operating system for small enterprises—slashing CAC by 78%, lifting non-GST conversions 4.25x, and unlocking ₹1,200 Cr ARR in 12 months.<br><span style="font-size: 12px; color: #4A4B4E; margin-top: 4px; display: inline-block;">Official HD Video Walkthrough & Interactive Demo: <a href="https://airtel.hrushikeshramilla.in/demoVideo" style="color: #E40000; font-weight: 800; text-decoration: underline;">https://airtel.hrushikeshramilla.in/demoVideo</a></span>
           </div>
