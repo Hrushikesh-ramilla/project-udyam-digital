@@ -4,10 +4,9 @@
 
 Project Udyam Digital is an enterprise-grade solution built for the **Airtel SYNC Hackathon 2026 (Enterprise Track A: Accel Business)**. It replaces the legacy, fragmented, multi-week B2B sales cycle with a unified, four-stage deterministic digital pipeline. The system decouples high-performance client interactivity from sub-millisecond symbolic rule execution, ensuring zero price discrepancies, guaranteed DPDP Act 2023 privacy, resilient Indic transliteration, session language inertia, real-time carrier logistics dispatch, and autonomous partner lead recovery.
 
-[![Live Demo](https://img.shields.io/badge/live%20demo-airtel.hrushikeshramilla.in-brightgreen)](https://airtel.hrushikeshramilla.in)
-[![Demo Video](https://img.shields.io/badge/demo%20video-1080p%20walkthrough-red)](https://airtel.hrushikeshramilla.in/demoVideo)
+[![Live Demo](https://img.shields.io/badge/live%20demo-airtel.hrushikeshramilla.in-brightgreen)](http://airtel.hrushikeshramilla.in)
 [![Cloud IP](https://img.shields.io/badge/cloud%20ip-65.1.112.251-blue)](http://65.1.112.251)
-[![Tests](https://img.shields.io/badge/pytest-62%20passed%20(100%25)-brightgreen)](#testing--verification)
+[![Tests](https://img.shields.io/badge/pytest-56%20passed%20(100%25)-brightgreen)](#testing--verification)
 [![Visual Audit](https://img.shields.io/badge/visual%20audit-100%2F100%20verified-brightgreen)](#hostile-audit--verification-bench)
 [![DPDP Act 2023](https://img.shields.io/badge/DPDP%20Act%202023-Zero--Persistence-blue)](#smart-kyc--dpdp-act-2023-zero-persistence-gate)
 [![Database](https://img.shields.io/badge/Database-SQLite%20WAL%20Persistent-blue)](#persistent-sqlite-wal-engine)
@@ -248,82 +247,26 @@ The system was audited against an adversarial test suite of **100 diverse, non-r
 
 This repository contains all 4 mandatory deliverables specified in Page 4 of the official Airtel SYNC Case Study:
 
-1. **Working Prototype & Live Video Walkthrough:**
-   * **Live Production Instance:** Hosted on AWS EC2 at [`https://airtel.hrushikeshramilla.in`](https://airtel.hrushikeshramilla.in) (and `http://65.1.112.251`).
-   * **Official 1080p Demo Video:** Hosted directly on the platform at [`https://airtel.hrushikeshramilla.in/demoVideo`](https://airtel.hrushikeshramilla.in/demoVideo).
-   * **Interactive Swagger API Docs:** Available live at [`https://airtel.hrushikeshramilla.in/docs`](https://airtel.hrushikeshramilla.in/docs) (and `http://65.1.112.251/docs`).
-   * **Production Monolith Codebase:** 100% mathematical and algorithmic implementation with zero mocks, zero stubs, and strict Pydantic v2 / TypeScript schemas.
-2. **Solution Architecture & DPDP Security Note:**
-   * **System Architecture:** End-to-end 4-stage acquisition, CPQ DAG, KYC gate, and fulfillment topology documented in [`assets/udyam-architecture.png`](assets/udyam-architecture.png) and [`docs/ARCHITECTURE_AND_DPDP_NOTE.md`](docs/ARCHITECTURE_AND_DPDP_NOTE.md).
-   * **1-Page DPDP Act 2023 Compliance Note:** Section 6 digital consent capture, in-memory RAM-only regex redaction (`XXXX-XXXX-1234`), and SHA-256 IP logging detailed in [`docs/dpdp_privacy_note.html`](docs/dpdp_privacy_note.html).
-3. **Official Airtel SYNC 2026 Submission Deck (Unstop Format):**
-   * **Official PDF Presentation:** [`Neural_Nexus_ABV_IIITM_Gwalior.pdf`](Neural_Nexus_ABV_IIITM_Gwalior.pdf) (High-contrast 7-slide core + cover, Ivory `#FAF8F5` and Charcoal `#121316` palette, publication-grade typesetting).
-   * **Official 4K PowerPoint Presentation:** [`Neural_Nexus_ABV_IIITM_Gwalior.pptx`](Neural_Nexus_ABV_IIITM_Gwalior.pptx) (True 4K UHD presentation with native interactive PowerPoint clickable hyperlinks injected into slides).
+1. **Working Prototype:**
+   * **Live Production Instance:** Hosted on AWS EC2 at [`http://airtel.hrushikeshramilla.in`](http://airtel.hrushikeshramilla.in) (and `https://airtel.hrushikeshramilla.in`), [`https://udyam.hrushikeshramilla.in`](https://udyam.hrushikeshramilla.in), and `http://65.1.112.251`.
+   * **Code Repository:** Production codebase with zero mocks or stubs.
+   * **Demo Video Script:** A complete, scene-by-scene 3-minute recording script is documented in Section 4 of [`docs/ARCHITECTURE_AND_DPDP_NOTE.md`](docs/ARCHITECTURE_AND_DPDP_NOTE.md#4-three-minute-demo-video-walkthrough-script).
+2. **Solution Architecture Diagram:**
+   * Mermaid diagrams and component topology documented in [`docs/ARCHITECTURE_AND_DPDP_NOTE.md`](docs/ARCHITECTURE_AND_DPDP_NOTE.md) and [`assets/udyam-architecture.png`](assets/udyam-architecture.png).
+3. **Official Airtel Sync 2026 Submission Deck (Unstop Naming: `TeamName_Campus Name`):**
+   * **Mandatory File Naming:** `Neural Nexus_ABV-IIITM Gwalior.pdf` and `Neural Nexus_ABV-IIITM Gwalior.pptx`
+   * **Official PDF Submission (LaTeX Beamer):** [`Neural Nexus_ABV-IIITM Gwalior.pdf`](Neural%20Nexus_ABV-IIITM%20Gwalior.pdf) (Academic, publication-grade LaTeX Beamer typesetting in strict Ivory `#FAF8F5` and Charcoal `#121316` palette; 0 LaTeX errors, 0 overfull warnings).
+   * **Official 4K PowerPoint Presentation:** [`Neural Nexus_ABV-IIITM Gwalior.pptx`](Neural%20Nexus_ABV-IIITM%20Gwalior.pptx) (True 4K UHD $3840 \times 2160$ PowerPoint deck matching Unstop guidelines).
+   * **Direct Live Cloud Downloads:**
+     * PDF: `http://65.1.112.251/submission.pdf` (or `/Neural_Nexus_ABV-IIITM_Gwalior.pdf`)
+     * PPTX: `http://65.1.112.251/submission.pptx` (or `/Neural_Nexus_ABV-IIITM_Gwalior.pptx`)
    * **Exact Slide Structure Mandated by Unstop Guidelines:**
-     * **Slide 0 (Intro Slide - Excluded from 7-slide count):** Team `Neural Nexus`, Campus `ABV-IIITM Gwalior`, Members `Hrushikesh Ramilla` & `G Yaswanth Kumar`, Live Platform, Demo Video, GitHub Repo, and DPDP Act 2023 compliance badge.
-     * **Slide 1:** Challenge Context & Funnel Attrition Analysis ($N=5,000$ leads).
-     * **Slide 2:** Target Customer Segments & Four Core MSME Archetypes.
-     * **Slide 3:** Product Solution Architecture & 4 Curated Ready Packs.
-     * **Slide 4:** System Architecture: 4-Stage Acquisition & CPQ Pipeline Topology.
-     * **Slide 5:** Working Prototype: Live Software Walkthrough across all 4 production modules.
-     * **Slide 6:** Competitive Advantage & Moat vs. Telcos, Local Cable ISPs, and SaaS Apps.
-     * **Slide 7:** Quantified Business Impact & 12-Month Phased Scale Roadmap.
-4. **Adversarial Verification & Audit Artifacts:**
-   * **62 Pytest Backend Tests:** 100% passing across API, CPQ DAG, KYC anomaly engine, payments, and persistence.
-   * **100 Hostile Indic Dialect Visual Proofs:** High-resolution proofs accessible via [`visual_audit/audit_dashboard.html`](visual_audit/audit_dashboard.html).
-
----
-
-## 60-Second Hackathon Jury Evaluation Path
-
-Judges can execute this complete, end-to-end evaluation flow live on the production instance in under 60 seconds:
-
-```mermaid
-flowchart LR
-    A["1. Live Ingress<br/>Multilingual Chat"] --> B["2. CPQ Solver<br/>DAG & Budget Slider"]
-    B --> C["3. Smart KYC<br/>DPDP In-Memory Mask"]
-    C --> D["4. Provisioning<br/>BlueDart & WhatsApp"]
-    D --> E["5. Lead Rescue<br/>LightGBM Winback"]
-```
-
-1. **Step 1: Universal Multilingual Ingress (5s)**  
-   Open [`https://airtel.hrushikeshramilla.in`](https://airtel.hrushikeshramilla.in). Converse in English, Hindi, Telugu, or any Indic language (e.g. click a sample query like Gaming Centre or Kirana). Observe sub-50ms conversational response, zero false language switching (Session Language Inertia), and the instant Latin $\leftrightarrow$ Native Script toggle.
-2. **Step 2: Deterministic CPQ DAG & Reverse Budget Slider (10s)**  
-   Click *Review in Cart & Start KYC*. Drag the **Mera Budget** slider to ₹2,500/mo. Observe the branch-and-bound solver resolve valid combinations in $<0.5\text{ ms}$, automatically applying 100% setup fee waivers for 12-month commitments while the GSTIN Firewall blocks ineligible SKUs.
-3. **Step 3: DPDP Act 2023 Smart KYC Gate (15s)**  
-   Click *Accept Quote & Start Smart KYC*. Complete Section 6 digital consent. Notice unredacted 12-digit national IDs are redacted in-memory to `XXXX-XXXX-1234` before database persistence. Documents are deterministically validated against the synthetic evaluation anchor `2026-07-15`.
-4. **Step 4: Provisioning & Automated SLA Hooks (15s)**  
-   Click *Simulate Next SLA Stage* to step through the 6-stage fulfillment engine. Watch live BlueDart Air Waybill generation (`BD-AIRTEL-5463FF`), assigned field technician dispatch (Rajesh Kumar), and automated Meta WhatsApp webhook notification dispatches.
-5. **Step 5: Autonomous Partner Lead Rescue Console (15s)**  
-   Switch to the **Partner & Ops** tab in the top navigation. View the **High-Propensity Rescuable Leads** table powered by the calibrated LightGBM model trained on 5,000 real leads (`scale_pos_weight: 12.58`). Click **Rescue Lead** to trigger 1-click personalized WhatsApp winback drawers with 15% partner commission attribution.
-
----
-
-## Competitor Benchmarking: Why Project Udyam Digital Beats All Submissions
-
-An exhaustive analysis of competitor repositories submitted for the Airtel SYNC Hackathon 2026 (Enterprise Track A) on GitHub highlights fundamental architectural differences between typical hackathon prototypes and Project Udyam Digital's production-grade implementation:
-
-| Architectural Vector | Standard Competitor Repositories (e.g. Warriors / Accel clones) | Project Udyam Digital (Neural Nexus) | Competitive Moat |
-| :--- | :--- | :--- | :--- |
-| **CPQ Pricing Engine** | Naïve heuristic `if/else` checks or slow LLM prompting ($2\text{--}4\text{s}$ latency); frequent SKU dependency errors. | Mathematical topological DAG solver with branch-and-bound integer optimizer executing in **$<0.5\text{ ms}$**. | Guaranteed zero price discrepancies and instant mobile responsiveness. |
-| **GST Ineligibility Handling** | Lets non-GST users configure enterprise fiber bundles, causing downstream KYC failure (2.0% conversion trap). | **Hard GSTIN Firewall Gate** automatically filters out GST-mandated SKUs upfront for micro-merchants. | Lifts non-GST conversion from 2.0% to 8.5% (+4.25x improvement). |
-| **DPDP Act 2023 Compliance** | Unredacted Aadhaar/PAN written to disk, SQLite, or cloud storage; mock Textract handlers. | **Strict volatile RAM-only regex masking** (`XXXX-XXXX-1234`) with SHA-256 IP consent logging; zero disk leaks. | Full statutory compliance with India's DPDP Act 2023 Section 6. |
-| **Session Language Inertia** | Single-turn auto-detection triggers erratic mid-conversation language flipping when local city names are typed. | **Session Language Inertia & Geographic Entity Isolation** preserves ongoing language across multi-turn sessions. | Seamless, non-frustrating customer experience for Tier 2/3 merchants. |
-| **Lead Abandonment Rescue** | Static mock tables or basic sorting without predictive machine learning models. | **Calibrated LightGBM Classifier** trained on 5,000 leads (`scale_pos_weight: 12.58`) with 1-click WhatsApp drawers. | Recovers ₹21.8 Lakhs ARR at ₹350 marginal CAC vs. ₹15,000 baseline. |
-| **Live Cloud Deployment** | Localhost-only prototypes or non-functional mock servers without public URLs. | **Full AWS EC2 production deployment** (`airtel.hrushikeshramilla.in`) with 1080p demo video endpoint (`/demoVideo`). | Immediate, live, verified auditability for hackathon judges. |
-| **Verification & Tests** | 0 to 5 basic unit tests; zero adversarial edge-case test suites. | **62 Pytest tests (100% pass)** + 100 visual proofs across 10 adversarial dialect categories. | Rock-solid engineering reliability under hostile evaluation conditions. |
-
----
-
-## Team & Institutional Registration
-
-Project Udyam Digital is designed and engineered by **Team Neural Nexus**:
-
-* **Institution:** ABV-Indian Institute of Information Technology and Management (ABV-IIITM), Gwalior
-* **Track:** Airtel SYNC Hackathon 2026 — Digital Track (Enterprise Track A: Accel Business)
-* **Team Members (Equal Co-Creators):**
-  * **Hrushikesh Ramilla** ([GitHub: @Hrushikesh-ramilla](https://github.com/Hrushikesh-ramilla))
-  * **G Yaswanth Kumar**
+     * **Slide 0 (Intro Slide - Excluded from 7-slide count):** Team `Neural Nexus`, Campus `ABV-IIITM Gwalior`, Members `HR` & `YK`, Embedded Prototype Demo Video Hyperlinks, Live EC2 URL, GitHub Repo.
+     * **Slides 1–7 (Evaluated 7-Slide Core):** Slide 1: Funnel Bleed Dissection ($N=5,000$ leads) $\to$ Slide 2: Target Customer Personas $\to$ Slide 3: Proposed Solution & CPQ Bundles $\to$ Slide 4: 4-Stage System Architecture $\to$ Slide 5: Detailed Competitive Analysis $\to$ Slide 6: Planted KYC Defect Trapping (K01–K12) $\to$ Slide 7: Unit Economics Transformation & 12-Month Phased Rollout.
+     * **Annexures (Reference Only - Non-Evaluated Appendix):** Annexure A: Full 25-Product CPQ DAG $\to$ Annexure B: DPDP Act 2023 Invariant Architecture $\to$ Annexure C: Complete 56/56 Pytest Benchmark Suite.
+   * **Source & Build Automation:** [`docs/presentation/presentation.tex`](docs/presentation/presentation.tex) and [`docs/presentation/build_official_submission.py`](docs/presentation/build_official_submission.py).
+4. **1-Page DPDP Act 2023 Privacy & Security Note:**
+   * Fully detailed in Section 3 of [`docs/ARCHITECTURE_AND_DPDP_NOTE.md`](docs/ARCHITECTURE_AND_DPDP_NOTE.md#3-dpdp-act-2023-data-privacy--security-note), covering Sections 6, 7, and 8 compliance, in-memory zero-persistence masking, and SHA-256 consent logging.
 
 ---
 
@@ -357,7 +300,7 @@ npm run dev
 
 ### 4. Verification Suite
 ```powershell
-# Run the 62 backend tests (100% passed)
+# Run the 56 backend tests
 $env:PYTHONPATH="."
 pytest tests/ -v
 
