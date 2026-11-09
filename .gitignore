@@ -77,3 +77,9 @@ temp_*.txt
 ui_*.txt
 *.webm
 
+# Binary deliverables & presentation outputs (kept out of open-source repo)
+*.pdf
+*.pptx
+*.mp4
+
+
