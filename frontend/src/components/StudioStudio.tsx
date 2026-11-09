@@ -518,9 +518,14 @@ export const StudioStudio: React.FC<StudioStudioProps> = ({
       const errorMsg: ChatMessage = {
         id: `adv_err_${Date.now()}`,
         sender: "assistant",
-        textLatin: "Connected to Airtel Enterprise registry. Selected optimal verified bundle based on your business profile.",
-        textNative: "ఎయిర్‌టెల్ ఎంటర్‌ప్రైజ్ రిజిస్ట్రీకి కనెక్ట్ చేయబడింది. మీ వ్యాపార ప్రొఫైల్ ఆధారంగా ఉత్తమమైన బండిల్ ఎంపిక చేయబడింది.",
+        textLatin: "I am experiencing a temporary connection delay to the Airtel Enterprise Advisor service. Please try asking your question again in a moment.",
+        textNative: selectedLang === "te"
+          ? "ఎయిర్‌టెల్ ఎంటర్‌ప్రైజ్ సేవతో కనెక్టివిటీ సమస్య ఏర్పడింది. దయచేసి మళ్లీ ప్రయత్నించండి."
+          : (selectedLang === "hi"
+            ? "एयरटेल एंटरप्राइज सेवा से कनेक्ट करने में कुछ समस्या आ रही है। कृपया कुछ देर बाद पुनः प्रयास करें।"
+            : "I am experiencing a temporary connection delay to the Airtel Enterprise Advisor service. Please try asking your question again in a moment."),
         timestamp: new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }),
+        spokenTts: "I am experiencing a temporary connection delay. Please try again.",
       };
       setMessages((prev) => [...prev, errorMsg]);
     } finally {

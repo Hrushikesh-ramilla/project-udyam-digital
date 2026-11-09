@@ -120,7 +120,9 @@ class AdvisorAgent:
         lang_names = {
             "en": "English", "hi": "Hindi (or Hinglish if conversational)",
             "te": "Telugu", "ta": "Tamil", "kn": "Kannada", "ml": "Malayalam",
-            "bn": "Bengali", "gu": "Gujarati", "mr": "Marathi", "or": "Odia"
+            "bn": "Bengali", "gu": "Gujarati", "mr": "Marathi", "or": "Odia",
+            "fr": "French", "es": "Spanish", "de": "German", "it": "Italian",
+            "pt": "Portuguese", "ru": "Russian", "ja": "Japanese", "ar": "Arabic"
         }
         active_lang_name = lang_names.get(language_code or "en", language_code or "English")
 
@@ -534,6 +536,84 @@ Return STRICTLY valid JSON:
                 pass
         return text
 
+    @staticmethod
+    def _detect_language_directive(clean_msg: str) -> Optional[str]:
+        """Detects explicit user directives commanding the assistant to converse in a specific language.
+
+        Handles English commands (e.g. 'talk anything in hindi', 'speak french', 'switch to telugu'),
+        prepositional commands ('in spanish', 'in hindi'), and native script commands ('हिंदी में बात करो').
+        """
+        directive_map = {
+            # Indian Languages
+            "hindi": "hi", "hinglish": "hi",
+            "telugu": "te", "tenglish": "te",
+            "tamil": "ta", "tanglish": "ta",
+            "bengali": "bn", "bangla": "bn",
+            "gujarati": "gu", "marathi": "mr",
+            "kannada": "kn", "malayalam": "ml",
+            "odia": "or", "oriya": "or",
+            "punjabi": "pa", "urdu": "ur", "assamese": "as",
+            # Global Languages
+            "french": "fr", "francais": "fr", "français": "fr",
+            "spanish": "es", "espanol": "es", "español": "es",
+            "german": "de", "deutsch": "de",
+            "italian": "it", "italiano": "it",
+            "portuguese": "pt", "portugues": "pt", "português": "pt",
+            "russian": "ru", "japanese": "ja", "arabic": "ar",
+            "english": "en",
+        }
+
+        # 1. Verb-driven directives: "talk in hindi", "speak french", "can you talk anything in hindi", "switch to telugu"
+        m = re.search(
+            r"\b(?:talk|speak|switch|converse|reply|answer|respond|translate|write|chat)\s*(?:anything\s*)?(?:in|to|into)?\s*([a-zA-Z\u00C0-\u017F]+)\b",
+            clean_msg
+        )
+        if m:
+            target = m.group(1).lower()
+            if target in directive_map:
+                return directive_map[target]
+
+        # 2. Prepositional directives: "in hindi", "in french", "speak hindi please"
+        m_prep = re.search(
+            r"\b(?:in|into)\s*(hindi|telugu|tamil|bengali|gujarati|marathi|kannada|malayalam|odia|oriya|punjabi|urdu|french|spanish|german|italian|japanese|russian|arabic|english)\b",
+            clean_msg
+        )
+        if m_prep:
+            return directive_map.get(m_prep.group(1).lower())
+
+        m_speak = re.search(
+            r"\b(?:speak|talk)\s+(hindi|telugu|tamil|bengali|gujarati|marathi|kannada|malayalam|odia|oriya|punjabi|urdu|french|spanish|german|italian|japanese|russian|arabic|english)\b",
+            clean_msg
+        )
+        if m_speak:
+            return directive_map.get(m_speak.group(1).lower())
+
+        # 3. Native script language directives
+        if re.search(r"(?:हिंदी|हिन्दी)\s*(?:में)?\s*(?:बात|बोलो|बताओ|लिखो)", clean_msg):
+            return "hi"
+        if re.search(r"తెలుగులో\s*(?:మాట్లాడు|చెప్పు|రాయండి|మాట్లాడండి)", clean_msg):
+            return "te"
+        if re.search(r"தமிழில்\s*(?:பேசு|சொல்லு|எழுது)", clean_msg):
+            return "ta"
+        if re.search(r"বাংলায়\s*(?:বলুন|কথা|লিখুন)", clean_msg):
+            return "bn"
+        if re.search(r"मराठीत\s*(?:बोला|सांगा)", clean_msg):
+            return "mr"
+        if re.search(r"ગુજરાતીમાં\s*(?:બોલો|કહો)", clean_msg):
+            return "gu"
+        if re.search(r"ಕನ್ನಡದಲ್ಲಿ\s*(?:ಮಾತನಾಡಿ|ಹೇಳಿ)", clean_msg):
+            return "kn"
+        if re.search(r"മലയാളത്തിൽ\s*(?:സംസാരിക്കുക|പറയുക)", clean_msg):
+            return "ml"
+        if re.search(r"\b(parlez[- ]vous\s*français|en\s*français)\b", clean_msg):
+            return "fr"
+        if re.search(r"\b(hablemos\s*en\s*español|habla\s*español|en\s*español)\b", clean_msg):
+            return "es"
+        if re.search(r"\b(sprechen\s*sie\s*deutsch|auf\s*deutsch)\b", clean_msg):
+            return "de"
+
+        return None
+
     def process_turn(
         self,
         user_message: str,
@@ -654,7 +734,12 @@ Return STRICTLY valid JSON:
         elif not has_indic and en_matches >= 2:
             detected_in_msg = "en"
 
-        if language_code and language_code != "auto":
+        explicit_directive = self._detect_language_directive(clean_msg)
+
+        if explicit_directive:
+            # User explicitly instructed what language to talk in (e.g. "Talk anything in Hindi", "Switch to French")
+            active_lang = explicit_directive
+        elif language_code and language_code != "auto":
             active_lang = language_code
         elif detected_in_msg:
             # User explicitly switched to or used this language in the current turn
@@ -674,11 +759,11 @@ Return STRICTLY valid JSON:
             r"\b(what|why|how|can|is|will|do|explain|tell|difference|kya|kaise|kyun|enti|ela|eppudu)\b",
             clean_msg
         ))
-        is_foreign = bool(re.search(r"^(hola|bonjour|ciao|aloha|hallo|salut|wie\s*gehts|que\s*tal|konnichiwa|privet|merhaba|sawasdee)\b", clean_msg))
+        is_foreign = bool(re.search(r"^(hola|bonjour|ciao|aloha|hallo|salut|wie\s*gehts|que\s*tal|konnichiwa|privet|merhaba|sawasdee)\b", clean_msg)) or active_lang in {"fr", "es", "de", "it", "ja", "ru", "ar", "pt"}
         is_unrelated = bool(re.search(r"\b(recipe|biryani|butter\s*chicken|cook|weather|monsoon|rain|poem|movie|sci-fi|python|binary\s*search|code|joke|capital\s*of|capital\s*city|who\s*won)\b", clean_msg))
         is_terse = clean_msg in {"internet", "broadband", "plans", "price", "how much", "speed", "enterprise", "connection", "quote", "airtel"}
         is_greeting = bool(re.search(
-            r"^(h+e+y+|h+i+|h+e+l+o+|h+o+l+a+|whats\s*up|what\'s\s*up|good\s*(morning|evening|afternoon)|yo+|sup|bhai|bhaiya|namaste|namaskar|namasthe|pranam)\b",
+            r"^(h+e+y+|h+i+|h+e+l+o+|h+o+l+a+|b+o+n+j+o+u+r+|s+a+l+u+t+|c+i+a+o+|h+a+l+l+o+|whats\s*up|what\'s\s*up|good\s*(morning|evening|afternoon)|yo+|sup|bhai|bhaiya|namaste|namaskar|namasthe|pranam)\b",
             clean_msg
         )) or bool(re.search(
             r"\b(bagunnara|bagunara|ela\s*unnaru|ela\s*unnav|namaskaram|namasthe|vanakkam|eppadi\s*iruk|kemon\s*ac|kem\s*cho|kase\s*ahat|hegidd|sukhamano|kemiti\s*ach|kaise\s*ho|kya\s*haal|namaste|నమస్కారం|నమస్తే|బాగున్నారా|வணக்கம்|நமஸ்கார்|নমস্কার|નમસ્તે|नमस्कार|ನಮಸ್ಕಾರ|നമസ്കാരം|ନମସ୍କାର)\b",
@@ -693,12 +778,9 @@ Return STRICTLY valid JSON:
         is_telecom_question = is_question and not is_casual_courtesy
 
         # Fast-path for simple 1-6 word conversational greetings (instant <50ms handshake)
-        is_simple_greeting = is_greeting and not is_telecom_question and not is_comparison and not slots.segment and not slots.city_tier and not slots.employee_count and len(clean_msg.split()) <= 6
+        is_simple_greeting = (is_greeting or (bool(explicit_directive) and len(clean_msg.split()) <= 6)) and not is_telecom_question and not is_comparison and not slots.segment and not slots.city_tier and not slots.employee_count
         if is_simple_greeting:
-            f_latin, f_native, f_tts = self._generate_human_fallback(
-                user_message, clean_msg, active_lang, effective_script, slots,
-                is_foreign=is_foreign, is_unrelated=False, is_terse=False, is_greeting=True
-            )
+            f_latin, f_native, f_tts = self._generate_human_fallback(user_message, clean_msg, active_lang, effective_script, slots, is_foreign=is_foreign, is_unrelated=False, is_terse=False, is_greeting=True, explicit_directive=explicit_directive)
             pure_latin, pure_native = ensure_dual_scripts(f_latin, f_native, active_lang)
             user_lat, user_nat = self._dualize_user_message(user_message, active_lang, effective_script)
             return AdvisorResponse(
@@ -765,18 +847,15 @@ Return STRICTLY valid JSON:
             spoken = re.sub(r"[\*#\[\]]", "", spoken).replace("₹", "rupaye ").strip()
 
             # Strict guard against accidental Hindi/Hinglish language leak when active conversation is in English
-            if active_lang == "en":
-                hi_leak_markers = r"\b(aapka|aapke|aapki|hoga|hogi|hain|hai|mein|zaroorat|karna|karke|badiya|shandar|chinta|dukaan|matlab|saste|liye|bilkul|kya)\b"
+            if active_lang == "en" and not explicit_directive:
+                hi_leak_markers = r"(aapka|aapke|aapki|hoga|hogi|hain|hai|mein|zaroorat|karna|karke|badiya|shandar|chinta|dukaan|matlab|saste|liye|bilkul)"
                 if len(re.findall(hi_leak_markers, disp_lat.lower())) >= 3:
-                    b_name = slots.business_name or "your store"
-                    loc = slots.city or "your location"
                     disp_lat = (
-                        f"Got it! I have noted **{b_name}** in **{loc}** with your contact number. "
-                        f"Your order for the recommended plan is ready to be locked in with zero upfront setup fees! "
-                        f"Shall I confirm this and forward to our installation dispatch team?"
+                        "Got it! Based on your business profile, we can configure an optimal Airtel enterprise connectivity package "
+                        "with zero upfront setup fees on a 12-month commitment. What specific bandwidth or uptime requirement can I help you with?"
                     )
                     disp_nat = disp_lat
-                    spoken = re.sub(r"[\*#\[\]]", "", disp_lat)
+                    spoken = "Got it. Based on your business profile, we can configure an optimal Airtel enterprise connectivity package."
 
             turn_skus = self._extract_skus_from_text(user_message)
 
@@ -816,7 +895,7 @@ Return STRICTLY valid JSON:
             valid_skus = [s for s in gem_skus if self.db.get_product(s)]
 
             # CRITICAL ENFORCEMENT: Never attach SKUs or quote on greetings, small talk, or unprompted incomplete discovery
-            if is_greeting or is_unrelated or is_foreign or (not slots.is_complete and not has_explicit_plan_intent):
+            if is_greeting or is_unrelated or is_foreign or bool(explicit_directive) or (not slots.is_complete and not has_explicit_plan_intent):
                 valid_skus = []
             else:
                 if turn_skus and ("P06" in turn_skus or len(turn_skus) >= len(valid_skus)):
@@ -901,10 +980,7 @@ Return STRICTLY valid JSON:
 
         # 2. Greeting, Unrelated, Terse, Foreign
         if is_foreign or is_unrelated or is_terse or (is_greeting and not slots.is_complete):
-            f_latin, f_native, f_tts = self._generate_human_fallback(
-                user_message, clean_msg, active_lang, effective_script, slots,
-                is_foreign=is_foreign, is_unrelated=is_unrelated, is_terse=is_terse, is_greeting=is_greeting
-            )
+            f_latin, f_native, f_tts = self._generate_human_fallback(user_message, clean_msg, active_lang, effective_script, slots, is_foreign=is_foreign, is_unrelated=is_unrelated, is_terse=is_terse, is_greeting=is_greeting, explicit_directive=explicit_directive)
             pure_latin, pure_native = ensure_dual_scripts(f_latin, f_native, active_lang)
             user_lat, user_nat = self._dualize_user_message(user_message, active_lang, effective_script)
             return AdvisorResponse(
@@ -926,9 +1002,7 @@ Return STRICTLY valid JSON:
 
         # 3. Slots are incomplete: prompt for clarification
         if not slots.is_complete:
-            f_latin, f_native, f_tts = self._generate_human_fallback(
-                user_message, clean_msg, active_lang, effective_script, slots
-            )
+            f_latin, f_native, f_tts = self._generate_human_fallback(user_message, clean_msg, active_lang, effective_script, slots, explicit_directive=explicit_directive)
             pure_latin, pure_native = ensure_dual_scripts(f_latin, f_native, active_lang)
             user_lat, user_nat = self._dualize_user_message(user_message, active_lang, effective_script)
             return AdvisorResponse(
@@ -1060,7 +1134,78 @@ Return STRICTLY valid JSON:
         is_unrelated: bool = False,
         is_terse: bool = False,
         is_greeting: bool = False,
+        explicit_directive: Optional[str] = None,
     ) -> tuple[str, str, str]:
+        # 0.0 Explicit Language Switch Directive (e.g. "Talk anything in Hindi / French / Spanish / Telugu")
+        if explicit_directive:
+            if explicit_directive == "hi":
+                lat = (
+                    "Namaste! Airtel Business me aapka swagat hai. Main aapki bhasha me baat karne ke liye bilkul taiyar hoon! "
+                    "Aapka kis tarah ka business hai aur aapko kaisi high-speed connectivity chahiye?"
+                )
+                nat = (
+                    "नमस्ते! एयरटेल बिजनेस में आपका स्वागत है। मैं आपकी भाषा में बात करने के लिए बिल्कुल तैयार हूँ! "
+                    "आपका किस तरह का व्यवसाय है और आपको कैसी हाई-स्पीड कनेक्टिविटी चाहिए?"
+                )
+                tts = "Namaste! Airtel Business mein aapka swagat hai. Main Hindi mein baat karne ke liye taiyar hoon. Aapka business kis tarah ka hai?"
+                return lat, nat, tts
+            elif explicit_directive == "fr":
+                lat = (
+                    "Bonjour ! Bienvenue chez Airtel Business. Je suis ravi d'échanger avec vous en français ! "
+                    "Comment puis-je vous aider aujourd'hui pour la connectivité fibre haute vitesse ou les solutions numériques de votre entreprise ?"
+                )
+                nat = lat
+                tts = "Bonjour ! Bienvenue chez Airtel Business. Comment puis-je vous aider pour votre entreprise ?"
+                return lat, nat, tts
+            elif explicit_directive == "es":
+                lat = (
+                    "¡Hola! Bienvenido a Airtel Business. Con mucho gusto conversamos en español. "
+                    "¿En qué puedo ayudarte hoy con la conectividad de fibra de alta velocidad o soluciones digitales para tu negocio?"
+                )
+                nat = lat
+                tts = "Hola! Bienvenido a Airtel Business. Con mucho gusto conversamos en español."
+                return lat, nat, tts
+            elif explicit_directive == "te":
+                lat = (
+                    "Namaskaram! Airtel Business ki swagatham. Meeru korukuna vidhamga nenu Telugu lo matladadaniki siddhamga unnanu! "
+                    "Mee vyaparam gurinchi konchem vivarinchandi, meeku thagina best connectivity plan chepthanu."
+                )
+                nat = (
+                    "నమస్కారం! ఎయిర్‌టెల్ బిజినెస్‌కి స్వాగతం. మీరు కోరుకున్న విధంగా నేను తెలుగులో మాట్లాడటానికి సిద్ధంగా ఉన్నాను! "
+                    "మీ వ్యాపారం గురించి కొంచెం వివరించండి, మీకు తగిన బెస్ట్ కనెక్టివిటీ ప్లాన్ చెబుతాను."
+                )
+                tts = "Namaskaram! Airtel Business ki swagatham. Nenu Telugu lo matladadaniki ready ga unnanu."
+                return lat, nat, tts
+            elif explicit_directive == "ta":
+                lat = (
+                    "Vanakkam! Airtel Business-ukku varaverkirom. Neengal ketta padi naangal Tamil-il pesa thayaraga ullom! "
+                    "Ungal vanigam patri koorungal, sirandha fiber plan-ai theerumanipom."
+                )
+                nat = (
+                    "வணக்கம்! ஏர்டெல் பிசினஸுக்கு வரவேற்கிறோம். நீங்கள் கேட்டபடி நாங்கள் தமிழில் பேச தயாராக உள்ளோம்! "
+                    "உங்கள் வணிகம் பற்றி கூறுங்கள், சிறந்த ஃபைபர் திட்டத்தை பரிந்துரைக்கிறோம்."
+                )
+                tts = "Vanakkam! Airtel Business-ukku varaverkirom. Naangal Tamil-il pesa thayaraga ullom."
+                return lat, nat, tts
+            elif explicit_directive == "bn":
+                lat = (
+                    "Nomoshkar! Airtel Business-e apnake shagotom. Ami apnar sathe Banglay kotha bolte prostut! "
+                    "Apnar ki dhoroner byabsha ebong kemon high-speed connectivity proyojon?"
+                )
+                nat = (
+                    "নমস্কার! এয়ারটেল বিজনেসে আপনাকে স্বাগতম। আমি আপনার সাথে বাংলায় কথা বলতে প্রস্তুত! "
+                    "আপনার কি ধরনের ব্যবসা এবং কেমন হাই-স্পিড কানেক্টিভিটি প্রয়োজন?"
+                )
+                tts = "Nomoshkar! Airtel Business-e apnake shagotom. Ami Banglay kotha bolte prostut."
+                return lat, nat, tts
+            elif explicit_directive == "en":
+                lat = (
+                    "Welcome back to English! I am here to help you configure the perfect high-speed connectivity and digital solutions for your enterprise. "
+                    "What kind of business do you run, and in which city are you located?"
+                )
+                nat = lat
+                tts = "Welcome back to English! What kind of business do you run, and in which city are you located?"
+                return lat, nat, tts
         """Generates a warm, witty, context-attuned human response across all edge categories."""
         # 0.1 Navigation & App Layout Inquiry (Issue #13)
         if re.search(r"\b(where\s*(?:can\s*i\s*)?(?:see|find|look|track|view)\s*(?:my\s*)?order|how\s*to\s*navigate|where\s*is\s*(?:the\s*)?(?:cart|tracker|dashboard|app|orders?)|navigate\s*me|look\s*it\s*up\s*in\s*my\s*orders)\b", clean_msg):
@@ -1105,6 +1250,52 @@ Return STRICTLY valid JSON:
             tts = (
                 "Aapka plan lock karke chat ke theek neeche Dynamic Cart mein stage kar diya gaya hai. "
                 "Official order ID generate karne ke liye neeche diye gaye Accept Quote and Start Smart KYC button par click karein."
+            )
+            return lat, nat, tts
+
+        # 0.35 AirFiber / Wireless Connectivity FAQ
+        if re.search(r"\b(airfiber|air\s*fiber|trenching|digging|antenna|wireless\s*fiber)\b", clean_msg):
+            lat = (
+                "### 📡 Airtel Biz 5G AirFiber Capabilities\n\n"
+                "**Yes, absolutely!** Airtel Biz 5G AirFiber is purpose-built for businesses in Tier 1 and Tier 2 cities "
+                "where optical fiber trenching or road-digging is delayed or restricted.\n\n"
+                "* **Deployment Speed:** Active in **3 business days** via plug-and-play outdoor high-gain 5G antenna.\n"
+                "* **Performance:** Symmetric 100 Mbps with dedicated QoS priority for billing, POS, and VoIP.\n"
+                "* **Upfront Setup:** 100% Waived (₹0 OTC) on a 12-month commercial agreement.\n\n"
+                "What kind of business or branch are you looking to connect?"
+            )
+            nat = (
+                "### 📡 ఎయిర్‌టెల్ బిజ్ 5G ఎయిర్‌ఫైబర్ సమాచారం\n\n"
+                "**ఖచ్చితంగా పనిచేస్తుంది!** కేబుల్ తవ్వకాలు లేదా మున్సిపల్ అనుమతుల ఆలస్యం లేకుండా టైర్ 1 మరియు టైర్ 2 నగరాల్లో "
+                "ఎయిర్‌టెల్ బిజ్ 5G ఎయిర్‌ఫైబర్ ద్వారా కేవలం **3 రోజుల్లో** కనెక్షన్ ప్రారంభించబడుతుంది.\n\n"
+                "* **స్పీడ్ & ఎస్‌ఎల్‌ఏ:** 100 Mbps హై-స్పీడ్, ₹0 సెటప్ రుసుము.\n\n"
+                "మీ వ్యాపార వివరాలు తెలపండి."
+            )
+            tts = (
+                "Airtel Biz 5G AirFiber wireless antenna ke through bina kisi digging ke sirf 3 din mein activate ho jata hai. "
+                "Yeh Tier 2 cities ke retail aur clinics ke liye ekdam best option hai."
+            )
+            return lat, nat, tts
+
+        # 0.36 GST Exemption / Udyam Law FAQ
+        if re.search(r"\b(gst|gstin|turnover|40\s*lakh|20\s*lakh|exempt|exemption|without\s*gst|no\s*gst)\b", clean_msg) and not (slots.segment and slots.city_tier):
+            lat = (
+                "### 📜 Statutory GST Exemption & Udyam Onboarding\n\n"
+                "**Under Indian law, you do NOT need a GST number if your turnover is under ₹40 Lakhs!**\n\n"
+                "* **Statutory Basis:** Section 22 of the CGST Act explicitly exempts small MSMEs from mandatory GST registration.\n"
+                "* **Airtel Policy:** We accept your **Udyam Registration Certificate** as 100% legally sufficient KYC documentation.\n"
+                "* **Enterprise Benefits:** You receive the exact same enterprise-grade SLA, dedicated fiber, and business customer support.\n\n"
+                "What kind of business are you operating, and in which city?"
+            )
+            nat = (
+                "### 📜 చట్టబద్ధమైన జీఎస్టీ మినహాయింపు & ఉద్యమ్ నమోదు\n\n"
+                "**భారత చట్టం ప్రకారం, మీ వార్షిక టర్నోవర్ ₹40 లక్షల లోపు ఉంటే జీఎస్టీ అవసరం లేదు!**\n\n"
+                "* **ఉద్యమ్ సర్టిఫికేట్:** ఎయిర్‌టెల్ బిజినెస్ కనెక్షన్ కోసం మీ ఉద్యమ్ రిజిస్ట్రేషన్ 100% సరిపోతుంది.\n"
+                "* **ఎస్‌ఎల్‌ఏ:** జీఎస్టీ ఉన్న సంస్థలతో సమానమైన ఎంటర్‌ప్రైజ్ స్పీడ్ మరియు సపోర్ట్ లభిస్తుంది."
+            )
+            tts = (
+                "Indian law ke hisab se 40 lakh se kam turnover par GST ki zaroorat nahi hai. "
+                "Airtel Business connection ke liye aapka Udyam certificate 100 percent valid hai."
             )
             return lat, nat, tts
 

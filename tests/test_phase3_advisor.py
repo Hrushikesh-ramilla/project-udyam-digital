@@ -417,3 +417,115 @@ def test_greeting_and_discovery_turns_suppress_premature_quotes_and_skus(advisor
     assert res_incomplete.slots.is_complete is False
     assert res_incomplete.quote is None
     assert res_incomplete.recommended_skus == []
+
+
+def test_explicit_language_switch_directives(advisor: AdvisorAgent):
+    """Verifies that explicit language commands ('Talk anything in Hindi', 'Talk anything in French',
+    'Can you speak in Telugu?', 'Switch to Spanish') immediately adopt the requested language
+    with zero schema errors, zero premature quotes, and authentic dual scripts.
+    """
+    import re
+
+    # 1. Hindi directive
+    res_hi = advisor.process_turn("Talk anything in Hindi")
+    assert res_hi.quote is None
+    assert res_hi.recommended_skus == []
+    assert res_hi.display_latin is not None
+    assert res_hi.display_native is not None
+    assert "Namaste" in res_hi.display_latin or "Airtel" in res_hi.display_latin
+    # Native script MUST contain authentic Devanagari characters
+    assert re.search(r"[\u0900-\u097F]", res_hi.display_native)
+
+    # 2. French directive
+    res_fr = advisor.process_turn("Talk anything in French")
+    assert res_fr.quote is None
+    assert res_fr.recommended_skus == []
+    assert "Bonjour" in res_fr.display_latin
+    assert not re.search(r"[\u0C00-\u0C7F]", res_fr.display_native)  # Zero spurious Telugu!
+
+    # 3. Telugu directive
+    res_te = advisor.process_turn("Can you talk in Telugu?")
+    assert res_te.quote is None
+    assert "Namaskaram" in res_te.display_latin or "Airtel" in res_te.display_latin
+    assert re.search(r"[\u0C00-\u0C7F]", res_te.display_native)
+
+    # 4. Spanish directive
+    res_es = advisor.process_turn("Switch to Spanish")
+    assert res_es.quote is None
+    assert "Hola" in res_es.display_latin or "Bienvenido" in res_es.display_latin
+
+    # 5. Switch back to English
+    res_en = advisor.process_turn("Please reply in English")
+    assert res_en.quote is None
+    assert "English" in res_en.display_latin or "welcome" in res_en.display_latin.lower()
+
+
+def test_multiturn_conversational_language_flow(advisor: AdvisorAgent):
+    """Verifies the exact multi-turn conversational test sequence:
+    Hola -> Bonjour -> Talk anything in French -> Talk anything in Hindi ->
+    GST doubt in English -> 5G AirFiber doubt in English.
+    """
+    import re
+
+    history: list[dict[str, str]] = []
+
+    # Turn 1: Hola
+    t1 = advisor.process_turn("Hola", history=history)
+    assert "Hola" in t1.display_latin
+    assert t1.quote is None
+    history.append({"role": "user", "content": "Hola"})
+    history.append({"role": "assistant", "content": t1.display_latin})
+
+    # Turn 2: Bonjour
+    t2 = advisor.process_turn("Bonjour", history=history)
+    assert "Bonjour" in t2.display_latin
+    assert t2.quote is None
+    history.append({"role": "user", "content": "Bonjour"})
+    history.append({"role": "assistant", "content": t2.display_latin})
+
+    # Turn 3: Talk anything in French
+    t3 = advisor.process_turn("Talk anything in French", history=history)
+    assert "Bonjour" in t3.display_latin or "français" in t3.display_latin.lower()
+    assert t3.quote is None
+    history.append({"role": "user", "content": "Talk anything in French"})
+    history.append({"role": "assistant", "content": t3.display_latin})
+
+    # Turn 4: Talk anything in Hindi
+    t4 = advisor.process_turn("Talk anything in Hindi", history=history)
+    assert "Namaste" in t4.display_latin or "Airtel" in t4.display_latin
+    assert re.search(r"[\u0900-\u097F]", t4.display_native)  # Devanagari Hindi
+    assert t4.quote is None
+    assert t4.recommended_skus == []
+    history.append({"role": "user", "content": "Talk anything in Hindi"})
+    history.append({"role": "assistant", "content": t4.display_latin})
+
+    # Turn 5: Ask doubt about GST in English
+    t5 = advisor.process_turn("Is GST required if my annual turnover is 20 lakhs?", history=history)
+    assert t5.quote is None
+    assert t5.recommended_skus == []
+    assert any(term in t5.display_latin.lower() for term in ["gst", "udyam", "exempt", "turnover", "40", "lakh"])
+    history.append({"role": "user", "content": "Is GST required if my annual turnover is 20 lakhs?"})
+    history.append({"role": "assistant", "content": t5.display_latin})
+
+    # Turn 6: Ask doubt about 5G AirFiber in English
+    t6 = advisor.process_turn("Can 5G AirFiber work in Tier 2 cities without fiber trenching?", history=history)
+    assert t6.quote is None
+    assert t6.recommended_skus == []
+    assert any(term in t6.display_latin.lower() for term in ["airfiber", "5g", "tier", "antenna", "fiber", "sla"])
+
+
+def test_anti_leak_guard_safety_with_strict_schema(advisor: AdvisorAgent):
+    """Verifies that anti-leak sanitization on English turns operates safely
+    without attempting to read non-existent attributes on MSMEProfileSlots.
+    """
+    slots = advisor.extract_slots("I run an enterprise in Pune")
+    # Verify MSMEProfileSlots has strict forbid config
+    with pytest.raises(AttributeError):
+        _ = getattr(slots, "business_name")
+    with pytest.raises(AttributeError):
+        _ = getattr(slots, "city")
+
+    # Verify process_turn with English query never crashes even if LLM returns Hinglish
+    res = advisor.process_turn("I run an enterprise in Pune with 10 staff and GST")
+    assert res.display_markdown is not None
+    assert res.display_latin is not None
