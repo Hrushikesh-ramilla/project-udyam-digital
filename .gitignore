@@ -70,3 +70,5 @@ problem.zip
 !assets/*.jpg
 !assets/*.webp
 visual_audit/
+
+official_demo_recording/

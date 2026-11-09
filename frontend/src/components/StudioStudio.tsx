@@ -215,7 +215,7 @@ export const StudioStudio: React.FC<StudioStudioProps> = ({
   const [contractMonths, setContractMonths] = useState<number>(12);
   const [budgetSlider, setBudgetSlider] = useState<number>(2500);
   const [quote, setQuote] = useState<CommercialBreakdown | null>(null);
-  const [activeArchetype, setActiveArchetype] = useState<string | null>("clinic");
+  const [activeArchetype, setActiveArchetype] = useState<string | null>(null);
 
   const initializedRef = useRef(false);
   const latestSlotsRef = useRef<MSMEProfileSlots | null>(profileSlots);
