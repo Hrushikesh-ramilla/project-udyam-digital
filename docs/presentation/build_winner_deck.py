@@ -1055,11 +1055,12 @@ def generate_deck():
 
     # -------------------------------------------------------------
         # -------------------------------------------------------------
+        # -------------------------------------------------------------
     # SLIDE 4: SYSTEM ARCHITECTURE
     # -------------------------------------------------------------
     s4 = f"""
     <div class="slide slide-template-bg" style="background-image: url('{img_template_slide_b64}');">
-      <div class="slide-header">
+      <div class="slide-header" style="margin-left: 175px; margin-right: 175px; border-bottom: 2px solid #EFECE6; padding-bottom: 8px; margin-bottom: 12px; min-height: 82px;">
         <div class="slide-title-group">
           <h1>System Architecture: The 4-Step Acquisition Pipeline</h1>
           <p>Four-stage deterministic acquisition, pricing, verification &amp; fulfillment topology</p>
@@ -1067,169 +1068,157 @@ def generate_deck():
         <div class="slide-category-badge">Slide 4 of 7 · System Architecture</div>
       </div>
 
-      <div class="slide-content" style="display: flex; flex-direction: column; justify-content: space-between;">
-        <div class="grid-4" style="gap: 16px; flex: 1; width: 100%; align-items: stretch;">
+      <div class="slide-content" style="display: flex; flex-direction: column; justify-content: space-between; flex: 1;">
+        <div class="grid-4" style="gap: 14px; flex: 1; width: 100%; align-items: stretch;">
           
           <!-- STAGE 1 -->
-          <div class="card" style="display: flex; flex-direction: column; justify-content: space-between; padding: 20px 18px; border-top: 4px solid #E40000;">
+          <div class="card" style="display: flex; flex-direction: column; justify-content: space-between; padding: 14px 14px; border-top: 4px solid #E40000; background: #FFFFFF;">
             <div>
-              <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
+              <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px;">
                 <span style="background: #E40000; color: #FFFFFF; font-size: 11px; font-weight: 850; padding: 3px 8px; border-radius: 4px; text-transform: uppercase;">STAGE 1</span>
-                <span style="font-size: 11.5px; font-weight: 750; color: #8F9094;">&lt;50ms Fast-Path</span>
+                <span style="font-size: 11px; font-weight: 750; color: #8F9094;">&lt;50ms Fast-Path</span>
               </div>
-              <div style="font-size: 17px; font-weight: 850; color: #121316; margin-bottom: 3px; line-height: 1.2;">Discovery &amp; Multilingual Advisor</div>
-              <div style="font-size: 12px; color: #6E6F73; margin-bottom: 16px; font-weight: 600;">Natural Indic Ingress &amp; Slot Extraction</div>
+              <div style="font-size: 16px; font-weight: 850; color: #121316; margin-bottom: 2px; line-height: 1.2;">Discovery &amp; Advisor</div>
+              <div style="font-size: 11.5px; color: #6E6F73; margin-bottom: 10px; font-weight: 600;">Natural Indic Ingress &amp; Slot Extraction</div>
               
-              <div style="display: flex; flex-direction: column; gap: 10px; font-size: 12.5px; color: #2C2D30; line-height: 1.35;">
-                <div style="display: flex; gap: 8px; align-items: flex-start;">
-                  <span style="color: #E40000; font-weight: 900; font-size: 14px; line-height: 1;">•</span>
-                  <div><strong>Mobile PWA &amp; Phygital QR:</strong> Zero-friction entry for non-tech-savvy micro-merchants.</div>
+              <!-- Sub-Module A -->
+              <div style="background: #FAF8F5; border: 1px solid #EFECE6; border-radius: 6px; padding: 8px 10px; margin-bottom: 8px;">
+                <div style="font-size: 11.5px; font-weight: 800; color: #121316; margin-bottom: 4px; text-transform: uppercase; letter-spacing: 0.5px;">A. Indic NLP Engine</div>
+                <div style="font-size: 11.5px; color: #3A3B3E; line-height: 1.35;">
+                  • <strong>10+ Regional Languages:</strong> te, ta, bn, gu, mr, kn, ml, or, hi, en.<br>
+                  • <strong>Session Language Inertia:</strong> Eliminates mid-conversation language hijacking.<br>
+                  • <strong>Script Toggle:</strong> English Words &lt;-&gt; Native Script instant toggle.
                 </div>
-                <div style="display: flex; gap: 8px; align-items: flex-start;">
-                  <span style="color: #E40000; font-weight: 900; font-size: 14px; line-height: 1;">•</span>
-                  <div><strong>10+ Regional Languages:</strong> Native support for te, ta, bn, gu, mr, kn, ml, or, hi, en.</div>
-                </div>
-                <div style="display: flex; gap: 8px; align-items: flex-start;">
-                  <span style="color: #E40000; font-weight: 900; font-size: 14px; line-height: 1;">•</span>
-                  <div><strong>Session Language Inertia:</strong> Eliminates mid-conversation language hijacking.</div>
-                </div>
-                <div style="display: flex; gap: 8px; align-items: flex-start;">
-                  <span style="color: #E40000; font-weight: 900; font-size: 14px; line-height: 1;">•</span>
-                  <div><strong>Bidirectional Script Toggle:</strong> English Words &lt;-&gt; Native Script instant switch.</div>
-                </div>
-                <div style="display: flex; gap: 8px; align-items: flex-start;">
-                  <span style="color: #E40000; font-weight: 900; font-size: 14px; line-height: 1;">•</span>
-                  <div><strong>Cascaded Slot Extractor:</strong> Isolates business type, headcount, city tier, &amp; budget.</div>
+              </div>
+
+              <!-- Sub-Module B -->
+              <div style="background: #FAF8F5; border: 1px solid #EFECE6; border-radius: 6px; padding: 8px 10px; margin-bottom: 8px;">
+                <div style="font-size: 11.5px; font-weight: 800; color: #121316; margin-bottom: 4px; text-transform: uppercase; letter-spacing: 0.5px;">B. Ingress &amp; Slot Isolation</div>
+                <div style="font-size: 11.5px; color: #3A3B3E; line-height: 1.35;">
+                  • <strong>Mobile PWA / Phygital QR:</strong> Instant camera scan onboarding.<br>
+                  • <strong>Cascaded Slot Extractor:</strong> Extracts segment, headcount, tier, sites, budget.<br>
+                  • <strong>Dual Narration:</strong> Markdown text + Web Speech TTS audio.
                 </div>
               </div>
             </div>
             
-            <div style="background: #FAF8F5; border: 1px solid #EFECE6; border-radius: 6px; padding: 8px 10px; margin-top: 14px; font-size: 11px; color: #5A5A5D; font-weight: 600;">
-              Zero initial delay · Dual Narration TTS Audio
+            <div style="background: rgba(228,0,0,0.06); border: 1px solid rgba(228,0,0,0.2); border-radius: 4px; padding: 6px 8px; font-size: 11px; color: #E40000; font-weight: 750; text-align: center;">
+              Zero initial cold-start delay · &lt;50ms response
             </div>
           </div>
 
           <!-- STAGE 2 -->
-          <div class="card" style="display: flex; flex-direction: column; justify-content: space-between; padding: 20px 18px; border-top: 4px solid #121316;">
+          <div class="card" style="display: flex; flex-direction: column; justify-content: space-between; padding: 14px 14px; border-top: 4px solid #121316; background: #FFFFFF;">
             <div>
-              <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
+              <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px;">
                 <span style="background: #121316; color: #FFFFFF; font-size: 11px; font-weight: 850; padding: 3px 8px; border-radius: 4px; text-transform: uppercase;">STAGE 2</span>
-                <span style="font-size: 11.5px; font-weight: 750; color: #8F9094;">&lt;0.5ms Solver</span>
+                <span style="font-size: 11px; font-weight: 750; color: #8F9094;">&lt;0.5ms Solver</span>
               </div>
-              <div style="font-size: 17px; font-weight: 850; color: #121316; margin-bottom: 3px; line-height: 1.2;">Deterministic CPQ DAG Engine</div>
-              <div style="font-size: 12px; color: #6E6F73; margin-bottom: 16px; font-weight: 600;">Constraint Solver &amp; Reverse Optimizer</div>
+              <div style="font-size: 16px; font-weight: 850; color: #121316; margin-bottom: 2px; line-height: 1.2;">Deterministic CPQ DAG</div>
+              <div style="font-size: 11.5px; color: #6E6F73; margin-bottom: 10px; font-weight: 600;">Constraint Solver &amp; Reverse Optimizer</div>
               
-              <div style="display: flex; flex-direction: column; gap: 10px; font-size: 12.5px; color: #2C2D30; line-height: 1.35;">
-                <div style="display: flex; gap: 8px; align-items: flex-start;">
-                  <span style="color: #E40000; font-weight: 900; font-size: 14px; line-height: 1;">•</span>
-                  <div><strong>Hard GSTIN Firewall:</strong> Strictly blocks GSTIN-mandated SKUs for unregistered micro-merchants.</div>
+              <!-- Sub-Module A -->
+              <div style="background: #FAF8F5; border: 1px solid #EFECE6; border-radius: 6px; padding: 8px 10px; margin-bottom: 8px;">
+                <div style="font-size: 11.5px; font-weight: 800; color: #121316; margin-bottom: 4px; text-transform: uppercase; letter-spacing: 0.5px;">A. Symbolic DAG Rules</div>
+                <div style="font-size: 11.5px; color: #3A3B3E; line-height: 1.35;">
+                  • <strong>Hard GSTIN Firewall:</strong> Strictly blocks GST-mandated SKUs for micro-merchants.<br>
+                  • <strong>Dependency Graph:</strong> Validates <code>requires_one_of</code> checks in &lt;0.5ms.<br>
+                  • <strong>OTC Setup Waiver:</strong> 100% install fee waiver on &gt;= 12mo contract.
                 </div>
-                <div style="display: flex; gap: 8px; align-items: flex-start;">
-                  <span style="color: #E40000; font-weight: 900; font-size: 14px; line-height: 1;">•</span>
-                  <div><strong>Symbolic DAG Solver:</strong> Validates <code>requires_one_of</code> dependency checks in microsecond time.</div>
-                </div>
-                <div style="display: flex; gap: 8px; align-items: flex-start;">
-                  <span style="color: #E40000; font-weight: 900; font-size: 14px; line-height: 1;">•</span>
-                  <div><strong>Multi-Tier Bundling Logic:</strong> 5% (2 cats), 10% (3 cats), 15% (4+ cats) transparent savings.</div>
-                </div>
-                <div style="display: flex; gap: 8px; align-items: flex-start;">
-                  <span style="color: #E40000; font-weight: 900; font-size: 14px; line-height: 1;">•</span>
-                  <div><strong>Setup Fee Waiver Engine:</strong> 100% OTC fee waiver on &gt;= 12mo contract commitment.</div>
-                </div>
-                <div style="display: flex; gap: 8px; align-items: flex-start;">
-                  <span style="color: #E40000; font-weight: 900; font-size: 14px; line-height: 1;">•</span>
-                  <div><strong>"Mera Budget" Optimizer:</strong> Branch-and-bound resolves optimal bundle dynamically.</div>
+              </div>
+
+              <!-- Sub-Module B -->
+              <div style="background: #FAF8F5; border: 1px solid #EFECE6; border-radius: 6px; padding: 8px 10px; margin-bottom: 8px;">
+                <div style="font-size: 11.5px; font-weight: 800; color: #121316; margin-bottom: 4px; text-transform: uppercase; letter-spacing: 0.5px;">B. Reverse Budget Optimizer</div>
+                <div style="font-size: 11.5px; color: #3A3B3E; line-height: 1.35;">
+                  • <strong>"Mera Budget" Slider:</strong> Branch-and-bound resolves optimal bundle dynamically.<br>
+                  • <strong>Multi-Tier Bundling:</strong> 5% (2 cats), 10% (3 cats), 15% (4+ cats) transparent savings.<br>
+                  • <strong>Zero Mis-Sell:</strong> Mathematical guarantee of SKU compatibility.
                 </div>
               </div>
             </div>
             
-            <div style="background: #FAF8F5; border: 1px solid #EFECE6; border-radius: 6px; padding: 8px 10px; margin-top: 14px; font-size: 11px; color: #5A5A5D; font-weight: 600;">
+            <div style="background: #FAF8F5; border: 1px solid #EFECE6; border-radius: 4px; padding: 6px 8px; font-size: 11px; color: #5A5A5D; font-weight: 750; text-align: center;">
               Mathematical optimality · Zero manual sales quote latency
             </div>
           </div>
 
           <!-- STAGE 3 -->
-          <div class="card" style="display: flex; flex-direction: column; justify-content: space-between; padding: 20px 18px; border-top: 4px solid #E40000;">
+          <div class="card" style="display: flex; flex-direction: column; justify-content: space-between; padding: 14px 14px; border-top: 4px solid #E40000; background: #FFFFFF;">
             <div>
-              <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
+              <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px;">
                 <span style="background: #E40000; color: #FFFFFF; font-size: 11px; font-weight: 850; padding: 3px 8px; border-radius: 4px; text-transform: uppercase;">STAGE 3</span>
-                <span style="font-size: 11.5px; font-weight: 750; color: #8F9094;">DPDP Compliant</span>
+                <span style="font-size: 11px; font-weight: 750; color: #8F9094;">DPDP Compliant</span>
               </div>
-              <div style="font-size: 17px; font-weight: 850; color: #121316; margin-bottom: 3px; line-height: 1.2;">DPDP Smart KYC Gate</div>
-              <div style="font-size: 12px; color: #6E6F73; margin-bottom: 16px; font-weight: 600;">In-Memory Privacy &amp; Anomaly Trapping</div>
+              <div style="font-size: 16px; font-weight: 850; color: #121316; margin-bottom: 2px; line-height: 1.2;">DPDP Smart KYC Gate</div>
+              <div style="font-size: 11.5px; color: #6E6F73; margin-bottom: 10px; font-weight: 600;">In-Memory Privacy &amp; Anomaly Trapping</div>
               
-              <div style="display: flex; flex-direction: column; gap: 10px; font-size: 12.5px; color: #2C2D30; line-height: 1.35;">
-                <div style="display: flex; gap: 8px; align-items: flex-start;">
-                  <span style="color: #E40000; font-weight: 900; font-size: 14px; line-height: 1;">•</span>
-                  <div><strong>DPDP Act 2023 Consent:</strong> Explicit digital consent timestamped with SHA-256 IP hash.</div>
+              <!-- Sub-Module A -->
+              <div style="background: #FAF8F5; border: 1px solid #EFECE6; border-radius: 6px; padding: 8px 10px; margin-bottom: 8px;">
+                <div style="font-size: 11.5px; font-weight: 800; color: #121316; margin-bottom: 4px; text-transform: uppercase; letter-spacing: 0.5px;">A. DPDP Act 2023 Shield</div>
+                <div style="font-size: 11.5px; color: #3A3B3E; line-height: 1.35;">
+                  • <strong>Section 6 Consent:</strong> Explicit digital consent + SHA-256 IP hash.<br>
+                  • <strong>In-Memory Masking:</strong> 12-digit UID masked to <code>XXXX-XXXX-1234</code>.<br>
+                  • <strong>Zero Persistence:</strong> Unredacted national IDs never hit disk or SQLite.
                 </div>
-                <div style="display: flex; gap: 8px; align-items: flex-start;">
-                  <span style="color: #E40000; font-weight: 900; font-size: 14px; line-height: 1;">•</span>
-                  <div><strong>In-Memory Redaction:</strong> 12-digit UID masked to <code>XXXX-XXXX-1234</code> in volatile memory.</div>
-                </div>
-                <div style="display: flex; gap: 8px; align-items: flex-start;">
-                  <span style="color: #E40000; font-weight: 900; font-size: 14px; line-height: 1;">•</span>
-                  <div><strong>Zero-Persistence Guarantee:</strong> Unredacted national IDs never hit disk or database.</div>
-                </div>
-                <div style="display: flex; gap: 8px; align-items: flex-start;">
-                  <span style="color: #E40000; font-weight: 900; font-size: 14px; line-height: 1;">•</span>
-                  <div><strong>Deterministic Registries:</strong> O(1) indexed lookup across 3,534 GSTINs &amp; 2,723 Udyams.</div>
-                </div>
-                <div style="display: flex; gap: 8px; align-items: flex-start;">
-                  <span style="color: #E40000; font-weight: 900; font-size: 14px; line-height: 1;">•</span>
-                  <div><strong>RapidFuzz Entity Resolver:</strong> Traps planted name anomalies and stale electricity bills.</div>
+              </div>
+
+              <!-- Sub-Module B -->
+              <div style="background: #FAF8F5; border: 1px solid #EFECE6; border-radius: 6px; padding: 8px 10px; margin-bottom: 8px;">
+                <div style="font-size: 11.5px; font-weight: 800; color: #121316; margin-bottom: 4px; text-transform: uppercase; letter-spacing: 0.5px;">B. Entity &amp; Date Traps</div>
+                <div style="font-size: 11.5px; color: #3A3B3E; line-height: 1.35;">
+                  • <strong>Deterministic Registries:</strong> O(1) query: 3,534 GSTINs &amp; 2,723 Udyams.<br>
+                  • <strong>RapidFuzz Matching:</strong> Traps name anomalies (K01, K05, K07, K11).<br>
+                  • <strong>Anchored Freshness:</strong> Validates bills against 2026-07-15 anchor.
                 </div>
               </div>
             </div>
             
-            <div style="background: #FAF8F5; border: 1px solid #EFECE6; border-radius: 6px; padding: 8px 10px; margin-top: 14px; font-size: 11px; color: #5A5A5D; font-weight: 600;">
-              Anchored freshness · Instant legal verification
+            <div style="background: rgba(0,114,255,0.06); border: 1px solid rgba(0,114,255,0.25); border-radius: 4px; padding: 6px 8px; font-size: 11px; color: #0072FF; font-weight: 750; text-align: center;">
+              DPDP Act 2023 Zero-Persistence Architecture
             </div>
           </div>
 
           <!-- STAGE 4 -->
-          <div class="card" style="display: flex; flex-direction: column; justify-content: space-between; padding: 20px 18px; border-top: 4px solid #121316;">
+          <div class="card" style="display: flex; flex-direction: column; justify-content: space-between; padding: 14px 14px; border-top: 4px solid #121316; background: #FFFFFF;">
             <div>
-              <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
+              <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px;">
                 <span style="background: #121316; color: #FFFFFF; font-size: 11px; font-weight: 850; padding: 3px 8px; border-radius: 4px; text-transform: uppercase;">STAGE 4</span>
-                <span style="font-size: 11.5px; font-weight: 750; color: #8F9094;">17.6d -&gt; 3.8d</span>
+                <span style="font-size: 11px; font-weight: 750; color: #8F9094;">17.6d -&gt; 3.8d</span>
               </div>
-              <div style="font-size: 17px; font-weight: 850; color: #121316; margin-bottom: 3px; line-height: 1.2;">Fulfillment &amp; Lead Rescue</div>
-              <div style="font-size: 12px; color: #6E6F73; margin-bottom: 16px; font-weight: 600;">6-Stage Tracker &amp; Machine Learning</div>
+              <div style="font-size: 16px; font-weight: 850; color: #121316; margin-bottom: 2px; line-height: 1.2;">Fulfillment &amp; Rescue</div>
+              <div style="font-size: 11.5px; color: #6E6F73; margin-bottom: 10px; font-weight: 600;">6-Stage Tracker &amp; Machine Learning</div>
               
-              <div style="display: flex; flex-direction: column; gap: 10px; font-size: 12.5px; color: #2C2D30; line-height: 1.35;">
-                <div style="display: flex; gap: 8px; align-items: flex-start;">
-                  <span style="color: #E40000; font-weight: 900; font-size: 14px; line-height: 1;">•</span>
-                  <div><strong>6-Stage Fulfillment Tracker:</strong> Order -&gt; KYC -&gt; Feasibility -&gt; CPE -&gt; Tech -&gt; Active.</div>
+              <!-- Sub-Module A -->
+              <div style="background: #FAF8F5; border: 1px solid #EFECE6; border-radius: 6px; padding: 8px 10px; margin-bottom: 8px;">
+                <div style="font-size: 11.5px; font-weight: 800; color: #121316; margin-bottom: 4px; text-transform: uppercase; letter-spacing: 0.5px;">A. 6-Stage Fulfillment</div>
+                <div style="font-size: 11.5px; color: #3A3B3E; line-height: 1.35;">
+                  • <strong>Milestone Tracker:</strong> Order -&gt; KYC -&gt; Feasibility -&gt; CPE -&gt; Tech -&gt; Active.<br>
+                  • <strong>SLA Compression:</strong> Shrinks 17.6-day delay to 3.8-day guaranteed install.<br>
+                  • <strong>Dynamic UPI QR:</strong> Instant one-tap checkout with Razorpay sync.
                 </div>
-                <div style="display: flex; gap: 8px; align-items: flex-start;">
-                  <span style="color: #E40000; font-weight: 900; font-size: 14px; line-height: 1;">•</span>
-                  <div><strong>SLA Compression Engine:</strong> Shrinks 17.6-day delay to 3.8-day guaranteed install.</div>
-                </div>
-                <div style="display: flex; gap: 8px; align-items: flex-start;">
-                  <span style="color: #E40000; font-weight: 900; font-size: 14px; line-height: 1;">•</span>
-                  <div><strong>Dynamic NPCI UPI QR:</strong> Instant one-tap checkout with Razorpay webhook sync.</div>
-                </div>
-                <div style="display: flex; gap: 8px; align-items: flex-start;">
-                  <span style="color: #E40000; font-weight: 900; font-size: 14px; line-height: 1;">•</span>
-                  <div><strong>Automated WhatsApp Push:</strong> Proactive router shipment &amp; OTP tracking updates.</div>
-                </div>
-                <div style="display: flex; gap: 8px; align-items: flex-start;">
-                  <span style="color: #E40000; font-weight: 900; font-size: 14px; line-height: 1;">•</span>
-                  <div><strong>Field Tech Dispatch Card:</strong> Real-time technician assignment with secure OTP feed.</div>
+              </div>
+
+              <!-- Sub-Module B -->
+              <div style="background: #FAF8F5; border: 1px solid #EFECE6; border-radius: 6px; padding: 8px 10px; margin-bottom: 8px;">
+                <div style="font-size: 11.5px; font-weight: 800; color: #121316; margin-bottom: 4px; text-transform: uppercase; letter-spacing: 0.5px;">B. Telemetry &amp; Logistics</div>
+                <div style="font-size: 11.5px; color: #3A3B3E; line-height: 1.35;">
+                  • <strong>BlueDart AWB Sync:</strong> Automated CPE shipment tracking.<br>
+                  • <strong>Field Tech Dispatch:</strong> Real-time tech assignment with secure OTP.<br>
+                  • <strong>Meta WhatsApp API:</strong> Automated milestone push updates.
                 </div>
               </div>
             </div>
             
-            <div style="background: #FAF8F5; border: 1px solid #EFECE6; border-radius: 6px; padding: 8px 10px; margin-top: 14px; font-size: 11px; color: #5A5A5D; font-weight: 600;">
-              Zero inbound chase calls · BlueDart AWB logistics
+            <div style="background: #FAF8F5; border: 1px solid #EFECE6; border-radius: 4px; padding: 6px 8px; font-size: 11px; color: #5A5A5D; font-weight: 750; text-align: center;">
+              Zero inbound chase calls · Proactive SLA transparency
             </div>
           </div>
 
         </div>
 
         <!-- FULL-WIDTH CLOSED-LOOP RECOVERY BANNER -->
-        <div style="background: rgba(228,0,0,0.05); border: 1.5px dashed #E40000; border-radius: 8px; padding: 12px 20px; display: flex; align-items: center; justify-content: space-between; margin-top: 14px; width: 100%;">
+        <div style="background: rgba(228,0,0,0.05); border: 1.5px dashed #E40000; border-radius: 8px; padding: 12px 20px; display: flex; align-items: center; justify-content: space-between; margin-top: 12px; width: 100%;">
           <div style="display: flex; align-items: center; gap: 14px;">
             <span style="background: #E40000; color: #FFFFFF; font-size: 11.5px; font-weight: 850; padding: 4px 10px; border-radius: 4px; text-transform: uppercase; letter-spacing: 0.5px; white-space: nowrap;">Closed-Loop ML Recovery</span>
             <span style="font-size: 13.5px; color: #121316; font-weight: 750; line-height: 1.35;">
@@ -1477,100 +1466,305 @@ def generate_deck():
 
     # -------------------------------------------------------------
     # SLIDE 7: QUANTIFIED BUSINESS IMPACT & 12-MONTH ROLLOUT
+
     # -------------------------------------------------------------
+
     s7 = f"""
+
     <div class="slide slide-template-bg" style="background-image: url('{img_template_slide_b64}');">
+
       <div class="slide-header">
+
         <div class="slide-title-group">
+
           <h1>Quantified Business Impact & 12-Month Rollout</h1>
+
           <p>Before vs. After sales transformation and 12-month national scale roadmap</p>
+
         </div>
+
         <div class="slide-category-badge">Slide 7 of 7 · Impact & Rollout</div>
+
       </div>
 
-            <div class="slide-content">
-        <div class="grid-2" style="flex: 1; gap: 14px;">
+
+
+      <div class="slide-content">
+
+        <div class="grid-2" style="flex: 1; gap: 18px;">
+
           
-          <!-- BOX 1: ADVISOR -->
-          <div class="card" style="display: flex; flex-direction: column; justify-content: space-between; padding: 14px 16px;">
-            <div>
-              <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px;">
-                <span style="font-size: 15px; font-weight: 850; color: #121316;">1. Multilingual Natural Language Advisor</span>
-                <span class="badge-pill">Universal Multilingual AI</span>
+
+          <div style="display: flex; flex-direction: column; gap: 10px;">
+
+            <div class="card" style="padding: 16px 18px;">
+
+              <div style="font-size: 14.5px; font-weight: 850; color: #121316; margin-bottom: 10px;">Funnel Economics Transformation</div>
+
+              <div class="grid-2" style="gap: 12px;">
+
+                <div class="stat-box">
+
+                  <div class="stat-num" style="color: #E40000;">+38.8%</div>
+
+                  <div class="stat-label">Quote Acceptance Rate</div>
+
+                  <div class="stat-sub">Jumps from 43.6% to 82.4% by eliminating the 5-day quote wait.</div>
+
+                </div>
+
+                <div class="stat-box">
+
+                  <div class="stat-num">4.25x</div>
+
+                  <div class="stat-label">Non-GST Conversion Lift</div>
+
+                  <div class="stat-sub">Conversion rises from 2.0% to 8.5% via instant Udyam lookup.</div>
+
+                </div>
+
+                <div class="stat-box">
+
+                  <div class="stat-num">3.8 Days</div>
+
+                  <div class="stat-label">Lead to Activation Cycle</div>
+
+                  <div class="stat-sub">Compressed by 78.4% from baseline 17.6 days via digital KYC.</div>
+
+                </div>
+
+                <div class="stat-box">
+
+                  <div class="stat-num">₹3,250</div>
+
+                  <div class="stat-label">Acquisition Cost (CAC)</div>
+
+                  <div class="stat-sub">Slashed by 78.3% from ₹15,000 via self-serve mobile flow.</div>
+
+                </div>
+
               </div>
-              <div style="background: #0D0E12; border-radius: 6px; overflow: hidden; height: 285px; display: flex; align-items: center; justify-content: center; border: 1px solid #DDD8CE;">
-                <img src="{img_screen_advisor_b64}" style="max-height: 100%; max-width: 100%; object-fit: contain;" alt="Multilingual Advisor">
+
+            </div>
+
+
+
+            <div class="card" style="padding: 14px 18px; border-left: 3.5px solid #121316;">
+
+              <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 3px;">
+
+                <div style="font-size: 14px; font-weight: 850; color: #121316;">LightGBM Lead Rescue Engine (Trained on 5,000 Leads)</div>
+
+                <span class="badge-pill" style="background: #121316; color: #fff; font-weight: 800;">AUC 0.84 MODEL</span>
+
               </div>
+
+              <div style="font-size: 13px; color: #4A4B4E; line-height: 1.4;">
+
+                Retargets the 56.4% dropped quote cohort within 15 minutes via enterprise WhatsApp API with 1-click pre-hydrated carts. <strong>Recovers 22.4% of abandoned prospects</strong> (249 merchants from 5,000 leads), unlocking <strong>₹48 Cr in recovered recurring ARR</strong> at national scale.
+
+              </div>
+
             </div>
-            <div style="font-size: 13px; color: #4A4B4E; margin-top: 6px; line-height: 1.35;">
-              Shop owners converse in any language (English, Hindi, Telugu, Tamil, etc.). Session Language Inertia preserves conversation continuity without false language flipping.
+
+
+
+            <div class="card" style="padding: 14px 18px;">
+
+              <div style="font-size: 13.5px; font-weight: 850; color: #121316; margin-bottom: 6px;">Direct Labor & Operational Efficiency Gains:</div>
+
+              <table style="width: 100%; font-size: 12.5px; border-collapse: collapse;">
+
+                <tr style="border-bottom: 1px solid #EFECE6;"><td style="padding: 4px 0; color: #5A5A5D;">Field Sales Rep Time / Customer</td><td style="text-align: right; font-weight: 800;">24.0 Hours → 2.1 Hours (-91.2%)</td></tr>
+
+                <tr style="border-bottom: 1px solid #EFECE6;"><td style="padding: 4px 0; color: #5A5A5D;">Customer Status Chase Calls</td><td style="text-align: right; font-weight: 800;">3.2 Calls → 0.4 Calls (-87.5%)</td></tr>
+
+                <tr style="border-bottom: 1px solid #EFECE6;"><td style="padding: 4px 0; color: #5A5A5D;">6-Month Customer Churn Rate</td><td style="text-align: right; font-weight: 800;">14.2% → 6.8% (-52.1% via SLAs)</td></tr>
+
+                <tr style="border-bottom: 1px solid #EFECE6;"><td style="padding: 4px 0; color: #5A5A5D;">Catalogue Rule Violation / Mis-Sell Rate</td><td style="text-align: right; font-weight: 850; color: #E40000;">15.2% (56/368) → 0.0% (-100% via CPQ DAG)</td></tr>
+
+                <tr style="border-bottom: 1px solid #EFECE6;"><td style="padding: 4px 0; color: #5A5A5D;">Gross Margin on Bundles</td><td style="text-align: right; font-weight: 800;">42.5% → 61.8% (+19.3% automated margin)</td></tr>
+
+                <tr style="border-bottom: 1px solid #EFECE6;"><td style="padding: 4px 0; color: #5A5A5D;">Partner Dealer Commission</td><td style="text-align: right; font-weight: 800;">15% Recurring via Instant QR Attribution</td></tr>
+
+                <tr style="border-bottom: 1px solid #EFECE6;"><td style="padding: 4px 0; color: #5A5A5D;">Quote Generation Speed</td><td style="text-align: right; font-weight: 800;">3 to 5 Days → &lt; 60 Seconds (-99.9%)</td></tr>
+
+                <tr><td style="padding: 4px 0; color: #5A5A5D;">Payback Period on Sales CAC</td><td style="text-align: right; font-weight: 850; color: #121316;">4.8 Months (vs 14.2 Months baseline)</td></tr>
+
+              </table>
+
+              <div style="font-size: 11.5px; color: #7A7B7E; margin-top: 6px; border-top: 1px solid #EFECE6; padding-top: 4px;">
+
+                <strong>Bottom-Line Result:</strong> Direct sales acquisition cost slashed from ₹15,000 to ₹3,250, compressing CAC payback from 14.2 months to 4.8 months while freeing 22 hours of sales rep labor per closed account.
+
+              </div>
+
             </div>
+
           </div>
 
-          <!-- BOX 2: SMART KYC GATE -->
-          <div class="card" style="display: flex; flex-direction: column; justify-content: space-between; padding: 14px 16px;">
-            <div>
-              <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px;">
-                <span style="font-size: 15px; font-weight: 850; color: #121316;">2. DPDP Smart KYC Verification Gate</span>
-                <span class="badge-pill">DPDP Act 2023 · In-Memory</span>
+
+
+          <div style="display: flex; flex-direction: column; gap: 10px;">
+
+            <div class="card" style="padding: 16px 18px;">
+
+              <div style="font-size: 14.5px; font-weight: 850; color: #121316; margin-bottom: 8px;">12-Month National Scale Strategy</div>
+
+              
+
+              <div style="border-left: 3px solid #E40000; padding-left: 10px; margin-bottom: 10px;">
+
+                <div style="display: flex; justify-content: space-between;">
+
+                  <strong style="font-size: 13.5px; color: #121316;">Phase 1: Metros & Kirana Density (Months 1–3)</strong>
+
+                  <span class="badge-pill" style="background: #E40000; color: #fff; border-color: #E40000;">50K Units · ₹12 Cr ARR</span>
+
+                </div>
+
+                <div style="font-size: 12.5px; color: #4A4B4E; margin-top: 2px; line-height: 1.35;">
+
+                  • Target 8 Tier-1 cities (Delhi NCR, Mumbai, Bengaluru, Hyderabad).<br>
+
+                  • Deploy Udyam Vyapar & Clinic packs via 15,000 retail store QR codes.<br>
+
+                  • Activate 50,000 merchants with instant paperless Udyam onboarding.<br>
+
+                  • Train 1,200 local cable operators as authorized 15% commission partners.
+
+                </div>
+
               </div>
-              <div style="background: #0D0E12; border-radius: 6px; overflow: hidden; height: 285px; display: flex; align-items: center; justify-content: center; border: 1px solid #DDD8CE;">
-                <img src="{img_screen_kyc_b64}" style="max-height: 100%; max-width: 100%; object-fit: contain;" alt="DPDP Smart KYC Verification Gate">
+
+
+
+              <div style="border-left: 3px solid #121316; padding-left: 10px; margin-bottom: 10px;">
+
+                <div style="display: flex; justify-content: space-between;">
+
+                  <strong style="font-size: 13.5px; color: #121316;">Phase 2: Industrial Clusters & Clinics (Months 4–6)</strong>
+
+                  <span class="badge-pill">120K Units · ₹38 Cr ARR</span>
+
+                </div>
+
+                <div style="font-size: 12.5px; color: #4A4B4E; margin-top: 2px; line-height: 1.35;">
+
+                  • Expand into 40 manufacturing towns (Surat, Coimbatore, Ludhiana, Peenya).<br>
+
+                  • Focus on Leased Line connectivity and multi-store Cloud CCTV packs.<br>
+
+                  • Capture 120,000 businesses with mission-critical 99.95% SLAs.<br>
+
+                  • Roll out automated field technician dispatch with OTP tracking across hubs.
+
+                </div>
+
               </div>
+
+
+
+              <div style="border-left: 3px solid #121316; padding-left: 10px;">
+
+                <div style="display: flex; justify-content: space-between;">
+
+                  <strong style="font-size: 13.5px; color: #121316;">Phase 3: All-India Bharat Scale (Months 7–12)</strong>
+
+                  <span class="badge-pill" style="background: #121316; color: #fff;">500K Units · ₹1,200 Cr ARR</span>
+
+                </div>
+
+                <div style="font-size: 12.5px; color: #4A4B4E; margin-top: 2px; line-height: 1.35;">
+
+                  • Roll out across 500+ Tier-3/4 districts supported by 10 Indian languages.<br>
+
+                  • Integrate full voice biometrics and regional dialect speech synthesis.<br>
+
+                  • 12-Month Goal: 500,000 active small businesses generating ₹1,200 Cr annualized ARR at ₹3,250 blended CAC.
+
+                </div>
+
+              </div>
+
             </div>
-            <div style="font-size: 13px; color: #4A4B4E; margin-top: 6px; line-height: 1.35;">
-              Instant 4-slot statutory verification against GST and Udyam registries. Redacts 12-digit national IDs to XXXX-XXXX-1234 in volatile RAM with zero disk persistence.
+
+
+
+            <div class="card-beige" style="padding: 14px 18px;">
+
+              <div style="font-size: 14px; font-weight: 850; color: #121316; margin-bottom: 6px;">Strategic Airtel Ecosystem Synergies:</div>
+
+              <div style="display: flex; flex-direction: column; gap: 5px; font-size: 12.5px; color: #333336;">
+
+                <div style="background: #FFFFFF; padding: 6px 10px; border-radius: 4px; border: 1px solid #DDD8CE;">
+
+                  <strong>Airtel Payments Bank:</strong> Integrated QR soundbox for Kirana checkouts; daily merchant cash settlements automatically offset monthly Accel broadband subscriptions.
+
+                </div>
+
+                <div style="background: #FFFFFF; padding: 6px 10px; border-radius: 4px; border: 1px solid #DDD8CE;">
+
+                  <strong>Airtel IQ WhatsApp API:</strong> Sub-second transactional quote push and LightGBM automated retargeting with 1-click pre-hydrated carts. Recovers 22.4% of abandoned prospects.
+
+                </div>
+
+                <div style="background: #FFFFFF; padding: 6px 10px; border-radius: 4px; border: 1px solid #DDD8CE;">
+
+                  <strong>Nxtra Data Centers:</strong> Sovereign Tier-4 Indian data facilities guarantee 100% DPDP Act 2023 compliance with zero offshore data transit or foreign jurisdiction exposure.
+
+                </div>
+
+                <div style="background: #FFFFFF; padding: 6px 10px; border-radius: 4px; border: 1px solid #DDD8CE;">
+
+                  <strong>Airtel 5G Plus QoS Slicing:</strong> Dedicated network QoS packet queues ensure zero latency jitter during evening peak payment hours (7–9 PM), preventing lost retail checkouts.
+
+                </div>
+
+                <div style="background: #FFFFFF; padding: 6px 10px; border-radius: 4px; border: 1px solid #DDD8CE;">
+
+                  <strong>Airtel Merchant Finance:</strong> Pre-approved working capital micro-loans up to ₹5 Lakhs for active Accel businesses based on automated broadband uptime and UPI transaction history.
+
+                </div>
+
+              </div>
+
             </div>
+
           </div>
 
-          <!-- BOX 3: 6-STAGE FULFILLMENT & WHATSAPP HOOKS -->
-          <div class="card" style="display: flex; flex-direction: column; justify-content: space-between; padding: 14px 16px;">
-            <div>
-              <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px;">
-                <span style="font-size: 15px; font-weight: 850; color: #121316;">3. 6-Stage SLA Fulfillment &amp; WhatsApp Hooks</span>
-                <span class="badge-pill">Zero Chase Calls · Meta API</span>
-              </div>
-              <div style="background: #0D0E12; border-radius: 6px; overflow: hidden; height: 285px; display: flex; align-items: center; justify-content: center; border: 1px solid #DDD8CE;">
-                <img src="{img_screen_fulfillment_b64}" style="max-height: 100%; max-width: 100%; object-fit: contain;" alt="6-Stage SLA Fulfillment">
-              </div>
-            </div>
-            <div style="font-size: 13px; color: #4A4B4E; margin-top: 6px; line-height: 1.35;">
-              End-to-end transparency compresses 17.6-day delays to 3.8 days. Proactive Meta WhatsApp API hooks push real-time technician assignment and OTP tracking directly to merchants.
-            </div>
-          </div>
 
-          <!-- BOX 4: PARTNER CONSOLE & RESCUE -->
-          <div class="card" style="display: flex; flex-direction: column; justify-content: space-between; padding: 14px 16px;">
-            <div>
-              <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px;">
-                <span style="font-size: 15px; font-weight: 850; color: #121316;">4. Partner Console &amp; Autonomous Lead Rescue</span>
-                <span class="badge-pill">LightGBM ML · ₹21.8L ARR</span>
-              </div>
-              <div style="background: #0D0E12; border-radius: 6px; overflow: hidden; height: 285px; display: flex; align-items: center; justify-content: center; border: 1px solid #DDD8CE;">
-                <img src="{img_screen_tracker_b64}" style="max-height: 100%; max-width: 100%; object-fit: contain;" alt="Partner Lead Rescue Console">
-              </div>
-            </div>
-            <div style="font-size: 13px; color: #4A4B4E; margin-top: 6px; line-height: 1.35;">
-              Partner ops console powered by LightGBM calibrated propensity scoring across 5,000 leads. Recovers the 56.4% quote drop-off cohort via 1-click WhatsApp winback at ₹350 marginal CAC.
-            </div>
+
+        </div>
+
+
+
+        <div style="background: #FFFFFF; border-left: 4px solid #E40000; border-top: 1.5px solid #DDD8CE; border-right: 1.5px solid #DDD8CE; border-bottom: 1.5px solid #DDD8CE; border-radius: 6px; padding: 12px 18px; width: 100%;">
+
+          <div style="font-size: 13.5px; font-weight: 750; color: #121316; line-height: 1.4;">
+
+            <strong style="color: #E40000;">Executive Verdict:</strong> Project Udyam Digital transforms Accel Business from a slow, paper-bound corporate carrier into India's default digital operating system for small enterprises—slashing CAC by 78%, lifting non-GST conversions 4.25x, and unlocking ₹1,200 Cr ARR in 12 months.<br><span style="font-size: 12px; color: #4A4B4E; margin-top: 4px; display: inline-block;">Official HD Video Walkthrough & Interactive Demo: <a href="https://airtel.hrushikeshramilla.in/demoVideo" style="color: #E40000; font-weight: 800; text-decoration: underline;">https://airtel.hrushikeshramilla.in/demoVideo</a></span>
+
           </div>
 
         </div>
 
-        <div class="card-beige" style="padding: 10px 18px; margin-top: 12px; width: 100%;">
-          <div style="font-size: 13.5px; color: #121316; font-weight: 750; display: flex; justify-content: space-between; align-items: center;">
-            <span><strong style="color: #E40000;">Live Prototype Access:</strong> Deployed and accessible live at <a href="https://airtel.hrushikeshramilla.in" style="color: #E40000; text-decoration: underline;">airtel.hrushikeshramilla.in</a></span>
-            <span style="color: #5A5A5D; font-weight: 600;">Official Demo Video: <a href="https://airtel.hrushikeshramilla.in/demoVideo" style="color: #121316; text-decoration: underline; font-weight: 800;">airtel.hrushikeshramilla.in/demoVideo</a></span>
-          </div>
-        </div>
       </div>
+
+
 
       <div class="slide-footer">
+
         <div>Airtel Sync 2026 · Digital Track | Project Udyam Digital</div>
+
         <div class="team-name">Team Neural Nexus · ABV-IIITM Gwalior</div>
+
         <div class="slide-number">Slide 7 of 7</div>
+
       </div>
+
     </div>
+
     """
 
     slides_html = [s0, s1, s2, s3, s4, s5, s6, s7]
