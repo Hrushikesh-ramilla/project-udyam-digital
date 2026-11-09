@@ -24,15 +24,12 @@ import {
   Lock,
 } from "lucide-react";
 import { ProvisioningOrder, ProvisioningMilestone } from "../types";
+import { PaymentSandboxModal } from "./PaymentSandboxModal";
 import {
   advanceOrderStage,
-  createPaymentIntent,
-  verifyUPIPayment,
-  verifyRazorpayPayment,
   fetchOrderLogistics,
   triggerHardwareDispatch,
   LogisticsDispatch,
-  PaymentIntent,
 } from "../api";
 
 interface OrderTrackerProps {
@@ -52,11 +49,6 @@ export const OrderTracker: React.FC<OrderTrackerProps> = ({ order, onOrderUpdate
 
   // Payment State
   const [showPaymentModal, setShowPaymentModal] = useState<boolean>(false);
-  const [paymentIntent, setPaymentIntent] = useState<PaymentIntent | null>(null);
-  const [paymentMethodTab, setPaymentMethodTab] = useState<"upi" | "razorpay">("upi");
-  const [utrInput, setUtrInput] = useState<string>("202607159841");
-  const [paymentStatus, setPaymentStatus] = useState<"IDLE" | "PROCESSING" | "SUCCESS" | "FAILED">("IDLE");
-  const [paymentMessage, setPaymentMessage] = useState<string>("");
 
   useEffect(() => {
     // Automatically load or create logistics dispatch for order
@@ -86,66 +78,13 @@ export const OrderTracker: React.FC<OrderTrackerProps> = ({ order, onOrderUpdate
     }
   };
 
-  const handleOpenPayment = async () => {
+  const handleOpenPayment = () => {
     setShowPaymentModal(true);
-    setPaymentStatus("IDLE");
-    setPaymentMessage("");
-    try {
-      const intent = await createPaymentIntent(order.order_id, order.monthly_charge_inr);
-      setPaymentIntent(intent);
-    } catch (err: unknown) {
-      setPaymentMessage(err instanceof Error ? err.message : "Failed to initialize payment gateway");
-    }
   };
 
-  const handleVerifyUPI = async () => {
-    if (!paymentIntent) return;
-    setPaymentStatus("PROCESSING");
-    try {
-      const res = await verifyUPIPayment(paymentIntent.payment_id, order.order_id, utrInput);
-      if (res.status === "SUCCESS") {
-        setPaymentStatus("SUCCESS");
-        setPaymentMessage(res.message);
-        // Advance milestone if on stage 0
-        if (order.current_stage_idx === 0) {
-          handleAdvance();
-        }
-      } else {
-        setPaymentStatus("FAILED");
-        setPaymentMessage(res.message);
-      }
-    } catch (err: unknown) {
-      setPaymentStatus("FAILED");
-      setPaymentMessage(err instanceof Error ? err.message : "Payment verification failed");
-    }
-  };
-
-  const handleVerifyRazorpaySandbox = async () => {
-    if (!paymentIntent) return;
-    setPaymentStatus("PROCESSING");
-    try {
-      const rzpPaymentId = `pay_test_${Date.now()}`;
-      // In sandbox mode, use deterministic valid sandbox token
-      const res = await verifyRazorpayPayment(
-        paymentIntent.payment_id,
-        order.order_id,
-        paymentIntent.razorpay_order_id,
-        rzpPaymentId,
-        "demo_sig_valid_sandbox_token"
-      );
-      if (res.status === "SUCCESS") {
-        setPaymentStatus("SUCCESS");
-        setPaymentMessage(res.message);
-        if (order.current_stage_idx === 0) {
-          handleAdvance();
-        }
-      } else {
-        setPaymentStatus("FAILED");
-        setPaymentMessage(res.message);
-      }
-    } catch (err: unknown) {
-      setPaymentStatus("FAILED");
-      setPaymentMessage(err instanceof Error ? err.message : "Razorpay payment verification failed");
+  const handlePaymentSuccess = (_msg: string) => {
+    if (order.current_stage_idx === 0) {
+      handleAdvance();
     }
   };
 
@@ -393,191 +332,13 @@ export const OrderTracker: React.FC<OrderTrackerProps> = ({ order, onOrderUpdate
         </div>
       )}
 
-      {/* Payment Gateway Modal (Native NPCI Dynamic UPI & Razorpay Sandbox) */}
-      <AnimatePresence>
-        {showPaymentModal && (
-          <div className="fixed inset-0 z-50 bg-black/85 backdrop-blur-xl flex items-center justify-center p-4">
-            <motion.div
-              initial={{ opacity: 0, scale: 0.95 }}
-              animate={{ opacity: 1, scale: 1 }}
-              exit={{ opacity: 0, scale: 0.95 }}
-              className="luxury-glass-elevated rounded-3xl max-w-lg w-full p-6 space-y-5 border border-white/[0.12] shadow-2xl relative"
-            >
-              <div className="flex items-center justify-between pb-3 border-b border-slate-700/80">
-                <div className="flex items-center space-x-2.5">
-                  <div className="w-8 h-8 rounded-xl bg-emerald-500/20 border border-emerald-500/30 flex items-center justify-center text-emerald-400">
-                    <CreditCard className="w-4 h-4" />
-                  </div>
-                  <div>
-                    <h3 className="font-sans font-bold text-lg font-normal text-white">
-                      Airtel Business Enterprise Checkout
-                    </h3>
-                    <p className="text-[11px] text-slate-300">
-                      Total Payable: <strong className="text-white font-mono">₹{order.monthly_charge_inr.toLocaleString()}</strong>
-                    </p>
-                  </div>
-                </div>
-                <button
-                  onClick={() => setShowPaymentModal(false)}
-                  className="w-7 h-7 rounded-lg bg-white/[0.05] hover:bg-white/[0.1] flex items-center justify-center text-slate-300 hover:text-white"
-                >
-                  <X className="w-4 h-4" />
-                </button>
-              </div>
-
-              {/* Payment Method Switcher */}
-              <div className="flex space-x-2 bg-slate-900/90 p-1 rounded-2xl border border-slate-700">
-                <button
-                  onClick={() => setPaymentMethodTab("upi")}
-                  className={`flex-1 py-2 rounded-xl text-xs font-medium transition-all cursor-pointer flex items-center justify-center space-x-1.5 ${
-                    paymentMethodTab === "upi"
-                      ? "bg-[#e40000] text-white shadow-md"
-                      : "text-slate-300 hover:text-white"
-                  }`}
-                >
-                  <QrCode className="w-3.5 h-3.5" />
-                  <span>Native NPCI UPI (QR &amp; Intent)</span>
-                </button>
-                <button
-                  onClick={() => setPaymentMethodTab("razorpay")}
-                  className={`flex-1 py-2 rounded-xl text-xs font-medium transition-all cursor-pointer flex items-center justify-center space-x-1.5 ${
-                    paymentMethodTab === "razorpay"
-                      ? "bg-[#e40000] text-white shadow-md"
-                      : "text-slate-300 hover:text-white"
-                  }`}
-                >
-                  <ShieldCheck className="w-3.5 h-3.5 text-blue-400" />
-                  <span>Razorpay Sandbox</span>
-                </button>
-              </div>
-
-              {/* TAB 1: NPCI Dynamic UPI Intent */}
-              {paymentMethodTab === "upi" && (
-                <div className="space-y-4">
-                  {paymentIntent ? (
-                    <div className="flex flex-col sm:flex-row items-center gap-4 bg-slate-900/90 p-4 rounded-2xl border border-slate-700">
-                      <div className="bg-[#FAF8F5] p-2 rounded-xl shrink-0 shadow-md">
-                        <img
-                          src={paymentIntent.qr_data_url}
-                          alt="Dynamic UPI QR"
-                          className="w-36 h-36 object-contain"
-                        />
-                        <div className="text-[9px] font-mono text-center text-gray-800 font-bold mt-1">
-                          SCAN VIA ANY UPI APP
-                        </div>
-                      </div>
-
-                      <div className="space-y-2 text-xs flex-1">
-                        <div className="text-[11px] text-slate-300">
-                          VPA: <strong className="text-white font-mono">{paymentIntent.upi_pa}</strong>
-                        </div>
-                        <div className="text-[11px] text-slate-300">
-                          Merchant: <strong className="text-white">{paymentIntent.upi_pn}</strong>
-                        </div>
-
-                        <a
-                          href={paymentIntent.upi_uri}
-                          className="mt-2 inline-flex items-center space-x-1.5 w-full justify-center bg-emerald-600 hover:bg-emerald-500 text-white font-medium py-2 px-3 rounded-xl text-xs shadow transition-all"
-                        >
-                          <Smartphone className="w-3.5 h-3.5" />
-                          <span>Pay via GPay / PhonePe / Paytm</span>
-                        </a>
-                      </div>
-                    </div>
-                  ) : (
-                    <div className="flex items-center justify-center py-6 text-xs text-slate-300">
-                      <RefreshCw className="w-4 h-4 animate-spin mr-2" />
-                      Generating Dynamic UPI QR...
-                    </div>
-                  )}
-
-                  {/* 12-Digit Bank UTR Verification Input */}
-                  <div className="space-y-2">
-                    <label className="text-xs font-medium text-white flex items-center justify-between">
-                      <span>12-Digit Bank UTR / Transaction Reference</span>
-                      <span className="text-[10px] text-emerald-400 font-mono">Demo: 202607159841</span>
-                    </label>
-                    <div className="flex space-x-2">
-                      <input
-                        type="text"
-                        value={utrInput}
-                        onChange={(e) => setUtrInput(e.target.value)}
-                        placeholder="202607159841"
-                        maxLength={12}
-                        className="flex-1 bg-slate-900/90 border border-[rgba(235,229,217,0.12)] rounded-xl px-3 py-2 text-xs text-white font-mono focus:outline-none focus:border-emerald-500"
-                      />
-                      <button
-                        onClick={handleVerifyUPI}
-                        disabled={paymentStatus === "PROCESSING"}
-                        className="bg-emerald-600 hover:bg-emerald-500 disabled:opacity-40 text-white font-medium px-4 py-2 rounded-xl text-xs cursor-pointer shadow transition-all"
-                      >
-                        {paymentStatus === "PROCESSING" ? "Verifying..." : "Verify UTR"}
-                      </button>
-                    </div>
-                  </div>
-                </div>
-              )}
-
-              {/* TAB 2: Razorpay Developer Sandbox */}
-              {paymentMethodTab === "razorpay" && (
-                <div className="space-y-4">
-                  <div className="bg-slate-900/90 p-4 rounded-2xl border border-slate-700 space-y-2.5 text-xs text-slate-300">
-                    <div className="flex items-center justify-between text-white font-medium pb-1.5 border-b border-slate-700">
-                      <span>Razorpay Developer Sandbox Mode</span>
-                      <span className="text-[10px] font-mono bg-blue-500/20 text-blue-300 px-2 py-0.5 rounded">
-                        rzp_test_airtel_udyam
-                      </span>
-                    </div>
-                    <p className="text-[11px] leading-relaxed">
-                      Simulates Razorpay Standard Modal with cryptographic HMAC-SHA256 signature verification token. Zero business GSTIN or bank paperwork required.
-                    </p>
-                    <div className="bg-black/50 p-2.5 rounded-xl font-mono text-[10px] space-y-1 text-gray-300">
-                      <div>Test Card: 4111 2222 3333 4444 (Visa)</div>
-                      <div>Expiry: 12/28 · CVV: 123 · OTP: Any (123456)</div>
-                    </div>
-                  </div>
-
-                  <button
-                    onClick={handleVerifyRazorpaySandbox}
-                    disabled={paymentStatus === "PROCESSING"}
-                    className="w-full bg-[#e40000] hover:bg-[#b80000] disabled:opacity-40 text-white font-medium py-3 rounded-2xl text-xs sm:text-sm cursor-pointer shadow-[0_0_20px_rgba(228,0,0,0.3)] transition-all flex items-center justify-center space-x-2"
-                  >
-                    {paymentStatus === "PROCESSING" ? (
-                      <>
-                        <RefreshCw className="w-4 h-4 animate-spin" />
-                        <span>Verifying HMAC Signature...</span>
-                      </>
-                    ) : (
-                      <>
-                        <Lock className="w-4 h-4" />
-                        <span>Simulate Razorpay Payment &amp; Verify Signature</span>
-                      </>
-                    )}
-                  </button>
-                </div>
-              )}
-
-              {/* Status Message */}
-              {paymentMessage && (
-                <div
-                  className={`p-3 rounded-xl text-xs font-sans flex items-center space-x-2 ${
-                    paymentStatus === "SUCCESS"
-                      ? "bg-emerald-950/40 text-emerald-300 border border-emerald-500/30"
-                      : "bg-red-950/40 text-red-300 border border-red-500/30"
-                  }`}
-                >
-                  {paymentStatus === "SUCCESS" ? (
-                    <CheckCircle2 className="w-4 h-4 text-emerald-400 shrink-0" />
-                  ) : (
-                    <Clock className="w-4 h-4 text-red-400 shrink-0" />
-                  )}
-                  <span>{paymentMessage}</span>
-                </div>
-              )}
-            </motion.div>
-          </div>
-        )}
-      </AnimatePresence>
+      {/* Interactive Payment Sandbox: UPI Smartphone Simulator & 3D-Secure Card Terminal */}
+      <PaymentSandboxModal
+        isOpen={showPaymentModal}
+        onClose={() => setShowPaymentModal(false)}
+        order={order}
+        onPaymentSuccess={handlePaymentSuccess}
+      />
     </div>
   );
 };
