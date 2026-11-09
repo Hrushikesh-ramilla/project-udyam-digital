@@ -7,6 +7,7 @@ import { SmartKYC } from "./components/SmartKYC";
 import { OrderTracker } from "./components/OrderTracker";
 import { PartnerRescueConsole } from "./components/PartnerRescueConsole";
 import { JudgeTestBench } from "./components/JudgeTestBench";
+import { PreProvisioningCheckoutModal } from "./components/PreProvisioningCheckoutModal";
 import {
   MSMEProfileSlots,
   CommercialBreakdown,
@@ -35,6 +36,8 @@ export const App: React.FC = () => {
   const [kycResult, setKycResult] = useState<KYCVerificationResult | null>(null);
   const [order, setOrder] = useState<ProvisioningOrder | null>(null);
   const [rescueBanner, setRescueBanner] = useState<string | null>(null);
+  const [showCheckoutModal, setShowCheckoutModal] = useState<boolean>(false);
+  const [pendingKycResult, setPendingKycResult] = useState<KYCVerificationResult | null>(null);
 
   const handleRescueLeadPreHydrate = (lead: LeadRescueItem, skus: string[]) => {
     const seg = lead.segment.toLowerCase();
@@ -142,16 +145,23 @@ export const App: React.FC = () => {
     KIRANA_NON_GST: "Ganesh Kirana & General Store",
   };
 
-  const handleKYCApproved = async (kycRes: KYCVerificationResult) => {
+  const handleKYCApproved = (kycRes: KYCVerificationResult) => {
     setKycResult(kycRes);
-    try {
-      const bName =
-        (kycRes.applicant_id && APPLICANT_NAMES[kycRes.applicant_id]) ||
-        (profileSlots?.segment ? `${profileSlots.segment} Enterprise` : "Apex Diagnostics Center");
-      const bundleName = quote?.items.map((i) => i.product_name).join(" + ") || "Smart Office High-Speed Fiber";
-      const monthlyPrice = quote?.net_mrc_inr || 2499;
-      const slaDays = quote?.guaranteed_sla_days || 4;
+    setPendingKycResult(kycRes);
+    setShowCheckoutModal(true);
+  };
 
+  const handleConfirmSettlement = async (mode: "DIGITAL_PAY" | "POSTPAID_COD") => {
+    setShowCheckoutModal(false);
+    const activeKyc = pendingKycResult || kycResult;
+    const bName =
+      (activeKyc?.applicant_id && APPLICANT_NAMES[activeKyc.applicant_id]) ||
+      (profileSlots?.segment ? `${profileSlots.segment} Enterprise` : "Apex Diagnostics Center");
+    const bundleName = quote?.items.map((i) => i.product_name).join(" + ") || "Smart Office High-Speed Fiber";
+    const monthlyPrice = quote?.net_mrc_inr || 2499;
+    const slaDays = quote?.guaranteed_sla_days || 4;
+
+    try {
       const newOrder = await createProvisioningOrder(
         bName,
         bundleName,
@@ -159,18 +169,30 @@ export const App: React.FC = () => {
         slaDays,
         "PARTNER_DIRECT"
       );
+      newOrder.payment_mode = mode;
+      newOrder.payment_status = mode === "DIGITAL_PAY" ? "ADVANCE_PAID" : "PENDING_COD";
+      newOrder.otc_waived = mode === "DIGITAL_PAY";
+      if (newOrder.milestones && newOrder.milestones[0]) {
+        newOrder.milestones[0].description =
+          mode === "DIGITAL_PAY"
+            ? "Digital quote locked. Instant Digital Pay selected (100% OTC Waived)."
+            : "Digital quote locked. Post-Installation billing selected (Payment Due on Handover).";
+      }
       setOrder(newOrder);
       setTab("tracker");
     } catch {
       setOrder({
         order_id: `ORD_${Date.now()}`,
-        business_name: "Apex Diagnostics Center",
+        business_name: bName,
         partner_id: "PARTNER_DIRECT",
-        partner_commission_inr: Math.round((quote?.net_mrc_inr || 2499) * 12 * 0.15),
-        bundle_name: "Smart Office High-Speed Fiber",
-        monthly_charge_inr: quote?.net_mrc_inr || 2499,
-        total_sla_days: quote?.guaranteed_sla_days || 4,
+        partner_commission_inr: Math.round(monthlyPrice * 12 * 0.15),
+        bundle_name: bundleName,
+        monthly_charge_inr: monthlyPrice,
+        total_sla_days: slaDays,
         current_stage_idx: 1,
+        payment_mode: mode,
+        payment_status: mode === "DIGITAL_PAY" ? "ADVANCE_PAID" : "PENDING_COD",
+        otc_waived: mode === "DIGITAL_PAY",
         milestones: [
           {
             stage_id: "ORDER_PLACED",
@@ -178,8 +200,11 @@ export const App: React.FC = () => {
             status: "COMPLETED",
             timestamp: "2026-07-15T10:15:00Z",
             eta_days: 0,
-            description: "Digital quote locked and commercial contract approved.",
-            whatsapp_preview: "Order confirmed! SLA: 4 days.",
+            description:
+              mode === "DIGITAL_PAY"
+                ? "Digital quote locked. Instant Digital Pay selected (100% OTC Waived)."
+                : "Digital quote locked. Post-Installation billing selected (Payment Due on Handover).",
+            whatsapp_preview: `Order confirmed! SLA: ${slaDays} days.`,
           },
           {
             stage_id: "KYC_VERIFIED",
@@ -447,6 +472,17 @@ export const App: React.FC = () => {
           )}
         </AnimatePresence>
       </main>
+
+      <PreProvisioningCheckoutModal
+        isOpen={showCheckoutModal}
+        onClose={() => setShowCheckoutModal(false)}
+        quote={quote}
+        businessName={
+          (pendingKycResult?.applicant_id && APPLICANT_NAMES[pendingKycResult.applicant_id]) ||
+          (profileSlots?.segment ? `${profileSlots.segment} Enterprise` : "Apex Diagnostics Center")
+        }
+        onConfirmSettlement={handleConfirmSettlement}
+      />
 
       {/* Minimal Luxury Footer */}
       <footer className="border-t border-slate-800 bg-[#0B0F19]/95 py-8 mt-20">
