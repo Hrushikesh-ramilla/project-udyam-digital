@@ -344,108 +344,67 @@ export const App: React.FC = () => {
           </motion.div>
         )}
 
-        <AnimatePresence mode="wait">
-          {currentTab === "studio" && (
-            <motion.div
-              key="studio"
-              initial={{ opacity: 0, y: 16, filter: "blur(4px)" }}
-              animate={{ opacity: 1, y: 0, filter: "blur(0px)" }}
-              exit={{ opacity: 0, y: -12, filter: "blur(4px)" }}
-              transition={{ duration: 0.38, ease: [0.16, 1, 0.3, 1] }}
-            >
-              <StudioStudio
-                profileSlots={profileSlots}
-                recommendedSkus={recommendedSkus}
-                onProfileUpdated={handleProfileUpdated}
-                onProceedToKYC={handleProceedToKYC}
-              />
-            </motion.div>
-          )}
+        {/* Persistent Tab Architecture (Issue #36): Keep panels mounted to preserve live component state */}
+        <div className={currentTab === "studio" ? "block" : "hidden"}>
+          <StudioStudio
+            profileSlots={profileSlots}
+            recommendedSkus={recommendedSkus}
+            onProfileUpdated={handleProfileUpdated}
+            onProceedToKYC={handleProceedToKYC}
+          />
+        </div>
 
-          {currentTab === "kyc" && (
-            <motion.div
-              key="kyc"
-              initial={{ opacity: 0, y: 16, filter: "blur(4px)" }}
-              animate={{ opacity: 1, y: 0, filter: "blur(0px)" }}
-              exit={{ opacity: 0, y: -12, filter: "blur(4px)" }}
-              transition={{ duration: 0.38, ease: [0.16, 1, 0.3, 1] }}
-            >
-              <SmartKYC
-                quote={quote}
-                onKYCApproved={handleKYCApproved}
-                onSwitchToUdyamExempt={handleSwitchToUdyamExempt}
-              />
-            </motion.div>
-          )}
+        <div className={currentTab === "kyc" ? "block" : "hidden"}>
+          <SmartKYC
+            quote={quote}
+            onKYCApproved={handleKYCApproved}
+            onSwitchToUdyamExempt={handleSwitchToUdyamExempt}
+          />
+        </div>
 
-          {currentTab === "tracker" && (
-            <motion.div
-              key="tracker"
-              initial={{ opacity: 0, y: 16, filter: "blur(4px)" }}
-              animate={{ opacity: 1, y: 0, filter: "blur(0px)" }}
-              exit={{ opacity: 0, y: -12, filter: "blur(4px)" }}
-              transition={{ duration: 0.38, ease: [0.16, 1, 0.3, 1] }}
-            >
-              {order ? (
-                <OrderTracker order={order} onOrderUpdated={(up) => setOrder(up)} />
-              ) : (
-                <div className="luxury-glass rounded-3xl p-12 text-center space-y-5 max-w-md mx-auto border border-[rgba(235,229,217,0.08)] shadow-[0_20px_50px_rgba(0,0,0,0.7)]">
-                  <div className="w-16 h-16 rounded-2xl bg-white/[0.03] border border-white/[0.06] flex items-center justify-center mx-auto text-[#B39D82]">
-                    <ShieldCheck className="w-8 h-8" />
-                  </div>
-                  <div className="space-y-2">
-                    <h3 className="font-serif text-2xl font-normal text-[#EBE5D9]">No Active Order</h3>
-                    <p className="text-xs text-[#B39D82] max-w-sm mx-auto leading-relaxed">
-                      Complete the Smart KYC gate or load a verified specimen order to observe live 6-stage SLA dispatch telemetry.
-                    </p>
-                  </div>
-                  <div className="flex items-center justify-center space-x-3 pt-3">
-                    <motion.button
-                      whileHover={{ scale: 1.02 }}
-                      whileTap={{ scale: 0.98 }}
-                      onClick={() => setTab("kyc")}
-                      className="bg-[#e40000] hover:bg-[#b30000] text-white text-xs font-medium py-2.5 px-5 rounded-xl shadow-[0_0_20px_rgba(228,0,0,0.4)] cursor-pointer"
-                    >
-                      Run Smart KYC
-                    </motion.button>
-                    <motion.button
-                      whileHover={{ scale: 1.02 }}
-                      whileTap={{ scale: 0.98 }}
-                      onClick={handleLoadDemoOrder}
-                      className="bg-[#080a0d] hover:bg-[#12161c] text-[#EBE5D9] border border-[rgba(235,229,217,0.1)] text-xs font-medium py-2.5 px-5 rounded-xl cursor-pointer"
-                    >
-                      Load Specimen Order
-                    </motion.button>
-                  </div>
-                </div>
-              )}
-            </motion.div>
+        <div className={currentTab === "tracker" ? "block" : "hidden"}>
+          {order ? (
+            <OrderTracker order={order} onOrderUpdated={(up) => setOrder(up)} />
+          ) : (
+            <div className="luxury-glass rounded-3xl p-12 text-center space-y-5 max-w-md mx-auto border border-[rgba(235,229,217,0.08)] shadow-[0_20px_50px_rgba(0,0,0,0.7)]">
+              <div className="w-16 h-16 rounded-2xl bg-white/[0.03] border border-white/[0.06] flex items-center justify-center mx-auto text-[#B39D82]">
+                <ShieldCheck className="w-8 h-8" />
+              </div>
+              <div className="space-y-2">
+                <h3 className="font-serif text-2xl font-normal text-[#EBE5D9]">No Active Order</h3>
+                <p className="text-xs text-[#B39D82] max-w-sm mx-auto leading-relaxed">
+                  Complete the Smart KYC gate or load a verified specimen order to observe live 6-stage SLA dispatch telemetry.
+                </p>
+              </div>
+              <div className="flex items-center justify-center space-x-3 pt-3">
+                <motion.button
+                  whileHover={{ scale: 1.02 }}
+                  whileTap={{ scale: 0.98 }}
+                  onClick={() => setTab("kyc")}
+                  className="bg-[#e40000] hover:bg-[#b30000] text-white text-xs font-medium py-2.5 px-5 rounded-xl shadow-[0_0_20px_rgba(228,0,0,0.4)] cursor-pointer"
+                >
+                  Run Smart KYC
+                </motion.button>
+                <motion.button
+                  whileHover={{ scale: 1.02 }}
+                  whileTap={{ scale: 0.98 }}
+                  onClick={handleLoadDemoOrder}
+                  className="bg-[#080a0d] hover:bg-[#12161c] text-[#EBE5D9] border border-[rgba(235,229,217,0.1)] text-xs font-medium py-2.5 px-5 rounded-xl cursor-pointer"
+                >
+                  Load Specimen Order
+                </motion.button>
+              </div>
+            </div>
           )}
+        </div>
 
-          {currentTab === "partner" && (
-            <motion.div
-              key="partner"
-              initial={{ opacity: 0, y: 16, filter: "blur(4px)" }}
-              animate={{ opacity: 1, y: 0, filter: "blur(0px)" }}
-              exit={{ opacity: 0, y: -12, filter: "blur(4px)" }}
-              transition={{ duration: 0.38, ease: [0.16, 1, 0.3, 1] }}
-            >
-              <PartnerRescueConsole onPreHydrateCart={handleRescueLeadPreHydrate} />
-            </motion.div>
-          )}
+        <div className={currentTab === "partner" ? "block" : "hidden"}>
+          <PartnerRescueConsole onPreHydrateCart={handleRescueLeadPreHydrate} />
+        </div>
 
-          {currentTab === "judge" && (
-            <motion.div
-              key="judge"
-              initial={{ opacity: 0, y: 16, filter: "blur(4px)" }}
-              animate={{ opacity: 1, y: 0, filter: "blur(0px)" }}
-              exit={{ opacity: 0, y: -12, filter: "blur(4px)" }}
-              transition={{ duration: 0.38, ease: [0.16, 1, 0.3, 1] }}
-            >
-              <JudgeTestBench />
-            </motion.div>
-          )}
-        </AnimatePresence>
+        <div className={currentTab === "judge" ? "block" : "hidden"}>
+          <JudgeTestBench />
+        </div>
       </main>
 
       {/* Minimal Luxury Footer */}

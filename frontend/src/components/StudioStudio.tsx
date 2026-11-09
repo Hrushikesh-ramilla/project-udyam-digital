@@ -282,8 +282,21 @@ export const StudioStudio: React.FC<StudioStudioProps> = ({
     }
   };
 
-  // Chat message history (WhatsApp / ChatGPT preserved thread)
-  const [messages, setMessages] = useState<ChatMessage[]>([]);
+  // Chat message history with localStorage persistence (Issue #36)
+  const [messages, setMessages] = useState<ChatMessage[]>(() => {
+    try {
+      const saved = localStorage.getItem("udyam_advisor_session");
+      if (saved) {
+        const parsed = JSON.parse(saved);
+        if (Array.isArray(parsed.messages) && parsed.messages.length > 0) {
+          return parsed.messages;
+        }
+      }
+    } catch (e) {
+      console.warn("Failed to rehydrate udyam_advisor_session from localStorage", e);
+    }
+    return [];
+  });
 
   const chatScrollRef = useRef<HTMLDivElement>(null);
 
@@ -351,6 +364,24 @@ export const StudioStudio: React.FC<StudioStudioProps> = ({
       setSelectedProductIds(recommendedSkus);
     }
   }, [recommendedSkus]);
+
+  // Sync session state to localStorage on every chat update (Issue #36)
+  useEffect(() => {
+    try {
+      if (messages.length > 0) {
+        localStorage.setItem(
+          "udyam_advisor_session",
+          JSON.stringify({
+            messages,
+            profileSlots: latestSlotsRef.current,
+            timestamp: Date.now(),
+          })
+        );
+      }
+    } catch (e) {
+      console.warn("Failed to persist udyam_advisor_session", e);
+    }
+  }, [messages]);
 
   // Recalculate quote
   useEffect(() => {
@@ -450,6 +481,11 @@ export const StudioStudio: React.FC<StudioStudioProps> = ({
 
   const handleClearChat = () => {
     setMessages([]);
+    try {
+      localStorage.removeItem("udyam_advisor_session");
+    } catch (e) {
+      console.warn("Failed to clear udyam_advisor_session", e);
+    }
   };
 
   const handleSend = async (textOverride?: string, nativeOverride?: string) => {
@@ -634,13 +670,14 @@ export const StudioStudio: React.FC<StudioStudioProps> = ({
               </button>
             </div>
 
-            {/* Clear History Button */}
+            {/* Clear History / New Conversation Button (Issue #36) */}
             <button
               onClick={handleClearChat}
-              className="p-1.5 rounded-xl bg-white/[0.03] hover:bg-white/[0.08] text-slate-300 hover:text-white border border-white/[0.06] transition-colors cursor-pointer"
-              title="Reset conversation"
+              className="px-2.5 py-1.5 rounded-xl bg-white/[0.03] hover:bg-white/[0.08] text-slate-300 hover:text-white border border-white/[0.06] transition-colors cursor-pointer flex items-center space-x-1.5 text-xs"
+              title="New Conversation / Reset Chat"
             >
               <RotateCcw className="w-3.5 h-3.5" />
+              <span className="hidden md:inline text-[10px] font-mono">Reset</span>
             </button>
           </div>
         </div>
