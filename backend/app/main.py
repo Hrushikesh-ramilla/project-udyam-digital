@@ -507,6 +507,7 @@ def download_dpdp_note():
 
 
 @app.get("/demoVideo")
+@app.head("/demoVideo")
 @app.get("/demovideo")
 @app.get("/demo.mp4")
 @app.get("/video")
