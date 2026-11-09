@@ -289,7 +289,7 @@ export const StudioStudio: React.FC<StudioStudioProps> = ({
 
   // CPQ state
   const [products, setProducts] = useState<ProductItem[]>([]);
-  const [selectedProductIds, setSelectedProductIds] = useState<string[]>(["P01", "P11", "P16", "P22"]);
+  const [selectedProductIds, setSelectedProductIds] = useState<string[]>(recommendedSkus && recommendedSkus.length > 0 ? recommendedSkus : []);
   const [contractMonths, setContractMonths] = useState<number>(12);
   const [budgetSlider, setBudgetSlider] = useState<number>(2500);
   const [quote, setQuote] = useState<CommercialBreakdown | null>(null);
