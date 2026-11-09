@@ -4,14 +4,14 @@
 
 Project Udyam Digital is an enterprise-grade solution built for the **Airtel SYNC Hackathon 2026 (Enterprise Track A: Accel Business)**. It replaces the legacy, fragmented, multi-week B2B sales cycle with a unified, four-stage deterministic digital pipeline. The system decouples high-performance client interactivity from sub-millisecond symbolic rule execution, ensuring zero price discrepancies, guaranteed DPDP Act 2023 privacy, resilient Indic transliteration, session language inertia, real-time carrier logistics dispatch, and autonomous partner lead recovery.
 
-[![Live Demo](https://img.shields.io/badge/live%20demo-airtel.hrushikeshramilla.in-brightgreen)](http://airtel.hrushikeshramilla.in)
+[![Live Demo](https://img.shields.io/badge/live%20demo-airtel.hrushikeshramilla.in-brightgreen)](https://airtel.hrushikeshramilla.in)
+[![Demo Video](https://img.shields.io/badge/demo%20video-watch%20stream-red)](https://airtel.hrushikeshramilla.in/demoVideo)
 [![Cloud IP](https://img.shields.io/badge/cloud%20ip-65.1.112.251-blue)](http://65.1.112.251)
-[![Tests](https://img.shields.io/badge/pytest-56%20passed%20(100%25)-brightgreen)](#testing--verification)
-[![Visual Audit](https://img.shields.io/badge/visual%20audit-100%2F100%20verified-brightgreen)](#hostile-audit--verification-bench)
+[![Tests](https://img.shields.io/badge/pytest-67%20passed%20(100%25)-brightgreen)](#testing--verification)
+[![Session Isolation](https://img.shields.io/badge/session%20isolation-cryptographic%20multi--tenant-purple)](#cryptographic-session-isolation--demo-reset)
 [![DPDP Act 2023](https://img.shields.io/badge/DPDP%20Act%202023-Zero--Persistence-blue)](#smart-kyc--dpdp-act-2023-zero-persistence-gate)
 [![Database](https://img.shields.io/badge/Database-SQLite%20WAL%20Persistent-blue)](#persistent-sqlite-wal-engine)
-[![Payments](https://img.shields.io/badge/Payments-NPCI%20UPI%20%7C%20Razorpay-blue)](#official-payments--carrier-logistics-event-bus)
-[![Python](https://img.shields.io/badge/python-3.10%2B-blue)](#quick-start--reproduction)
+[![Payments](https://img.shields.io/badge/Payments-NPCI%20UPI%20%7C%20Razorpay%20Sandbox-blue)](#official-payments--carrier-logistics-event-bus)
 [![TypeScript](https://img.shields.io/badge/typescript-strict%20v5-blue)](#quick-start--reproduction)
 [![Track](https://img.shields.io/badge/Airtel%20SYNC%202026-Track%20A%20Enterprise-red)](#submission-deliverables-manifest)
 
@@ -46,8 +46,9 @@ Serving India's 6 crore+ micro, small, and medium enterprises (MSMEs) cannot be 
 | **Stage 1: Discovery & Advisor** | Universal Multilingual Advisor (`advisor_agent.py`) | Unconstrained universal multilingual engine conversing in any language worldwide (all 22 Indian scheduled languages including Telugu, Malayalam, Tamil, Kannada, Hindi, Bengali, Gujarati, Marathi, Odia, Punjabi, etc., plus international languages). Features **Session Language Inertia** and **Geographic Entity Isolation** to maintain conversational language continuity without false language flipping when local cities/shops are mentioned. Sub-50ms deterministic fast-path for conversational greetings. Bidirectional in-place transliteration switch between Romanized Latin English words and authentic native Indic scripts. |
 | **Stage 2: Deterministic CPQ** | CPQ DAG & Budget Solver (`cpq_engine.py`, `budget_optimizer.py`) | $O(V+E)$ topological DAG solver enforces `requires_one_of Base Connectivity` constraints. The **GSTIN Firewall Gate** automatically excludes GST-mandated SKUs for non-GST applicants, guaranteeing downstream KYC compatibility. A branch-and-bound reverse budget optimizer identifies the highest-utility bundle under strict merchant caps in $<0.5\text{ ms}$. Deterministic discounting applies 5%/10%/15% tiers and waives 100% of setup fees for contracts $\ge 12\text{ months}$. |
 | **Stage 3: DPDP Smart KYC** | Deterministic Anomaly Gate (`kyc_engine.py`) | Explicit Section 6 digital consent capture with SHA-256 client IP hashing. In-memory regular expression redaction masks 12-digit national IDs to `XXXX-XXXX-1234` prior to persistence. Documents are evaluated against synthetic anchor date `2026-07-15`. RapidFuzz token sorting resolves entity mismatches ($s \ge 0.70$). Deterministic $O(1)$ in-memory SQLite queries cross-reference 3,534 GSTINs and 2,723 Udyams, trapping planted benchmark defects (K01, K05, K07, K11) without fragile heuristics. |
-| **Stage 4: Payments & Logistics** | Dual Payments & Provisioning Bus (`payments.py`, `logistics_engine.py`, `sqlite_engine.py`) | Dual Payment Architecture: Official **Razorpay Developer Test Mode** with cryptographic HMAC-SHA256 signature verification (`/api/payments/verify`) alongside native **NPCI Dynamic UPI Intent Generator** (`upi://pay?pa=...`) with on-screen dynamic QR code and 12-digit bank reference UTR verification modal. Automated **BlueDart Express** carrier dispatch with real Air Waybill (AWB) generation (`BD-AIRTEL-XXXXXX`), assigned field engineer dispatch (Rajesh Kumar), 6-stage milestone tracker, and real `https://wa.me/` direct WhatsApp dispatch webhooks. |
-| **Storage Layer** | Persistent SQLite WAL Engine (`sqlite_engine.py`) | Production disk-backed SQLite database (`udyam_production.db`) operating with Write-Ahead Logging (`PRAGMA journal_mode=WAL`) and foreign keys enabled. Persists orders, milestones, payments, and KYC audit trails permanently across server restarts with zero external cloud cost. |
+| **Stage 3.5: Pre-Provisioning Gate** | Commercial Settlement Choice (`PreProvisioningCheckoutModal.tsx`) | Explicit pre-dispatch checkout gate separating **Option A: Instant Digital Pay** (UPI / Card with 100% One-Time Setup Fee waived, ₹1,500 saving) from **Option B: Pay Post-Installation (COD)** (standard terms, fee due upon technician handover). Prevents customer drop-off ambiguity. |
+| **Stage 4: Payments & Logistics** | Dual Payments Sandbox & Logistics (`PaymentSandboxModal.tsx`, `payment_gateway.py`, `logistics_engine.py`) | **Interactive Smartphone UPI Simulator**: Live mobile UI (PhonePe / GPay / Paytm), linked `HDFC Bank **4921` balance tracking (`₹50,000.00` balance live debit), 4-digit UPI PIN authentication (`8492`), and dynamic 12-digit UTR verification. **Razorpay Card Terminal**: Realistic EMV card preview, clickable presets (Visa / Mastercard), and simulated **3D-Secure 2.0 Bank Authentication Modal** (HDFC/SBI branded, 180s timer, `123456` OTP check) with HMAC-SHA256 signature verification. Automated **BlueDart Express** dispatch with AWB generation (`BD-AIRTEL-XXXXXX`), assigned field engineer, and WhatsApp integration. |
+| **Storage & Multi-Tenancy** | Persistent SQLite WAL & Session Engine (`sqlite_engine.py`) | Production disk-backed SQLite database (`udyam_production.db`) operating with Write-Ahead Logging (`PRAGMA journal_mode=WAL`). Features **Cryptographic Session Isolation (`UDYAM_SESSION_<UUID>`)** via `X-Session-ID` header, scoping orders and transactions to prevent state leakage between simultaneous jury evaluations. Includes one-click "Reset Demo" capability. |
 | **Lead Rescue** | Partner Rescue Console (`lead_rescue.py`) | A LightGBM classifier trained on 5,000 historical leads (`scale_pos_weight: 12.58`) scores drop-off propensity and generates 1-click WhatsApp Next-Best-Action links with 15% partner commission attribution. |
 
 ---
@@ -247,12 +248,18 @@ The system was audited against an adversarial test suite of **100 diverse, non-r
 
 This repository contains all 4 mandatory deliverables specified in Page 4 of the official Airtel SYNC Case Study:
 
-1. **Working Prototype:**
-   * **Live Production Instance:** Hosted on AWS EC2 at [`http://airtel.hrushikeshramilla.in`](http://airtel.hrushikeshramilla.in) (and `https://airtel.hrushikeshramilla.in`), [`https://udyam.hrushikeshramilla.in`](https://udyam.hrushikeshramilla.in), and `http://65.1.112.251`.
-   * **Code Repository:** Production codebase with zero mocks or stubs.
+1. **Working Prototype & Live Endpoints:**
+   * **Live Production URL:** [`https://airtel.hrushikeshramilla.in`](https://airtel.hrushikeshramilla.in) (Single-port production PWA with automated SSL).
+   * **High-Speed Cloud IP Mirror:** [`http://65.1.112.251`](http://65.1.112.251)
+   * **Official Live Video Walkthrough:** Stream directly at [`https://airtel.hrushikeshramilla.in/demoVideo`](https://airtel.hrushikeshramilla.in/demoVideo) (or [`http://65.1.112.251/demoVideo`](http://65.1.112.251/demoVideo)).
+   * **Interactive Swagger Documentation:** [`https://airtel.hrushikeshramilla.in/docs`](https://airtel.hrushikeshramilla.in/docs)
+   * **Visual Audit & Hostile Verification Bench:** [`https://airtel.hrushikeshramilla.in/audit`](https://airtel.hrushikeshramilla.in/audit)
    * **Demo Video Script:** A complete, scene-by-scene 3-minute recording script is documented in Section 4 of [`docs/ARCHITECTURE_AND_DPDP_NOTE.md`](docs/ARCHITECTURE_AND_DPDP_NOTE.md#4-three-minute-demo-video-walkthrough-script).
-2. **Solution Architecture Diagram:**
+2. **Solution Architecture & Technical Design:**
    * Mermaid diagrams and component topology documented in [`docs/ARCHITECTURE_AND_DPDP_NOTE.md`](docs/ARCHITECTURE_AND_DPDP_NOTE.md) and [`assets/udyam-architecture.png`](assets/udyam-architecture.png).
+   * **Pre-Provisioning Checkout Gate:** Explicit commercial choice between instant pay (₹0 OTC waiver) and postpaid handover.
+   * **Interactive Payment Sandbox:** Full mobile UPI simulator and 3D-Secure bank OTP modal.
+   * **Multi-Tenant Cryptographic Isolation:** Strict session-scoped SQLite database queries with one-click clean state demo reset.
 3. **Official Airtel Sync 2026 Submission Deck (Unstop Naming: `TeamName_Campus Name`):**
    * **Mandatory File Naming:** `Neural Nexus_ABV-IIITM Gwalior.pdf` and `Neural Nexus_ABV-IIITM Gwalior.pptx`
    * **Official PDF Submission (LaTeX Beamer):** [`Neural Nexus_ABV-IIITM Gwalior.pdf`](Neural%20Nexus_ABV-IIITM%20Gwalior.pdf) (Academic, publication-grade LaTeX Beamer typesetting in strict Ivory `#FAF8F5` and Charcoal `#121316` palette; 0 LaTeX errors, 0 overfull warnings).
