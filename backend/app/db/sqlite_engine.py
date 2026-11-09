@@ -58,6 +58,7 @@ class ProductionDatabase:
                     partner_id TEXT,
                     partner_commission_inr INTEGER DEFAULT 0,
                     is_activated INTEGER NOT NULL DEFAULT 0,
+                    session_id TEXT,
                     created_at TEXT NOT NULL,
                     updated_at TEXT NOT NULL
                 );
@@ -130,13 +131,21 @@ class ProductionDatabase:
                 CREATE INDEX IF NOT EXISTS idx_logistics_order ON logistics_dispatches(order_id);
                 """
             )
+            try:
+                conn.execute("ALTER TABLE orders ADD COLUMN session_id TEXT;")
+            except sqlite3.OperationalError:
+                pass
+            try:
+                conn.execute("CREATE INDEX IF NOT EXISTS idx_orders_session ON orders(session_id);")
+            except sqlite3.OperationalError:
+                pass
 
     # -------------------------------------------------------------------------
     # ORDER PERSISTENCE OPERATIONS
     # -------------------------------------------------------------------------
 
-    def save_order(self, order: ProvisioningOrder) -> None:
-        """Upserts order and its milestone state in an atomic transaction."""
+    def save_order(self, order: ProvisioningOrder, session_id: Optional[str] = None) -> None:
+        """Upserts order and its milestone state in an atomic transaction with session isolation."""
         now_iso = time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime())
         with self.get_connection() as conn:
             conn.execute(
@@ -144,11 +153,12 @@ class ProductionDatabase:
                 INSERT INTO orders (
                     order_id, business_name, bundle_name, monthly_charge_inr,
                     total_sla_days, current_stage_idx, partner_id, partner_commission_inr,
-                    is_activated, created_at, updated_at
-                ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                    is_activated, session_id, created_at, updated_at
+                ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
                 ON CONFLICT(order_id) DO UPDATE SET
                     current_stage_idx = excluded.current_stage_idx,
                     is_activated = excluded.is_activated,
+                    session_id = COALESCE(excluded.session_id, orders.session_id),
                     updated_at = excluded.updated_at;
                 """,
                 (
@@ -161,6 +171,7 @@ class ProductionDatabase:
                     order.partner_id,
                     order.partner_commission_inr,
                     1 if order.is_activated else 0,
+                    session_id,
                     now_iso,
                     now_iso,
                 ),
@@ -191,12 +202,18 @@ class ProductionDatabase:
                     ),
                 )
 
-    def get_order(self, order_id: str) -> Optional[ProvisioningOrder]:
-        """Loads order and full ordered milestone state from SQLite."""
+    def get_order(self, order_id: str, session_id: Optional[str] = None) -> Optional[ProvisioningOrder]:
+        """Loads order and full ordered milestone state from SQLite, checking session boundary if provided."""
         with self.get_connection() as conn:
-            o_row = conn.execute(
-                "SELECT * FROM orders WHERE order_id = ?", (order_id,)
-            ).fetchone()
+            if session_id:
+                o_row = conn.execute(
+                    "SELECT * FROM orders WHERE order_id = ? AND (session_id = ? OR session_id IS NULL)",
+                    (order_id, session_id),
+                ).fetchone()
+            else:
+                o_row = conn.execute(
+                    "SELECT * FROM orders WHERE order_id = ?", (order_id,)
+                ).fetchone()
             if not o_row:
                 return None
 
@@ -230,12 +247,18 @@ class ProductionDatabase:
                 is_activated=bool(o_row["is_activated"]),
             )
 
-    def list_orders(self, limit: int = 50) -> list[ProvisioningOrder]:
-        """Lists recent orders with milestone state."""
+    def list_orders(self, limit: int = 50, session_id: Optional[str] = None) -> list[ProvisioningOrder]:
+        """Lists recent orders with milestone state scoped to session if provided."""
         with self.get_connection() as conn:
-            rows = conn.execute(
-                "SELECT order_id FROM orders ORDER BY created_at DESC LIMIT ?", (limit,)
-            ).fetchall()
+            if session_id:
+                rows = conn.execute(
+                    "SELECT order_id FROM orders WHERE (session_id = ? OR session_id IS NULL) ORDER BY created_at DESC LIMIT ?",
+                    (session_id, limit),
+                ).fetchall()
+            else:
+                rows = conn.execute(
+                    "SELECT order_id FROM orders ORDER BY created_at DESC LIMIT ?", (limit,)
+                ).fetchall()
         orders: list[ProvisioningOrder] = []
         for r in rows:
             ord_obj = self.get_order(r["order_id"])

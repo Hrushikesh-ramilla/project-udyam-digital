@@ -1,6 +1,7 @@
 import React from "react";
 import { motion } from "motion/react";
-import { Zap, Sparkles, ShieldCheck, Truck, BarChart3, Scale } from "lucide-react";
+import { Zap, Sparkles, ShieldCheck, Truck, BarChart3, Scale, RotateCcw, Key } from "lucide-react";
+import { getOrCreateSessionId } from "../api";
 import { AppPersona } from "../types";
 
 export interface NavbarProps {
@@ -8,9 +9,11 @@ export interface NavbarProps {
   setTab: (tab: "studio" | "kyc" | "tracker" | "partner" | "judge") => void;
   persona: AppPersona;
   setPersona: (persona: AppPersona) => void;
+  onResetDemo?: () => void;
 }
 
-export const Navbar: React.FC<NavbarProps> = ({ currentTab, setTab, persona, setPersona }) => {
+export const Navbar: React.FC<NavbarProps> = ({ currentTab, setTab, persona, setPersona, onResetDemo }) => {
+  const activeSessionId = getOrCreateSessionId();
   const customerNavItems = [
     { id: "studio" as const, label: "Studio", icon: Sparkles },
     { id: "kyc" as const, label: "Smart KYC", icon: ShieldCheck },
@@ -124,6 +127,23 @@ export const Navbar: React.FC<NavbarProps> = ({ currentTab, setTab, persona, set
             );
           })}
         </nav>
+
+        {/* Cryptographic Session Isolation & Demo Reset (Issue #39) */}
+        {onResetDemo && (
+          <motion.button
+            whileHover={{ scale: 1.03 }}
+            whileTap={{ scale: 0.97 }}
+            onClick={onResetDemo}
+            title={`Cryptographic Session Token: ${activeSessionId}\nClick to reset workspace & initialize fresh customer session.`}
+            className="flex items-center space-x-1.5 px-3 py-1.5 rounded-full text-xs font-semibold bg-white/5 hover:bg-white/10 text-slate-300 hover:text-white border border-slate-700/60 shadow-sm transition-all cursor-pointer"
+          >
+            <RotateCcw className="w-3.5 h-3.5 text-[#d9ad63]" />
+            <span className="hidden sm:inline">Reset Demo</span>
+            <span className="text-[10px] font-mono text-[#d9ad63] hidden lg:inline">
+              #{activeSessionId.slice(-6)}
+            </span>
+          </motion.button>
+        )}
       </div>
     </header>
   );

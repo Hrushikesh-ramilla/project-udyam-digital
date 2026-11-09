@@ -11,9 +11,43 @@ import {
 
 const API_BASE = "/api";
 
+export function getOrCreateSessionId(): string {
+  if (typeof window === "undefined" || !window.localStorage) {
+    return "UDYAM_SESSION_DEFAULT";
+  }
+  let sessionId = localStorage.getItem("udyam_session_id");
+  if (!sessionId) {
+    const randomHex = typeof crypto !== "undefined" && crypto.randomUUID
+      ? crypto.randomUUID().replace(/-/g, "").toUpperCase()
+      : Math.random().toString(36).substring(2).toUpperCase() + Date.now().toString(36).toUpperCase();
+    sessionId = `UDYAM_SESSION_${randomHex}`;
+    localStorage.setItem("udyam_session_id", sessionId);
+  }
+  return sessionId;
+}
+
+export function resetCustomerSession(): string {
+  const randomHex = typeof crypto !== "undefined" && crypto.randomUUID
+    ? crypto.randomUUID().replace(/-/g, "").toUpperCase()
+    : Math.random().toString(36).substring(2).toUpperCase() + Date.now().toString(36).toUpperCase();
+  const newSessionId = `UDYAM_SESSION_${randomHex}`;
+  if (typeof window !== "undefined" && window.localStorage) {
+    localStorage.clear();
+    localStorage.setItem("udyam_session_id", newSessionId);
+  }
+  return newSessionId;
+}
+
+export function getSessionHeaders(customHeaders: Record<string, string> = {}): Record<string, string> {
+  return {
+    "X-Session-ID": getOrCreateSessionId(),
+    ...customHeaders,
+  };
+}
+
 export async function fetchProducts(): Promise<ProductItem[]> {
   try {
-    const res = await fetch(`${API_BASE}/products`);
+    const res = await fetch(`${API_BASE}/products`, { headers: getSessionHeaders() });
     if (!res.ok) throw new Error("Failed to fetch products");
     return await res.json();
   } catch (err) {
@@ -31,7 +65,7 @@ export async function sendChatMessage(
 ): Promise<AdvisorResponse> {
   const res = await fetch(`${API_BASE}/advisor/chat`, {
     method: "POST",
-    headers: { "Content-Type": "application/json" },
+    headers: getSessionHeaders({ "Content-Type": "application/json" }),
     body: JSON.stringify({
       user_message: message,
       previous_slots: previousSlots,
@@ -50,7 +84,7 @@ export async function calculateQuote(
 ): Promise<CommercialBreakdown> {
   const res = await fetch(`${API_BASE}/cpq/calculate`, {
     method: "POST",
-    headers: { "Content-Type": "application/json" },
+    headers: getSessionHeaders({ "Content-Type": "application/json" }),
     body: JSON.stringify({ cart, contract_months: contractMonths }),
   });
   if (!res.ok) {
@@ -80,7 +114,7 @@ export async function optimizeBudget(
 }> {
   const res = await fetch(`${API_BASE}/cpq/optimize-budget`, {
     method: "POST",
-    headers: { "Content-Type": "application/json" },
+    headers: getSessionHeaders({ "Content-Type": "application/json" }),
     body: JSON.stringify({ profile, max_monthly_budget: maxBudget }),
   });
   if (!res.ok) throw new Error("Budget optimization failed");
@@ -93,7 +127,7 @@ export async function verifyKYC(
 ): Promise<KYCVerificationResult> {
   const res = await fetch(`${API_BASE}/kyc/verify`, {
     method: "POST",
-    headers: { "Content-Type": "application/json" },
+    headers: getSessionHeaders({ "Content-Type": "application/json" }),
     body: JSON.stringify({
       applicant_preset: preset,
       cart_requires_gstin: cartRequiresGstin,
@@ -121,7 +155,7 @@ export async function verifyDigiLocker(params: {
 }): Promise<KYCVerificationResult> {
   const res = await fetch(`${API_BASE}/kyc/digilocker`, {
     method: "POST",
-    headers: { "Content-Type": "application/json" },
+    headers: getSessionHeaders({ "Content-Type": "application/json" }),
     body: JSON.stringify({
       aadhaar_number: params.aadhaarNumber,
       otp: params.otp,
@@ -165,6 +199,7 @@ export async function uploadKYCDocument(
   formData.append("consent_granted", "true");
 
   const res = await fetch(`${API_BASE}/kyc/upload`, {
+    headers: getSessionHeaders(),
     method: "POST",
     body: formData,
   });
@@ -174,7 +209,7 @@ export async function uploadKYCDocument(
 
 export async function fetchRescueLeads(): Promise<LeadRescueItem[]> {
   try {
-    const res = await fetch(`${API_BASE}/partner/leads?limit=30`);
+    const res = await fetch(`${API_BASE}/partner/leads?limit=30`, { headers: getSessionHeaders() });
     if (!res.ok) throw new Error("Failed to fetch leads");
     return await res.json();
   } catch (err) {
@@ -192,7 +227,7 @@ export async function createProvisioningOrder(
 ): Promise<ProvisioningOrder> {
   const res = await fetch(`${API_BASE}/order/create`, {
     method: "POST",
-    headers: { "Content-Type": "application/json" },
+    headers: getSessionHeaders({ "Content-Type": "application/json" }),
     body: JSON.stringify({
       business_name: businessName,
       bundle_name: bundleName,
@@ -207,6 +242,7 @@ export async function createProvisioningOrder(
 
 export async function advanceOrderStage(orderId: string): Promise<ProvisioningOrder> {
   const res = await fetch(`${API_BASE}/order/${orderId}/advance`, {
+    headers: getSessionHeaders(),
     method: "POST",
   });
   if (!res.ok) throw new Error("Failed to advance order");
@@ -214,7 +250,7 @@ export async function advanceOrderStage(orderId: string): Promise<ProvisioningOr
 }
 
 export async function fetchJudgeScenario(scenarioId: string): Promise<JudgeScenarioResult> {
-  const res = await fetch(`${API_BASE}/demo/judge-scenario/${scenarioId}`);
+  const res = await fetch(`${API_BASE}/demo/judge-scenario/${scenarioId}`, { headers: getSessionHeaders() });
   if (!res.ok) throw new Error("Scenario not found");
   return await res.json();
 }
@@ -260,7 +296,7 @@ export async function createPaymentIntent(
 ): Promise<PaymentIntent> {
   const res = await fetch(`${API_BASE}/payments/create-intent`, {
     method: "POST",
-    headers: { "Content-Type": "application/json" },
+    headers: getSessionHeaders({ "Content-Type": "application/json" }),
     body: JSON.stringify({
       order_id: orderId,
       amount_inr: amountInr,
@@ -278,7 +314,7 @@ export async function verifyUPIPayment(
 ): Promise<PaymentVerificationResult> {
   const res = await fetch(`${API_BASE}/payments/verify-upi`, {
     method: "POST",
-    headers: { "Content-Type": "application/json" },
+    headers: getSessionHeaders({ "Content-Type": "application/json" }),
     body: JSON.stringify({
       payment_id: paymentId,
       order_id: orderId,
@@ -298,7 +334,7 @@ export async function verifyRazorpayPayment(
 ): Promise<PaymentVerificationResult> {
   const res = await fetch(`${API_BASE}/payments/verify-razorpay`, {
     method: "POST",
-    headers: { "Content-Type": "application/json" },
+    headers: getSessionHeaders({ "Content-Type": "application/json" }),
     body: JSON.stringify({
       payment_id: paymentId,
       order_id: orderId,
@@ -312,13 +348,14 @@ export async function verifyRazorpayPayment(
 }
 
 export async function fetchOrderLogistics(orderId: string): Promise<LogisticsDispatch> {
-  const res = await fetch(`${API_BASE}/logistics/${orderId}`);
+  const res = await fetch(`${API_BASE}/logistics/${orderId}`, { headers: getSessionHeaders() });
   if (!res.ok) throw new Error("Failed to fetch logistics dispatch");
   return await res.json();
 }
 
 export async function triggerHardwareDispatch(orderId: string): Promise<LogisticsDispatch> {
   const res = await fetch(`${API_BASE}/logistics/${orderId}/dispatch`, {
+    headers: getSessionHeaders(),
     method: "POST",
   });
   if (!res.ok) throw new Error("Failed to trigger hardware dispatch");
@@ -327,7 +364,7 @@ export async function triggerHardwareDispatch(orderId: string): Promise<Logistic
 
 
 export async function fetchLiveBenchmarks(): Promise<any> {
-  const res = await fetch(`${API_BASE}/benchmarks/run`);
+  const res = await fetch(`${API_BASE}/benchmarks/run`, { headers: getSessionHeaders() });
   if (!res.ok) throw new Error("Failed to run live system benchmarks");
   return await res.json();
 }

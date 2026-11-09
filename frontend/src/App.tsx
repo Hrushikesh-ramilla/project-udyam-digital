@@ -15,7 +15,7 @@ import {
   AppPersona,
   LeadRescueItem,
 } from "./types";
-import { createProvisioningOrder, calculateQuote } from "./api";
+import { createProvisioningOrder, calculateQuote, resetCustomerSession } from "./api";
 import { ShieldCheck, Sparkles, ArrowRight } from "lucide-react";
 
 declare global {
@@ -35,6 +35,18 @@ export const App: React.FC = () => {
   const [kycResult, setKycResult] = useState<KYCVerificationResult | null>(null);
   const [order, setOrder] = useState<ProvisioningOrder | null>(null);
   const [rescueBanner, setRescueBanner] = useState<string | null>(null);
+
+  const handleResetDemo = () => {
+    resetCustomerSession();
+    setProfileSlots(null);
+    setRecommendedSkus([]);
+    setQuote(null);
+    setKycResult(null);
+    setOrder(null);
+    setTab("studio");
+    setRescueBanner("✨ Clean demo session initialized with cryptographic multi-tenant isolation!");
+    setTimeout(() => setRescueBanner(null), 4000);
+  };
 
   const handleRescueLeadPreHydrate = (lead: LeadRescueItem, skus: string[]) => {
     const seg = lead.segment.toLowerCase();
@@ -320,7 +332,7 @@ export const App: React.FC = () => {
 
   return (
     <div className="min-h-screen bg-[#090D16] text-[#F8FAFC] flex flex-col font-sans selection:bg-[#e40000]/30 selection:text-white relative">
-      <Navbar currentTab={currentTab} setTab={setTab} persona={persona} setPersona={setPersona} />
+      <Navbar currentTab={currentTab} setTab={setTab} persona={persona} setPersona={setPersona} onResetDemo={handleResetDemo} />
 
       <main className="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-8 sm:py-10">
         {/* Pre-Hydrate Rescue Winback Toast/Banner */}
