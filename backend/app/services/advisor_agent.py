@@ -869,10 +869,13 @@ Return STRICTLY valid JSON:
             # Ensure order placement intent guides user to Cart & KYC instead of fake booking
             if re.search(r"\b(order\s*placed\s*and\s*sealed|order\s*is\s*officially\s*in\s*our\s*system)\b", disp_lat, re.IGNORECASE):
                 disp_lat += "\n\nTo officially finalize this order and activate live dispatch tracking, please scroll down to the **Dynamic Cart** below and click **'Accept Quote & Start Smart KYC'**."
-            # Check explicit plan intent
-            # Check informational / educational questions
+            # Check informational / educational questions / technical doubts
             is_info_question = bool(re.search(
                 r"^\s*(what\s*is|what\s*are|explain|tell\s*me\s*about|tell\s*me\s*more|how\s*does|difference\s*between|meaning\s*of|kya\s*hai|enti)\b",
+                clean_msg
+            ))
+            is_doubt_or_question = is_question or is_info_question or bool(re.search(
+                r"\b(is\s*gst|does\s*(?:biz|airfiber|fiber|failover|router|it)|can\s*(?:5g|airfiber|fiber|it|we|you)|do\s*i\s*need|difference\s*between|meaning\s*of|what\s*is|how\s*does|why\s*does|kya\s*hai|enti)\b",
                 clean_msg
             ))
             # Check explicit plan intent
@@ -889,18 +892,20 @@ Return STRICTLY valid JSON:
                 clean_msg
             )) or bool(re.search(r"\b(P0[1-9]|P1[0-9]|P2[0-5])\b", user_message))
 
-            has_explicit_plan_intent = (bool(turn_skus) and is_explicit_selection and not is_info_question) or is_explicit_rec_request or is_order_intent
+            has_explicit_plan_intent = is_explicit_rec_request or is_order_intent or (bool(turn_skus) and is_explicit_selection and not is_doubt_or_question)
 
             gem_skus = gemini_data.get("recommended_skus") or []
             valid_skus = [s for s in gem_skus if self.db.get_product(s)]
 
-            # CRITICAL ENFORCEMENT: Never attach SKUs or quote on greetings, small talk, or unprompted incomplete discovery
-            if is_greeting or is_unrelated or is_foreign or bool(explicit_directive) or (not slots.is_complete and not has_explicit_plan_intent):
+            # CRITICAL ENFORCEMENT: Never attach SKUs or quote on greetings, small talk, language switches, or informational doubts
+            if is_greeting or is_unrelated or is_foreign or bool(explicit_directive) or (is_doubt_or_question and not has_explicit_plan_intent):
+                valid_skus = []
+            elif not slots.is_complete and not has_explicit_plan_intent:
                 valid_skus = []
             else:
                 if turn_skus and ("P06" in turn_skus or len(turn_skus) >= len(valid_skus)):
                     valid_skus = [s for s in turn_skus if self.db.get_product(s)]
-                elif not valid_skus and (slots.is_complete or has_explicit_plan_intent):
+                elif not valid_skus and has_explicit_plan_intent:
                     if turn_skus:
                         valid_skus = [s for s in turn_skus if self.db.get_product(s)]
                     else:
@@ -908,7 +913,7 @@ Return STRICTLY valid JSON:
 
             # Deterministic CPQ Engine execution for live commercials & cart sync
             quote = None
-            if len(valid_skus) > 0 and (slots.is_complete or has_explicit_plan_intent):
+            if len(valid_skus) > 0 and (slots.is_complete or has_explicit_plan_intent) and not (is_doubt_or_question and not has_explicit_plan_intent):
                 try:
                     cart_items = [CartItem(product_id=s) for s in valid_skus]
                     quote = self.cpq.calculate_commercials(cart_items, contract_months=12, strict_dag=True)
@@ -1015,6 +1020,32 @@ Return STRICTLY valid JSON:
                     "I run a Kirana store in Tier 2 with no GST",
                     "We are a CA office in Mumbai with GST",
                     "We have a factory in Surat with 30 staff",
+                ],
+                display_latin=pure_latin,
+                display_native=pure_native,
+                user_latin=user_lat,
+                user_native=user_nat,
+            )
+
+        # 3.5 Informational doubts and FAQs (zero premature quote even if slots are complete)
+        is_doubt_faq = is_question or bool(re.search(
+            r"\b(is\s*gst|does\s*(?:biz|airfiber|fiber|failover|router|it)|can\s*(?:5g|airfiber|fiber|it|we|you)|do\s*i\s*need|difference\s*between|meaning\s*of|what\s*is|how\s*does|why\s*does|kya\s*hai|enti)\b",
+            clean_msg
+        ))
+        if is_doubt_faq and not is_order_intent and not is_comparison:
+            f_latin, f_native, f_tts = self._generate_human_fallback(user_message, clean_msg, active_lang, effective_script, slots, is_foreign=False, is_unrelated=False, is_terse=False, is_greeting=False)
+            pure_latin, pure_native = ensure_dual_scripts(f_latin, f_native, active_lang)
+            user_lat, user_nat = self._dualize_user_message(user_message, active_lang, effective_script)
+            return AdvisorResponse(
+                slots=slots,
+                quote=None,
+                recommended_skus=[],
+                display_markdown=pure_latin if effective_script == "latin" else pure_native,
+                spoken_tts_text=f_tts,
+                next_suggested_prompts=[
+                    "Recommend a plan for my business",
+                    "Compare AirFiber vs Fiber",
+                    "Proceed to instant KYC",
                 ],
                 display_latin=pure_latin,
                 display_native=pure_native,
@@ -1278,7 +1309,7 @@ Return STRICTLY valid JSON:
             return lat, nat, tts
 
         # 0.36 GST Exemption / Udyam Law FAQ
-        if re.search(r"\b(gst|gstin|turnover|40\s*lakh|20\s*lakh|exempt|exemption|without\s*gst|no\s*gst)\b", clean_msg) and not (slots.segment and slots.city_tier):
+        if re.search(r"\b(gst|gstin|turnover|40\s*lakh|20\s*lakh|exempt|exemption|without\s*gst|no\s*gst)\b", clean_msg):
             lat = (
                 "### 📜 Statutory GST Exemption & Udyam Onboarding\n\n"
                 "**Under Indian law, you do NOT need a GST number if your turnover is under ₹40 Lakhs!**\n\n"

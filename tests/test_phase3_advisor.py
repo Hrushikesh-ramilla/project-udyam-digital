@@ -529,3 +529,54 @@ def test_anti_leak_guard_safety_with_strict_schema(advisor: AdvisorAgent):
     res = advisor.process_turn("I run an enterprise in Pune with 10 staff and GST")
     assert res.display_markdown is not None
     assert res.display_latin is not None
+
+def test_no_premature_sku_on_doubts_even_with_completed_slots(advisor: AdvisorAgent):
+    """Verifies that educational doubts, technical feasibility inquiries, and regulatory FAQs
+    NEVER return premature SKUs or CPQ quotes, EVEN WHEN the session profile slots
+    are already complete (segment, city_tier, has_gstin). Quotes and SKUs are strictly
+    gated to explicit plan recommendations, product selections, or order placement.
+    """
+    from backend.app.models.schemas import MSMEProfileSlots
+    
+    # Fully completed profile slots
+    complete_slots = MSMEProfileSlots(
+        segment="micro",
+        city_tier=2,
+        has_gstin=False,
+        is_complete=True,
+        missing_slots=[],
+    )
+
+    # 1. Legal / GST doubt
+    res_gst = advisor.process_turn(
+        "Is GST mandatory if my turnover is 20 lakhs?",
+        previous_slots=complete_slots
+    )
+    assert res_gst.quote is None, "Doubt turn must never return a quote!"
+    assert res_gst.recommended_skus == [], "Doubt turn must never attach SKUs!"
+    assert any(term in res_gst.display_markdown.lower() for term in ["gst", "udyam", "exempt", "turnover", "40", "20"])
+
+    # 2. Technical feasibility doubt (AirFiber trenching)
+    res_airfiber = advisor.process_turn(
+        "Can 5G AirFiber work in Tier 2 cities without fiber trenching?",
+        previous_slots=complete_slots
+    )
+    assert res_airfiber.quote is None, "AirFiber technical doubt must never return a quote!"
+    assert res_airfiber.recommended_skus == [], "AirFiber technical doubt must never attach SKUs!"
+    assert any(term in res_airfiber.display_markdown.lower() for term in ["airfiber", "5g", "antenna", "fiber", "trenching", "digging"])
+
+    # 3. Kirana shop doubt
+    res_kirana = advisor.process_turn(
+        "Do I need GST for my small kirana shop, or is Udyam registration enough?",
+        previous_slots=complete_slots
+    )
+    assert res_kirana.quote is None
+    assert res_kirana.recommended_skus == []
+
+    # 4. In contrast, an EXPLICIT plan recommendation request on the same slots MUST return quote & SKUs
+    res_explicit = advisor.process_turn(
+        "Recommend a plan for my retail shop in Tier 2 with no GST",
+        previous_slots=complete_slots
+    )
+    assert res_explicit.quote is not None, "Explicit plan recommendation MUST return quote!"
+    assert len(res_explicit.recommended_skus) > 0, "Explicit plan recommendation MUST return SKUs!"
