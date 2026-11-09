@@ -140,6 +140,9 @@ export interface ProvisioningOrder {
   current_stage_idx: number;
   milestones: ProvisioningMilestone[];
   is_activated: boolean;
+  payment_mode?: "DIGITAL_PAY" | "POSTPAID_COD";
+  payment_status?: "ADVANCE_PAID" | "PENDING_COD";
+  otc_waived?: boolean;
 }
 
 export interface JudgeScenarioResult {

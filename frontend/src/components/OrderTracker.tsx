@@ -167,6 +167,18 @@ export const OrderTracker: React.FC<OrderTrackerProps> = ({ order, onOrderUpdate
             >
               {order.is_activated ? "ACTIVATED · 100% LIVE" : "IN-PROGRESS · DAY 1"}
             </span>
+
+            {order.payment_mode === "DIGITAL_PAY" ? (
+              <span className="inline-flex items-center space-x-1 px-2.5 py-0.5 rounded-full text-[10px] font-mono uppercase bg-emerald-500/15 text-emerald-300 border border-emerald-500/30 font-semibold">
+                <Check className="w-3 h-3 text-emerald-400" />
+                <span>Advance Paid · 100% OTC Waived</span>
+              </span>
+            ) : order.payment_mode === "POSTPAID_COD" ? (
+              <span className="inline-flex items-center space-x-1 px-2.5 py-0.5 rounded-full text-[10px] font-mono uppercase bg-amber-500/15 text-amber-300 border border-amber-500/30 font-semibold">
+                <Clock className="w-3 h-3 text-amber-400" />
+                <span>Postpaid Billing · Due Upon Handover</span>
+              </span>
+            ) : null}
           </div>
           <h2 className="text-2xl sm:text-3xl font-extrabold text-white tracking-tight mt-2">
             {order.business_name}
