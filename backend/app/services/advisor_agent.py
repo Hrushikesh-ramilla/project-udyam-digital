@@ -165,8 +165,9 @@ INSTRUCTIONS FOR YOUR CONVERSATIONAL RESPONSE:
    - If the ongoing conversation language is English, and the user provides order details, entity names, addresses, or phone numbers (e.g. "hhh shop gwalior 1234567890 number"), you MUST continue responding in ENGLISH in both "display_latin" and "display_native".
    - If the user explicitly switches languages (e.g. writes in Hindi, Telugu, Tamil, Bengali, or switches back to English), seamlessly match their current language in this turn.
    - If the user writes in Romanized Indic (e.g. Tenglish, Hinglish, Tanglish, etc.):
-     * Respond in the SAME Romanized Indic dialect in "display_latin" using English/Latin alphabet.
-     * Provide the corresponding authentic native script transliteration in "display_native" (e.g. Telugu, Hindi, Tamil, Punjabi, Bengali, etc.).
+     * "display_latin": Natural conversational Romanized Indic using English alphabet (e.g. "Ooty mein gaming center ke liye...").
+     * "display_native": YOU MUST WRITE THE FULL RESPONSE IN 100% AUTHENTIC NATIVE SCRIPT (e.g. Devanagari for Hindi: "ऊटी में गेमिंग सेंटर के लिए...", Telugu script for Telugu: "ఊటీలో గేమింగ్ సెంటర్ కోసం...").
+     * ABSOLUTE INVARIANT: "display_native" MUST BE the exact, complete, sentence-by-sentence native script translation of "display_latin". ZERO Latin characters in display_native! NEVER return a short generic greeting or placeholder in display_native!
      * NEVER reply in standard English in "display_latin" when the user writes in Romanized Indic!
    - If the user writes in authentic native script (Indic, Devanagari, Arabic, Kanji, Cyrillic, etc.):
      * Provide the native script response in "display_native", and the corresponding Romanized transliteration in "display_latin".

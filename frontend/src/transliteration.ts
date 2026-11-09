@@ -272,12 +272,71 @@ export function toLatinScript(text: string): string {
 /**
  * Translates Romanized English words to authentic regional script.
  */
+export const HINDI_LEXICON: Record<string, string> = {
+  "ooty": "ऊटी", "gaming": "गेमिंग", "center": "सेंटर", "centre": "सेंटर",
+  "online": "ऑनलाइन", "shooting": "शूटिंग", "games": "गेम्स", "game": "गेम",
+  "internet": "इंटरनेट", "connection": "कनेक्शन", "speed": "स्पीड",
+  "latency": "लेटेंसी", "ping": "पिंग", "packet": "पैकेट", "drop": "ड्रॉप",
+  "loss": "लॉस", "high": "हाई", "low": "लो", "wifi": "वाई-फ़ाई", "wi-fi": "वाई-फ़ाई",
+  "router": "राउटर", "fibre": "फ़ाइबर", "fiber": "फ़ाइबर", "airfiber": "एयरफ़ाइबर",
+  "airtel": "एयरटेल", "business": "बिज़नेस", "enterprise": "एंटरप्राइज़",
+  "digital": "डिजिटल", "guest": "गेस्ट", "network": "नेटवर्क", "cart": "कार्ट",
+  "plan": "प्लान", "plans": "प्लान्स", "package": "पैकेज", "failover": "फ़ेलओवर",
+  "backup": "बैकअप", "setup": "सेटअप", "support": "सपोर्ट", "free": "फ़्री",
+  "symmetric": "सिमेट्रिक", "clients": "क्लाइंट्स", "lobbies": "लॉबीज़",
+  "lightning": "लाइटनिंग", "fast": "फ़ास्ट", "secure": "सिक्योर",
+  "recommend": "रेकमेंड", "configuration": "कॉन्फ़िगरेशन", "mein": "में",
+  "ek": "एक", "hai": "है", "hain": "हैं", "ho": "हो", "hoon": "हूँ",
+  "tha": "था", "the": "थे", "thi": "थी", "ka": "का", "ke": "के", "ki": "की",
+  "ko": "को", "se": "से", "par": "पर", "aur": "और", "ya": "या", "toh": "तो",
+  "to": "तो", "bhi": "भी", "yeh": "यह", "ye": "ये", "woh": "वह", "wo": "वो",
+  "kya": "क्या", "kyun": "क्यों", "kaise": "कैसे", "khelne": "खेलने",
+  "chalana": "चलाना", "chalane": "चलाने", "chahiye": "चाहिए", "achha": "अच्छा",
+  "accha": "अच्छा", "sabse": "सबसे", "zaroori": "ज़रूरी", "zaroorat": "ज़रूरत",
+  "cheez": "चीज़", "cheezein": "चीज़ें", "taaki": "ताकि", "sakein": "सकें",
+  "sakte": "सकते", "sakti": "सकती", "karta": "करता", "karte": "करते",
+  "karunga": "करूँगा", "karungi": "करूँगी", "karein": "करें", "karo": "करो",
+  "karoon": "करूँ", "karne": "करने", "karna": "करना", "rakhein": "रखें",
+  "rakho": "रखो", "dekh": "देख", "deta": "देता", "dete": "देते", "deti": "देती",
+  "apne": "अपने", "apna": "अपना", "apni": "अपनी", "aap": "आप", "aapka": "आपका",
+  "aapke": "आपके", "aapki": "आपकी", "main": "मैं", "hum": "हम", "mera": "मेरा",
+  "mere": "मेरे", "meri": "मेरी", "mujhe": "मुझे", "humein": "हमें",
+  "niche": "नीचे", "upar": "ऊपर", "saath": "साथ", "wah": "वाह",
+  "shandar": "शानदार", "shaandaar": "शानदार", "ekdum": "एकदम", "bilkul": "बिल्कुल",
+  "badiya": "बढ़िया", "badhai": "बधाई", "naam": "नाम", "koi": "कोई", "kuch": "कुछ",
+  "bahut": "बहुत", "kam": "कम", "zyada": "ज़्यादा", "kharch": "खर्च",
+  "paise": "पैसे", "rupaye": "रुपये", "mahina": "महीना", "mahine": "महीने",
+  "din": "दिन", "saal": "साल", "dukan": "दुकान", "dukaan": "दुकान",
+  "kirana": "किराणा", "clinic": "क्लीनिक", "office": "ऑफ़िस", "factory": "फ़ैक्टरी",
+  "staff": "स्टाफ़", "strongly": "स्ट्रॉन्गली", "isolated": "आइसोलेटेड",
+  "add-on": "ऐड-ऑन", "addon": "ऐड-ऑन", "sure": "ज़रूर", "namaste": "नमस्ते",
+  "bhai": "भाई", "dost": "दोस्त", "karenge": "करेंगे", "kijiye": "कीजिए",
+  "bataiye": "बताइए", "batao": "बताओ", "lekin": "लेकिन", "parantu": "परंतु"
+};
+
+export function romanToDevanagari(text: string): string {
+  if (!text) return "";
+  return text.replace(/[a-zA-Z\-]+/g, (match) => {
+    const low = match.toLowerCase();
+    return HINDI_LEXICON[low] || match;
+  });
+}
+
 export function toNativeScript(text: string, lang: string = "auto"): string {
   if (!text) return "";
   if (hasIndicScript(text)) return text;
   if (lang === "en") return text;
 
   const lower = text.toLowerCase().trim();
+
+  // Hindi / Hinglish conversion (Preserves full dynamic advice)
+  const isHindi = lang === "hi" || lower.includes("kaise") || lower.includes("theek") || lower.includes("ooty") || lower.includes("gaming") || lower.includes("chahiye") || lower.includes("achha") || lower.includes("accha") || lower.includes("khelne") || lower.includes("chalana") || lower.includes("zaroori") || lower.includes("namaste") || lower.includes("shaandaar") || lower.includes("shandar");
+  if (isHindi) {
+    const converted = romanToDevanagari(text);
+    if (hasIndicScript(converted)) return converted;
+    if (lower.includes("kaise ho") || lower.includes("kaise hain")) return "नमस्ते! आप कैसे हैं?";
+    if (lower.includes("namaste")) return "नमस्ते!";
+  }
 
   // Telugu
   const isTelugu = lang === "te" || lower.includes("bagunnara") || lower.includes("ela unna") || lower.includes("kavali") || lower.includes("ekkuva") || lower.includes("karchu") || lower.includes("takkuva") || lower.includes("enthalo") || lower.includes("artham");
@@ -297,12 +356,6 @@ export function toNativeScript(text: string, lang: string = "auto"): string {
     }
     if (lower.includes("kirana")) return "టైర్ 2 లో కిరాణా షాప్, జీఎస్టీ లేదు";
     if (lower.includes("kavali")) return "నాకు కనెక్టివిటీ కావాలి";
-  }
-
-  // Hindi
-  if (lang === "hi" || lower.includes("kaise ho") || lower.includes("kaise hain")) {
-    if (lower.includes("kaise ho") || lower.includes("kaise hain")) return "नमस्ते कैसे हैं आप";
-    if (lower.includes("namaste")) return "नमस्ते";
   }
 
   // Tamil

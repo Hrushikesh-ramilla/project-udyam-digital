@@ -500,8 +500,10 @@ export const StudioStudio: React.FC<StudioStudioProps> = ({
       const rawLatin = res.display_latin || res.display_markdown || "";
       const rawNative = res.display_native || res.display_markdown || "";
 
+      const isBogusGreeting = hasIndicScript(rawNative) && rawNative.length < 50 && rawLatin.length > 80 && (rawNative.includes("स्वागत") || rawNative.includes("స్వాగతం") || rawNative.includes("வரவேற்கிறோம்"));
+
       const advLatin = hasIndicScript(rawLatin) ? toLatinScript(rawLatin) : (rawLatin || toLatinScript(rawNative));
-      const advNative = hasIndicScript(rawNative) ? rawNative : (rawNative ? toNativeScript(rawNative, "auto") : advLatin);
+      const advNative = (hasIndicScript(rawNative) && !isBogusGreeting) ? rawNative : toNativeScript(advLatin, "hi");
 
       const advMsg: ChatMessage = {
         id: `adv_${Date.now()}`,
@@ -675,6 +677,11 @@ export const StudioStudio: React.FC<StudioStudioProps> = ({
             {messages.map((m) => {
               const isUser = m.sender === "user";
               let displayedText = scriptMode === "latin" ? (m.textLatin || m.textNative) : (m.textNative || m.textLatin);
+              
+              if (scriptMode === "native" && displayedText.length < 50 && (m.textLatin?.length || 0) > 80 && (displayedText.includes("स्वागत") || displayedText.includes("స్వాగతం"))) {
+                displayedText = toNativeScript(m.textLatin, "hi");
+              }
+
               if (scriptMode === "latin" && hasIndicScript(displayedText)) {
                 displayedText = toLatinScript(displayedText);
               } else if (scriptMode === "native" && !hasIndicScript(displayedText)) {
