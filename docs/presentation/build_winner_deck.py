@@ -30,6 +30,7 @@ img_arch_b64 = to_base64("docs/presentation/assets/udyam-architecture-tight.png"
 img_screen_advisor_b64 = to_base64("docs/presentation/assets/clean_advisor.png")
 img_screen_cart_b64 = to_base64("docs/presentation/assets/clean_cart.png")
 img_screen_kyc_b64 = to_base64("docs/presentation/assets/clean_kyc.png")
+img_screen_fulfillment_b64 = to_base64("docs/presentation/assets/clean_fulfillment.png")
 img_screen_tracker_b64 = to_base64("docs/presentation/assets/screen_tracker.png")
 
 CSS_THEME = """
@@ -1262,9 +1263,10 @@ def generate_deck():
         <div class="slide-category-badge">Slide 5 of 7 · Product Demonstration</div>
       </div>
 
-      <div class="slide-content">
+            <div class="slide-content">
         <div class="grid-2" style="flex: 1; gap: 14px;">
           
+          <!-- BOX 1: ADVISOR -->
           <div class="card" style="display: flex; flex-direction: column; justify-content: space-between; padding: 14px 16px;">
             <div>
               <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px;">
@@ -1276,58 +1278,61 @@ def generate_deck():
               </div>
             </div>
             <div style="font-size: 13px; color: #4A4B4E; margin-top: 6px; line-height: 1.35;">
-              Shop owners converse in any language (Telugu, Malayalam, Hindi, Tamil, English, etc.). Session Language Inertia & Geographic Isolation preserve conversation continuity without false language flipping.
+              Shop owners converse in any language (English, Hindi, Telugu, Tamil, etc.). Session Language Inertia preserves conversation continuity without false language flipping.
             </div>
           </div>
 
+          <!-- BOX 2: SMART KYC GATE -->
           <div class="card" style="display: flex; flex-direction: column; justify-content: space-between; padding: 14px 16px;">
             <div>
               <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px;">
-                <span style="font-size: 15px; font-weight: 850; color: #121316;">2. Dynamic Cart & "Mera Budget" Slider</span>
-                <span class="badge-pill">&lt;0.5ms Solver</span>
+                <span style="font-size: 15px; font-weight: 850; color: #121316;">2. DPDP Smart KYC Verification Gate</span>
+                <span class="badge-pill">DPDP Act 2023 · In-Memory</span>
               </div>
               <div style="background: #0D0E12; border-radius: 6px; overflow: hidden; height: 285px; display: flex; align-items: center; justify-content: center; border: 1px solid #DDD8CE;">
-                <img src="{img_screen_cart_b64}" style="max-height: 100%; max-width: 100%; object-fit: contain;" alt="Dynamic Cart">
+                <img src="{img_screen_kyc_b64}" style="max-height: 100%; max-width: 100%; object-fit: contain;" alt="DPDP Smart KYC Verification Gate">
               </div>
             </div>
             <div style="font-size: 13px; color: #4A4B4E; margin-top: 6px; line-height: 1.35;">
-              Transparent monthly price breakdown. Moving the budget slider automatically recalculates the best compliant bundle in under 1ms, applying multi-category discounts.
+              Instant 4-slot statutory verification against GST and Udyam registries. Redacts 12-digit national IDs to XXXX-XXXX-1234 in volatile RAM with zero disk persistence.
             </div>
           </div>
 
+          <!-- BOX 3: 6-STAGE FULFILLMENT & WHATSAPP HOOKS -->
           <div class="card" style="display: flex; flex-direction: column; justify-content: space-between; padding: 14px 16px;">
             <div>
               <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px;">
-                <span style="font-size: 15px; font-weight: 850; color: #121316;">3. Fast & Safe KYC (Zero-Persistence DPDP)</span>
-                <span class="badge-pill">Traps Planted Defects</span>
+                <span style="font-size: 15px; font-weight: 850; color: #121316;">3. 6-Stage SLA Fulfillment &amp; WhatsApp Hooks</span>
+                <span class="badge-pill">Zero Chase Calls · Meta API</span>
               </div>
               <div style="background: #0D0E12; border-radius: 6px; overflow: hidden; height: 285px; display: flex; align-items: center; justify-content: center; border: 1px solid #DDD8CE;">
-                <img src="{img_screen_kyc_b64}" style="max-height: 100%; max-width: 100%; object-fit: contain;" alt="Smart KYC">
+                <img src="{img_screen_fulfillment_b64}" style="max-height: 100%; max-width: 100%; object-fit: contain;" alt="6-Stage SLA Fulfillment">
               </div>
             </div>
             <div style="font-size: 13px; color: #4A4B4E; margin-top: 6px; line-height: 1.35;">
-              Instant verification against Udyam/GST databases. Traps cancelled GSTINs and old bills immediately, while masking 12-digit national IDs in volatile RAM.
+              End-to-end transparency compresses 17.6-day delays to 3.8 days. Proactive Meta WhatsApp API hooks push real-time technician assignment and OTP tracking directly to merchants.
             </div>
           </div>
 
-                    <div class="card" style="display: flex; flex-direction: column; justify-content: space-between; padding: 14px 16px;">
+          <!-- BOX 4: PARTNER CONSOLE & RESCUE -->
+          <div class="card" style="display: flex; flex-direction: column; justify-content: space-between; padding: 14px 16px;">
             <div>
               <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px;">
-                <span style="font-size: 15px; font-weight: 850; color: #121316;">4. Partner Console & Lead Rescue</span>
-                <span class="badge-pill">Autonomous Winback</span>
+                <span style="font-size: 15px; font-weight: 850; color: #121316;">4. Partner Console &amp; Autonomous Lead Rescue</span>
+                <span class="badge-pill">LightGBM ML · ₹21.8L ARR</span>
               </div>
               <div style="background: #0D0E12; border-radius: 6px; overflow: hidden; height: 285px; display: flex; align-items: center; justify-content: center; border: 1px solid #DDD8CE;">
                 <img src="{img_screen_tracker_b64}" style="max-height: 100%; max-width: 100%; object-fit: contain;" alt="Partner Lead Rescue Console">
               </div>
             </div>
             <div style="font-size: 13px; color: #4A4B4E; margin-top: 6px; line-height: 1.35;">
-              Partner ops console powered by LightGBM. Automatically identifies dropped leads and triggers personalized WhatsApp recovery drawers with 1-click cart pre-hydration.
+              Partner ops console powered by LightGBM calibrated propensity scoring across 5,000 leads. Recovers the 56.4% quote drop-off cohort via 1-click WhatsApp winback at ₹350 marginal CAC.
             </div>
           </div>
 
         </div>
 
-                <div class="card-beige" style="padding: 10px 18px; margin-top: 12px; width: 100%;">
+        <div class="card-beige" style="padding: 10px 18px; margin-top: 12px; width: 100%;">
           <div style="font-size: 13.5px; color: #121316; font-weight: 750; display: flex; justify-content: space-between; align-items: center;">
             <span><strong style="color: #E40000;">Live Prototype Access:</strong> Deployed and accessible live at <a href="https://airtel.hrushikeshramilla.in" style="color: #E40000; text-decoration: underline;">airtel.hrushikeshramilla.in</a></span>
             <span style="color: #5A5A5D; font-weight: 600;">Official Demo Video: <a href="https://airtel.hrushikeshramilla.in/demoVideo" style="color: #121316; text-decoration: underline; font-weight: 800;">airtel.hrushikeshramilla.in/demoVideo</a></span>
@@ -1483,134 +1488,79 @@ def generate_deck():
         <div class="slide-category-badge">Slide 7 of 7 · Impact & Rollout</div>
       </div>
 
-      <div class="slide-content">
-        <div class="grid-2" style="flex: 1; gap: 18px;">
+            <div class="slide-content">
+        <div class="grid-2" style="flex: 1; gap: 14px;">
           
-          <div style="display: flex; flex-direction: column; gap: 10px;">
-            <div class="card" style="padding: 16px 18px;">
-              <div style="font-size: 14.5px; font-weight: 850; color: #121316; margin-bottom: 10px;">Funnel Economics Transformation</div>
-              <div class="grid-2" style="gap: 12px;">
-                <div class="stat-box">
-                  <div class="stat-num" style="color: #E40000;">+38.8%</div>
-                  <div class="stat-label">Quote Acceptance Rate</div>
-                  <div class="stat-sub">Jumps from 43.6% to 82.4% by eliminating the 5-day quote wait.</div>
-                </div>
-                <div class="stat-box">
-                  <div class="stat-num">4.25x</div>
-                  <div class="stat-label">Non-GST Conversion Lift</div>
-                  <div class="stat-sub">Conversion rises from 2.0% to 8.5% via instant Udyam lookup.</div>
-                </div>
-                <div class="stat-box">
-                  <div class="stat-num">3.8 Days</div>
-                  <div class="stat-label">Lead to Activation Cycle</div>
-                  <div class="stat-sub">Compressed by 78.4% from baseline 17.6 days via digital KYC.</div>
-                </div>
-                <div class="stat-box">
-                  <div class="stat-num">₹3,250</div>
-                  <div class="stat-label">Acquisition Cost (CAC)</div>
-                  <div class="stat-sub">Slashed by 78.3% from ₹15,000 via self-serve mobile flow.</div>
-                </div>
+          <!-- BOX 1: ADVISOR -->
+          <div class="card" style="display: flex; flex-direction: column; justify-content: space-between; padding: 14px 16px;">
+            <div>
+              <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px;">
+                <span style="font-size: 15px; font-weight: 850; color: #121316;">1. Multilingual Natural Language Advisor</span>
+                <span class="badge-pill">Universal Multilingual AI</span>
+              </div>
+              <div style="background: #0D0E12; border-radius: 6px; overflow: hidden; height: 285px; display: flex; align-items: center; justify-content: center; border: 1px solid #DDD8CE;">
+                <img src="{img_screen_advisor_b64}" style="max-height: 100%; max-width: 100%; object-fit: contain;" alt="Multilingual Advisor">
               </div>
             </div>
-
-            <div class="card" style="padding: 14px 18px; border-left: 3.5px solid #121316;">
-              <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 3px;">
-                <div style="font-size: 14px; font-weight: 850; color: #121316;">LightGBM Lead Rescue Engine (Trained on 5,000 Leads)</div>
-                <span class="badge-pill" style="background: #121316; color: #fff; font-weight: 800;">AUC 0.84 MODEL</span>
-              </div>
-              <div style="font-size: 13px; color: #4A4B4E; line-height: 1.4;">
-                Retargets the 56.4% dropped quote cohort within 15 minutes via enterprise WhatsApp API with 1-click pre-hydrated carts. <strong>Recovers 22.4% of abandoned prospects</strong> (249 merchants from 5,000 leads), unlocking <strong>₹48 Cr in recovered recurring ARR</strong> at national scale.
-              </div>
-            </div>
-
-            <div class="card" style="padding: 14px 18px;">
-              <div style="font-size: 13.5px; font-weight: 850; color: #121316; margin-bottom: 6px;">Direct Labor & Operational Efficiency Gains:</div>
-              <table style="width: 100%; font-size: 12.5px; border-collapse: collapse;">
-                <tr style="border-bottom: 1px solid #EFECE6;"><td style="padding: 4px 0; color: #5A5A5D;">Field Sales Rep Time / Customer</td><td style="text-align: right; font-weight: 800;">24.0 Hours → 2.1 Hours (-91.2%)</td></tr>
-                <tr style="border-bottom: 1px solid #EFECE6;"><td style="padding: 4px 0; color: #5A5A5D;">Customer Status Chase Calls</td><td style="text-align: right; font-weight: 800;">3.2 Calls → 0.4 Calls (-87.5%)</td></tr>
-                <tr style="border-bottom: 1px solid #EFECE6;"><td style="padding: 4px 0; color: #5A5A5D;">6-Month Customer Churn Rate</td><td style="text-align: right; font-weight: 800;">14.2% → 6.8% (-52.1% via SLAs)</td></tr>
-                <tr style="border-bottom: 1px solid #EFECE6;"><td style="padding: 4px 0; color: #5A5A5D;">Catalogue Rule Violation / Mis-Sell Rate</td><td style="text-align: right; font-weight: 850; color: #E40000;">15.2% (56/368) → 0.0% (-100% via CPQ DAG)</td></tr>
-                <tr style="border-bottom: 1px solid #EFECE6;"><td style="padding: 4px 0; color: #5A5A5D;">Gross Margin on Bundles</td><td style="text-align: right; font-weight: 800;">42.5% → 61.8% (+19.3% automated margin)</td></tr>
-                <tr style="border-bottom: 1px solid #EFECE6;"><td style="padding: 4px 0; color: #5A5A5D;">Partner Dealer Commission</td><td style="text-align: right; font-weight: 800;">15% Recurring via Instant QR Attribution</td></tr>
-                <tr style="border-bottom: 1px solid #EFECE6;"><td style="padding: 4px 0; color: #5A5A5D;">Quote Generation Speed</td><td style="text-align: right; font-weight: 800;">3 to 5 Days → &lt; 60 Seconds (-99.9%)</td></tr>
-                <tr><td style="padding: 4px 0; color: #5A5A5D;">Payback Period on Sales CAC</td><td style="text-align: right; font-weight: 850; color: #121316;">4.8 Months (vs 14.2 Months baseline)</td></tr>
-              </table>
-              <div style="font-size: 11.5px; color: #7A7B7E; margin-top: 6px; border-top: 1px solid #EFECE6; padding-top: 4px;">
-                <strong>Bottom-Line Result:</strong> Direct sales acquisition cost slashed from ₹15,000 to ₹3,250, compressing CAC payback from 14.2 months to 4.8 months while freeing 22 hours of sales rep labor per closed account.
-              </div>
+            <div style="font-size: 13px; color: #4A4B4E; margin-top: 6px; line-height: 1.35;">
+              Shop owners converse in any language (English, Hindi, Telugu, Tamil, etc.). Session Language Inertia preserves conversation continuity without false language flipping.
             </div>
           </div>
 
-          <div style="display: flex; flex-direction: column; gap: 10px;">
-            <div class="card" style="padding: 16px 18px;">
-              <div style="font-size: 14.5px; font-weight: 850; color: #121316; margin-bottom: 8px;">12-Month National Scale Strategy</div>
-              
-              <div style="border-left: 3px solid #E40000; padding-left: 10px; margin-bottom: 10px;">
-                <div style="display: flex; justify-content: space-between;">
-                  <strong style="font-size: 13.5px; color: #121316;">Phase 1: Metros & Kirana Density (Months 1–3)</strong>
-                  <span class="badge-pill" style="background: #E40000; color: #fff; border-color: #E40000;">50K Units · ₹12 Cr ARR</span>
-                </div>
-                <div style="font-size: 12.5px; color: #4A4B4E; margin-top: 2px; line-height: 1.35;">
-                  • Target 8 Tier-1 cities (Delhi NCR, Mumbai, Bengaluru, Hyderabad).<br>
-                  • Deploy Udyam Vyapar & Clinic packs via 15,000 retail store QR codes.<br>
-                  • Activate 50,000 merchants with instant paperless Udyam onboarding.<br>
-                  • Train 1,200 local cable operators as authorized 15% commission partners.
-                </div>
+          <!-- BOX 2: SMART KYC GATE -->
+          <div class="card" style="display: flex; flex-direction: column; justify-content: space-between; padding: 14px 16px;">
+            <div>
+              <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px;">
+                <span style="font-size: 15px; font-weight: 850; color: #121316;">2. DPDP Smart KYC Verification Gate</span>
+                <span class="badge-pill">DPDP Act 2023 · In-Memory</span>
               </div>
-
-              <div style="border-left: 3px solid #121316; padding-left: 10px; margin-bottom: 10px;">
-                <div style="display: flex; justify-content: space-between;">
-                  <strong style="font-size: 13.5px; color: #121316;">Phase 2: Industrial Clusters & Clinics (Months 4–6)</strong>
-                  <span class="badge-pill">120K Units · ₹38 Cr ARR</span>
-                </div>
-                <div style="font-size: 12.5px; color: #4A4B4E; margin-top: 2px; line-height: 1.35;">
-                  • Expand into 40 manufacturing towns (Surat, Coimbatore, Ludhiana, Peenya).<br>
-                  • Focus on Leased Line connectivity and multi-store Cloud CCTV packs.<br>
-                  • Capture 120,000 businesses with mission-critical 99.95% SLAs.<br>
-                  • Roll out automated field technician dispatch with OTP tracking across hubs.
-                </div>
-              </div>
-
-              <div style="border-left: 3px solid #121316; padding-left: 10px;">
-                <div style="display: flex; justify-content: space-between;">
-                  <strong style="font-size: 13.5px; color: #121316;">Phase 3: All-India Bharat Scale (Months 7–12)</strong>
-                  <span class="badge-pill" style="background: #121316; color: #fff;">500K Units · ₹1,200 Cr ARR</span>
-                </div>
-                <div style="font-size: 12.5px; color: #4A4B4E; margin-top: 2px; line-height: 1.35;">
-                  • Roll out across 500+ Tier-3/4 districts supported by 10 Indian languages.<br>
-                  • Integrate full voice biometrics and regional dialect speech synthesis.<br>
-                  • 12-Month Goal: 500,000 active small businesses generating ₹1,200 Cr annualized ARR at ₹3,250 blended CAC.
-                </div>
+              <div style="background: #0D0E12; border-radius: 6px; overflow: hidden; height: 285px; display: flex; align-items: center; justify-content: center; border: 1px solid #DDD8CE;">
+                <img src="{img_screen_kyc_b64}" style="max-height: 100%; max-width: 100%; object-fit: contain;" alt="DPDP Smart KYC Verification Gate">
               </div>
             </div>
+            <div style="font-size: 13px; color: #4A4B4E; margin-top: 6px; line-height: 1.35;">
+              Instant 4-slot statutory verification against GST and Udyam registries. Redacts 12-digit national IDs to XXXX-XXXX-1234 in volatile RAM with zero disk persistence.
+            </div>
+          </div>
 
-            <div class="card-beige" style="padding: 14px 18px;">
-              <div style="font-size: 14px; font-weight: 850; color: #121316; margin-bottom: 6px;">Strategic Airtel Ecosystem Synergies:</div>
-              <div style="display: flex; flex-direction: column; gap: 5px; font-size: 12.5px; color: #333336;">
-                <div style="background: #FFFFFF; padding: 6px 10px; border-radius: 4px; border: 1px solid #DDD8CE;">
-                  <strong>Airtel Payments Bank:</strong> Integrated QR soundbox for Kirana checkouts; daily merchant cash settlements automatically offset monthly Accel broadband subscriptions.
-                </div>
-                <div style="background: #FFFFFF; padding: 6px 10px; border-radius: 4px; border: 1px solid #DDD8CE;">
-                  <strong>Airtel IQ WhatsApp API:</strong> Sub-second transactional quote push and LightGBM automated retargeting with 1-click pre-hydrated carts. Recovers 22.4% of abandoned prospects.
-                </div>
-                <div style="background: #FFFFFF; padding: 6px 10px; border-radius: 4px; border: 1px solid #DDD8CE;">
-                  <strong>Nxtra Data Centers:</strong> Sovereign Tier-4 Indian data facilities guarantee 100% DPDP Act 2023 compliance with zero offshore data transit or foreign jurisdiction exposure.
-                </div>
-                <div style="background: #FFFFFF; padding: 6px 10px; border-radius: 4px; border: 1px solid #DDD8CE;">
-                  <strong>Airtel 5G Plus QoS Slicing:</strong> Dedicated network QoS packet queues ensure zero latency jitter during evening peak payment hours (7–9 PM), preventing lost retail checkouts.
-                </div>
-                <div style="background: #FFFFFF; padding: 6px 10px; border-radius: 4px; border: 1px solid #DDD8CE;">
-                  <strong>Airtel Merchant Finance:</strong> Pre-approved working capital micro-loans up to ₹5 Lakhs for active Accel businesses based on automated broadband uptime and UPI transaction history.
-                </div>
+          <!-- BOX 3: 6-STAGE FULFILLMENT & WHATSAPP HOOKS -->
+          <div class="card" style="display: flex; flex-direction: column; justify-content: space-between; padding: 14px 16px;">
+            <div>
+              <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px;">
+                <span style="font-size: 15px; font-weight: 850; color: #121316;">3. 6-Stage SLA Fulfillment &amp; WhatsApp Hooks</span>
+                <span class="badge-pill">Zero Chase Calls · Meta API</span>
               </div>
+              <div style="background: #0D0E12; border-radius: 6px; overflow: hidden; height: 285px; display: flex; align-items: center; justify-content: center; border: 1px solid #DDD8CE;">
+                <img src="{img_screen_fulfillment_b64}" style="max-height: 100%; max-width: 100%; object-fit: contain;" alt="6-Stage SLA Fulfillment">
+              </div>
+            </div>
+            <div style="font-size: 13px; color: #4A4B4E; margin-top: 6px; line-height: 1.35;">
+              End-to-end transparency compresses 17.6-day delays to 3.8 days. Proactive Meta WhatsApp API hooks push real-time technician assignment and OTP tracking directly to merchants.
+            </div>
+          </div>
+
+          <!-- BOX 4: PARTNER CONSOLE & RESCUE -->
+          <div class="card" style="display: flex; flex-direction: column; justify-content: space-between; padding: 14px 16px;">
+            <div>
+              <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px;">
+                <span style="font-size: 15px; font-weight: 850; color: #121316;">4. Partner Console &amp; Autonomous Lead Rescue</span>
+                <span class="badge-pill">LightGBM ML · ₹21.8L ARR</span>
+              </div>
+              <div style="background: #0D0E12; border-radius: 6px; overflow: hidden; height: 285px; display: flex; align-items: center; justify-content: center; border: 1px solid #DDD8CE;">
+                <img src="{img_screen_tracker_b64}" style="max-height: 100%; max-width: 100%; object-fit: contain;" alt="Partner Lead Rescue Console">
+              </div>
+            </div>
+            <div style="font-size: 13px; color: #4A4B4E; margin-top: 6px; line-height: 1.35;">
+              Partner ops console powered by LightGBM calibrated propensity scoring across 5,000 leads. Recovers the 56.4% quote drop-off cohort via 1-click WhatsApp winback at ₹350 marginal CAC.
             </div>
           </div>
 
         </div>
 
-        <div style="background: #FFFFFF; border-left: 4px solid #E40000; border-top: 1.5px solid #DDD8CE; border-right: 1.5px solid #DDD8CE; border-bottom: 1.5px solid #DDD8CE; border-radius: 6px; padding: 12px 18px; width: 100%;">
-          <div style="font-size: 13.5px; font-weight: 750; color: #121316; line-height: 1.4;">
-            <strong style="color: #E40000;">Executive Verdict:</strong> Project Udyam Digital transforms Accel Business from a slow, paper-bound corporate carrier into India's default digital operating system for small enterprises—slashing CAC by 78%, lifting non-GST conversions 4.25x, and unlocking ₹1,200 Cr ARR in 12 months.<br><span style="font-size: 12px; color: #4A4B4E; margin-top: 4px; display: inline-block;">Official HD Video Walkthrough & Interactive Demo: <a href="https://airtel.hrushikeshramilla.in/demoVideo" style="color: #E40000; font-weight: 800; text-decoration: underline;">https://airtel.hrushikeshramilla.in/demoVideo</a></span>
+        <div class="card-beige" style="padding: 10px 18px; margin-top: 12px; width: 100%;">
+          <div style="font-size: 13.5px; color: #121316; font-weight: 750; display: flex; justify-content: space-between; align-items: center;">
+            <span><strong style="color: #E40000;">Live Prototype Access:</strong> Deployed and accessible live at <a href="https://airtel.hrushikeshramilla.in" style="color: #E40000; text-decoration: underline;">airtel.hrushikeshramilla.in</a></span>
+            <span style="color: #5A5A5D; font-weight: 600;">Official Demo Video: <a href="https://airtel.hrushikeshramilla.in/demoVideo" style="color: #121316; text-decoration: underline; font-weight: 800;">airtel.hrushikeshramilla.in/demoVideo</a></span>
           </div>
         </div>
       </div>
