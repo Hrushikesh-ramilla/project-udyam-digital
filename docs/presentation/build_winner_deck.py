@@ -6,6 +6,8 @@ from pathlib import Path
 from playwright.sync_api import sync_playwright
 from pptx import Presentation
 from pptx.util import Inches
+from pptx.enum.shapes import MSO_SHAPE
+import fitz
 
 BUILD_DIR = "docs/presentation/build"
 PREVIEW_DIR = "docs/presentation/preview"
@@ -273,7 +275,7 @@ def generate_deck():
             <table style="width: 100%; font-size: 14px; color: #C5C6C9; border-collapse: collapse;">
               <tr><td style="padding: 6px 0; width: 34%; font-weight: 600; color: #8F9094;">Live Platform</td><td><a href="https://airtel.hrushikeshramilla.in" style="color: #FF5252; text-decoration: underline; font-weight: 800;">airtel.hrushikeshramilla.in</a></td></tr>
               <tr><td style="padding: 6px 0; font-weight: 600; color: #8F9094;">Demo Video</td><td><a href="https://airtel.hrushikeshramilla.in/demoVideo" style="color: #FF5252; text-decoration: underline; font-weight: 850;">https://airtel.hrushikeshramilla.in/demoVideo</a></td></tr>
-              <tr><td style="padding: 6px 0; font-weight: 600; color: #8F9094;">Repository</td><td style="font-family: monospace; font-size: 13px; color: #FFFFFF;">github.com/hrushikesh-ramilla/project-udyam-digital</td></tr>
+              <tr><td style="padding: 6px 0; font-weight: 600; color: #8F9094;">Repository</td><td><a href="https://github.com/hrushikesh-ramilla/project-udyam-digital" style="font-family: monospace; font-size: 13px; color: #FF5252; text-decoration: underline; font-weight: 750;">github.com/hrushikesh-ramilla/project-udyam-digital</a></td></tr>
               <tr><td style="padding: 6px 0; font-weight: 600; color: #8F9094;">Compliance</td><td><span style="background: rgba(0, 114, 255, 0.25); color: #64b5f6; font-size: 11.5px; font-weight: 800; padding: 2px 8px; border-radius: 4px; border: 1px solid rgba(0, 114, 255, 0.4);">DPDP ACT 2023</span> <span style="color: #FFFFFF; font-weight: 600; font-size: 13px;">Zero-Persistence Privacy</span></td></tr>
             </table>
           </div>
@@ -1959,17 +1961,45 @@ body {{ margin: 0; padding: 0; background-color: #FFFFFF; }}
         browser.close()
         print(f"  -> Generated {OFFICIAL_PDF} ({os.path.getsize(OFFICIAL_PDF)/1024/1024:.2f} MB)")
 
-    print(f"Building official PPTX: {OFFICIAL_PPTX}...")
+    print(f"Building official PPTX: {OFFICIAL_PPTX} with native interactive hyperlinks...")
     prs = Presentation()
     prs.slide_width = Inches(13.333)
     prs.slide_height = Inches(7.5)
     blank_layout = prs.slide_layouts[6]
 
-    for png_path in slide_pngs:
+    # Open rendered PDF with PyMuPDF to extract exact vector hyperlink coordinates
+    pdf_doc = fitz.open(OFFICIAL_PDF)
+    scale_x = prs.slide_width / pdf_doc[0].rect.width
+    scale_y = prs.slide_height / pdf_doc[0].rect.height
+
+    total_pptx_links = 0
+    for i, png_path in enumerate(slide_pngs):
         slide = prs.slides.add_slide(blank_layout)
+        # 1. Background high-res 4K visual layer
         slide.shapes.add_picture(png_path, 0, 0, width=prs.slide_width, height=prs.slide_height)
 
+        # 2. Overlay native interactive PowerPoint hyperlinks
+        if i < len(pdf_doc):
+            page = pdf_doc[i]
+            for link in page.get_links():
+                uri = link.get("uri")
+                if uri:
+                    rect = link.get("from")
+                    left = int(rect.x0 * scale_x)
+                    top = int(rect.y0 * scale_y)
+                    width = int((rect.x1 - rect.x0) * scale_x)
+                    height = int((rect.y1 - rect.y0) * scale_y)
+
+                    # Create transparent clickable shape directly mapped to URL
+                    click_shape = slide.shapes.add_shape(MSO_SHAPE.RECTANGLE, left, top, width, height)
+                    click_shape.click_action.hyperlink.address = uri
+                    click_shape.fill.background()
+                    click_shape.line.fill.background()
+                    total_pptx_links += 1
+                    print(f"    [Slide {i}] Injected native PPTX link: {uri}")
+
     prs.save(OFFICIAL_PPTX)
+    print(f"  -> Generated {OFFICIAL_PPTX} with {total_pptx_links} native interactive hyperlinks ({os.path.getsize(OFFICIAL_PPTX)/1024/1024:.2f} MB)")
     print(f"  -> Generated {OFFICIAL_PPTX} ({os.path.getsize(OFFICIAL_PPTX)/1024/1024:.2f} MB)")
 
     if OFFICIAL_PDF != "Neural_Nexus_ABV_IIITM_Gwalior.pdf": shutil.copyfile(OFFICIAL_PDF, "Neural_Nexus_ABV_IIITM_Gwalior.pdf")
