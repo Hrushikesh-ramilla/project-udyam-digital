@@ -1056,11 +1056,13 @@ def generate_deck():
     # -------------------------------------------------------------
         # -------------------------------------------------------------
         # -------------------------------------------------------------
+        # -------------------------------------------------------------
+        # -------------------------------------------------------------
     # SLIDE 4: SYSTEM ARCHITECTURE
     # -------------------------------------------------------------
     s4 = f"""
     <div class="slide slide-template-bg" style="background-image: url('{img_template_slide_b64}');">
-      <div class="slide-header" style="margin-left: 175px; margin-right: 175px; border-bottom: 2px solid #EFECE6; padding-bottom: 8px; margin-bottom: 12px; min-height: 82px;">
+      <div class="slide-header" style="margin-left: 175px; margin-right: 175px; border-bottom: 2px solid #EFECE6; padding-bottom: 8px; margin-bottom: 10px; min-height: 80px;">
         <div class="slide-title-group">
           <h1>System Architecture: The 4-Step Acquisition Pipeline</h1>
           <p>Four-stage deterministic acquisition, pricing, verification &amp; fulfillment topology</p>
@@ -1068,167 +1070,278 @@ def generate_deck():
         <div class="slide-category-badge">Slide 4 of 7 · System Architecture</div>
       </div>
 
-      <div class="slide-content" style="display: flex; flex-direction: column; justify-content: space-between; flex: 1;">
+      <div class="slide-content" style="display: flex; flex-direction: column; justify-content: space-between; flex: 1; gap: 8px;">
+        
+        <!-- PIPELINE FLOW INDICATOR -->
+        <div style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 14px; width: 100%;">
+          <div style="background: #E40000; color: #FFFFFF; padding: 5px 12px; border-radius: 4px; font-size: 11.5px; font-weight: 850; text-align: center; text-transform: uppercase; letter-spacing: 0.5px;">
+            Stage 1: Discovery &amp; Ingress ➔
+          </div>
+          <div style="background: #121316; color: #FFFFFF; padding: 5px 12px; border-radius: 4px; font-size: 11.5px; font-weight: 850; text-align: center; text-transform: uppercase; letter-spacing: 0.5px;">
+            Stage 2: CPQ Constraint Engine ➔
+          </div>
+          <div style="background: #E40000; color: #FFFFFF; padding: 5px 12px; border-radius: 4px; font-size: 11.5px; font-weight: 850; text-align: center; text-transform: uppercase; letter-spacing: 0.5px;">
+            Stage 3: DPDP KYC Gate ➔
+          </div>
+          <div style="background: #121316; color: #FFFFFF; padding: 5px 12px; border-radius: 4px; font-size: 11.5px; font-weight: 850; text-align: center; text-transform: uppercase; letter-spacing: 0.5px;">
+            Stage 4: Fulfillment &amp; Active SLA ✔
+          </div>
+        </div>
+
+        <!-- 4-STAGE ARCHITECTURE CARDS (PACKED EDGE-TO-EDGE, EQUAL-FLEX BLOCKS) -->
         <div class="grid-4" style="gap: 14px; flex: 1; width: 100%; align-items: stretch;">
           
-          <!-- STAGE 1 -->
-          <div class="card" style="display: flex; flex-direction: column; justify-content: space-between; padding: 14px 14px; border-top: 4px solid #E40000; background: #FFFFFF;">
-            <div>
-              <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px;">
-                <span style="background: #E40000; color: #FFFFFF; font-size: 11px; font-weight: 850; padding: 3px 8px; border-radius: 4px; text-transform: uppercase;">STAGE 1</span>
-                <span style="font-size: 11px; font-weight: 750; color: #8F9094;">&lt;50ms Fast-Path</span>
-              </div>
-              <div style="font-size: 16px; font-weight: 850; color: #121316; margin-bottom: 2px; line-height: 1.2;">Discovery &amp; Advisor</div>
-              <div style="font-size: 11.5px; color: #6E6F73; margin-bottom: 10px; font-weight: 600;">Natural Indic Ingress &amp; Slot Extraction</div>
-              
-              <!-- Sub-Module A -->
-              <div style="background: #FAF8F5; border: 1px solid #EFECE6; border-radius: 6px; padding: 8px 10px; margin-bottom: 8px;">
-                <div style="font-size: 11.5px; font-weight: 800; color: #121316; margin-bottom: 4px; text-transform: uppercase; letter-spacing: 0.5px;">A. Indic NLP Engine</div>
-                <div style="font-size: 11.5px; color: #3A3B3E; line-height: 1.35;">
-                  • <strong>10+ Regional Languages:</strong> te, ta, bn, gu, mr, kn, ml, or, hi, en.<br>
-                  • <strong>Session Language Inertia:</strong> Eliminates mid-conversation language hijacking.<br>
-                  • <strong>Script Toggle:</strong> English Words &lt;-&gt; Native Script instant toggle.
+          <!-- STAGE 1: DISCOVERY & ADVISOR -->
+          <div class="card" style="display: flex; flex-direction: column; justify-content: space-between; padding: 14px 14px; border-top: 4px solid #E40000; background: #FFFFFF; height: 100%;">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 4px;">
+              <span style="background: #E40000; color: #FFFFFF; font-size: 11px; font-weight: 850; padding: 2px 7px; border-radius: 4px;">STAGE 1</span>
+              <span style="font-size: 11px; font-weight: 750; color: #E40000; background: rgba(228,0,0,0.08); padding: 2px 6px; border-radius: 4px;">&lt;50ms Fast-Path</span>
+            </div>
+            <div style="margin-bottom: 6px;">
+              <div style="font-size: 16px; font-weight: 850; color: #121316; line-height: 1.2;">Discovery &amp; Advisor</div>
+              <div style="font-size: 11.5px; color: #6E6F73; font-weight: 600;">Universal Indic Ingress &amp; Slot Extraction</div>
+            </div>
+
+            <div style="display: flex; flex-direction: column; flex: 1; justify-content: space-between; gap: 8px;">
+              <!-- Block 1 -->
+              <div style="background: #FAF8F5; border: 1.5px solid #EFECE6; border-radius: 6px; padding: 10px 12px; flex: 1; display: flex; flex-direction: column; justify-content: center;">
+                <div style="font-size: 12px; font-weight: 850; color: #E40000; text-transform: uppercase; margin-bottom: 3px;">1. Ingress Channels &amp; Voice</div>
+                <div style="font-size: 12px; color: #2C2D30; line-height: 1.4;">
+                  • <strong>Mobile PWA &amp; Phygital QR:</strong> Zero-friction camera scan entry.<br>
+                  • <strong>Indic Web Speech:</strong> Low-latency voice-to-text input stream.<br>
+                  • <strong>Dual Narration:</strong> Markdown text + browser TTS audio.
                 </div>
               </div>
 
-              <!-- Sub-Module B -->
-              <div style="background: #FAF8F5; border: 1px solid #EFECE6; border-radius: 6px; padding: 8px 10px; margin-bottom: 8px;">
-                <div style="font-size: 11.5px; font-weight: 800; color: #121316; margin-bottom: 4px; text-transform: uppercase; letter-spacing: 0.5px;">B. Ingress &amp; Slot Isolation</div>
-                <div style="font-size: 11.5px; color: #3A3B3E; line-height: 1.35;">
-                  • <strong>Mobile PWA / Phygital QR:</strong> Instant camera scan onboarding.<br>
-                  • <strong>Cascaded Slot Extractor:</strong> Extracts segment, headcount, tier, sites, budget.<br>
-                  • <strong>Dual Narration:</strong> Markdown text + Web Speech TTS audio.
-                </div>
-              </div>
-            </div>
-            
-            <div style="background: rgba(228,0,0,0.06); border: 1px solid rgba(228,0,0,0.2); border-radius: 4px; padding: 6px 8px; font-size: 11px; color: #E40000; font-weight: 750; text-align: center;">
-              Zero initial cold-start delay · &lt;50ms response
-            </div>
-          </div>
-
-          <!-- STAGE 2 -->
-          <div class="card" style="display: flex; flex-direction: column; justify-content: space-between; padding: 14px 14px; border-top: 4px solid #121316; background: #FFFFFF;">
-            <div>
-              <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px;">
-                <span style="background: #121316; color: #FFFFFF; font-size: 11px; font-weight: 850; padding: 3px 8px; border-radius: 4px; text-transform: uppercase;">STAGE 2</span>
-                <span style="font-size: 11px; font-weight: 750; color: #8F9094;">&lt;0.5ms Solver</span>
-              </div>
-              <div style="font-size: 16px; font-weight: 850; color: #121316; margin-bottom: 2px; line-height: 1.2;">Deterministic CPQ DAG</div>
-              <div style="font-size: 11.5px; color: #6E6F73; margin-bottom: 10px; font-weight: 600;">Constraint Solver &amp; Reverse Optimizer</div>
-              
-              <!-- Sub-Module A -->
-              <div style="background: #FAF8F5; border: 1px solid #EFECE6; border-radius: 6px; padding: 8px 10px; margin-bottom: 8px;">
-                <div style="font-size: 11.5px; font-weight: 800; color: #121316; margin-bottom: 4px; text-transform: uppercase; letter-spacing: 0.5px;">A. Symbolic DAG Rules</div>
-                <div style="font-size: 11.5px; color: #3A3B3E; line-height: 1.35;">
-                  • <strong>Hard GSTIN Firewall:</strong> Strictly blocks GST-mandated SKUs for micro-merchants.<br>
-                  • <strong>Dependency Graph:</strong> Validates <code>requires_one_of</code> checks in &lt;0.5ms.<br>
-                  • <strong>OTC Setup Waiver:</strong> 100% install fee waiver on &gt;= 12mo contract.
+              <!-- Block 2 -->
+              <div style="background: #FAF8F5; border: 1.5px solid #EFECE6; border-radius: 6px; padding: 10px 12px; flex: 1; display: flex; flex-direction: column; justify-content: center;">
+                <div style="font-size: 12px; font-weight: 850; color: #121316; text-transform: uppercase; margin-bottom: 3px;">2. Multilingual NLP Engine</div>
+                <div style="font-size: 12px; color: #2C2D30; line-height: 1.4;">
+                  • <strong>10+ Languages:</strong> Native te, ta, bn, gu, mr, kn, ml, or, hi, en.<br>
+                  • <strong>Session Inertia:</strong> User-turn isolation traps language flip.<br>
+                  • <strong>Script Toggle:</strong> Romanized English &lt;-&gt; Native script switch.
                 </div>
               </div>
 
-              <!-- Sub-Module B -->
-              <div style="background: #FAF8F5; border: 1px solid #EFECE6; border-radius: 6px; padding: 8px 10px; margin-bottom: 8px;">
-                <div style="font-size: 11.5px; font-weight: 800; color: #121316; margin-bottom: 4px; text-transform: uppercase; letter-spacing: 0.5px;">B. Reverse Budget Optimizer</div>
-                <div style="font-size: 11.5px; color: #3A3B3E; line-height: 1.35;">
-                  • <strong>"Mera Budget" Slider:</strong> Branch-and-bound resolves optimal bundle dynamically.<br>
-                  • <strong>Multi-Tier Bundling:</strong> 5% (2 cats), 10% (3 cats), 15% (4+ cats) transparent savings.<br>
-                  • <strong>Zero Mis-Sell:</strong> Mathematical guarantee of SKU compatibility.
+              <!-- Block 3 -->
+              <div style="background: #FAF8F5; border: 1.5px solid #EFECE6; border-radius: 6px; padding: 10px 12px; flex: 1; display: flex; flex-direction: column; justify-content: center;">
+                <div style="font-size: 12px; font-weight: 850; color: #121316; text-transform: uppercase; margin-bottom: 3px;">3. Cascaded Entity Extractor</div>
+                <div style="font-size: 12px; color: #2C2D30; line-height: 1.4;">
+                  • <strong>Slot Parser:</strong> Extracts business segment, city tier, headcount.<br>
+                  • <strong>Budget Isolation:</strong> Detects spending limits &amp; site count.<br>
+                  • <strong>Zero Cold-Start:</strong> Instant query bar response in &lt;50ms.
+                </div>
+              </div>
+
+              <!-- Block 4 -->
+              <div style="background: #FAF8F5; border: 1.5px solid #EFECE6; border-radius: 6px; padding: 10px 12px; flex: 1; display: flex; flex-direction: column; justify-content: center;">
+                <div style="font-size: 12px; font-weight: 850; color: #121316; text-transform: uppercase; margin-bottom: 3px;">4. Interface Hand-off &amp; State</div>
+                <div style="font-size: 12px; color: #2C2D30; line-height: 1.4;">
+                  • <strong>Pydantic v2 Schema:</strong> Strict JSON tool-call validation.<br>
+                  • <strong>FastAPI Async Bus:</strong> Non-blocking state pipeline sync.<br>
+                  • <strong>Telemetry:</strong> Live session tracking &amp; drop-off triggers.
                 </div>
               </div>
             </div>
-            
-            <div style="background: #FAF8F5; border: 1px solid #EFECE6; border-radius: 4px; padding: 6px 8px; font-size: 11px; color: #5A5A5D; font-weight: 750; text-align: center;">
-              Mathematical optimality · Zero manual sales quote latency
+
+            <!-- Footer Badge -->
+            <div style="margin-top: 8px; background: rgba(228,0,0,0.06); border: 1px solid rgba(228,0,0,0.2); border-radius: 4px; padding: 7px 10px; font-size: 11.5px; color: #E40000; font-weight: 750; text-align: center;">
+              Zero initial delay · &lt;50ms fast-path greeting
             </div>
           </div>
 
-          <!-- STAGE 3 -->
-          <div class="card" style="display: flex; flex-direction: column; justify-content: space-between; padding: 14px 14px; border-top: 4px solid #E40000; background: #FFFFFF;">
-            <div>
-              <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px;">
-                <span style="background: #E40000; color: #FFFFFF; font-size: 11px; font-weight: 850; padding: 3px 8px; border-radius: 4px; text-transform: uppercase;">STAGE 3</span>
-                <span style="font-size: 11px; font-weight: 750; color: #8F9094;">DPDP Compliant</span>
-              </div>
-              <div style="font-size: 16px; font-weight: 850; color: #121316; margin-bottom: 2px; line-height: 1.2;">DPDP Smart KYC Gate</div>
-              <div style="font-size: 11.5px; color: #6E6F73; margin-bottom: 10px; font-weight: 600;">In-Memory Privacy &amp; Anomaly Trapping</div>
-              
-              <!-- Sub-Module A -->
-              <div style="background: #FAF8F5; border: 1px solid #EFECE6; border-radius: 6px; padding: 8px 10px; margin-bottom: 8px;">
-                <div style="font-size: 11.5px; font-weight: 800; color: #121316; margin-bottom: 4px; text-transform: uppercase; letter-spacing: 0.5px;">A. DPDP Act 2023 Shield</div>
-                <div style="font-size: 11.5px; color: #3A3B3E; line-height: 1.35;">
-                  • <strong>Section 6 Consent:</strong> Explicit digital consent + SHA-256 IP hash.<br>
-                  • <strong>In-Memory Masking:</strong> 12-digit UID masked to <code>XXXX-XXXX-1234</code>.<br>
-                  • <strong>Zero Persistence:</strong> Unredacted national IDs never hit disk or SQLite.
+          <!-- STAGE 2: CPQ DAG CONSTRAINT ENGINE -->
+          <div class="card" style="display: flex; flex-direction: column; justify-content: space-between; padding: 14px 14px; border-top: 4px solid #121316; background: #FFFFFF; height: 100%;">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 4px;">
+              <span style="background: #121316; color: #FFFFFF; font-size: 11px; font-weight: 850; padding: 2px 7px; border-radius: 4px;">STAGE 2</span>
+              <span style="font-size: 11px; font-weight: 750; color: #121316; background: rgba(0,0,0,0.06); padding: 2px 6px; border-radius: 4px;">&lt;0.5ms Solver</span>
+            </div>
+            <div style="margin-bottom: 6px;">
+              <div style="font-size: 16px; font-weight: 850; color: #121316; line-height: 1.2;">Deterministic CPQ DAG</div>
+              <div style="font-size: 11.5px; color: #6E6F73; font-weight: 600;">Constraint Solver &amp; Reverse Optimizer</div>
+            </div>
+
+            <div style="display: flex; flex-direction: column; flex: 1; justify-content: space-between; gap: 8px;">
+              <!-- Block 1 -->
+              <div style="background: #FAF8F5; border: 1.5px solid #EFECE6; border-radius: 6px; padding: 10px 12px; flex: 1; display: flex; flex-direction: column; justify-content: center;">
+                <div style="font-size: 12px; font-weight: 850; color: #121316; text-transform: uppercase; margin-bottom: 3px;">1. Symbolic DAG Engine</div>
+                <div style="font-size: 12px; color: #2C2D30; line-height: 1.4;">
+                  • <strong>DAG Validator:</strong> Checks <code>requires_one_of</code> in microsecond.<br>
+                  • <strong>Hard GST Firewall:</strong> Blocks GST SKUs for non-GST firms.<br>
+                  • <strong>Zero Mis-Sell:</strong> Mathematical compatibility guarantee.
                 </div>
               </div>
 
-              <!-- Sub-Module B -->
-              <div style="background: #FAF8F5; border: 1px solid #EFECE6; border-radius: 6px; padding: 8px 10px; margin-bottom: 8px;">
-                <div style="font-size: 11.5px; font-weight: 800; color: #121316; margin-bottom: 4px; text-transform: uppercase; letter-spacing: 0.5px;">B. Entity &amp; Date Traps</div>
-                <div style="font-size: 11.5px; color: #3A3B3E; line-height: 1.35;">
-                  • <strong>Deterministic Registries:</strong> O(1) query: 3,534 GSTINs &amp; 2,723 Udyams.<br>
-                  • <strong>RapidFuzz Matching:</strong> Traps name anomalies (K01, K05, K07, K11).<br>
-                  • <strong>Anchored Freshness:</strong> Validates bills against 2026-07-15 anchor.
+              <!-- Block 2 -->
+              <div style="background: #FAF8F5; border: 1.5px solid #EFECE6; border-radius: 6px; padding: 10px 12px; flex: 1; display: flex; flex-direction: column; justify-content: center;">
+                <div style="font-size: 12px; font-weight: 850; color: #121316; text-transform: uppercase; margin-bottom: 3px;">2. Multi-Tier Bundling</div>
+                <div style="font-size: 12px; color: #2C2D30; line-height: 1.4;">
+                  • <strong>Commercial Tiers:</strong> 5% (2 cats), 10% (3 cats), 15% (4+ cats).<br>
+                  • <strong>Setup Waiver:</strong> 100% OTC fee waiver on &gt;=12mo tenure.<br>
+                  • <strong>Gross Margin:</strong> Automated discount keeps &gt;60% margin.
+                </div>
+              </div>
+
+              <!-- Block 3 -->
+              <div style="background: #FAF8F5; border: 1.5px solid #EFECE6; border-radius: 6px; padding: 10px 12px; flex: 1; display: flex; flex-direction: column; justify-content: center;">
+                <div style="font-size: 12px; font-weight: 850; color: #121316; text-transform: uppercase; margin-bottom: 3px;">3. "Mera Budget" Optimizer</div>
+                <div style="font-size: 12px; color: #2C2D30; line-height: 1.4;">
+                  • <strong>Branch-and-Bound:</strong> Max bandwidth under spend cap.<br>
+                  • <strong>Dynamic Recalculation:</strong> Updates cart in &lt;1ms on slide.<br>
+                  • <strong>SLA Guarantee:</strong> Real-time delivery timeline calculation.
+                </div>
+              </div>
+
+              <!-- Block 4 -->
+              <div style="background: #FAF8F5; border: 1.5px solid #EFECE6; border-radius: 6px; padding: 10px 12px; flex: 1; display: flex; flex-direction: column; justify-content: center;">
+                <div style="font-size: 12px; font-weight: 850; color: #121316; text-transform: uppercase; margin-bottom: 3px;">4. Catalogue Engine</div>
+                <div style="font-size: 12px; color: #2C2D30; line-height: 1.4;">
+                  • <strong>25 Enterprise SKUs:</strong> Fiber, Leased Line, 4G, CCTV, Wi-Fi.<br>
+                  • <strong>Zero Stubs:</strong> 100% mathematical constraint graph.<br>
+                  • <strong>Locking:</strong> Cryptographic quote hash locks terms for 30d.
                 </div>
               </div>
             </div>
-            
-            <div style="background: rgba(0,114,255,0.06); border: 1px solid rgba(0,114,255,0.25); border-radius: 4px; padding: 6px 8px; font-size: 11px; color: #0072FF; font-weight: 750; text-align: center;">
+
+            <!-- Footer Badge -->
+            <div style="margin-top: 8px; background: #FAF8F5; border: 1px solid #EFECE6; border-radius: 4px; padding: 7px 10px; font-size: 11.5px; color: #5A5A5D; font-weight: 750; text-align: center;">
+              Mathematical optimality · Zero manual sales delay
+            </div>
+          </div>
+
+          <!-- STAGE 3: DPDP SMART KYC GATE -->
+          <div class="card" style="display: flex; flex-direction: column; justify-content: space-between; padding: 14px 14px; border-top: 4px solid #E40000; background: #FFFFFF; height: 100%;">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 4px;">
+              <span style="background: #E40000; color: #FFFFFF; font-size: 11px; font-weight: 850; padding: 2px 7px; border-radius: 4px;">STAGE 3</span>
+              <span style="font-size: 11px; font-weight: 750; color: #0072FF; background: rgba(0,114,255,0.08); padding: 2px 6px; border-radius: 4px;">DPDP Compliant</span>
+            </div>
+            <div style="margin-bottom: 6px;">
+              <div style="font-size: 16px; font-weight: 850; color: #121316; line-height: 1.2;">DPDP Smart KYC Gate</div>
+              <div style="font-size: 11.5px; color: #6E6F73; font-weight: 600;">In-Memory Privacy &amp; Anomaly Trapping</div>
+            </div>
+
+            <div style="display: flex; flex-direction: column; flex: 1; justify-content: space-between; gap: 8px;">
+              <!-- Block 1 -->
+              <div style="background: #FAF8F5; border: 1.5px solid #EFECE6; border-radius: 6px; padding: 10px 12px; flex: 1; display: flex; flex-direction: column; justify-content: center;">
+                <div style="font-size: 12px; font-weight: 850; color: #E40000; text-transform: uppercase; margin-bottom: 3px;">1. DPDP Privacy Shield</div>
+                <div style="font-size: 12px; color: #2C2D30; line-height: 1.4;">
+                  • <strong>Section 6 Consent:</strong> Explicit digital consent + SHA-256.<br>
+                  • <strong>In-Memory Masking:</strong> 12-digit UID masked in RAM.<br>
+                  • <strong>Zero Persistence:</strong> Unredacted UID never hits disk/DB.
+                </div>
+              </div>
+
+              <!-- Block 2 -->
+              <div style="background: #FAF8F5; border: 1.5px solid #EFECE6; border-radius: 6px; padding: 10px 12px; flex: 1; display: flex; flex-direction: column; justify-content: center;">
+                <div style="font-size: 12px; font-weight: 850; color: #121316; text-transform: uppercase; margin-bottom: 3px;">2. Registry Verification</div>
+                <div style="font-size: 12px; color: #2C2D30; line-height: 1.4;">
+                  • <strong>GSTIN Registry:</strong> O(1) lookup across 3,534 records.<br>
+                  • <strong>Udyam Registry:</strong> Instant lookup across 2,723 records.<br>
+                  • <strong>Non-GST Bridge:</strong> Onboards micro-firms with Udyam.
+                </div>
+              </div>
+
+              <!-- Block 3 -->
+              <div style="background: #FAF8F5; border: 1.5px solid #EFECE6; border-radius: 6px; padding: 10px 12px; flex: 1; display: flex; flex-direction: column; justify-content: center;">
+                <div style="font-size: 12px; font-weight: 850; color: #121316; text-transform: uppercase; margin-bottom: 3px;">3. Adversarial Anomaly Traps</div>
+                <div style="font-size: 12px; color: #2C2D30; line-height: 1.4;">
+                  • <strong>RapidFuzz Match:</strong> Traps planted name defects (K07).<br>
+                  • <strong>Status Verifier:</strong> Rejects Cancelled GSTINs (K01).<br>
+                  • <strong>Doc Completeness:</strong> Traps Missing Udyam (K05).
+                </div>
+              </div>
+
+              <!-- Block 4 -->
+              <div style="background: #FAF8F5; border: 1.5px solid #EFECE6; border-radius: 6px; padding: 10px 12px; flex: 1; display: flex; flex-direction: column; justify-content: center;">
+                <div style="font-size: 12px; font-weight: 850; color: #121316; text-transform: uppercase; margin-bottom: 3px;">4. Freshness Validation</div>
+                <div style="font-size: 12px; color: #2C2D30; line-height: 1.4;">
+                  • <strong>Evaluation Anchor:</strong> Anchored to 2026-07-15.<br>
+                  • <strong>Stale Bill Trap:</strong> Rejects bills &gt;90 days old (K11).<br>
+                  • <strong>Audit Ledger:</strong> Tamper-evident verification logs.
+                </div>
+              </div>
+            </div>
+
+            <!-- Footer Badge -->
+            <div style="margin-top: 8px; background: rgba(0,114,255,0.06); border: 1px solid rgba(0,114,255,0.25); border-radius: 4px; padding: 7px 10px; font-size: 11.5px; color: #0072FF; font-weight: 750; text-align: center;">
               DPDP Act 2023 Zero-Persistence Architecture
             </div>
           </div>
 
-          <!-- STAGE 4 -->
-          <div class="card" style="display: flex; flex-direction: column; justify-content: space-between; padding: 14px 14px; border-top: 4px solid #121316; background: #FFFFFF;">
-            <div>
-              <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px;">
-                <span style="background: #121316; color: #FFFFFF; font-size: 11px; font-weight: 850; padding: 3px 8px; border-radius: 4px; text-transform: uppercase;">STAGE 4</span>
-                <span style="font-size: 11px; font-weight: 750; color: #8F9094;">17.6d -&gt; 3.8d</span>
-              </div>
-              <div style="font-size: 16px; font-weight: 850; color: #121316; margin-bottom: 2px; line-height: 1.2;">Fulfillment &amp; Rescue</div>
-              <div style="font-size: 11.5px; color: #6E6F73; margin-bottom: 10px; font-weight: 600;">6-Stage Tracker &amp; Machine Learning</div>
-              
-              <!-- Sub-Module A -->
-              <div style="background: #FAF8F5; border: 1px solid #EFECE6; border-radius: 6px; padding: 8px 10px; margin-bottom: 8px;">
-                <div style="font-size: 11.5px; font-weight: 800; color: #121316; margin-bottom: 4px; text-transform: uppercase; letter-spacing: 0.5px;">A. 6-Stage Fulfillment</div>
-                <div style="font-size: 11.5px; color: #3A3B3E; line-height: 1.35;">
-                  • <strong>Milestone Tracker:</strong> Order -&gt; KYC -&gt; Feasibility -&gt; CPE -&gt; Tech -&gt; Active.<br>
-                  • <strong>SLA Compression:</strong> Shrinks 17.6-day delay to 3.8-day guaranteed install.<br>
-                  • <strong>Dynamic UPI QR:</strong> Instant one-tap checkout with Razorpay sync.
+          <!-- STAGE 4: FULFILLMENT & RESCUE -->
+          <div class="card" style="display: flex; flex-direction: column; justify-content: space-between; padding: 14px 14px; border-top: 4px solid #121316; background: #FFFFFF; height: 100%;">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 4px;">
+              <span style="background: #121316; color: #FFFFFF; font-size: 11px; font-weight: 850; padding: 2px 7px; border-radius: 4px;">STAGE 4</span>
+              <span style="font-size: 11px; font-weight: 750; color: #121316; background: rgba(0,0,0,0.06); padding: 2px 6px; border-radius: 4px;">17.6d -&gt; 3.8d</span>
+            </div>
+            <div style="margin-bottom: 6px;">
+              <div style="font-size: 16px; font-weight: 850; color: #121316; line-height: 1.2;">Fulfillment &amp; Rescue</div>
+              <div style="font-size: 11.5px; color: #6E6F73; font-weight: 600;">6-Stage Tracker &amp; Machine Learning</div>
+            </div>
+
+            <div style="display: flex; flex-direction: column; flex: 1; justify-content: space-between; gap: 8px;">
+              <!-- Block 1 -->
+              <div style="background: #FAF8F5; border: 1.5px solid #EFECE6; border-radius: 6px; padding: 10px 12px; flex: 1; display: flex; flex-direction: column; justify-content: center;">
+                <div style="font-size: 12px; font-weight: 850; color: #121316; text-transform: uppercase; margin-bottom: 3px;">1. 6-Stage Lifecycle</div>
+                <div style="font-size: 12px; color: #2C2D30; line-height: 1.4;">
+                  • <strong>Sequential Stages:</strong> Order ➔ KYC ➔ Feas ➔ CPE ➔ Tech ➔ Live.<br>
+                  • <strong>SLA Compression:</strong> Shrinks 17.6-day delay to 3.8 days.<br>
+                  • <strong>Digital Stamping:</strong> Instant agreement counter-signing.
                 </div>
               </div>
 
-              <!-- Sub-Module B -->
-              <div style="background: #FAF8F5; border: 1px solid #EFECE6; border-radius: 6px; padding: 8px 10px; margin-bottom: 8px;">
-                <div style="font-size: 11.5px; font-weight: 800; color: #121316; margin-bottom: 4px; text-transform: uppercase; letter-spacing: 0.5px;">B. Telemetry &amp; Logistics</div>
-                <div style="font-size: 11.5px; color: #3A3B3E; line-height: 1.35;">
-                  • <strong>BlueDart AWB Sync:</strong> Automated CPE shipment tracking.<br>
-                  • <strong>Field Tech Dispatch:</strong> Real-time tech assignment with secure OTP.<br>
-                  • <strong>Meta WhatsApp API:</strong> Automated milestone push updates.
+              <!-- Block 2 -->
+              <div style="background: #FAF8F5; border: 1.5px solid #EFECE6; border-radius: 6px; padding: 10px 12px; flex: 1; display: flex; flex-direction: column; justify-content: center;">
+                <div style="font-size: 12px; font-weight: 850; color: #121316; text-transform: uppercase; margin-bottom: 3px;">2. Logistics &amp; Field Tech</div>
+                <div style="font-size: 12px; color: #2C2D30; line-height: 1.4;">
+                  • <strong>BlueDart AWB Sync:</strong> Live CPE hardware tracking.<br>
+                  • <strong>Field Tech Dispatch:</strong> Real-time tech assignment + OTP.<br>
+                  • <strong>Zero Chase Calls:</strong> Status transparency ends inbound calls.
+                </div>
+              </div>
+
+              <!-- Block 3 -->
+              <div style="background: #FAF8F5; border: 1.5px solid #EFECE6; border-radius: 6px; padding: 10px 12px; flex: 1; display: flex; flex-direction: column; justify-content: center;">
+                <div style="font-size: 12px; font-weight: 850; color: #121316; text-transform: uppercase; margin-bottom: 3px;">3. Instant NPCI UPI QR</div>
+                <div style="font-size: 12px; color: #2C2D30; line-height: 1.4;">
+                  • <strong>Dynamic QR:</strong> Exact quote amount locked with UTR sync.<br>
+                  • <strong>Razorpay Webhooks:</strong> Auto-advances order to Stage 2.<br>
+                  • <strong>Partner Split:</strong> 15% instant commission allocation.
+                </div>
+              </div>
+
+              <!-- Block 4 -->
+              <div style="background: #FAF8F5; border: 1.5px solid #EFECE6; border-radius: 6px; padding: 10px 12px; flex: 1; display: flex; flex-direction: column; justify-content: center;">
+                <div style="font-size: 12px; font-weight: 850; color: #121316; text-transform: uppercase; margin-bottom: 3px;">4. Meta WhatsApp API</div>
+                <div style="font-size: 12px; color: #2C2D30; line-height: 1.4;">
+                  • <strong>Proactive Push:</strong> Milestones delivered to phone directly.<br>
+                  • <strong>Security OTP:</strong> Automated installation code dispatch.<br>
+                  • <strong>Live Link:</strong> One-tap live order tracking URL.
                 </div>
               </div>
             </div>
-            
-            <div style="background: #FAF8F5; border: 1px solid #EFECE6; border-radius: 4px; padding: 6px 8px; font-size: 11px; color: #5A5A5D; font-weight: 750; text-align: center;">
-              Zero inbound chase calls · Proactive SLA transparency
+
+            <!-- Footer Badge -->
+            <div style="margin-top: 8px; background: #FAF8F5; border: 1px solid #EFECE6; border-radius: 4px; padding: 7px 10px; font-size: 11.5px; color: #5A5A5D; font-weight: 750; text-align: center;">
+              Zero inbound chase calls · Proactive SLA delivery
             </div>
           </div>
 
         </div>
 
-        <!-- FULL-WIDTH CLOSED-LOOP RECOVERY BANNER -->
-        <div style="background: rgba(228,0,0,0.05); border: 1.5px dashed #E40000; border-radius: 8px; padding: 12px 20px; display: flex; align-items: center; justify-content: space-between; margin-top: 12px; width: 100%;">
-          <div style="display: flex; align-items: center; gap: 14px;">
-            <span style="background: #E40000; color: #FFFFFF; font-size: 11.5px; font-weight: 850; padding: 4px 10px; border-radius: 4px; text-transform: uppercase; letter-spacing: 0.5px; white-space: nowrap;">Closed-Loop ML Recovery</span>
-            <span style="font-size: 13.5px; color: #121316; font-weight: 750; line-height: 1.35;">
+        <!-- FULL-WIDTH CLOSED-LOOP RECOVERY BANNER (AT THE BOTTOM OF ARCHITECTURE) -->
+        <div style="background: rgba(228,0,0,0.06); border: 1.5px dashed #E40000; border-radius: 6px; padding: 10px 16px; display: flex; align-items: center; justify-content: space-between; width: 100%;">
+          <div style="display: flex; align-items: center; gap: 12px;">
+            <span style="background: #E40000; color: #FFFFFF; font-size: 11px; font-weight: 850; padding: 3px 8px; border-radius: 4px; text-transform: uppercase; white-space: nowrap;">Closed-Loop ML Recovery</span>
+            <span style="font-size: 12.5px; color: #121316; font-weight: 750; line-height: 1.3;">
               <strong>LightGBM NBA Rescue Loop:</strong> Automatically identifies the 56.4% quote drop-off cohort and triggers personalized WhatsApp recovery drawers with 1-click pre-hydrated carts.
             </span>
           </div>
-          <span style="font-size: 12px; font-weight: 850; color: #E40000; background: #FFFFFF; padding: 5px 12px; border-radius: 4px; border: 1px solid rgba(228,0,0,0.25); white-space: nowrap; margin-left: 14px;">
+          <span style="font-size: 11.5px; font-weight: 850; color: #E40000; background: #FFFFFF; padding: 4px 10px; border-radius: 4px; border: 1px solid rgba(228,0,0,0.25); white-space: nowrap; margin-left: 12px;">
             Stops ₹15,000 CAC Bleed
           </span>
         </div>
+
       </div>
 
       <div class="slide-footer">
