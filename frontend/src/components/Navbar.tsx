@@ -98,32 +98,45 @@ export const Navbar: React.FC<NavbarProps> = ({ currentTab, setTab, persona, set
           </button>
         </div>
 
-        {/* Unified Floating Nav */}
-        <nav className="flex items-center space-x-1 bg-slate-900/90 p-1 rounded-full border border-slate-700/60 shadow-md">
-          {navItems.map((item) => {
-            const Icon = item.icon;
-            const isActive = currentTab === item.id;
-            return (
-              <button
-                key={item.id}
-                onClick={() => setTab(item.id)}
-                className={`relative px-4 py-1.5 rounded-full text-xs font-semibold transition-colors duration-200 cursor-pointer flex items-center space-x-1.5 ${
-                  isActive ? "text-white" : "text-slate-400 hover:text-white"
-                }`}
-              >
-                {isActive && (
-                  <motion.div
-                    layoutId="activeNavPill"
-                    transition={{ type: "spring", stiffness: 450, damping: 32 }}
-                    className="absolute inset-0 bg-[#e40000] rounded-full shadow-[0_0_16px_rgba(228,0,0,0.4)]"
-                  />
-                )}
-                <Icon className="w-3.5 h-3.5 relative z-10" />
-                <span className="relative z-10 hidden sm:inline">{item.label}</span>
-              </button>
-            );
-          })}
-        </nav>
+        <div className="flex items-center space-x-2.5">
+          {/* Unified Floating Nav */}
+          <nav className="flex items-center space-x-1 bg-slate-900/90 p-1 rounded-full border border-slate-700/60 shadow-md">
+            {navItems.map((item) => {
+              const Icon = item.icon;
+              const isActive = currentTab === item.id;
+              return (
+                <button
+                  key={item.id}
+                  onClick={() => setTab(item.id)}
+                  className={`relative px-4 py-1.5 rounded-full text-xs font-semibold transition-colors duration-200 cursor-pointer flex items-center space-x-1.5 ${
+                    isActive ? "text-white" : "text-slate-400 hover:text-white"
+                  }`}
+                >
+                  {isActive && (
+                    <motion.div
+                      layoutId="activeNavPill"
+                      transition={{ type: "spring", stiffness: 450, damping: 32 }}
+                      className="absolute inset-0 bg-[#e40000] rounded-full shadow-[0_0_16px_rgba(228,0,0,0.4)]"
+                    />
+                  )}
+                  <Icon className="w-3.5 h-3.5 relative z-10" />
+                  <span className="relative z-10 hidden sm:inline">{item.label}</span>
+                </button>
+              );
+            })}
+          </nav>
+
+          {/* Master Demo Video Link */}
+          <a
+            href="/demoVideo"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="hidden md:flex items-center space-x-1.5 px-3.5 py-1.5 rounded-full text-xs font-semibold bg-gradient-to-r from-red-600/30 to-amber-500/20 text-white border border-red-500/40 hover:border-red-400 hover:from-red-600/50 hover:to-amber-500/30 transition-all shadow-[0_0_12px_rgba(228,0,0,0.3)] cursor-pointer"
+          >
+            <span className="w-2 h-2 rounded-full bg-red-400 animate-ping" />
+            <span>🎥 Demo Video</span>
+          </a>
+        </div>
       </div>
     </header>
   );

@@ -2,8 +2,8 @@ from __future__ import annotations
 
 from pathlib import Path
 from typing import Optional
-from fastapi import FastAPI, File, Form, HTTPException, UploadFile
-from fastapi.responses import FileResponse
+from fastapi import FastAPI, File, Form, HTTPException, UploadFile, Request
+from fastapi.responses import FileResponse, HTMLResponse
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
 
@@ -506,12 +506,302 @@ def download_dpdp_note():
 
 
 
-@app.get("/demoVideo")
-@app.head("/demoVideo")
-@app.get("/demovideo")
+DEMO_PLAYER_HTML = """<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Airtel Business Project Udyam Digital — Master Demo</title>
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='%23e40000'><path d='M13 2L3 14h9l-1 8 10-12h-9l1-8z'/></svg>">
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      background-color: #090D16;
+      color: #F8FAFC;
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 24px 16px 48px;
+    }
+    .container {
+      width: 100%;
+      max-width: 1140px;
+      display: flex;
+      flex-direction: column;
+      gap: 20px;
+    }
+    .header {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+      padding: 16px 24px;
+      background: rgba(15, 23, 42, 0.75);
+      border: 1px solid rgba(51, 65, 85, 0.6);
+      border-radius: 20px;
+      backdrop-filter: blur(16px);
+      box-shadow: 0 10px 30px rgba(0,0,0,0.4);
+    }
+    .brand-group {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+    }
+    .brand-badge {
+      width: 42px;
+      height: 42px;
+      border-radius: 12px;
+      background: #e40000;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      box-shadow: 0 0 20px rgba(228,0,0,0.5);
+    }
+    .brand-badge svg {
+      width: 24px;
+      height: 24px;
+      fill: #fff;
+    }
+    .brand-text h1 {
+      font-size: 18px;
+      font-weight: 700;
+      color: #fff;
+      letter-spacing: -0.02em;
+    }
+    .brand-text p {
+      font-size: 12px;
+      color: #94a3b8;
+      font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+      margin-top: 2px;
+    }
+    .actions {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      align-items: center;
+    }
+    .btn {
+      padding: 9px 18px;
+      border-radius: 12px;
+      font-size: 12px;
+      font-weight: 600;
+      text-decoration: none;
+      transition: all 0.2s ease;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      cursor: pointer;
+    }
+    .btn-primary {
+      background: #e40000;
+      color: #fff;
+      border: 1px solid rgba(228,0,0,0.8);
+      box-shadow: 0 0 18px rgba(228,0,0,0.4);
+    }
+    .btn-primary:hover {
+      background: #b30000;
+      transform: translateY(-1px);
+    }
+    .btn-secondary {
+      background: rgba(30, 41, 59, 0.7);
+      color: #cbd5e1;
+      border: 1px solid rgba(71, 85, 105, 0.6);
+    }
+    .btn-secondary:hover {
+      background: rgba(51, 65, 85, 0.8);
+      color: #fff;
+      transform: translateY(-1px);
+    }
+    .player-card {
+      background: rgba(11, 15, 25, 0.9);
+      border: 1px solid rgba(51, 65, 85, 0.8);
+      border-radius: 24px;
+      padding: 16px;
+      box-shadow: 0 25px 60px rgba(0,0,0,0.8), 0 0 40px rgba(228,0,0,0.1);
+      overflow: hidden;
+    }
+    .video-wrapper {
+      position: relative;
+      width: 100%;
+      border-radius: 16px;
+      overflow: hidden;
+      background: #000;
+      box-shadow: 0 12px 36px rgba(0,0,0,0.7);
+    }
+    video {
+      width: 100%;
+      display: block;
+      max-height: 72vh;
+      background: #000;
+      outline: none;
+    }
+    .meta-bar {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: space-between;
+      align-items: center;
+      gap: 12px;
+      margin-top: 16px;
+      padding: 14px 18px;
+      background: rgba(15, 23, 42, 0.6);
+      border-radius: 14px;
+      border: 1px solid rgba(51, 65, 85, 0.5);
+      font-size: 12px;
+    }
+    .meta-tags {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      align-items: center;
+    }
+    .badge-pill {
+      padding: 4px 12px;
+      border-radius: 9999px;
+      font-size: 11px;
+      font-weight: 600;
+      font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+    }
+    .badge-red { background: rgba(228,0,0,0.15); color: #f87171; border: 1px solid rgba(228,0,0,0.35); }
+    .badge-green { background: rgba(16,185,129,0.15); color: #34d399; border: 1px solid rgba(16,185,129,0.35); }
+    .badge-blue { background: rgba(59,130,246,0.15); color: #60a5fa; border: 1px solid rgba(59,130,246,0.35); }
+    .chapters-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 12px;
+    }
+    .chapter-card {
+      padding: 14px 16px;
+      background: rgba(15, 23, 42, 0.65);
+      border: 1px solid rgba(51, 65, 85, 0.5);
+      border-radius: 14px;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      text-decoration: none;
+      color: inherit;
+    }
+    .chapter-card:hover {
+      border-color: #e40000;
+      background: rgba(228,0,0,0.08);
+      transform: translateY(-2px);
+    }
+    .chapter-time {
+      font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+      font-size: 11px;
+      color: #f87171;
+      font-weight: 700;
+      margin-bottom: 4px;
+    }
+    .chapter-title {
+      font-size: 13px;
+      font-weight: 600;
+      color: #f1f5f9;
+    }
+    .chapter-desc {
+      font-size: 11px;
+      color: #94a3b8;
+      margin-top: 4px;
+      line-height: 1.4;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <header class="header">
+      <div class="brand-group">
+        <div class="brand-badge">
+          <svg viewBox="0 0 24 24"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/></svg>
+        </div>
+        <div class="brand-text">
+          <h1>Project Udyam Digital — Master Demonstration</h1>
+          <p>Airtel SYNC Hackathon 2026 · Enterprise Track · Neural Nexus ABV-IIITM</p>
+        </div>
+      </div>
+      <div class="actions">
+        <a href="/" class="btn btn-secondary">⚡ Launch Web App</a>
+        <a href="/demo.mp4" download="Project_Udyam_Digital_Official_Demo.mp4" class="btn btn-primary">⬇️ Download MP4</a>
+      </div>
+    </header>
+
+    <div class="player-card">
+      <div class="video-wrapper">
+        <video id="demoVideo" controls autoplay playsinline preload="auto">
+          <source src="/demo.mp4" type="video/mp4">
+          Your browser does not support the video tag.
+        </video>
+      </div>
+
+      <div class="meta-bar">
+        <div class="meta-tags">
+          <span class="badge-pill badge-red">2m 42s Full Demo</span>
+          <span class="badge-pill badge-green">1080p HD · 60fps</span>
+          <span class="badge-pill badge-blue">Byte-Range Stream</span>
+          <span class="badge-pill badge-green">DPDP Act 2023 Compliant</span>
+        </div>
+        <div style="color: #94a3b8; font-size: 11px; font-family: monospace;">
+          SHA-256 Hash Verified · Deterministic CPQ &amp; KYC
+        </div>
+      </div>
+    </div>
+
+    <div class="chapters-grid">
+      <div class="chapter-card" onclick="seekTo(0)">
+        <div class="chapter-time">00:00 · SCENE 1</div>
+        <div class="chapter-title">Multilingual Advisor</div>
+        <div class="chapter-desc">Spanish, English &amp; Hinglish with instant Devanagari Native Script transliteration.</div>
+      </div>
+      <div class="chapter-card" onclick="seekTo(68)">
+        <div class="chapter-time">01:10 · SCENE 2</div>
+        <div class="chapter-title">Dynamic CPQ Architecture</div>
+        <div class="chapter-desc">Biz Fibre 300, 12-Month tenure toggle, ₹0 waived fee &amp; budget optimizer.</div>
+      </div>
+      <div class="chapter-card" onclick="seekTo(81)">
+        <div class="chapter-time">01:25 · SCENE 3</div>
+        <div class="chapter-title">Smart KYC Anomaly Bench</div>
+        <div class="chapter-desc">Auto-Fill test specimen, live Verhoeff D5, 100% RapidFuzz &amp; DPDP zero-persistence.</div>
+      </div>
+      <div class="chapter-card" onclick="seekTo(104)">
+        <div class="chapter-time">01:45 · SCENE 4</div>
+        <div class="chapter-title">Order Tracker &amp; Payments</div>
+        <div class="chapter-desc">BlueDart dispatch, Native NPCI Dynamic UPI QR code scanner &amp; Razorpay sandbox.</div>
+      </div>
+      <div class="chapter-card" onclick="seekTo(135)">
+        <div class="chapter-time">02:15 · SCENE 5</div>
+        <div class="chapter-title">Seller / Partner Ops Console</div>
+        <div class="chapter-desc">4 Winback KPI cards, LightGBM propensities, TreeSHAP chips &amp; NBA recovery drawer.</div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const vid = document.getElementById('demoVideo');
+    function seekTo(sec) {
+      if (vid) {
+        vid.currentTime = sec;
+        vid.play();
+      }
+    }
+  </script>
+</body>
+</html>"""
+
+
+@app.get("/demoVideo", response_class=HTMLResponse)
+@app.get("/demovideo", response_class=HTMLResponse)
+def serve_demo_video_player(raw: bool = False):
+    if raw:
+        return serve_demo_video_file()
+    return HTMLResponse(content=DEMO_PLAYER_HTML)
+
+
 @app.get("/demo.mp4")
 @app.get("/video")
-def serve_demo_video():
+@app.get("/demoVideo/raw")
+@app.head("/demo.mp4")
+@app.head("/demoVideo")
+def serve_demo_video_file():
     demo_video_path = root_dir / "Project_Udyam_Digital_Official_Demo.mp4"
     if not demo_video_path.exists():
         mp4s = list(root_dir.glob("*.mp4"))
@@ -522,6 +812,7 @@ def serve_demo_video():
     return FileResponse(
         path=str(demo_video_path),
         media_type="video/mp4",
+        content_disposition_type="inline",
         filename="Project_Udyam_Digital_Official_Demo.mp4",
     )
 
