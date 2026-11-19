@@ -61,6 +61,7 @@ class ProvisioningTracker:
         monthly_charge_inr: int,
         total_sla_days: int = 4,
         partner_id: Optional[str] = None,
+        session_id: Optional[str] = None,
     ) -> ProvisioningOrder:
         """Initializes a new enterprise order with milestone pipeline, partner attribution, and disk persistence."""
         order_id = f"AIRTEL-SMB-{uuid.uuid4().hex[:8].upper()}"
@@ -107,7 +108,7 @@ class ProvisioningTracker:
         )
         self._orders[order_id] = order
         # Persist to SQLite WAL disk database
-        self.db.save_order(order)
+        self.db.save_order(order, session_id=session_id)
         return order
 
     def advance_stage(self, order_id: str) -> Optional[ProvisioningOrder]:
@@ -130,14 +131,23 @@ class ProvisioningTracker:
 
         return order
 
-    def get_order(self, order_id: str) -> Optional[ProvisioningOrder]:
-        """Loads from memory cache, falling back to SQLite WAL disk store."""
+    def get_order(self, order_id: str, session_id: Optional[str] = None) -> Optional[ProvisioningOrder]:
+        """Loads from memory cache or SQLite WAL disk store, enforcing session boundaries."""
+        if session_id:
+            db_order = self.db.get_order(order_id, session_id=session_id)
+            if db_order:
+                self._orders[order_id] = db_order
+            return db_order
         if order_id in self._orders:
             return self._orders[order_id]
         order = self.db.get_order(order_id)
         if order:
             self._orders[order_id] = order
         return order
+
+    def list_orders(self, limit: int = 50, session_id: Optional[str] = None) -> list[ProvisioningOrder]:
+        """Lists orders with milestone state scoped to session if provided."""
+        return self.db.list_orders(limit=limit, session_id=session_id)
 
     def generate_obo_handshake_link(self, order: ProvisioningOrder, partner_id: str) -> str:
         """Generates cryptographically signed deep-link for assisted On-Behalf-Of (OBO) mode."""
